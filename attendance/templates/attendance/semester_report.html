@@ -1,0 +1,47 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<h2>Semester Attendance Report (Archive)</h2>
+
+<form method="get">
+    <label><strong>Select Semester:</strong></label>
+    <select name="semester" onchange="this.form.submit()">
+        <option value="">-- Choose Semester --</option>
+        {% for sem in semesters %}
+        <option value="{{ sem.id }}" {% if selected_semester.id == sem.id %}selected{% endif %}>
+            {{ sem }} {% if sem.is_active %}(Active){% else %}(Archived){% endif %}
+        </option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if selected_semester %}
+<hr>
+<h3>{{ selected_semester }}</h3>
+
+<table>
+    <tr>
+        <th>Student</th>
+        <th>Course</th>
+        <th>Date</th>
+        <th>Topic</th>
+        <th>Submitted At</th>
+        <th>Status</th>
+    </tr>
+    {% for record in records %}
+    <tr>
+        <td>{{ record.student.username }}</td>
+        <td>{{ record.class_session.course.code }} - {{ record.class_session.course.name }}</td>
+        <td>{{ record.class_session.date }}</td>
+        <td>{{ record.class_session.topic }}</td>
+        <td>{{ record.submitted_at }}</td>
+        <td>Present</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">No attendance records for this semester.</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

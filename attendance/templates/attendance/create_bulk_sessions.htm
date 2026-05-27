@@ -1,0 +1,11 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<h2>Create Weekly Class Sessions</h2>
+<p>Select a course, pick the first class date, and choose how many weeks the course runs.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Create Weekly Sessions</button>
+</form>
+{% endblock %}

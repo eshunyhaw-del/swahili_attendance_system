@@ -1,0 +1,19 @@
+{% extends "attendance/base.html" %}
+{% block title %}Bulk Import – SSA{% endblock %}
+
+{% block content %}
+<div class="wrap" style="max-width:600px;margin:0 auto;padding:2rem">
+  <h1>📤 Bulk Import Students</h1>
+  <p>Upload a CSV file with the following columns:</p>
+  <pre style="background:#f1f5f9;padding:1rem;border-radius:8px">
+username,password,first_name,last_name,level,student_id
+student2,swasa2026,John,Doe,100,STU2024002
+student3,swasa2026,Jane,Smith,200,STU2024003</pre>
+  
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv_file" accept=".csv" required style="margin:1rem 0">
+    <button type="submit" style="background:#2563eb;color:white;border:none;padding:.5rem 1rem;border-radius:8px">Upload</button>
+  </form>
+</div>
+{% endblock %}

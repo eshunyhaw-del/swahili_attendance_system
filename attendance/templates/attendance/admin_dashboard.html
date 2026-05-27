@@ -1,0 +1,158 @@
+{% extends "attendance/base.html" %}
+{% block title %}Admin Dashboard – SSA{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root{--green:#16a34a;--red:#dc2626;--amber:#d97706;--blue:#2563eb;--purple:#9333ea;--bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04)}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0}
+  .wrap{max-width:1200px;margin:0 auto;padding:2rem 1.25rem 4rem}
+  .page-header{margin-bottom:2rem}
+  .page-header h1{font-size:1.8rem;font-weight:700;margin:0 0 .25rem}
+  .page-header p{margin:0;color:var(--muted)}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-bottom:2rem}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;box-shadow:var(--shadow)}
+  .stat-number{font-size:2.2rem;font-weight:900;color:var(--blue);line-height:1}
+  .stat-label{font-size:.8rem;color:var(--muted);margin-top:.5rem;text-transform:uppercase;letter-spacing:.05em}
+  .level-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+  .level-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+  .level-header h2{margin:0;font-size:1.3rem}
+  .level-badge{background:var(--blue);color:white;padding:.25rem .75rem;border-radius:20px;font-size:.8rem}
+  .progress-bar{background:#e2e8f0;height:24px;border-radius:12px;overflow:hidden;margin:1rem 0}
+  .progress-fill{height:100%;border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600}
+  .fill-high{background:linear-gradient(90deg,#22c55e,#16a34a)}
+  .fill-medium{background:linear-gradient(90deg,#fbbf24,#d97706)}
+  .fill-low{background:linear-gradient(90deg,#f87171,#dc2626)}
+  .level-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1rem;margin-top:1rem}
+  .level-stat-item{text-align:center;padding:.5rem;background:#f8fafc;border-radius:10px}
+  .level-stat-value{font-size:1.3rem;font-weight:700;color:var(--text)}
+  .level-stat-label{font-size:.7rem;color:var(--muted)}
+  .btn{display:inline-block;padding:.5rem 1rem;background:var(--blue);color:white;text-decoration:none;border-radius:8px;font-size:.85rem;margin-right:.5rem;margin-top:.5rem}
+  .btn-green{background:var(--green)}
+  .btn-purple{background:var(--purple)}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .trend-chart{display:flex;gap:.5rem;margin-top:.75rem}
+  .trend-bar{flex:1;height:40px;background:#e2e8f0;border-radius:6px;overflow:hidden;position:relative}
+  .trend-fill{position:absolute;bottom:0;left:0;right:0;background:var(--blue);transition:height .3s}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+  .student-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem}
+  .student-list h3{margin:0 0 1rem 0;font-size:1rem}
+  .student-item{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border)}
+  .student-name{font-weight:500}
+  .student-percent{font-size:.85rem;color:var(--muted)}
+  .high{color:var(--green);font-weight:700}
+  .low{color:var(--red);font-weight:700}
+  .recent-table{width:100%;font-size:.85rem}
+  .recent-table td{padding:.5rem 0;border-bottom:1px solid var(--border)}
+  @media(max-width:700px){.two-col{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="page-header">
+    <h1>📊 Admin Dashboard</h1>
+    <p>Attendance analytics across all levels</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ total_students }}</div>
+      <div class="stat-label">👨‍🎓 Total Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ total_courses }}</div>
+      <div class="stat-label">📚 Total Courses</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ total_sessions }}</div>
+      <div class="stat-label">📅 Class Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ total_attendance_records }}</div>
+      <div class="stat-label">✅ Attendance Records</div>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:1rem">📈 Attendance by Level</h2>
+  {% for stat in level_stats %}
+  <div class="level-card">
+    <div class="level-header">
+      <h2>Level {{ stat.level.name }}</h2>
+      <span class="level-badge">{{ stat.attendance_rate }}% Overall</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill {% if stat.attendance_rate >= 75 %}fill-high{% elif stat.attendance_rate >= 50 %}fill-medium{% else %}fill-low{% endif %}" style="width: {{ stat.attendance_rate }}%">
+        {{ stat.attendance_rate }}%
+      </div>
+    </div>
+    <div class="level-stats">
+      <div class="level-stat-item">
+        <div class="level-stat-value">{{ stat.total_students }}</div>
+        <div class="level-stat-label">Students</div>
+      </div>
+      <div class="level-stat-item">
+        <div class="level-stat-value">{{ stat.total_courses }}</div>
+        <div class="level-stat-label">Courses</div>
+      </div>
+      <div class="level-stat-item">
+        <div class="level-stat-value">{{ stat.total_sessions }}</div>
+        <div class="level-stat-label">Sessions</div>
+      </div>
+      <div class="level-stat-item">
+        <div class="level-stat-value">{{ stat.attendance_records }}</div>
+        <div class="level-stat-label">Records</div>
+      </div>
+    </div>
+    <div>
+      <a href="{% url 'attendance:export_level' stat.level.id %}" class="btn btn-green">📥 Export CSV</a>
+      <a href="{% url 'attendance:student_report' %}?level={{ stat.level.id }}" class="btn btn-purple">👥 View Students</a>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="two-col">
+    <div class="student-list">
+      <h3>🏆 Top Performing Students (90%+)</h3>
+      {% if top_students %}
+        {% for student in top_students %}
+        <div class="student-item">
+          <span class="student-name">{{ student.name }}</span>
+          <span class="student-percent high">{{ student.percentage }}%</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:.85rem">No students with high attendance yet</p>
+      {% endif %}
+    </div>
+
+    <div class="student-list">
+      <h3>⚠️ Struggling Students (&lt;60%)</h3>
+      {% if struggling_students %}
+        {% for student in struggling_students %}
+        <div class="student-item">
+          <span class="student-name">{{ student.name }}</span>
+          <span class="student-percent low">{{ student.percentage }}%</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:.85rem">No struggling students</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="student-list">
+    <h3>🕐 Recent Attendance Activity</h3>
+    <table class="recent-table">
+      {% for record in recent_attendance %}
+      <tr>
+        <td>{{ record.student.get_full_name|default:record.student.username }}</td>
+        <td>{{ record.class_session.course.code }}</td>
+        <td>{{ record.submitted_at|date:"M d, H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" style="color:var(--muted)">No recent activity</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

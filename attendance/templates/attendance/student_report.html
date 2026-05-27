@@ -1,0 +1,65 @@
+{% extends "attendance/base.html" %}
+{% block title %}Student Reports – SSA{% endblock %}
+
+{% block content %}
+<div class="wrap" style="max-width:1400px;margin:0 auto;padding:2rem">
+  <h1>👥 Student Attendance Reports</h1>
+  
+  <form method="get" style="margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+    <select name="level">
+      <option value="">All Levels</option>
+      {% for level in levels %}
+      <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+        Level {{ level.name }}
+      </option>
+      {% endfor %}
+    </select>
+    <input type="text" name="search" placeholder="Search by name or ID" value="{{ search_query|default:'' }}">
+    <button type="submit">Filter</button>
+  </form>
+
+  {% for student in students %}
+  <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:1rem;padding:1rem">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap">
+      <div>
+        <strong>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</strong><br>
+        <small>ID: {{ student.profile.student_id_number|default:"-" }} | Level {{ student.profile.level.name }}</small>
+      </div>
+      <div style="font-size:1.2rem;font-weight:700">
+        Overall: {{ student.attendance_percentage }}%
+      </div>
+    </div>
+    <div style="background:#e2e8f0;height:8px;border-radius:4px;margin:1rem 0">
+      <div style="width:{{ student.attendance_percentage }}%;height:100%;background:#2563eb;border-radius:4px"></div>
+    </div>
+    
+    {% if student.alerts %}
+    <div style="background:#fee2e2;padding:.5rem;border-radius:8px;margin-bottom:.5rem">
+      ⚠️ Low attendance in: 
+      {% for alert in student.alerts %}
+      {{ alert.course }} ({{ alert.percentage }}%)
+      {% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    <details>
+      <summary style="cursor:pointer;color:#64748b">📚 Course breakdown</summary>
+      <table style="width:100%;margin-top:.5rem;font-size:.85rem">
+        <tr><th>Course</th><th>Attended</th><th>Total</th><th>%</th></tr>
+        {% for code, data in student.course_attendance.items %}
+        <tr>
+          <td>{{ data.name }}</td>
+          <td>{{ data.attended }}</td>
+          <td>{{ data.total }}</td>
+          <td style="{% if data.percentage < 75 %}color:#dc2626{% else %}color:#16a34a{% endif %}">{{ data.percentage }}%</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </details>
+  </div>
+  {% empty %}
+  <p>No students found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

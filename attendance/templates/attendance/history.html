@@ -1,0 +1,97 @@
+{% extends "attendance/base.html" %}
+{% block title %}Attendance History – SSA{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root{--green:#16a34a;--red:#dc2626;--blue:#2563eb;--bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04)}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0}
+  .wrap{max-width:960px;margin:0 auto;padding:2rem 1.25rem 4rem}
+  .back-link{display:inline-flex;align-items:center;gap:.4rem;color:var(--blue);font-size:.85rem;font-weight:600;text-decoration:none;margin-bottom:1.5rem}
+  .back-link:hover{text-decoration:underline}
+  .page-header{margin-bottom:2rem}
+  .page-header h1{font-size:1.7rem;font-weight:700;margin:0 0 .25rem}
+  .page-header p{margin:0;color:var(--muted)}
+  .course-block{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:2rem;overflow:hidden}
+  .course-block-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .course-info{display:flex;align-items:center;gap:.9rem}
+  .course-badge{background:#eff6ff;color:var(--blue);font-size:.75rem;font-weight:700;padding:.3rem .7rem;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+  .course-name{font-size:1.05rem;font-weight:700}
+  .course-sub{font-size:.83rem;color:var(--muted);margin-top:.1rem}
+  .stats-row{display:flex;gap:1rem;flex-wrap:wrap}
+  .stat-chip{text-align:center;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:.5rem .9rem}
+  .stat-chip .val{font-size:1.25rem;font-weight:800;line-height:1}
+  .stat-chip .lbl{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+  .stat-chip.good .val{color:var(--green)}.stat-chip.bad .val{color:var(--red)}.stat-chip.pct .val{color:var(--blue)}
+  .progress-bar-wrap{margin:0 1.4rem 1.2rem}
+  .progress-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.3rem}
+  .progress-track{height:8px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:99px;transition:width .6s ease}
+  .fill-good{background:linear-gradient(90deg,#4ade80,#16a34a)}.fill-warn{background:linear-gradient(90deg,#fbbf24,#d97706)}.fill-bad{background:linear-gradient(90deg,#f87171,#dc2626)}
+  .cal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.65rem;padding:1.25rem 1.4rem 1.5rem}
+  .cal-cell{border-radius:10px;padding:.6rem .4rem;text-align:center;font-size:.75rem;font-weight:600;border:1.5px solid transparent;transition:transform .12s;cursor:default}
+  .cal-cell:hover{transform:scale(1.05)}
+  .cal-cell .week-num{font-size:.65rem;opacity:.7;margin-bottom:.15rem}
+  .cal-cell .cell-date{font-size:.68rem;opacity:.75;margin-top:.15rem;font-weight:400}
+  .cell-attended{background:#dcfce7;border-color:#86efac;color:#15803d}
+  .cell-absent{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+  .cell-future{background:#f1f5f9;border-color:#cbd5e1;color:#94a3b8}
+  .legend{display:flex;gap:1.25rem;padding:0 1.4rem 1.1rem;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted)}
+  .legend-dot{width:12px;height:12px;border-radius:4px}
+  .dot-green{background:#86efac}.dot-red{background:#fca5a5}.dot-gray{background:#cbd5e1}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <a href="{% url 'attendance:dashboard' %}" class="back-link">← Back to Dashboard</a>
+  <div class="page-header">
+    <h1>📅 Attendance History</h1>
+    <p>{{ request.user.get_full_name|default:request.user.username }} — Level {{ request.user.userprofile.level }}</p>
+  </div>
+
+  {% for item in history_data %}
+  <div class="course-block">
+    <div class="course-block-header">
+      <div class="course-info">
+        <span class="course-badge">{{ item.course.code }}</span>
+        <div>
+          <div class="course-name">{{ item.course.name }}</div>
+          <div class="course-sub">Level {{ item.course.level }}</div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-chip good"><div class="val">{{ item.attended }}</div><div class="lbl">Attended</div></div>
+        <div class="stat-chip bad"><div class="val">{{ item.total|add:"-0" }}</div><div class="lbl">Total</div></div>
+        <div class="stat-chip pct"><div class="val">{{ item.percentage }}%</div><div class="lbl">Rate</div></div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>Attendance Progress</span><span>{{ item.attended }} / {{ item.total }} classes</span></div>
+      <div class="progress-track">
+        <div class="progress-fill {% if item.percentage >= 75 %}fill-good{% elif item.percentage >= 50 %}fill-warn{% else %}fill-bad{% endif %}"
+          style="width:{{ item.percentage }}%"></div>
+      </div>
+    </div>
+
+    <div class="cal-grid">
+      {% for w in item.weeks %}
+      <div class="cal-cell {% if w.status == 'attended' %}cell-attended{% elif w.status == 'absent' %}cell-absent{% else %}cell-future{% endif %}"
+        title="Week {{ w.week_num }}: {{ w.session.topic }} — {{ w.session.date|date:'d M Y' }}">
+        <div class="week-num">W{{ w.week_num }}</div>
+        {% if w.status == 'attended' %}✅{% elif w.status == 'absent' %}❌{% else %}○{% endif %}
+        <div class="cell-date">{{ w.session.date|date:"d M" }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot dot-green"></span>Attended</span>
+      <span class="legend-item"><span class="legend-dot dot-red"></span>Absent</span>
+      <span class="legend-item"><span class="legend-dot dot-gray"></span>Future</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

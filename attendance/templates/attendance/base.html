@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swasa Attendance</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
+        nav { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .logout-form { display: inline; }
+        .logout-btn { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; text-decoration: underline; padding: 0; }
+        .logout-btn:hover { color: #a71d2a; }
+    </style>
+</head>
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="{% url 'attendance:dashboard' %}">Dashboard</a> |
+            <a href="{% url 'attendance:history' %}">My History</a> |
+            {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'attendance:lecturer_dashboard' %}">Lecturer Dashboard</a> |
+            {% endif %}
+            {% if user.is_superuser %}
+                <a href="{% url 'attendance:admin_dashboard' %}">Admin Dashboard</a> |
+            {% endif %}
+            <span>Hello, {{ user.username }}</span> |
+            <form method="post" action="{% url 'logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+        {% endif %}
+
+<!-- Add this inside the nav when user is authenticated -->
+{% if user.is_authenticated and not user.is_staff %}
+    <a href="{% url 'attendance:export_my_pdf' %}">📄 Export PDF</a> |
+    <a href="{% url 'attendance:export_my_csv' %}">📊 Export CSV</a> |
+{% endif %}
+
+    </nav>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% block extra_head %}{% endblock %}
+    {% block content %}{% endblock %}
+</body>
+</html>

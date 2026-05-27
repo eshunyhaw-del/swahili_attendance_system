@@ -1,0 +1,239 @@
+{% extends "attendance/base.html" %}
+{% block title %}My Dashboard – SSA Attendance{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --green:#16a34a; --amber:#d97706; --red:#dc2626; --blue:#2563eb;
+    --gray:#6b7280; --bg:#f8fafc; --surface:#ffffff; --border:#e2e8f0;
+    --text:#0f172a; --muted:#64748b; --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04);
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0}
+  .dash-wrap{max-width:1100px;margin:0 auto;padding:2rem 1.25rem 4rem}
+  .dash-header{margin-bottom:2rem}
+  .dash-header h1{font-size:1.7rem;font-weight:700;margin:0 0 .25rem}
+  .dash-header p{margin:0;color:var(--muted)}
+  .course-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:2rem;overflow:hidden}
+  .course-card-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+  .course-badge{background:#eff6ff;color:var(--blue);font-size:.75rem;font-weight:700;padding:.3rem .7rem;border-radius:99px;letter-spacing:.04em;text-transform:uppercase}
+  .course-title{font-size:1.05rem;font-weight:700;margin:0}
+  .course-subtitle{font-size:.83rem;color:var(--muted);margin:0}
+  .week-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .week-table thead th{background:#f1f5f9;color:var(--muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.65rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+  .week-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+  .week-table tbody tr:last-child{border-bottom:none}
+  .week-table tbody tr:hover{background:#f8fafc}
+  .week-table td{padding:.75rem 1rem;vertical-align:middle}
+  .col-week{width:70px;font-weight:700;color:var(--muted)}
+  .col-date{width:120px;white-space:nowrap}
+  .col-status{width:145px}
+  .col-action{width:220px;text-align:right}
+  .pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:700;padding:.28rem .7rem;border-radius:99px;white-space:nowrap}
+  .pill-none{background:#f1f5f9;color:var(--gray)}
+  .pill-generated{background:#fef9c3;color:#92400e}
+  .pill-submitted{background:#dcfce7;color:#15803d}
+  .pill-expired{background:#fee2e2;color:#991b1b}
+  .btn{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;border:none;border-radius:8px;font-size:.82rem;font-weight:600;padding:.45rem .95rem;transition:all .15s;white-space:nowrap}
+  .btn-generate{background:var(--blue);color:#fff}
+  .btn-generate:hover{background:#1d4ed8}
+  .btn-submit{background:var(--green);color:#fff}
+  .btn-submit:hover{background:#15803d}
+  .btn-copy{background:#f1f5f9;color:var(--text);padding:.3rem .65rem;font-size:.78rem;border-radius:6px}
+  .btn-copy:hover{background:#e2e8f0}
+  .btn:disabled{opacity:.55;cursor:default}
+  .code-inline-wrap{display:none;margin-top:.6rem;padding:.75rem 1rem;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;animation:slideDown .2s ease}
+  @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .code-inline-wrap.visible{display:block}
+  .code-value{font-family:'Courier New',monospace;font-size:1.5rem;font-weight:900;letter-spacing:.18em;color:#166534;margin-bottom:.45rem}
+  .code-meta{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+  .countdown{font-weight:700;color:var(--amber)}
+  #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#0f172a;color:#fff;border-radius:10px;padding:.8rem 1.25rem;font-size:.87rem;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(12px);transition:all .25s;pointer-events:none;z-index:9999;max-width:320px}
+  #toast.show{opacity:1;transform:translateY(0)}
+  #toast.success{border-left:4px solid var(--green)}
+  #toast.error{border-left:4px solid var(--red)}
+  .empty-state{padding:3rem 1.5rem;text-align:center;color:var(--muted)}
+  @media(max-width:640px){.col-date{display:none}.col-action{width:auto}.code-value{font-size:1.2rem}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+  <div class="dash-header">
+    <h1>📚 My Attendance Dashboard</h1>
+    <p>Welcome back, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+       — Level {{ request.user.userprofile.level }}</p>
+  </div>
+
+  <p style="margin-bottom:1.5rem">
+    <a href="{% url 'attendance:history' %}" style="color:var(--blue);font-weight:600;text-decoration:none">📅 View My Attendance History →</a>
+  </p>
+
+  {% if not course_data %}
+    <div class="empty-state"><p>No courses found for your level. Contact your administrator.</p></div>
+  {% endif %}
+
+  {% for item in course_data %}
+  <div class="course-card">
+    <div class="course-card-header">
+      <span class="course-badge">{{ item.course.code }}</span>
+      <div>
+        <p class="course-title">{{ item.course.name }}</p>
+        <p class="course-subtitle">Level {{ item.course.level }} · {{ item.weeks|length }} sessions</p>
+      </div>
+    </div>
+    <table class="week-table">
+      <thead>
+        <tr>
+          <th class="col-week">Week</th>
+          <th class="col-date">Date</th>
+          <th>Topic</th>
+          <th class="col-status">Status</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in item.weeks %}
+        <tr id="row-{{ w.session.id }}">
+          <td class="col-week">W{{ w.week_num }}</td>
+          <td class="col-date">{{ w.session.date|date:"d M Y" }}</td>
+          <td>{{ w.session.topic|default:"–" }}</td>
+
+          <td class="col-status">
+            <span class="pill status-pill-{{ w.session.id }}
+              {% if w.status == 'submitted' %}pill-submitted
+              {% elif w.status == 'generated' %}pill-generated
+              {% elif w.status == 'expired' %}pill-expired
+              {% else %}pill-none{% endif %}">
+              {% if w.status == 'submitted' %}✅ Submitted
+              {% elif w.status == 'generated' %}🔑 Generated
+              {% elif w.status == 'expired' %}⏰ Expired
+              {% else %}– Not started{% endif %}
+            </span>
+          </td>
+
+          <td class="col-action">
+            {% if w.status == 'submitted' %}
+              <span style="font-size:.8rem;color:var(--green);font-weight:600">✔ Done</span>
+
+            {% elif w.status == 'generated' %}
+              <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap">
+                <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔄 Refresh</button>
+                <button class="btn btn-submit" onclick="submitAttendance({{ w.session.id }},this)">✅ Submit</button>
+              </div>
+              <div class="code-inline-wrap visible" id="code-wrap-{{ w.session.id }}">
+                <div class="code-value" id="code-val-{{ w.session.id }}">{{ w.code_obj.code_string }}</div>
+                <div class="code-meta">
+                  <button class="btn-copy btn" onclick="copyCode('{{ w.code_obj.code_string }}',this)">📋 Copy</button>
+                  <span>Expires: <span class="countdown" id="timer-{{ w.session.id }}"
+                    data-expires="{{ w.code_obj.expires_at|date:'c' }}">…</span></span>
+                </div>
+              </div>
+
+            {% elif w.status == 'expired' %}
+              <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔄 New Code</button>
+
+            {% else %}
+              <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔑 Generate Code</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CSRF = "{{ csrf_token }}";
+
+function showToast(msg, type="success") {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "show " + type;
+  clearTimeout(t._t); t._t = setTimeout(() => t.className = "", 3500);
+}
+
+function copyCode(code, btn) {
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = "✅ Copied!";
+    setTimeout(() => btn.textContent = "📋 Copy", 2000);
+    showToast("Code copied!");
+  });
+}
+
+function updateCountdowns() {
+  document.querySelectorAll(".countdown[data-expires]").forEach(el => {
+    const diff = new Date(el.dataset.expires) - Date.now();
+    if (diff <= 0) { el.textContent = "Expired"; el.style.color = "var(--red)"; return; }
+    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+    el.textContent = `${h}h ${m}m ${s}s`;
+  });
+}
+setInterval(updateCountdowns, 1000); updateCountdowns();
+
+async function generateCode(sessionId, btn) {
+  btn.disabled = true; btn.textContent = "⏳ Generating…";
+  try {
+    const res = await fetch("{% url 'attendance:generate_code' %}", {
+      method: "POST",
+      headers: {"X-CSRFToken": CSRF, "Content-Type": "application/x-www-form-urlencoded"},
+      body: new URLSearchParams({session_id: sessionId}),
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || "Error.", "error"); btn.disabled=false; btn.textContent="🔑 Generate Code"; return; }
+
+    let wrap = document.getElementById(`code-wrap-${sessionId}`);
+    const row = document.getElementById(`row-${sessionId}`);
+
+    if (!wrap) {
+      row.querySelector(".col-action").innerHTML = `
+        <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn btn-generate" onclick="generateCode(${sessionId},this)">🔄 Refresh</button>
+          <button class="btn btn-submit" onclick="submitAttendance(${sessionId},this)">✅ Submit</button>
+        </div>
+        <div class="code-inline-wrap visible" id="code-wrap-${sessionId}">
+          <div class="code-value" id="code-val-${sessionId}">${data.code}</div>
+          <div class="code-meta">
+            <button class="btn-copy btn" onclick="copyCode('${data.code}',this)">📋 Copy</button>
+            <span>Expires: <span class="countdown" id="timer-${sessionId}" data-expires="${data.expires_at}">…</span></span>
+          </div>
+        </div>`;
+    } else {
+      document.getElementById(`code-val-${sessionId}`).textContent = data.code;
+      const timer = document.getElementById(`timer-${sessionId}`);
+      if (timer) timer.dataset.expires = data.expires_at;
+      wrap.classList.add("visible");
+      row.querySelectorAll(".btn-generate").forEach(b => { b.disabled=false; b.textContent="🔄 Refresh"; });
+    }
+
+    const pill = document.querySelector(`.status-pill-${sessionId}`);
+    if (pill) { pill.className=`pill status-pill-${sessionId} pill-generated`; pill.textContent="🔑 Generated"; }
+    updateCountdowns();
+    showToast("Code generated! Keep it safe.", "success");
+  } catch(e) { showToast("Network error.", "error"); btn.disabled=false; btn.textContent="🔑 Generate Code"; }
+}
+
+async function submitAttendance(sessionId, btn) {
+  if (!confirm("Submit attendance? This cannot be undone.")) return;
+  btn.disabled=true; btn.textContent="⏳ Submitting…";
+  try {
+    const res = await fetch("{% url 'attendance:submit_attendance' %}", {
+      method: "POST",
+      headers: {"X-CSRFToken": CSRF, "Content-Type": "application/x-www-form-urlencoded"},
+      body: new URLSearchParams({session_id: sessionId}),
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.error || "Error.", "error"); btn.disabled=false; btn.textContent="✅ Submit"; return; }
+
+    document.getElementById(`row-${sessionId}`).querySelector(".col-action").innerHTML =
+      `<span style="font-size:.8rem;color:var(--green);font-weight:600">✔ Done</span>`;
+
+    const pill = document.querySelector(`.status-pill-${sessionId}`);
+    if (pill) { pill.className=`pill status-pill-${sessionId} pill-submitted`; pill.textContent="✅ Submitted"; }
+    showToast("Attendance marked! 🎉", "success");
+  } catch(e) { showToast("Network error.", "error"); btn.disabled=false; btn.textContent="✅ Submit"; }
+}
+</script>
+{% endblock %}

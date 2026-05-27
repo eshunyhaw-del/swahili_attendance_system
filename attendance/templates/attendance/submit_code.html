@@ -1,0 +1,11 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+<h2>Submit Attendance Code</h2>
+<p>Enter the unique code you received during the lecture.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Submit Code</button>
+</form>
+{% endblock %}

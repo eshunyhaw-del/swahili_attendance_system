@@ -1,0 +1,64 @@
+{% extends "attendance/base.html" %}
+{% block title %}Search Students{% endblock %}
+
+{% block content %}
+<h1>🔍 Search Students</h1>
+
+<form method="get" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <input type="text" name="q" placeholder="Search by name, username, or student ID" 
+           value="{{ search_query }}" style="flex: 1; padding: 8px;">
+    <select name="level" style="padding: 8px;">
+        <option value="">All Levels</option>
+        {% for level in levels %}
+            <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+                Level {{ level.name }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit" style="padding: 8px 16px;">Search</button>
+</form>
+
+{% if students %}
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn">📊 Export All Students CSV</a>
+        {% if selected_level %}
+            <a href="{% url 'attendance:admin_export_level_csv' selected_level %}" class="btn">📊 Export Level CSV</a>
+        {% endif %}
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Sessions</th>
+                <th>Attended</th>
+                <th>Percentage</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.profile.student_id_number|default:"-" }}</td>
+                <td>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</td>
+                <td>{{ student.profile.level.name }}</td>
+                <td>{{ student.total_sessions }}</td>
+                <td>{{ student.total_attended }}</td>
+                <td style="{% if student.percentage < 60 %}color: red; font-weight: bold;{% endif %}">
+                    {{ student.percentage }}%
+                </td>
+                <td>
+                    <a href="{% url 'attendance:admin_export_student_pdf' student.profile.id %}">📄 PDF</a> |
+                    <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}">📊 CSV</a> |
+                    <a href="{% url 'attendance:student_detail' student.profile.id %}">Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No students found.</p>
+{% endif %}
+{% endblock %}
