@@ -2,63 +2,461 @@
 {% block title %}Search Students{% endblock %}
 
 {% block content %}
-<h1>🔍 Search Students</h1>
+<style>
+    /* Theme Variables - Defaults to Light Mode */
+    :root {
+        --dash-bg: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+        --panel-bg: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #334155;
+        --text-muted: #64748B;
+        --border-color: rgba(226, 232, 240, 0.9);
+        --panel-shadow: 0 4px 10px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+        
+        --input-bg: #F8FAFC;
+        --input-border: #CBD5E1;
+        --input-focus: rgba(13, 36, 114, 0.15);
+        --input-focus-border: #0D2472;
+        
+        --btn-main-bg: #0D2472;
+        --btn-main-hover: #0A1B56;
+        --btn-main-text: #FFFFFF;
+        
+        --btn-out-bg: transparent;
+        --btn-out-text: #0D2472;
+        --btn-out-border: #0D2472;
+        --btn-out-hover: #F8FAFC;
+        
+        --table-head-bg: #F8FAFC;
+        --table-row-hover: #F1F5F9;
+        
+        --badge-good-bg: #D1FAE5;
+        --badge-good-text: #059669;
+        --badge-danger-bg: #FEE2E2;
+        --badge-danger-text: #DC2626;
+        
+        --action-bg: #F1F5F9;
+        --action-text: #475569;
+        --action-hover-bg: #E2E8F0;
+        --action-hover-text: #0F172A;
+    }
 
-<form method="get" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-    <input type="text" name="q" placeholder="Search by name, username, or student ID" 
-           value="{{ search_query }}" style="flex: 1; padding: 8px;">
-    <select name="level" style="padding: 8px;">
-        <option value="">All Levels</option>
-        {% for level in levels %}
-            <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
-                Level {{ level.name }}
-            </option>
-        {% endfor %}
-    </select>
-    <button type="submit" style="padding: 8px 16px;">Search</button>
-</form>
+    /* Dark Mode Overrides */
+    [data-theme="dark"] {
+        --dash-bg: linear-gradient(135deg, #0F172A 0%, #020617 100%);
+        --panel-bg: #1E293B;
+        --text-primary: #F8FAFC;
+        --text-secondary: #E2E8F0;
+        --text-muted: #94A3B8;
+        --border-color: #334155;
+        --panel-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+        
+        --input-bg: #0F172A;
+        --input-border: #475569;
+        --input-focus: rgba(59, 130, 246, 0.25);
+        --input-focus-border: #3B82F6;
+        
+        --btn-main-bg: #2563EB;
+        --btn-main-hover: #1D4ED8;
+        --btn-main-text: #FFFFFF;
+        
+        --btn-out-bg: transparent;
+        --btn-out-text: #60A5FA;
+        --btn-out-border: #3B82F6;
+        --btn-out-hover: rgba(59, 130, 246, 0.1);
+        
+        --table-head-bg: #0F172A;
+        --table-row-hover: #1e293bd3;
+        
+        --badge-good-bg: rgba(16, 185, 129, 0.15);
+        --badge-good-text: #34D399;
+        --badge-danger-bg: rgba(239, 68, 68, 0.15);
+        --badge-danger-text: #F87171;
+        
+        --action-bg: #334155;
+        --action-text: #CBD5E1;
+        --action-hover-bg: #475569;
+        --action-hover-text: #F8FAFC;
+    }
 
-{% if students %}
-    <div style="margin-bottom: 20px;">
-        <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn">📊 Export All Students CSV</a>
-        {% if selected_level %}
-            <a href="{% url 'attendance:admin_export_level_csv' selected_level %}" class="btn">📊 Export Level CSV</a>
-        {% endif %}
-    </div>
+    /* Layout */
+    body {
+        background: var(--dash-bg);
+        min-height: 100vh;
+        margin: 0;
+        background-attachment: fixed;
+        color: var(--text-primary);
+        transition: background 0.3s ease, color 0.3s ease;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
     
-    <table>
-        <thead>
-            <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Level</th>
-                <th>Sessions</th>
-                <th>Attended</th>
-                <th>Percentage</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in students %}
-            <tr>
-                <td>{{ student.profile.student_id_number|default:"-" }}</td>
-                <td>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</td>
-                <td>{{ student.profile.level.name }}</td>
-                <td>{{ student.total_sessions }}</td>
-                <td>{{ student.total_attended }}</td>
-                <td style="{% if student.percentage < 60 %}color: red; font-weight: bold;{% endif %}">
-                    {{ student.percentage }}%
-                </td>
-                <td>
-                    <a href="{% url 'attendance:admin_export_student_pdf' student.profile.id %}">📄 PDF</a> |
-                    <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}">📊 CSV</a> |
-                    <a href="{% url 'attendance:student_detail' student.profile.id %}">Details</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No students found.</p>
-{% endif %}
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.75px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    /* Search Bar */
+    .search-card {
+        background: var(--panel-bg);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--panel-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .input-wrapper {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .input-wrapper .iconify {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.25rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.85rem 1rem 0.85rem 2.75rem;
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 4px var(--input-focus);
+    }
+
+    .form-select {
+        padding-left: 1rem;
+        min-width: 180px;
+        flex: 0 0 auto;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-text);
+        white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+        background: var(--btn-main-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 36, 114, 0.15);
+    }
+
+    .btn-outline {
+        background: var(--btn-out-bg);
+        color: var(--btn-out-text);
+        border: 2px solid var(--btn-out-border);
+        padding: 0.65rem 1.25rem;
+    }
+
+    .btn-outline:hover {
+        background: var(--btn-out-hover);
+        transform: translateY(-1px);
+    }
+
+    /* Table Container */
+    .data-card {
+        background: var(--panel-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--panel-shadow);
+        overflow: hidden;
+    }
+
+    .data-actions-bar {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        background: var(--panel-bg);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    th {
+        background: var(--table-head-bg);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
+    tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+        background-color: var(--table-row-hover);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Micro-components */
+    .pct-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: -0.2px;
+    }
+
+    .pct-good {
+        background: var(--badge-good-bg);
+        color: var(--badge-good-text);
+    }
+
+    .pct-danger {
+        background: var(--badge-danger-bg);
+        color: var(--badge-danger-text);
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .action-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--action-bg);
+        color: var(--action-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .action-icon:hover {
+        background: var(--action-hover-bg);
+        color: var(--action-hover-text);
+        transform: translateY(-2px);
+    }
+
+    .action-text {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--btn-main-bg);
+        text-decoration: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(13, 36, 114, 0.05);
+        transition: all 0.2s;
+        margin-left: 0.5rem;
+    }
+
+    [data-theme="dark"] .action-text {
+        color: var(--btn-main-text);
+        background: rgba(59, 130, 246, 0.2);
+    }
+
+    .action-text:hover {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-text);
+    }
+
+    /* Blank State */
+    .blank-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--panel-bg);
+        border-radius: 20px;
+        border: 2px dashed var(--border-color);
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>
+            <span class="iconify" data-icon="mdi:account-search-outline"></span>
+            Search Students
+        </h1>
+    </div>
+
+    <div class="search-card">
+        <form method="get" class="search-form">
+            <div class="input-wrapper">
+                <span class="iconify" data-icon="mdi:magnify"></span>
+                <input type="text" name="q" placeholder="Search by name, username, or student ID..." 
+                       value="{{ search_query }}" class="form-control">
+            </div>
+            
+            <select name="level" class="form-control form-select">
+                <option value="">All Levels</option>
+                {% for level in levels %}
+                    <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+                        Level {{ level.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    {% if students %}
+    <div class="data-card">
+        <div class="data-actions-bar">
+            <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-outline">
+                <span class="iconify" data-icon="mdi:file-delimited-outline" style="font-size: 1.2rem;"></span> 
+                Export All (CSV)
+            </a>
+            {% if selected_level %}
+                <a href="{% url 'attendance:admin_export_level_csv' selected_level %}" class="btn btn-outline">
+                    <span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span> 
+                    Export Level (CSV)
+                </a>
+            {% endif %}
+        </div>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Sessions</th>
+                        <th>Attended</th>
+                        <th>Percentage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td style="color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px;">
+                            {{ student.profile.student_id_number|default:"-" }}
+                        </td>
+                        <td style="font-weight: 700;">
+                            {{ student.profile.user.get_full_name|default:student.profile.user.username }}
+                        </td>
+                        <td>
+                            <span style="background: var(--dash-bg); padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+                                {{ student.profile.level.name }}
+                            </span>
+                        </td>
+                        <td>{{ student.total_sessions }}</td>
+                        <td>{{ student.total_attended }}</td>
+                        <td>
+                            <span class="pct-badge {% if student.percentage < 60 %}pct-danger{% else %}pct-good{% endif %}">
+                                {{ student.percentage }}%
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <a href="{% url 'attendance:admin_export_student_pdf' student.profile.id %}" class="action-icon" title="Export PDF">
+                                    <span class="iconify" data-icon="mdi:file-pdf-box" style="font-size: 1.2rem; color: #DC2626;"></span>
+                                </a>
+                                <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="action-icon" title="Export CSV">
+                                    <span class="iconify" data-icon="mdi:file-delimited" style="font-size: 1.2rem; color: #059669;"></span>
+                                </a>
+                                <a href="{% url 'attendance:student_detail' student.profile.id %}" class="action-text">
+                                    Details
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="blank-state">
+        <span class="iconify" data-icon="mdi:account-search-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
+        <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
+        <p style="color: var(--text-muted); font-weight: 500; margin: 0;">Try adjusting your search query or level filter.</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

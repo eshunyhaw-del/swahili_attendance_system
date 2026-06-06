@@ -1,10 +1,512 @@
-{% extends 'attendance/base.html' %}
-{% block content %}
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Login</button>
-</form>
-<p>Don't have an account? <a href="{% url 'attendance:register' %}">Register here</a>.</p>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Login - SWASA Attendance</title>
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:        #0D2472;
+            --primary-hover:  #091A55;
+            --primary-light:  rgba(13,36,114,0.07);
+            --gold:           #F2C31A;
+            --gold-dark:      #C9A00E;
+            --surface:        #FFFFFF;
+            --bg-main:        #F4F6FB;
+            --text-main:      #0D1B3E;
+            --text-muted:     #8896AB;
+            --border:         #E4E9F2;
+            --border-strong:  #C8D0E0;
+            --shadow-sm:      0 1px 2px rgba(13,36,114,0.06);
+            --shadow-md:      0 4px 16px rgba(13,36,114,0.12);
+            --radius-lg:      16px;
+            --radius-md:      12px;
+            --radius-sm:      8px;
+            --transition:     all 0.15s ease;
+            --danger:         #C0392B;
+            --danger-light:   rgba(192,57,43,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .auth-wrapper {
+            max-width: 440px;
+            width: 100%;
+            margin: 1rem;
+        }
+
+        .auth-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ── Top accent bar ── */
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0D2472, #1B3A9C, #F2C31A);
+        }
+
+        /* ── Card header ── */
+        .card-header {
+            padding: 2.5rem 2rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        /* TWEAK 1: Gold logo container like sidebar */
+        .logo-container {
+            width: 56px;
+            height: 56px;
+            background: var(--gold);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 26px;
+            box-shadow: 0 2px 8px rgba(242,195,26,0.35);
+        }
+
+        .card-header h1 {
+            font-weight: 700;
+            font-size: 1.45rem;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        /* TWEAK 2: subtitle inside proper padding context */
+        .card-subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 0 2rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        .card-body { padding: 0 2rem 2rem; }
+
+        /* ── Form ── */
+        .form-group { margin-bottom: 1.25rem; }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.06em;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: var(--bg-main);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .form-control::placeholder { color: var(--text-muted); }
+
+        .form-control.with-icon { padding-left: 2.75rem; }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        /* ── Hint chip ── */
+        .hint-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--primary-light);
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        .hint-chip .iconify { font-size: 12px; }
+
+        /* ── Password toggle ── */
+        .password-toggle-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .password-toggle-btn .eye-off-icon { display: none; }
+        .password-toggle-btn.showing-password .eye-on-icon { display: none; }
+        .password-toggle-btn.showing-password .eye-off-icon { display: block; }
+
+        /* ── Form utilities ── */
+        .form-utilities {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.25rem 0;
+            font-size: 12px;
+        }
+
+        /* TWEAK 3: Styled checkbox */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .remember-me input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-strong);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+
+        .remember-me input[type="checkbox"]:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .remember-me input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 0px;
+            width: 5px;
+            height: 9px;
+            border: 2px solid #fff;
+            border-top: none;
+            border-left: none;
+            transform: rotate(45deg);
+        }
+
+        .remember-me input[type="checkbox"]:focus {
+            box-shadow: 0 0 0 3px var(--primary-light);
+            outline: none;
+        }
+
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+
+        .forgot-link:hover { color: var(--primary-hover); text-decoration: underline; }
+
+        /* TWEAK 4: font-family inherit on submit button */
+        .btn-submit {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: 14px;
+            font-family: inherit;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            box-shadow: 0 1px 3px rgba(13,36,114,0.25);
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 3px 10px rgba(13,36,114,0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active { transform: scale(0.99); }
+
+        /* ── Error alert ── */
+        .error-alert {
+            background: var(--danger-light);
+            border: 1px solid rgba(192,57,43,0.2);
+            border-left: 3px solid var(--danger);
+            padding: 0.75rem 0.875rem;
+            border-radius: var(--radius-sm);
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ── Divider ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── Register cards ── */
+        .register-card {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            text-decoration: none;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+
+        .register-card:hover {
+            background: #F4F6FB;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .register-card:last-child { margin-bottom: 0; }
+
+        .register-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+
+        .register-card:hover .register-icon {
+            background: var(--gold);
+            color: var(--primary);
+        }
+
+        .register-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .register-text span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 1px;
+        }
+
+        .register-chevron {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="card-header">
+            <div class="logo-container">
+                <span class="iconify" data-icon="mdi:fingerprint"></span>
+            </div>
+            <h1>SWASA Attendance</h1>
+        </div>
+        <div class="card-subtitle">Sign in to access your portal</div>
+
+        <div class="card-body">
+            {% if form.errors or form.non_field_errors %}
+            <div class="error-alert">
+                <span class="iconify" data-icon="mdi:alert-circle" style="font-size: 1.25rem; flex-shrink: 0;"></span>
+                <span>Invalid username or password. Please try again.</span>
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="id_username">Username or Student ID</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="username" id="id_username" class="form-control with-icon" placeholder="Enter your username or Student ID" required autofocus>
+                        <span class="iconify input-icon" data-icon="mdi:account-outline"></span>
+                    </div>
+                    <div class="hint-chip">
+                        <span class="iconify" data-icon="mdi:school-outline"></span>
+                        Students: Use your Student ID
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="id_password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" id="id_password" class="form-control with-icon" placeholder="Enter your password" required>
+                        <span class="iconify input-icon" data-icon="mdi:lock-outline"></span>
+                        
+                        <button type="button" id="passwordToggle" class="password-toggle-btn" aria-label="Toggle password visibility">
+                            <svg class="eye-on-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-utilities">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember_me">
+                        Keep me signed in
+                    </label>
+                    <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Sign In
+                    <span class="iconify" data-icon="mdi:arrow-right" style="font-size: 1.2rem;"></span>
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>New here?</span>
+            </div>
+            
+            <div class="auth-footer">
+                <a href="{% url 'attendance:register' %}" class="register-card">
+                    <div class="register-icon">
+                        <span class="iconify" data-icon="mdi:school-outline"></span>
+                    </div>
+                    <div class="register-text">
+                        Register as Student
+                        <span>Create your student portal account</span>
+                    </div>
+                    <span class="iconify register-chevron" data-icon="mdi:chevron-right"></span>
+                </a>
+                
+                <a href="{% url 'attendance:ta_register' %}" class="register-card">
+                    <div class="register-icon">
+                        <span class="iconify" data-icon="mdi:account-tie-outline"></span>
+                    </div>
+                    <div class="register-text">
+                        Register as TA
+                        <span>Create your teaching assistant account</span>
+                    </div>
+                    <span class="iconify register-chevron" data-icon="mdi:chevron-right"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('id_password');
+        const toggleBtn = document.getElementById('passwordToggle');
+
+        toggleBtn.addEventListener('click', function() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            this.classList.toggle('showing-password', isPassword);
+            passwordInput.focus();
+        });
+    });
+</script>
+</body>
+</html>

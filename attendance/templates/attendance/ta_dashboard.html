@@ -1,0 +1,1129 @@
+{% extends "attendance/base.html" %}
+{% block title %}TA Dashboard{% endblock %}
+
+{% block content %}
+<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        background: #F4F6FB !important;
+        background-image: none !important;
+    }
+
+    :root {
+        --primary:        #0D2472;
+        --primary-hover:  #091A55;
+        --primary-light:  rgba(13,36,114,0.07);
+        --surface:        #FFFFFF;
+        --bg-main:        #F4F6FB;
+        --text-main:      #0D1B3E;
+        --text-muted:     #8896AB;
+        --border:         #E4E9F2;
+
+        --success:        #1E9E5E;
+        --success-light:  rgba(30,158,94,0.1);
+        --warning:        #C9A00E;
+        --warning-light:  rgba(242,195,26,0.12);
+        --info:           #4A90D9;
+        --info-light:     rgba(74,144,217,0.1);
+
+        --shadow-sm: 0 1px 2px rgba(13,36,114,0.06);
+        --shadow-md: 0 4px 12px rgba(13,36,114,0.1);
+        --shadow-lg: 0 8px 24px rgba(13,36,114,0.12);
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+
+        --transition: all 0.15s ease;
+    }
+
+    .dash-wrapper {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0.5rem 0 3rem;
+        font-family: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
+        color: var(--text-main);
+        background-color: var(--bg-main);
+        min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .dash-header {
+        margin-bottom: 1.5rem;
+        background: var(--surface);
+        padding: 1.75rem;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dash-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #0D2472, #1B3A9C, #F2C31A);
+    }
+
+    .dash-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.02em;
+        color: var(--text-main);
+    }
+
+    .dash-header p {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-bottom: 1rem;
+    }
+
+    .level-badges {
+        display: inline-flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        background: var(--bg-main);
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .level-badge {
+        background: var(--surface);
+        color: var(--primary);
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+    }
+
+    /* ── Stats ── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        border: 1px solid var(--border);
+        border-left: 4px solid transparent;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--transition);
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-card:nth-child(1) { border-left-color: #0D2472; }
+    .stat-card:nth-child(2) { border-left-color: #1E9E5E; }
+    .stat-card:nth-child(3) { border-left-color: #4A90D9; }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.generated { background: rgba(13,36,114,0.08);  color: #0D2472; }
+    .stat-icon.used      { background: var(--success-light);  color: var(--success); }
+    .stat-icon.students  { background: var(--info-light);     color: var(--info); }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: var(--text-main);
+        font-family: 'DM Mono', monospace;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 3px;
+    }
+
+    /* ── Course Section ── */
+    .course-section { margin-bottom: 2.5rem; }
+
+    .course-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+    }
+
+    .course-title .iconify {
+        color: #0D2472;
+        background: rgba(13,36,114,0.08);
+        padding: 0.35rem;
+        border-radius: var(--radius-sm);
+        font-size: 20px;
+    }
+
+    /* ── Week selector ── */
+    .week-selector {
+        display: inline-flex;
+        gap: 3px;
+        margin-bottom: 1.25rem;
+        padding: 4px;
+        background: #EEF1F8;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        flex-wrap: wrap;
+    }
+
+    .week-btn {
+        padding: 0.45rem 1rem;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .week-btn:hover:not(.active) { color: var(--text-main); background: rgba(255,255,255,0.6); }
+
+    .week-btn.active {
+        background: var(--surface);
+        color: #0D2472;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+    }
+
+    /* ── Session Card ── */
+    .session-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .session-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        background: #EEF1F8;
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .session-meta strong {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-main);
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+
+    .session-meta small {
+        color: var(--text-muted);
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-right: 1rem;
+        font-weight: 500;
+    }
+
+    .session-meta small .iconify { color: #0D2472; opacity: 0.6; }
+
+    /* ── Buttons ── */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .generate-all-btn {
+        background: #1E9E5E;
+        color: white;
+        padding: 0.6rem 1.1rem;
+        font-size: 13px;
+        box-shadow: 0 1px 3px rgba(30,158,94,0.25);
+    }
+
+    .generate-all-btn:hover { background: #167a48; box-shadow: 0 3px 8px rgba(30,158,94,0.3); }
+
+    .generate-one-btn {
+        background: #0D2472;
+        color: white;
+        padding: 0.4rem 0.875rem;
+        font-size: 12px;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .generate-one-btn:hover { background: #091A55; }
+
+    .generate-one-btn.outline {
+        background: transparent;
+        color: #0D2472;
+        border: 1.5px solid #C8D0E0;
+        box-shadow: none;
+    }
+
+    .generate-one-btn.outline:hover { border-color: #0D2472; background: rgba(13,36,114,0.05); }
+
+    /* ── Table Controls ── */
+    .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 1.25rem;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 220px;
+        max-width: 360px;
+    }
+
+    .search-wrapper .iconify {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        pointer-events: none;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.55rem 0.875rem 0.55rem 2.4rem;
+        border: 1.5px solid #C8D0E0;
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        color: var(--text-main);
+        background: #EEF1F8;
+        transition: var(--transition);
+    }
+
+    .search-input:focus {
+        border-color: #0D2472;
+        background: var(--surface);
+        box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
+    }
+
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .status-filters {
+        display: flex;
+        gap: 2px;
+        background: #EEF1F8;
+        padding: 3px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+    }
+
+    .filter-btn {
+        padding: 0.35rem 0.75rem;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .filter-btn:hover:not(.active) { color: var(--text-main); background: rgba(255,255,255,0.5); }
+
+    .filter-btn.active {
+        background: var(--surface);
+        color: #0D2472;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* ── Table ── */
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        min-height: 400px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .students-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+
+    .students-table th {
+        background: #EEF1F8;
+        color: var(--text-muted);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .students-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        font-size: 13px;
+        transition: background 0.12s;
+    }
+
+    .students-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
+    .students-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Loading state ── */
+    .loading-spinner {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-muted);
+    }
+    
+    .loading-spinner .iconify {
+        animation: spin 1s linear infinite;
+        margin-bottom: 0.5rem;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* ── Code display ── */
+    .code-display {
+        font-family: 'JetBrains Mono', 'Fira Code', 'DM Mono', 'Courier New', monospace;
+        font-weight: 700;
+        background: #EEF1F8;
+        color: var(--text-main);
+        padding: 3px 10px;
+        border-radius: var(--radius-sm);
+        letter-spacing: 1.5px;
+        border: 1px solid var(--border);
+        font-size: 13px;
+    }
+
+    /* ── Badges ── */
+    .badge {
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .badge-used        { background: var(--success-light);  color: var(--success); }
+    .badge-pending     { background: var(--warning-light);  color: var(--warning); }
+    .badge-distributed { background: var(--info-light);     color: var(--info); }
+    .badge-empty       { background: #EEF1F8; color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ── Pagination ── */
+    .pagination-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 1.25rem;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+
+    .page-info { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+    .page-controls { display: flex; gap: 0.4rem; }
+
+    .page-btn {
+        padding: 0.4rem 0.875rem;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        color: #4A5568;
+        font-weight: 600;
+        transition: var(--transition);
+        font-size: 12px;
+        font-family: inherit;
+    }
+
+    .page-btn:hover:not(:disabled) { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        border: 2px dashed #C8D0E0;
+    }
+
+    .empty-state h3 { color: var(--text-main); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+
+    /* ── Custom Modal Styles ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(13,27,62,0.5);
+        backdrop-filter: blur(6px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .modal-card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        max-width: 380px;
+        width: 100%;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 24px 48px rgba(13,27,62,0.2);
+        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
+    }
+
+    .modal-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 28px;
+    }
+
+    .modal-icon.confirm { background: rgba(13,36,114,0.1); color: var(--primary); }
+    .modal-icon.error   { background: rgba(192,57,43,0.1); color: #C0392B; }
+    .modal-icon.success { background: rgba(30,158,94,0.1); color: var(--success); }
+
+    .modal-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--text-main);
+    }
+
+    .modal-card p {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+    }
+
+    .modal-btn {
+        padding: 0.6rem 1.25rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .modal-btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .modal-btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+    }
+
+    .modal-btn-secondary {
+        background: var(--bg-main);
+        color: var(--text-main);
+        border: 1px solid var(--border);
+    }
+
+    .modal-btn-secondary:hover {
+        background: var(--border);
+    }
+
+    .modal-btn-danger {
+        background: #C0392B;
+        color: white;
+    }
+
+    .modal-btn-danger:hover {
+        background: #A93226;
+    }
+
+    .toast-success {
+        position: fixed;
+        top: 72px;
+        right: 1.25rem;
+        padding: 0.7rem 1.1rem;
+        border-radius: var(--radius-md);
+        z-index: 2000;
+        animation: fadeInOut 2.2s ease forwards;
+        background: rgba(30,158,94,0.1);
+        color: #1E9E5E;
+        border: 1px solid rgba(30,158,94,0.2);
+        box-shadow: var(--shadow-md);
+        font-weight: 600;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 280px;
+    }
+
+    /* Pending Approval Banner */
+    .pending-approval-banner {
+        background: #FEF3C7;
+        border-left: 4px solid #F2C31A;
+        padding: 1rem 1.25rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .pending-approval-banner .iconify {
+        color: #C9A00E;
+        font-size: 1.25rem;
+    }
+
+    .pending-approval-banner p {
+        margin: 0;
+        color: #7A5C00;
+        font-weight: 500;
+    }
+
+    @keyframes fadeInOut {
+        0%   { opacity: 0; transform: translateY(-12px); }
+        12%  { opacity: 1; transform: translateY(0); }
+        85%  { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-12px); }
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(0.94) translateY(8px); opacity: 0; }
+        to   { transform: scale(1) translateY(0);      opacity: 1; }
+    }
+</style>
+
+<div class="dash-wrapper">
+    <div class="dash-header">
+        <h1>TA Dashboard</h1>
+        <p>Welcome back, {{ user.get_full_name|default:user.username }}</p>
+        <div class="level-badges">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Assigned Levels:</span>
+            {% for level in assigned_levels %}
+                <span class="level-badge">
+                    <span class="iconify" data-icon="mdi:check-decagram"></span>
+                    Level {{ level.name }}
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pending Approval Banner - Show only if TA is not approved -->
+    {% if ta_profile and not ta_profile.is_approved %}
+    <div class="pending-approval-banner">
+        <span class="iconify" data-icon="mdi:clock-alert-outline"></span>
+        <p>
+            <strong>Account Pending Approval</strong> — Your TA account is awaiting admin approval. 
+            You will be notified via email once approved. You cannot generate codes until then.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Only show dashboard content if TA is approved -->
+    {% if ta_profile and ta_profile.is_approved %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon generated"><span class="iconify" data-icon="mdi:barcode-scan"></span></div>
+            <div class="stat-info"><div class="stat-value">{{ total_codes_generated }}</div><div class="stat-label">Codes Generated</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon used"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+            <div class="stat-info"><div class="stat-value">{{ total_codes_used }}</div><div class="stat-label">Codes Used</div></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon students"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
+            <div class="stat-info"><div class="stat-value">{{ total_students }}</div><div class="stat-label">Total Students</div></div>
+        </div>
+    </div>
+
+    {% for course_id, course_data in sessions_by_course.items %}
+    <div class="course-section">
+        <div class="course-title">
+            <span class="iconify" data-icon="mdi:book-open-variant"></span>
+            {{ course_data.course.code }} - {{ course_data.course.name }}
+        </div>
+        
+        <div class="week-selector">
+            {% for session in course_data.sessions %}
+            <button class="week-btn {% if forloop.first %}active{% endif %}" onclick="showWeek(event, {{ course_id }}, {{ session.id }})">
+                Week {{ forloop.counter }}
+            </button>
+            {% endfor %}
+        </div>
+        
+        {% for session in course_data.sessions %}
+        <div class="session-card" id="session-{{ course_id }}-{{ session.id }}" style="{% if not forloop.first %}display: none;{% endif %}" data-session-id="{{ session.id }}">
+            <div class="session-header">
+                <div class="session-meta">
+                    <strong>{{ session.date|date:"l, F d, Y" }}</strong>
+                    <small><span class="iconify" data-icon="mdi:clock-outline"></span> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
+                    <small><span class="iconify" data-icon="mdi:text-box-outline"></span> {{ session.topic }}</small>
+                </div>
+                <div>
+                    <button class="btn generate-all-btn" onclick="generateAllCodes({{ session.id }})">
+                        <span class="iconify" data-icon="mdi:creation"></span> Generate All
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-controls">
+                <div class="search-wrapper">
+                    <span class="iconify" data-icon="mdi:magnify"></span>
+                    <input type="text" class="search-input" id="search-{{ session.id }}" placeholder="Search by name or ID..." onkeyup="debouncedLoadStudents({{ session.id }})">
+                </div>
+                
+                <div class="status-filters" id="filters-{{ session.id }}">
+                    <button class="filter-btn active" onclick="setFilter({{ session.id }}, 'all', this)">All</button>
+                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'pending', this)">Pending</button>
+                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'given', this)">Given</button>
+                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'used', this)">Used</button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <div class="loading-spinner" id="loading-{{ session.id }}">
+                    <span class="iconify" data-icon="mdi:loading" data-width="32" data-height="32"></span><br>
+                    Loading students...
+                </div>
+                <div id="table-container-{{ session.id }}" style="display: none;">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student Name</th>
+                                <th>Student ID</th>
+                                <th>Code</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-tbody-{{ session.id }}">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination-footer" id="pagination-{{ session.id }}" style="display: none;">
+                <div class="page-info" id="page-info-{{ session.id }}"></div>
+                <div class="page-controls">
+                    <button class="page-btn" onclick="changePage({{ session.id }}, -1)">Previous</button>
+                    <button class="page-btn" onclick="changePage({{ session.id }}, 1)">Next</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        <span class="iconify" data-icon="mdi:calendar-blank" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1rem; opacity: 0.8;"></span>
+        <h3>No upcoming sessions</h3>
+        <p>You don't have any sessions scheduled for your assigned levels yet.</p>
+    </div>
+    {% endfor %}
+    
+    {% else %}
+    <!-- Show message when TA is not approved yet -->
+    <div class="empty-state">
+        <span class="iconify" data-icon="mdi:account-clock-outline" data-width="48" data-height="48" style="color: var(--warning);"></span>
+        <h3>Account Pending Approval</h3>
+        <p>Your TA account is waiting for admin approval. You will receive an email once approved.</p>
+        <p style="margin-top: 0.5rem;">If you have questions, please contact the administrator.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Custom Confirmation Modal -->
+<div id="confirmModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon confirm">
+            <span class="iconify" data-icon="mdi:help-circle-outline" data-width="28"></span>
+        </div>
+        <h3 id="confirmTitle">Confirm Action</h3>
+        <p id="confirmMessage">Are you sure you want to proceed?</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-secondary" id="confirmCancelBtn">Cancel</button>
+            <button class="modal-btn modal-btn-primary" id="confirmOkBtn">Yes, Proceed</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Error Modal -->
+<div id="errorModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-icon error">
+            <span class="iconify" data-icon="mdi:alert-circle-outline" data-width="28"></span>
+        </div>
+        <h3>Error</h3>
+        <p id="errorMessage">Something went wrong.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-primary" id="errorOkBtn">Got it</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Existing Django API Functions ---
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+}
+
+// --- Custom Modal Functions ---
+let pendingConfirmAction = null;
+
+function showConfirmModal(message, title, onConfirm) {
+    document.getElementById('confirmMessage').innerText = message;
+    document.getElementById('confirmTitle').innerText = title || 'Confirm Action';
+    pendingConfirmAction = onConfirm;
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    pendingConfirmAction = null;
+}
+
+function showErrorModal(message) {
+    document.getElementById('errorMessage').innerText = message;
+    document.getElementById('errorModal').style.display = 'flex';
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+}
+
+function showSuccessToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-success';
+    toast.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span> ' + message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+}
+
+// Modal event listeners
+document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirmModal);
+document.getElementById('confirmOkBtn').addEventListener('click', () => {
+    if (pendingConfirmAction) {
+        pendingConfirmAction();
+        pendingConfirmAction = null;
+    }
+    closeConfirmModal();
+});
+document.getElementById('errorOkBtn').addEventListener('click', closeErrorModal);
+
+// Close modals on backdrop click
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmModal();
+});
+document.getElementById('errorModal').addEventListener('click', function(e) {
+    if (e.target === this) closeErrorModal();
+});
+
+// --- Updated API Functions with Custom Modals ---
+async function generateCode(sessionId, studentUsername) {
+    try {
+        const res = await fetch("{% url 'attendance:ta_generate_code' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
+            body: `session_id=${sessionId}&student_username=${studentUsername}`
+        });
+        if (res.ok) {
+            location.reload();
+        } else {
+            const data = await res.json();
+            showErrorModal(data.error || 'Failed to generate code');
+        }
+    } catch (error) {
+        showErrorModal('Network error. Please try again.');
+    }
+}
+
+async function generateAllCodes(sessionId) {
+    showConfirmModal(
+        'Generate codes for ALL students in this session? This action can be performed once.',
+        'Generate All Codes',
+        async () => {
+            try {
+                const res = await fetch("{% url 'attendance:ta_generate_all_codes' %}", {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `session_id=${sessionId}`
+                });
+                if (res.ok) {
+                    showSuccessToast('Codes generated successfully!');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    const data = await res.json();
+                    showErrorModal(data.error || 'Failed to generate codes');
+                }
+            } catch (error) {
+                showErrorModal('Network error. Please try again.');
+            }
+        }
+    );
+}
+
+async function markDistributed(codeId) {
+    showConfirmModal(
+        'Mark this code as given to the student?',
+        'Mark as Given',
+        async () => {
+            try {
+                const res = await fetch(`/ta/mark-distributed/${codeId}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" }
+                });
+                if (res.ok) {
+                    showSuccessToast('Code marked as given!');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showErrorModal('Error marking as distributed');
+                }
+            } catch (error) {
+                showErrorModal('Network error. Please try again.');
+            }
+        }
+    );
+}
+
+// --- AJAX Pagination Variables ---
+let sessionStates = {};
+let debounceTimers = {};
+
+function debouncedLoadStudents(sessionId) {
+    clearTimeout(debounceTimers[sessionId]);
+    debounceTimers[sessionId] = setTimeout(() => loadStudents(sessionId), 300);
+}
+
+async function loadStudents(sessionId) {
+    const state = sessionStates[sessionId] || { page: 1, filter: 'all', search: '' };
+    const searchInput = document.getElementById(`search-${sessionId}`);
+    const search = searchInput ? searchInput.value : '';
+    
+    document.getElementById(`loading-${sessionId}`).style.display = 'block';
+    document.getElementById(`table-container-${sessionId}`).style.display = 'none';
+    document.getElementById(`pagination-${sessionId}`).style.display = 'none';
+    
+    try {
+        const res = await fetch(`/ta/get-students-ajax/?session_id=${sessionId}&page=${state.page}&search=${encodeURIComponent(search)}&status=${state.filter}`);
+        const data = await res.json();
+        
+        const tbody = document.getElementById(`students-tbody-${sessionId}`);
+        tbody.innerHTML = '';
+        
+        data.students.forEach((student, idx) => {
+            const row = tbody.insertRow();
+            
+            const numCell = row.insertCell(0);
+            numCell.style.color = 'var(--text-muted)';
+            numCell.style.fontWeight = '600';
+            numCell.textContent = ((data.page - 1) * 50) + idx + 1;
+            
+            const nameCell = row.insertCell(1);
+            nameCell.style.fontWeight = '600';
+            nameCell.textContent = student.full_name;
+            
+            const idCell = row.insertCell(2);
+            idCell.style.color = 'var(--text-muted)';
+            idCell.style.fontFamily = 'monospace';
+            idCell.textContent = student.student_id;
+            
+            const codeCell = row.insertCell(3);
+            if (student.code && student.code.code_string) {
+                const codeSpan = document.createElement('span');
+                codeSpan.className = 'code-display';
+                codeSpan.textContent = student.code.code_string;
+                codeCell.appendChild(codeSpan);
+            } else {
+                const badge = document.createElement('span');
+                badge.className = 'badge badge-empty';
+                badge.textContent = 'Not generated';
+                codeCell.appendChild(badge);
+            }
+            
+            const statusCell = row.insertCell(4);
+            if (student.code) {
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                if (student.code.is_used) {
+                    badge.className += ' badge-used';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
+                } else if (student.code.is_distributed) {
+                    badge.className += ' badge-distributed';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
+                } else {
+                    badge.className += ' badge-pending';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
+                }
+                statusCell.appendChild(badge);
+            } else {
+                const badge = document.createElement('span');
+                badge.className = 'badge badge-empty';
+                badge.textContent = '-';
+                statusCell.appendChild(badge);
+            }
+            
+            const actionCell = row.insertCell(5);
+            if (student.code) {
+                if (!student.code.is_used && !student.code.is_distributed) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn generate-one-btn outline';
+                    btn.textContent = 'Mark Given';
+                    btn.onclick = () => markDistributed(student.code.id);
+                    actionCell.appendChild(btn);
+                }
+            } else {
+                const btn = document.createElement('button');
+                btn.className = 'btn generate-one-btn';
+                btn.textContent = 'Generate';
+                btn.onclick = () => generateCode(sessionId, student.username);
+                actionCell.appendChild(btn);
+            }
+        });
+        
+        const startNum = ((data.page - 1) * 50) + 1;
+        const endNum = Math.min(data.page * 50, data.total);
+        document.getElementById(`page-info-${sessionId}`).textContent = `Showing ${startNum} to ${endNum} of ${data.total} students`;
+        
+        if (data.total_pages > 1) {
+            document.getElementById(`pagination-${sessionId}`).style.display = 'flex';
+        } else {
+            document.getElementById(`pagination-${sessionId}`).style.display = 'none';
+        }
+        
+        document.getElementById(`table-container-${sessionId}`).style.display = 'block';
+        document.getElementById(`loading-${sessionId}`).style.display = 'none';
+        
+        sessionStates[sessionId] = { 
+            page: data.page, 
+            filter: state.filter, 
+            search: search, 
+            total_pages: data.total_pages 
+        };
+        
+    } catch (error) {
+        console.error('Error loading students:', error);
+        document.getElementById(`loading-${sessionId}`).innerHTML = '<span style="color: red;">Error loading students. Please refresh.</span>';
+    }
+}
+
+function setFilter(sessionId, filter, btnElement) {
+    sessionStates[sessionId] = { ...sessionStates[sessionId], page: 1, filter: filter };
+    
+    const filterDiv = document.getElementById(`filters-${sessionId}`);
+    if (filterDiv) {
+        filterDiv.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+    
+    loadStudents(sessionId);
+}
+
+function changePage(sessionId, delta) {
+    const state = sessionStates[sessionId];
+    if (!state) return;
+    
+    const newPage = state.page + delta;
+    if (newPage < 1) return;
+    if (state.total_pages && newPage > state.total_pages) return;
+    
+    state.page = newPage;
+    loadStudents(sessionId);
+}
+
+function showWeek(event, courseId, sessionId) {
+    document.querySelectorAll(`[id^="session-${courseId}-"]`).forEach(div => div.style.display = 'none');
+    document.getElementById(`session-${courseId}-${sessionId}`).style.display = 'block';
+    
+    const buttons = event.target.closest('.week-selector').querySelectorAll('.week-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (!sessionStates[sessionId]) {
+        sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+    }
+    loadStudents(sessionId);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const visibleSession = document.querySelector('.session-card[style*="display: block"], .session-card:not([style*="display: none"])');
+    if (visibleSession) {
+        const sessionId = visibleSession.dataset.sessionId;
+        if (sessionId) {
+            sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+            loadStudents(sessionId);
+        }
+    }
+});
+</script>
+{% endblock %}

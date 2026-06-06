@@ -1,0 +1,88 @@
+{% extends "attendance/base.html" %}
+{% block title %}Support Tickets - Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Inherit from dashboard base settings */
+    body { background: #F4F6FB !important; }
+
+    .dash-wrapper { max-width: 600px; margin: 0 auto; padding: 0.5rem 0 2rem; }
+
+    .dash-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .dash-header h1 { font-size: 1.55rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+
+    /* Unified Card */
+    .course-panel {
+        background: #FFFFFF;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.25rem;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xs);
+        padding: 1.25rem;
+    }
+
+    /* Ticket Components */
+    .ticket-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .student-info { display: flex; align-items: center; gap: 0.75rem; }
+    .avatar { width: 36px; height: 36px; background: var(--bg-subtle); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--navy); border: 1px solid var(--border); }
+    
+    .ticket-subject { font-weight: 700; color: var(--text-primary); font-size: 14px; }
+    .ticket-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    
+    .ticket-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+    .status-pending { background: #FFF3E0; color: #E67E22; }
+    .status-resolved { background: #E8F5E9; color: #27AE60; }
+
+    .ticket-message { font-size: 13px; color: var(--text-primary); line-height: 1.5; padding: 0.75rem; background: var(--bg-subtle); border-radius: var(--radius-sm); margin-bottom: 1rem; }
+
+    /* Admin Actions */
+    .admin-response-box { border-top: 1px solid var(--border); padding-top: 1rem; }
+    textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 0.75rem; background: #fff; box-sizing: border-box; }
+    .actions-row { display: flex; gap: 0.5rem; }
+    select { padding: 0.4rem; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; }
+    .btn-submit { background: var(--navy); color: #fff; padding: 0.4rem 1rem; border: none; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; cursor: pointer; }
+</style>
+
+<div class="dash-wrapper">
+    <div class="dash-header">
+        <h1>Admin Support</h1>
+    </div>
+
+    {% for ticket in tickets %}
+    <div class="course-panel">
+        <div class="ticket-header">
+            <div class="student-info">
+                <div class="avatar">{{ ticket.student.username|first|upper }}</div>
+                <div>
+                    <div class="ticket-subject">{{ ticket.subject }}</div>
+                    <div class="ticket-meta">{{ ticket.student.get_full_name }} • {{ ticket.created_at|date:"M d, H:i" }}</div>
+                </div>
+            </div>
+            <span class="ticket-status status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+        </div>
+
+        <div class="ticket-message">{{ ticket.message }}</div>
+
+        <div class="admin-response-box">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                <textarea name="response" rows="2" placeholder="Write a response...">{{ ticket.admin_response|default:"" }}</textarea>
+                <div class="actions-row">
+                    <select name="status">
+                        <option value="pending" {% if ticket.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="in_progress" {% if ticket.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="resolved" {% if ticket.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+                    <button type="submit" class="btn-submit">Update Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="course-panel" style="text-align:center; color: var(--text-muted); padding: 3rem;">
+        No pending support tickets.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

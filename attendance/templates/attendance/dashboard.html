@@ -1,239 +1,751 @@
 {% extends "attendance/base.html" %}
-{% block title %}My Dashboard – SSA Attendance{% endblock %}
-
-{% block extra_head %}
-<style>
-  :root {
-    --green:#16a34a; --amber:#d97706; --red:#dc2626; --blue:#2563eb;
-    --gray:#6b7280; --bg:#f8fafc; --surface:#ffffff; --border:#e2e8f0;
-    --text:#0f172a; --muted:#64748b; --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04);
-  }
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0}
-  .dash-wrap{max-width:1100px;margin:0 auto;padding:2rem 1.25rem 4rem}
-  .dash-header{margin-bottom:2rem}
-  .dash-header h1{font-size:1.7rem;font-weight:700;margin:0 0 .25rem}
-  .dash-header p{margin:0;color:var(--muted)}
-  .course-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:2rem;overflow:hidden}
-  .course-card-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-  .course-badge{background:#eff6ff;color:var(--blue);font-size:.75rem;font-weight:700;padding:.3rem .7rem;border-radius:99px;letter-spacing:.04em;text-transform:uppercase}
-  .course-title{font-size:1.05rem;font-weight:700;margin:0}
-  .course-subtitle{font-size:.83rem;color:var(--muted);margin:0}
-  .week-table{width:100%;border-collapse:collapse;font-size:.9rem}
-  .week-table thead th{background:#f1f5f9;color:var(--muted);font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.65rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
-  .week-table tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
-  .week-table tbody tr:last-child{border-bottom:none}
-  .week-table tbody tr:hover{background:#f8fafc}
-  .week-table td{padding:.75rem 1rem;vertical-align:middle}
-  .col-week{width:70px;font-weight:700;color:var(--muted)}
-  .col-date{width:120px;white-space:nowrap}
-  .col-status{width:145px}
-  .col-action{width:220px;text-align:right}
-  .pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:700;padding:.28rem .7rem;border-radius:99px;white-space:nowrap}
-  .pill-none{background:#f1f5f9;color:var(--gray)}
-  .pill-generated{background:#fef9c3;color:#92400e}
-  .pill-submitted{background:#dcfce7;color:#15803d}
-  .pill-expired{background:#fee2e2;color:#991b1b}
-  .btn{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;border:none;border-radius:8px;font-size:.82rem;font-weight:600;padding:.45rem .95rem;transition:all .15s;white-space:nowrap}
-  .btn-generate{background:var(--blue);color:#fff}
-  .btn-generate:hover{background:#1d4ed8}
-  .btn-submit{background:var(--green);color:#fff}
-  .btn-submit:hover{background:#15803d}
-  .btn-copy{background:#f1f5f9;color:var(--text);padding:.3rem .65rem;font-size:.78rem;border-radius:6px}
-  .btn-copy:hover{background:#e2e8f0}
-  .btn:disabled{opacity:.55;cursor:default}
-  .code-inline-wrap{display:none;margin-top:.6rem;padding:.75rem 1rem;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;animation:slideDown .2s ease}
-  @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-  .code-inline-wrap.visible{display:block}
-  .code-value{font-family:'Courier New',monospace;font-size:1.5rem;font-weight:900;letter-spacing:.18em;color:#166534;margin-bottom:.45rem}
-  .code-meta{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
-  .countdown{font-weight:700;color:var(--amber)}
-  #toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#0f172a;color:#fff;border-radius:10px;padding:.8rem 1.25rem;font-size:.87rem;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(12px);transition:all .25s;pointer-events:none;z-index:9999;max-width:320px}
-  #toast.show{opacity:1;transform:translateY(0)}
-  #toast.success{border-left:4px solid var(--green)}
-  #toast.error{border-left:4px solid var(--red)}
-  .empty-state{padding:3rem 1.5rem;text-align:center;color:var(--muted)}
-  @media(max-width:640px){.col-date{display:none}.col-action{width:auto}.code-value{font-size:1.2rem}}
-</style>
-{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="dash-wrap">
-  <div class="dash-header">
-    <h1>📚 My Attendance Dashboard</h1>
-    <p>Welcome back, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-       — Level {{ request.user.userprofile.level }}</p>
-  </div>
-
-  <p style="margin-bottom:1.5rem">
-    <a href="{% url 'attendance:history' %}" style="color:var(--blue);font-weight:600;text-decoration:none">📅 View My Attendance History →</a>
-  </p>
-
-  {% if not course_data %}
-    <div class="empty-state"><p>No courses found for your level. Contact your administrator.</p></div>
-  {% endif %}
-
-  {% for item in course_data %}
-  <div class="course-card">
-    <div class="course-card-header">
-      <span class="course-badge">{{ item.course.code }}</span>
-      <div>
-        <p class="course-title">{{ item.course.name }}</p>
-        <p class="course-subtitle">Level {{ item.course.level }} · {{ item.weeks|length }} sessions</p>
-      </div>
-    </div>
-    <table class="week-table">
-      <thead>
-        <tr>
-          <th class="col-week">Week</th>
-          <th class="col-date">Date</th>
-          <th>Topic</th>
-          <th class="col-status">Status</th>
-          <th class="col-action">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for w in item.weeks %}
-        <tr id="row-{{ w.session.id }}">
-          <td class="col-week">W{{ w.week_num }}</td>
-          <td class="col-date">{{ w.session.date|date:"d M Y" }}</td>
-          <td>{{ w.session.topic|default:"–" }}</td>
-
-          <td class="col-status">
-            <span class="pill status-pill-{{ w.session.id }}
-              {% if w.status == 'submitted' %}pill-submitted
-              {% elif w.status == 'generated' %}pill-generated
-              {% elif w.status == 'expired' %}pill-expired
-              {% else %}pill-none{% endif %}">
-              {% if w.status == 'submitted' %}✅ Submitted
-              {% elif w.status == 'generated' %}🔑 Generated
-              {% elif w.status == 'expired' %}⏰ Expired
-              {% else %}– Not started{% endif %}
-            </span>
-          </td>
-
-          <td class="col-action">
-            {% if w.status == 'submitted' %}
-              <span style="font-size:.8rem;color:var(--green);font-weight:600">✔ Done</span>
-
-            {% elif w.status == 'generated' %}
-              <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap">
-                <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔄 Refresh</button>
-                <button class="btn btn-submit" onclick="submitAttendance({{ w.session.id }},this)">✅ Submit</button>
-              </div>
-              <div class="code-inline-wrap visible" id="code-wrap-{{ w.session.id }}">
-                <div class="code-value" id="code-val-{{ w.session.id }}">{{ w.code_obj.code_string }}</div>
-                <div class="code-meta">
-                  <button class="btn-copy btn" onclick="copyCode('{{ w.code_obj.code_string }}',this)">📋 Copy</button>
-                  <span>Expires: <span class="countdown" id="timer-{{ w.session.id }}"
-                    data-expires="{{ w.code_obj.expires_at|date:'c' }}">…</span></span>
-                </div>
-              </div>
-
-            {% elif w.status == 'expired' %}
-              <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔄 New Code</button>
-
-            {% else %}
-              <button class="btn btn-generate" onclick="generateCode({{ w.session.id }},this)">🔑 Generate Code</button>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endfor %}
-</div>
-
-<div id="toast"></div>
-
-<script>
-const CSRF = "{{ csrf_token }}";
-
-function showToast(msg, type="success") {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.className = "show " + type;
-  clearTimeout(t._t); t._t = setTimeout(() => t.className = "", 3500);
-}
-
-function copyCode(code, btn) {
-  navigator.clipboard.writeText(code).then(() => {
-    btn.textContent = "✅ Copied!";
-    setTimeout(() => btn.textContent = "📋 Copy", 2000);
-    showToast("Code copied!");
-  });
-}
-
-function updateCountdowns() {
-  document.querySelectorAll(".countdown[data-expires]").forEach(el => {
-    const diff = new Date(el.dataset.expires) - Date.now();
-    if (diff <= 0) { el.textContent = "Expired"; el.style.color = "var(--red)"; return; }
-    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-    el.textContent = `${h}h ${m}m ${s}s`;
-  });
-}
-setInterval(updateCountdowns, 1000); updateCountdowns();
-
-async function generateCode(sessionId, btn) {
-  btn.disabled = true; btn.textContent = "⏳ Generating…";
-  try {
-    const res = await fetch("{% url 'attendance:generate_code' %}", {
-      method: "POST",
-      headers: {"X-CSRFToken": CSRF, "Content-Type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({session_id: sessionId}),
-    });
-    const data = await res.json();
-    if (!res.ok) { showToast(data.error || "Error.", "error"); btn.disabled=false; btn.textContent="🔑 Generate Code"; return; }
-
-    let wrap = document.getElementById(`code-wrap-${sessionId}`);
-    const row = document.getElementById(`row-${sessionId}`);
-
-    if (!wrap) {
-      row.querySelector(".col-action").innerHTML = `
-        <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap">
-          <button class="btn btn-generate" onclick="generateCode(${sessionId},this)">🔄 Refresh</button>
-          <button class="btn btn-submit" onclick="submitAttendance(${sessionId},this)">✅ Submit</button>
-        </div>
-        <div class="code-inline-wrap visible" id="code-wrap-${sessionId}">
-          <div class="code-value" id="code-val-${sessionId}">${data.code}</div>
-          <div class="code-meta">
-            <button class="btn-copy btn" onclick="copyCode('${data.code}',this)">📋 Copy</button>
-            <span>Expires: <span class="countdown" id="timer-${sessionId}" data-expires="${data.expires_at}">…</span></span>
-          </div>
-        </div>`;
-    } else {
-      document.getElementById(`code-val-${sessionId}`).textContent = data.code;
-      const timer = document.getElementById(`timer-${sessionId}`);
-      if (timer) timer.dataset.expires = data.expires_at;
-      wrap.classList.add("visible");
-      row.querySelectorAll(".btn-generate").forEach(b => { b.disabled=false; b.textContent="🔄 Refresh"; });
+<style>
+    body {
+        background: #F4F6FB !important;
+        background-image: none !important;
+        background-attachment: unset !important;
     }
 
-    const pill = document.querySelector(`.status-pill-${sessionId}`);
-    if (pill) { pill.className=`pill status-pill-${sessionId} pill-generated`; pill.textContent="🔑 Generated"; }
-    updateCountdowns();
-    showToast("Code generated! Keep it safe.", "success");
-  } catch(e) { showToast("Network error.", "error"); btn.disabled=false; btn.textContent="🔑 Generate Code"; }
+    .dash-wrapper {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 0.5rem 0 2rem;
+    }
+
+    /* ── Header ── */
+    .dash-header {
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dash-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .dash-greeting {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .dash-header h1 {
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .dash-date-badge {
+        background: #FFFFFF;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.4rem 0.75rem;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-xs);
+    }
+
+    /* ── Course Panel ── */
+    .course-panel {
+        background: #FFFFFF;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xs);
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .course-panel:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .course-summary {
+        padding: 1.25rem;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        display: block;
+    }
+
+    .course-summary::-webkit-details-marker { display: none; }
+
+    .course-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .course-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .course-code {
+        align-self: flex-start;
+        color: var(--navy);
+        font-size: 10px;
+        font-weight: 700;
+        background: rgba(13,36,114,0.07);
+        padding: 3px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .course-name {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text-primary);
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .course-score {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: var(--bg-subtle);
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        white-space: nowrap;
+        font-family: 'DM Mono', monospace;
+        flex-shrink: 0;
+    }
+
+    /* ── Progress bar ── */
+    .track-line {
+        height: 6px;
+        background: var(--bg-subtle);
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 0.875rem;
+    }
+
+    .track-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--navy) 0%, var(--navy-light) 100%);
+        border-radius: 99px;
+        transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .track-fill.good   { background: linear-gradient(90deg, #1E9E5E 0%, #2ECC71 100%); }
+    .track-fill.medium { background: linear-gradient(90deg, #C9A00E 0%, #F2C31A 100%); }
+    .track-fill.low    { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
+
+    /* ── Toggle trigger ── */
+    .history-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        padding-top: 0.6rem;
+        border-top: 1px dashed var(--border);
+        letter-spacing: 0.03em;
+        transition: color 0.15s;
+    }
+
+    .course-panel:hover .history-trigger { color: var(--text-secondary); }
+    details[open] .history-trigger        { color: var(--navy); }
+
+    details[open]       .history-trigger::before { content: "Hide history"; }
+    details:not([open]) .history-trigger::before { content: "View history & actions"; }
+    details[open]       .history-trigger::after  { content: " ▴"; }
+    details:not([open]) .history-trigger::after  { content: " ▾"; }
+
+    /* ── Weeks ── */
+    .weeks-box {
+        border-top: 1px solid var(--border);
+        background: var(--bg-subtle);
+    }
+
+    .week-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.875rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.12s;
+        gap: 1rem;
+    }
+
+    .week-item:hover { background: rgba(13,36,114,0.03); }
+    .week-item:last-child { border-bottom: none; }
+
+    .week-title {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--text-primary);
+    }
+
+    .week-date {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+        font-weight: 500;
+    }
+
+    .state-zone { text-align: right; flex-shrink: 0; }
+
+    /* ── Action button ── */
+    .action-link {
+        border: none;
+        padding: 0.45rem 0.9rem;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-family: inherit;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .action-link:active { transform: scale(0.97); }
+
+    .act-submit {
+        background: var(--navy);
+        color: #fff;
+        box-shadow: 0 1px 3px rgba(13,36,114,0.2);
+    }
+
+    .act-submit:hover {
+        background: var(--navy-dark);
+        box-shadow: 0 3px 8px rgba(13,36,114,0.3);
+    }
+
+    /* ── Status ── */
+    .txt-status {
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .txt-done {
+        background: rgba(30,158,94,0.1);
+        color: #1E9E5E;
+    }
+
+    /* ── Empty state ── */
+    .blank-state {
+        text-align: center;
+        padding: 3.5rem 2rem;
+        background: #FFFFFF;
+        border-radius: var(--radius-lg);
+        border: 2px dashed var(--border-strong);
+        box-shadow: var(--shadow-xs);
+    }
+
+    .blank-state-icon {
+        font-size: 2.5rem;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 0.75rem;
+    }
+
+    .blank-state p {
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 1.25rem;
+    }
+
+    /* ── Modal ── */
+    .pop-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(13,27,62,0.45);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(0.94) translateY(8px); opacity: 0; }
+        to   { transform: scale(1) translateY(0);      opacity: 1; }
+    }
+
+    @keyframes fadeInOut {
+        0%   { opacity: 0; transform: translateY(-12px); }
+        12%  { opacity: 1; transform: translateY(0); }
+        85%  { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-12px); }
+    }
+
+    .pop-card {
+        background: #FFFFFF;
+        border-radius: var(--radius-xl, 20px);
+        max-width: 360px;
+        width: 100%;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 24px 48px rgba(13,27,62,0.18);
+        border: 1px solid var(--border);
+        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
+    }
+
+    .pop-card-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(13,36,114,0.07);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 24px;
+        color: var(--navy);
+    }
+
+    .pop-card h3 {
+        margin: 0 0 0.4rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+    }
+
+    .pop-card-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .pop-input {
+        width: 100%;
+        padding: 0.875rem;
+        border: 2px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        font-size: 1.5rem;
+        text-align: center;
+        letter-spacing: 6px;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: var(--bg-subtle);
+        margin-bottom: 1rem;
+        box-sizing: border-box;
+        font-family: 'DM Mono', monospace;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        outline: none;
+    }
+
+    .pop-input::placeholder {
+        letter-spacing: 2px;
+        color: var(--text-muted);
+        font-size: 1rem;
+    }
+
+    .pop-input:focus {
+        border-color: var(--navy);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(13,36,114,0.1);
+    }
+
+    .pop-btn {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        font-family: inherit;
+        min-height: 42px;
+    }
+
+    .pop-btn:last-child { margin-bottom: 0; }
+    .pop-btn:active { transform: scale(0.98); }
+
+    .pop-btn-main {
+        background: var(--navy);
+        color: #fff;
+        box-shadow: 0 1px 3px rgba(13,36,114,0.25);
+    }
+
+    .pop-btn-main:hover {
+        background: var(--navy-dark);
+        box-shadow: 0 3px 10px rgba(13,36,114,0.3);
+    }
+
+    .pop-btn-sub {
+        background: var(--bg-subtle);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .pop-btn-sub:hover {
+        background: var(--border);
+        color: var(--text-primary);
+    }
+
+    /* ── Error Modal ── */
+    .error-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(13,27,62,0.45);
+        backdrop-filter: blur(6px);
+        z-index: 1100;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+
+    .error-card {
+        background: #FFFFFF;
+        border-radius: var(--radius-xl, 20px);
+        max-width: 340px;
+        width: 100%;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 24px 48px rgba(13,27,62,0.18);
+        border-left: 4px solid #C0392B;
+        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
+    }
+
+    .error-card-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(192,57,43,0.1);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        font-size: 24px;
+        color: #C0392B;
+    }
+
+    .error-card h3 {
+        margin: 0 0 0.4rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .error-card p {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    .error-btn {
+        background: #C0392B;
+        color: white;
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-family: inherit;
+        border: none;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .error-btn:hover { background: #A93226; transform: translateY(-1px); }
+
+    /* ── Toast ── */
+    .toast-success {
+        position: fixed;
+        top: 72px;
+        right: 1.25rem;
+        padding: 0.7rem 1.1rem;
+        border-radius: var(--radius-md);
+        z-index: 2000;
+        animation: fadeInOut 2.2s ease forwards;
+        background: rgba(30,158,94,0.1);
+        color: #1E9E5E;
+        border: 1px solid rgba(30,158,94,0.2);
+        box-shadow: var(--shadow-md);
+        font-weight: 600;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 280px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<div class="dash-wrapper">
+
+    <div class="dash-header">
+        <div class="dash-header-top">
+            <div>
+                <div class="dash-greeting">Welcome back</div>
+                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                    Student ID: {{ user.userprofile.student_id_number }}
+                </p>
+            </div>
+            <div class="dash-date-badge">
+                <span class="iconify" data-icon="mdi:calendar-outline" data-width="12" style="vertical-align:middle;margin-right:3px;"></span>
+                My Courses
+            </div>
+        </div>
+    </div>
+
+    {% if course_data %}
+        {% for course in course_data %}
+        <details class="course-panel" {% if forloop.first %}open{% endif %}>
+            <summary class="course-summary">
+                <div class="course-meta">
+                    <div class="course-info">
+                        <span class="course-code">{{ course.course.code }}</span>
+                        <span class="course-name">{{ course.course.name }}</span>
+                    </div>
+                    <div class="course-score" id="course-score-{{ course.course.id }}">
+                        {{ course.attended }} / {{ course.total_sessions }}
+                    </div>
+                </div>
+                <div class="track-line">
+                    <div class="track-fill {% if course.percentage >= 75 %}good{% elif course.percentage >= 50 %}medium{% else %}low{% endif %}"
+                         style="width: {{ course.percentage }}%;"></div>
+                </div>
+                <div class="history-trigger"></div>
+            </summary>
+
+            <div class="weeks-box">
+                {% for week in course.weeks %}
+                <div id="week-{{ week.session.id }}" class="week-item">
+                    <div>
+                        <div class="week-title">Week {{ week.week_num }}</div>
+                        <div class="week-date">{{ week.session.date|date:"d M Y" }}</div>
+                    </div>
+                    <div class="state-zone" id="state-zone-{{ week.session.id }}">
+                        {% if week.status == 'submitted' %}
+                            <span class="txt-status txt-done">
+                                <span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
+                            </span>
+                        {% else %}
+                            <button class="action-link act-submit" onclick="openTaCodeModal({{ week.session.id }})">
+                                <span class="iconify" data-icon="mdi:keyboard-outline" data-width="13"></span>
+                                Submit Code
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endfor %}
+    {% else %}
+        <div class="blank-state">
+            <span class="iconify blank-state-icon" data-icon="mdi:book-open-blank-variant-outline" data-width="40"></span>
+            <p>No courses registered yet.</p>
+            <a href="{% url 'attendance:course_registration' %}" class="pop-btn pop-btn-main"
+               style="text-decoration:none;display:inline-flex;width:auto;padding:0.6rem 1.5rem;margin:0 auto;">
+                <span class="iconify" data-icon="mdi:plus" data-width="15"></span>
+                Register Courses
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- TA Code Modal -->
+<div id="taCodeModal" class="pop-overlay">
+    <div class="pop-card">
+        <div class="pop-card-icon">
+            <span class="iconify" data-icon="mdi:shield-key-outline" data-width="24"></span>
+        </div>
+        <h3>Enter TA Code</h3>
+        <p class="pop-card-sub">Enter the 2–5 digit code given by your Teaching Assistant</p>
+        <input type="text" id="taCodeInput" placeholder="· · · · ·" maxlength="5"
+               class="pop-input" autocomplete="off" inputmode="numeric">
+        <button onclick="submitTaCode()" class="pop-btn pop-btn-main">
+            <span class="iconify" data-icon="mdi:send-outline" data-width="15"></span>
+            Submit Attendance
+        </button>
+        <button onclick="closeTaCodeModal()" class="pop-btn pop-btn-sub">Cancel</button>
+    </div>
+</div>
+
+<!-- Custom Error Modal -->
+<div id="errorModal" class="error-modal-overlay">
+    <div class="error-card">
+        <div class="error-card-icon">
+            <span class="iconify" data-icon="mdi:alert-circle-outline" data-width="24"></span>
+        </div>
+        <h3 id="errorTitle">Error</h3>
+        <p id="errorMessage">Something went wrong.</p>
+        <button class="error-btn" onclick="closeErrorModal()">Got it</button>
+    </div>
+</div>
+
+<script>
+let currentTaSessionId = null;
+let currentErrorMessage = "";
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
 }
 
-async function submitAttendance(sessionId, btn) {
-  if (!confirm("Submit attendance? This cannot be undone.")) return;
-  btn.disabled=true; btn.textContent="⏳ Submitting…";
-  try {
-    const res = await fetch("{% url 'attendance:submit_attendance' %}", {
-      method: "POST",
-      headers: {"X-CSRFToken": CSRF, "Content-Type": "application/x-www-form-urlencoded"},
-      body: new URLSearchParams({session_id: sessionId}),
-    });
-    const data = await res.json();
-    if (!res.ok) { showToast(data.error || "Error.", "error"); btn.disabled=false; btn.textContent="✅ Submit"; return; }
-
-    document.getElementById(`row-${sessionId}`).querySelector(".col-action").innerHTML =
-      `<span style="font-size:.8rem;color:var(--green);font-weight:600">✔ Done</span>`;
-
-    const pill = document.querySelector(`.status-pill-${sessionId}`);
-    if (pill) { pill.className=`pill status-pill-${sessionId} pill-submitted`; pill.textContent="✅ Submitted"; }
-    showToast("Attendance marked! 🎉", "success");
-  } catch(e) { showToast("Network error.", "error"); btn.disabled=false; btn.textContent="✅ Submit"; }
+function openTaCodeModal(sessionId) {
+    currentTaSessionId = sessionId;
+    document.getElementById('taCodeInput').value = '';
+    document.getElementById('taCodeModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('taCodeInput').focus(), 50);
 }
+
+function closeTaCodeModal() {
+    document.getElementById('taCodeModal').style.display = 'none';
+    currentTaSessionId = null;
+}
+
+function showSuccessMessage(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-success';
+    toast.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span> ' + message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+}
+
+function showErrorModal(message, title = "Error") {
+    document.getElementById('errorMessage').innerText = message;
+    document.getElementById('errorTitle').innerText = title;
+    document.getElementById('errorModal').style.display = 'flex';
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').style.display = 'none';
+}
+
+async function submitTaCode() {
+    const code = document.getElementById('taCodeInput').value.trim();
+
+    if (!code) {
+        showErrorModal('Please enter the code from your TA.', 'Missing Code');
+        return;
+    }
+
+    const btn = event.target;
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="iconify" data-icon="mdi:loading" data-width="15" style="animation:spin 1s linear infinite"></span> Submitting...';
+
+    try {
+        const res = await fetch("{% url 'attendance:student_submit_ta_code' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCsrfToken(),
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `session_id=${currentTaSessionId}&code=${code}`
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            const stateZone = document.getElementById(`state-zone-${currentTaSessionId}`);
+            if (stateZone) {
+                stateZone.innerHTML = `
+                    <span class="txt-status txt-done">
+                        <span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
+                    </span>
+                `;
+            }
+
+            const weekElement = document.getElementById(`week-${currentTaSessionId}`);
+            if (weekElement) {
+                const coursePanel = weekElement.closest('.course-panel');
+                const scoreElement = coursePanel.querySelector('.course-score');
+                if (scoreElement) {
+                    const match = scoreElement.innerText.match(/(\d+)\s*\/\s*(\d+)/);
+                    if (match) {
+                        const newCount = parseInt(match[1]) + 1;
+                        const total = parseInt(match[2]);
+                        scoreElement.innerText = `${newCount} / ${total}`;
+                        const pct = (newCount / total) * 100;
+                        const fill = coursePanel.querySelector('.track-fill');
+                        if (fill) {
+                            fill.style.width = `${pct}%`;
+                            fill.className = 'track-fill ' + (pct >= 75 ? 'good' : pct >= 50 ? 'medium' : 'low');
+                        }
+                    }
+                }
+            }
+
+            closeTaCodeModal();
+            showSuccessMessage('Attendance submitted!');
+        } else {
+            closeTaCodeModal();
+            showErrorModal(data.error || 'Error submitting attendance', 'Submission Failed');
+        }
+    } catch (error) {
+        closeTaCodeModal();
+        showErrorModal('Network error. Please check your connection and try again.', 'Connection Error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+}
+
+// Close modal on backdrop click
+document.getElementById('taCodeModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTaCodeModal();
+});
+
+// Close error modal on backdrop click
+document.getElementById('errorModal').addEventListener('click', function(e) {
+    if (e.target === this) closeErrorModal();
+});
+
+// Submit on Enter
+document.getElementById('taCodeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') submitTaCode();
+});
 </script>
 {% endblock %}

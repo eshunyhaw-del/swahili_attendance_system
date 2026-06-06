@@ -1,65 +1,526 @@
 {% extends "attendance/base.html" %}
-{% block title %}Student Reports – SSA{% endblock %}
+{% block title %}Student Reports{% endblock %}
 
 {% block content %}
-<div class="wrap" style="max-width:1400px;margin:0 auto;padding:2rem">
-  <h1>👥 Student Attendance Reports</h1>
-  
-  <form method="get" style="margin-bottom:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
-    <select name="level">
-      <option value="">All Levels</option>
-      {% for level in levels %}
-      <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
-        Level {{ level.name }}
-      </option>
-      {% endfor %}
-    </select>
-    <input type="text" name="search" placeholder="Search by name or ID" value="{{ search_query|default:'' }}">
-    <button type="submit">Filter</button>
-  </form>
+<style>
+    /* Theme Variables - Defaults to Light Mode */
+    :root {
+        --dash-bg: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+        --panel-bg: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #334155;
+        --text-muted: #64748B;
+        --border-color: rgba(226, 232, 240, 0.9);
+        --panel-shadow: 0 4px 10px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+        --panel-shadow-hover: 0 20px 25px -5px rgba(13, 36, 114, 0.08), 0 8px 10px -6px rgba(13, 36, 114, 0.03);
+        
+        --input-bg: #F8FAFC;
+        --input-border: #CBD5E1;
+        --input-focus: rgba(13, 36, 114, 0.15);
+        --input-focus-border: #0D2472;
+        
+        --btn-main-bg: #0D2472;
+        --btn-main-hover: #0A1B56;
+        --btn-main-text: #FFFFFF;
+        
+        --btn-out-bg: transparent;
+        --btn-out-text: #0D2472;
+        --btn-out-border: #0D2472;
+        --btn-out-hover: #F8FAFC;
+        
+        --table-head-bg: #F8FAFC;
+        --table-row-hover: #F1F5F9;
+        
+        --track-base: #F1F5F9;
+        --track-fill: #0D2472;
+        
+        --alert-danger: #EF4444;
+        --alert-danger-bg: #FEF2F2;
+        
+        --details-bg: #F8FAFC;
+        --details-hover: #F1F5F9;
+    }
 
-  {% for student in students %}
-  <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;margin-bottom:1rem;padding:1rem">
-    <div style="display:flex;justify-content:space-between;flex-wrap:wrap">
-      <div>
-        <strong>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</strong><br>
-        <small>ID: {{ student.profile.student_id_number|default:"-" }} | Level {{ student.profile.level.name }}</small>
-      </div>
-      <div style="font-size:1.2rem;font-weight:700">
-        Overall: {{ student.attendance_percentage }}%
-      </div>
-    </div>
-    <div style="background:#e2e8f0;height:8px;border-radius:4px;margin:1rem 0">
-      <div style="width:{{ student.attendance_percentage }}%;height:100%;background:#2563eb;border-radius:4px"></div>
-    </div>
+    /* Dark Mode Overrides */
+    [data-theme="dark"] {
+        --dash-bg: linear-gradient(135deg, #0F172A 0%, #020617 100%);
+        --panel-bg: #1E293B;
+        --text-primary: #F8FAFC;
+        --text-secondary: #E2E8F0;
+        --text-muted: #94A3B8;
+        --border-color: #334155;
+        --panel-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+        --panel-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+        
+        --input-bg: #0F172A;
+        --input-border: #475569;
+        --input-focus: rgba(59, 130, 246, 0.25);
+        --input-focus-border: #3B82F6;
+        
+        --btn-main-bg: #2563EB;
+        --btn-main-hover: #1D4ED8;
+        --btn-main-text: #FFFFFF;
+        
+        --btn-out-bg: transparent;
+        --btn-out-text: #60A5FA;
+        --btn-out-border: #3B82F6;
+        --btn-out-hover: rgba(59, 130, 246, 0.1);
+        
+        --table-head-bg: #0F172A;
+        --table-row-hover: #1e293bd3;
+        
+        --track-base: #334155;
+        --track-fill: #3B82F6;
+        
+        --alert-danger: #F87171;
+        --alert-danger-bg: rgba(239, 68, 68, 0.15);
+        
+        --details-bg: #0F172A;
+        --details-hover: #334155;
+    }
+
+    /* Layout */
+    body {
+        background: var(--dash-bg);
+        min-height: 100vh;
+        margin: 0;
+        background-attachment: fixed;
+        color: var(--text-primary);
+        transition: background 0.3s ease, color 0.3s ease;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
     
-    {% if student.alerts %}
-    <div style="background:#fee2e2;padding:.5rem;border-radius:8px;margin-bottom:.5rem">
-      ⚠️ Low attendance in: 
-      {% for alert in student.alerts %}
-      {{ alert.course }} ({{ alert.percentage }}%)
-      {% if not forloop.last %}, {% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.75px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: var(--panel-bg);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--panel-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        padding: 0.85rem 1rem;
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 4px var(--input-focus);
+    }
+
+    .form-select {
+        padding-right: 2.5rem;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1em;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: var(--btn-main-bg);
+        color: var(--btn-main-text);
+        white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+        background: var(--btn-main-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 36, 114, 0.15);
+    }
+
+    .btn-outline {
+        background: var(--btn-out-bg);
+        color: var(--btn-out-text);
+        border: 2px solid var(--btn-out-border);
+    }
+
+    .btn-outline:hover {
+        background: var(--btn-out-hover);
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border-radius: 10px;
+    }
+
+    /* Student Card */
+    .student-card {
+        background: var(--panel-bg);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--panel-shadow);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .student-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--panel-shadow-hover);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: rgba(0, 0, 0, 0.01);
+    }
+
+    .student-info strong {
+        display: block;
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .student-info small {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .card-stats {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .stat-pct {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -0.5px;
+    }
+
+    .card-body {
+        padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+
+    /* Progress Bar */
+    .progress-track {
+        height: 8px;
+        background: var(--track-base);
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+        width: 100%;
+    }
     
-    <details>
-      <summary style="cursor:pointer;color:#64748b">📚 Course breakdown</summary>
-      <table style="width:100%;margin-top:.5rem;font-size:.85rem">
-        <tr><th>Course</th><th>Attended</th><th>Total</th><th>%</th></tr>
-        {% for code, data in student.course_attendance.items %}
-        <tr>
-          <td>{{ data.name }}</td>
-          <td>{{ data.attended }}</td>
-          <td>{{ data.total }}</td>
-          <td style="{% if data.percentage < 75 %}color:#dc2626{% else %}color:#16a34a{% endif %}">{{ data.percentage }}%</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </details>
-  </div>
-  {% empty %}
-  <p>No students found.</p>
-  {% endfor %}
+    .progress-fill {
+        height: 100%;
+        background: var(--track-fill);
+        border-radius: 99px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Alerts */
+    .alerts-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-badge {
+        background: var(--alert-danger-bg);
+        color: var(--alert-danger);
+        padding: 0.35rem 0.85rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Expandable Details Block */
+    details {
+        background: var(--details-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    summary {
+        padding: 1rem 1.25rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        list-style: none;
+        transition: background 0.2s ease;
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
+    summary:hover {
+        background: var(--details-hover);
+        color: var(--text-primary);
+    }
+
+    summary::after {
+        content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        transition: transform 0.3s ease;
+    }
+
+    details[open] summary::after {
+        transform: rotate(180deg);
+    }
+
+    /* Table within details */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        background: var(--panel-bg);
+        border-top: 1px solid var(--border-color);
+    }
+
+    th {
+        background: var(--table-head-bg);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    tbody tr:hover {
+        background-color: var(--table-row-hover);
+    }
+
+    .pct-danger {
+        color: var(--alert-danger);
+        font-weight: 700;
+    }
+
+    /* Blank State */
+    .blank-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--panel-bg);
+        border-radius: 20px;
+        border: 2px dashed var(--border-color);
+        box-shadow: var(--panel-shadow);
+    }
+</style>
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1>
+            <span class="iconify" data-icon="mdi:chart-bar"></span>
+            Student Attendance Reports
+        </h1>
+    </div>
+
+    <div class="filter-card">
+        <form method="get" class="filter-form">
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+                <label class="form-label">Level</label>
+                <select name="level" class="form-control form-select" onchange="this.form.submit()">
+                    <option value="">All Levels</option>
+                    {% for level in levels %}
+                    <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+                        Level {{ level.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group" style="flex: 2; min-width: 250px;">
+                <label class="form-label">Search Student</label>
+                <div style="position: relative;">
+                    <span class="iconify" data-icon="mdi:magnify" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem;"></span>
+                    <input type="text" name="search" class="form-control" style="padding-left: 2.75rem;" placeholder="Search by Name or Student ID..." value="{{ search_query|default:'' }}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    Filter Reports
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% for student in students %}
+    <div class="student-card">
+        <div class="card-header">
+            <div class="student-info">
+                <strong>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</strong>
+                <small>
+                    <span class="iconify" data-icon="mdi:id-card-outline" style="vertical-align: middle; margin-right: 0.2rem;"></span>
+                    ID: {{ student.profile.student_id_number|default:"-" }} &bull; Level {{ student.profile.level.name }}
+                </small>
+            </div>
+            
+            <div class="card-stats">
+                <span class="stat-pct">{{ student.attendance_percentage }}%</span>
+                <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="btn btn-outline btn-sm" title="Export CSV">
+                    <span class="iconify" data-icon="mdi:file-delimited-outline" style="font-size: 1.1rem;"></span>
+                    CSV
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="progress-track">
+                <div class="progress-fill" style="width: {{ student.attendance_percentage }}%;"></div>
+            </div>
+            
+            {% if student.alerts %}
+            <div class="alerts-container">
+                {% for alert in student.alerts %}
+                <span class="alert-badge">
+                    <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+                    Low in {{ alert.course }} ({{ alert.percentage }}%)
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <details>
+                <summary>
+                    <span>
+                        <span class="iconify" data-icon="mdi:format-list-bulleted" style="vertical-align: middle; margin-right: 0.5rem;"></span>
+                        Course Breakdown
+                    </span>
+                </summary>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Attended</th>
+                                <th>Total Sessions</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for code, data in student.course_attendance.items %}
+                            <tr>
+                                <td style="font-weight: 700;">{{ code }} <span style="color: var(--text-muted); font-weight: 500;">- {{ data.name }}</span></td>
+                                <td>{{ data.attended }}</td>
+                                <td>{{ data.total }}</td>
+                                <td class="{% if data.percentage < 75 %}pct-danger{% endif %}">
+                                    {{ data.percentage }}%
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+    </div>
+    {% empty %}
+    <div class="blank-state">
+        <span class="iconify" data-icon="mdi:file-document-remove-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
+        <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
+        <p style="color: var(--text-muted); font-weight: 500; margin: 0;">Adjust your search query or level filter to see reports.</p>
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

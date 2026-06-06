@@ -1,0 +1,116 @@
+{% extends "attendance/base.html" %}
+{% block title %}Support Center{% endblock %}
+
+{% block content %}
+<style>
+    /* Inherit from dashboard base settings */
+    body { background: #F4F6FB !important; }
+
+    .dash-wrapper {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 0.5rem 0 2rem;
+    }
+
+    /* Unified Header */
+    .dash-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .dash-header h1 { font-size: 1.55rem; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.03em; }
+    .dash-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+    /* Card Styling */
+    .course-panel {
+        background: #FFFFFF;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xs);
+        overflow: hidden;
+    }
+    .card-header-custom { 
+        padding: 1.25rem; border-bottom: 1px solid var(--border); 
+        font-weight: 700; color: var(--text-primary); font-size: 14px;
+    }
+    .card-body { padding: 1.25rem; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    input, textarea {
+        width: 100%; padding: 0.75rem; border: 1px solid var(--border);
+        border-radius: var(--radius-sm); font-size: 14px; background: var(--bg-subtle);
+        box-sizing: border-box; transition: 0.2s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--navy); background: #FFFFFF; }
+    textarea { min-height: 100px; resize: vertical; }
+
+    .btn-submit {
+        background: var(--navy); color: #fff; width: 100%; padding: 0.75rem;
+        border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .btn-submit:hover { background: var(--navy-dark); }
+
+    /* Ticket List */
+    .ticket-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .ticket-item:last-child { border-bottom: none; }
+    .ticket-subject { font-weight: 700; font-size: 14px; display: block; margin-bottom: 0.25rem; }
+    .ticket-status { font-size: 10px; font-weight: 700; background: var(--bg-subtle); padding: 2px 8px; border-radius: 4px; color: var(--navy); }
+    .ticket-msg { font-size: 13px; color: var(--text-primary); margin: 0.5rem 0; line-height: 1.5; }
+    .admin-reply { 
+        margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); 
+        border-left: 3px solid var(--navy); font-size: 13px; border-radius: 0 4px 4px 0;
+    }
+</style>
+
+<div class="dash-wrapper">
+    <div class="dash-header">
+        <h1>Support Center</h1>
+        <p>Need help? Submit a ticket and we'll get back to you.</p>
+    </div>
+
+    <!-- Ticket Form -->
+    <div class="course-panel">
+        <div class="card-header-custom">New Ticket</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    {{ form.subject }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    {{ form.message }}
+                </div>
+                <button type="submit" class="btn-submit">Submit Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ticket History -->
+    <div class="course-panel">
+        <div class="card-header-custom">My Tickets</div>
+        <div class="card-body">
+            {% for ticket in tickets %}
+            <div class="ticket-item">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span class="ticket-subject">{{ ticket.subject }}</span>
+                    <span class="ticket-status">{{ ticket.get_status_display }}</span>
+                </div>
+                <p class="ticket-msg">{{ ticket.message }}</p>
+                <div style="font-size: 11px; color: var(--text-muted);">{{ ticket.created_at|date:"M d, Y" }}</div>
+                
+                {% if ticket.admin_response %}
+                <div class="admin-reply">
+                    <strong>Response:</strong> {{ ticket.admin_response }}
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div style="text-align:center; color: var(--text-muted); font-size: 14px; padding: 1rem 0;">
+                No tickets opened yet.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,10 +1,214 @@
-{% extends 'attendance/base.html' %}
-{% block content %}
-<h2>Register</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Register</button>
-</form>
-<p>Already have an account? <a href="{% url 'login' %}">Login here</a>.</p>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Create Account - SWASA Attendance</title>
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <style>
+        :root {
+            --primary: #0D2472;
+            --primary-hover: #091A55;
+            --primary-light: rgba(13,36,114,0.07);
+            --surface: #FFFFFF;
+            --bg-main: #F4F6FB;
+            --text-main: #0D1B3E;
+            --text-muted: #8896AB;
+            --border: #E4E9F2;
+            --radius-lg: 16px;
+            --radius-sm: 8px;
+            --danger: #D32F2F;
+            --danger-light: rgba(211,47,47,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .register-container { max-width: 500px; width: 100%; }
+
+        .register-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(13,36,114,0.1);
+            position: relative;
+        }
+
+        .register-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #0D2472, #1B3A9C);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); text-align: center; }
+        .subtitle { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 2rem; }
+
+        .field-wrapper { margin-bottom: 1.25rem; }
+        .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+
+        .input-relative { position: relative; display: flex; align-items: center; }
+        
+        input, select {
+            width: 100%; padding: 0.85rem 1rem 0.85rem 2.75rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .field-icon { position: absolute; left: 12px; color: var(--text-muted); font-size: 18px; pointer-events: none; }
+        
+        .password-toggle { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; }
+        .password-toggle:hover { color: var(--primary); }
+
+        .help-text { font-size: 11px; color: var(--text-muted); margin-top: 0.4rem; }
+        .errorlist { list-style: none; color: var(--danger); font-size: 11px; margin-top: 0.4rem; font-weight: 600; }
+        .form-error-alert { background: var(--danger-light); padding: 0.75rem; border-radius: var(--radius-sm); color: var(--danger); font-size: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        button[type="submit"] {
+            width: 100%; padding: 0.9rem; background: var(--primary); color: white;
+            border: none; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; margin-top: 1rem;
+            transition: all 0.2s;
+        }
+        button[type="submit"]:hover { background: var(--primary-hover); }
+
+        .login-link { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--text-muted); }
+        .login-link a { color: var(--primary); font-weight: 700; text-decoration: none; }
+        
+        .info-note {
+            background: var(--primary-light);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            font-size: 12px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <h2>Student Registration</h2>
+            <p class="subtitle">Create your attendance account</p>
+            
+            <div class="info-note">
+                <span class="iconify" data-icon="lucide:info" style="font-size: 16px;"></span>
+                <span>Your Student ID will be your username and password for login.</span>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="form-error-alert">
+                        <span class="iconify" data-icon="lucide:alert-circle"></span>
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="name-row">
+                    <div class="field-wrapper">
+                        <label>First Name</label>
+                        <div class="input-relative">
+                            {{ form.first_name }}
+                            <span class="iconify field-icon" data-icon="lucide:user"></span>
+                        </div>
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="field-wrapper">
+                        <label>Last Name</label>
+                        <div class="input-relative">
+                            {{ form.last_name }}
+                            <span class="iconify field-icon" data-icon="lucide:user"></span>
+                        </div>
+                        {{ form.last_name.errors }}
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label>Student ID</label>
+                    <div class="input-relative">
+                        {{ form.student_id }}
+                        <span class="iconify field-icon" data-icon="lucide:contact-2"></span>
+                    </div>
+                    <div class="help-text">This will be your username and password (e.g., 10809707)</div>
+                    {{ form.student_id.errors }}
+                </div>
+
+                <div class="field-wrapper">
+                    <label>Level</label>
+                    <div class="input-relative">
+                        {{ form.level }}
+                        <span class="iconify field-icon" data-icon="lucide:graduation-cap"></span>
+                    </div>
+                    {{ form.level.errors }}
+                </div>
+
+                <div class="field-wrapper">
+                    <label>Email (UG Email)</label>
+                    <div class="input-relative">
+                        {{ form.email }}
+                        <span class="iconify field-icon" data-icon="lucide:mail"></span>
+                    </div>
+                    <div class="help-text">Enter a valid email address (e.g., student@gmail.com)</div>
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="field-wrapper">
+                    <label>Confirm Student ID</label>
+                    <div class="input-relative">
+                        {{ form.confirm_student_id }}
+                        <span class="iconify field-icon" data-icon="lucide:shield-check"></span>
+                        <button type="button" class="password-toggle" data-target="id_confirm_student_id">
+                            <span class="iconify eye-icon" data-icon="lucide:eye"></span>
+                        </button>
+                    </div>
+                    <div class="help-text">Re-enter your Student ID to confirm</div>
+                    {{ form.confirm_student_id.errors }}
+                </div>
+
+                <button type="submit">Register Now</button>
+
+                <div class="login-link">
+                    Already have an account? <a href="{% url 'login' %}">Login here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Password visibility toggles
+            document.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.addEventListener('click', function () {
+                    const input = document.getElementById(this.getAttribute('data-target'));
+                    const icon = this.querySelector('.eye-icon');
+                    const isPass = input.type === 'password';
+                    input.type = isPass ? 'text' : 'password';
+                    icon.setAttribute('data-icon', isPass ? 'lucide:eye-off' : 'lucide:eye');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,114 +1,81 @@
 {% extends "attendance/base.html" %}
-{% block title %}Lecturer Dashboard – SSA{% endblock %}
-
-{% block extra_head %}
-<style>
-  :root{--green:#16a34a;--red:#dc2626;--amber:#d97706;--blue:#2563eb;--bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04)}
-  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;margin:0}
-  .wrap{max-width:1100px;margin:0 auto;padding:2rem 1.25rem 4rem}
-  .page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem}
-  .page-header h1{font-size:1.7rem;font-weight:700;margin:0 0 .25rem}
-  .page-header p{margin:0;color:var(--muted)}
-  .date-form{display:flex;align-items:center;gap:.6rem}
-  .date-form input[type="date"]{border:1.5px solid var(--border);border-radius:8px;padding:.45rem .8rem;font-size:.88rem;color:var(--text);background:var(--surface)}
-  .date-form button{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.45rem .95rem;font-size:.85rem;font-weight:600;cursor:pointer}
-  .date-form button:hover{background:#1d4ed8}
-  .empty-state{text-align:center;padding:4rem 2rem;color:var(--muted)}
-  .session-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:2rem;overflow:hidden}
-  .session-card-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
-  .session-title{font-size:1.05rem;font-weight:700}
-  .session-sub{font-size:.83rem;color:var(--muted);margin-top:.1rem}
-  .export-btn{display:inline-flex;align-items:center;gap:.4rem;background:#f0fdf4;color:var(--green);border:1.5px solid #86efac;border-radius:8px;padding:.4rem .85rem;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s}
-  .export-btn:hover{background:#dcfce7}
-  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;padding:1.25rem 1.4rem;border-bottom:1px solid var(--border)}
-  .stat-box{border-radius:10px;padding:1rem 1.1rem}
-  .stat-box .val{font-size:2rem;font-weight:900;line-height:1}
-  .stat-box .lbl{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:.3rem;opacity:.75}
-  .sb-enrolled{background:#eff6ff;color:var(--blue)}.sb-generated{background:#fef9c3;color:#92400e}.sb-submitted{background:#dcfce7;color:var(--green)}.sb-absent{background:#fee2e2;color:var(--red)}
-  .prog-wrap{padding:0 1.4rem 1rem}
-  .prog-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.3rem}
-  .prog-track{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden}
-  .prog-fill{height:100%;border-radius:99px}
-  .fill-green{background:linear-gradient(90deg,#4ade80,#16a34a)}.fill-amber{background:linear-gradient(90deg,#fbbf24,#d97706)}.fill-red{background:linear-gradient(90deg,#f87171,#dc2626)}
-  .absent-section{padding:1.1rem 1.4rem 1.4rem}
-  .absent-section h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 .8rem}
-  .absent-pills{display:flex;flex-wrap:wrap;gap:.5rem}
-  .absent-pill{background:#fff1f2;border:1px solid #fecdd3;color:#9f1239;font-size:.78rem;font-weight:600;border-radius:99px;padding:.28rem .75rem}
-  .no-absent{color:var(--green);font-size:.88rem;font-weight:600}
-  .toggle-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:.3rem .7rem;font-size:.78rem;color:var(--muted);cursor:pointer;margin-bottom:.75rem}
-  .toggle-btn:hover{background:#f1f5f9}
-  @media(max-width:600px){.stat-grid{grid-template-columns:1fr 1fr}}
-</style>
-{% endblock %}
+{% block title %}Lecturer Dashboard{% endblock %}
 
 {% block content %}
-<div class="wrap">
-  <div class="page-header">
-    <div>
-      <h1>🎓 Lecturer Dashboard</h1>
-      <p>Attendance overview for <strong>{{ selected_date|date:"l, d F Y" }}</strong></p>
-    </div>
-    <form class="date-form" method="get">
-      <label for="date-input" style="font-size:.85rem;font-weight:600;color:var(--muted)">Date:</label>
-      <input type="date" id="date-input" name="date" value="{{ selected_date|date:'Y-m-d' }}">
-      <button type="submit">Go</button>
+<h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Lecturer Dashboard</h1>
+
+<div style="margin-bottom: 1rem;">
+    <form method="get" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" style="flex: 1; padding: 0.6rem; border: 1px solid #CBD5E1; border-radius: 12px; font-size: 16px;">
+        <button type="submit" class="btn btn-primary">Go</button>
     </form>
-  </div>
+</div>
 
-  {% if not dashboard_data %}
-    <div class="empty-state">
-      <p style="font-size:1.1rem">📭 No sessions scheduled for <strong>{{ selected_date|date:"d F Y" }}</strong>.</p>
-      <p>Try a different date above.</p>
-    </div>
-  {% else %}
+{% if dashboard_data %}
     {% for item in dashboard_data %}
-    <div class="session-card">
-      <div class="session-card-header">
-        <div>
-          <div class="session-title">{{ item.course.name }}</div>
-          <div class="session-sub">{{ item.session.date|date:"d M Y" }} · {{ item.session.topic }} · Level {{ item.course.level }}</div>
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <strong>{{ item.course.code }}</strong><br>
+                <small style="color: #5A6E8C;">{{ item.course.name }}</small>
+            </div>
+            <a href="{% url 'attendance:export_csv' item.session.id %}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">Export</a>
         </div>
-        <a href="{% url 'attendance:export_csv' item.session.id %}" class="export-btn">⬇ Export CSV</a>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat-box sb-enrolled"><div class="val">{{ item.total_enrolled }}</div><div class="lbl">Enrolled</div></div>
-        <div class="stat-box sb-generated"><div class="val">{{ item.generated }}</div><div class="lbl">Generated</div></div>
-        <div class="stat-box sb-submitted"><div class="val">{{ item.submitted }}</div><div class="lbl">Submitted</div></div>
-        <div class="stat-box sb-absent"><div class="val">{{ item.absent_profiles|length }}</div><div class="lbl">Absent</div></div>
-      </div>
-
-      <div class="prog-wrap">
-        <div class="prog-label">
-          <span>Submission rate</span>
-          <span>{{ item.submitted }} / {{ item.total_enrolled }}</span>
+        <div class="card-body">
+            <!-- Stats in grid -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="text-align: center; padding: 0.5rem; background: #F8FAFC; border-radius: 12px;">
+                    <div style="font-size: 1.25rem; font-weight: 700;">{{ item.total_enrolled }}</div>
+                    <div style="font-size: 0.7rem;">Enrolled</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #F8FAFC; border-radius: 12px;">
+                    <div style="font-size: 1.25rem; font-weight: 700;">{{ item.submitted }}</div>
+                    <div style="font-size: 0.7rem;">Present</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #FEF3C7; border-radius: 12px;">
+                    <div style="font-size: 1.25rem; font-weight: 700;">{{ item.generated }}</div>
+                    <div style="font-size: 0.7rem;">Codes</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #FEE2E2; border-radius: 12px;">
+                    <div style="font-size: 1.25rem; font-weight: 700;">{{ item.absent_profiles|length }}</div>
+                    <div style="font-size: 0.7rem;">Absent</div>
+                </div>
+            </div>
+            
+            <!-- Progress bar -->
+            <div style="height: 6px; background: #E9EEF3; border-radius: 3px; margin-bottom: 1rem;">
+                <div style="width: {% widthratio item.submitted item.total_enrolled 100 %}%; height: 100%; background: #0D2472; border-radius: 3px;"></div>
+            </div>
+            
+            <!-- Absent students dropdown -->
+            {% if item.absent_profiles %}
+            <details>
+                <summary style="cursor: pointer; color: #EF4444; font-size: 0.85rem;">
+                    <span class="iconify" data-icon="mdi:alert-circle"></span>
+                    Absent ({{ item.absent_profiles|length }})
+                </summary>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
+                    {% for profile in item.absent_profiles %}
+                    <span style="background: #FEE2E2; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem;">
+                        {{ profile.user.get_full_name|default:profile.user.username }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </details>
+            {% else %}
+            <div style="color: #10B981; font-size: 0.85rem;">
+                <span class="iconify" data-icon="mdi:check-circle"></span> All students present!
+            </div>
+            {% endif %}
         </div>
-        <div class="prog-track">
-          {% if item.total_enrolled > 0 %}
-            {% widthratio item.submitted item.total_enrolled 100 as fill_pct %}
-          {% else %}
-            {% with fill_pct=0 %}{% endwith %}
-          {% endif %}
-          <div class="prog-fill {% if fill_pct >= 75 %}fill-green{% elif fill_pct >= 50 %}fill-amber{% else %}fill-red{% endif %}"
-            style="width:{% if item.total_enrolled > 0 %}{% widthratio item.submitted item.total_enrolled 100 %}{% else %}0{% endif %}%"></div>
-        </div>
-      </div>
-
-      <div class="absent-section">
-        <h3>Absent Students ({{ item.absent_profiles|length }})</h3>
-        {% if item.absent_profiles %}
-          <button class="toggle-btn" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none';this.textContent=this.textContent.includes('▼')?'▲ Hide':'▼ Show'">▼ Show</button>
-          <div class="absent-pills" style="display:none">
-            {% for profile in item.absent_profiles %}
-              <span class="absent-pill">{{ profile.user.get_full_name|default:profile.user.username }}</span>
-            {% endfor %}
-          </div>
-        {% else %}
-          <span class="no-absent">✅ All students submitted attendance!</span>
-        {% endif %}
-      </div>
     </div>
     {% endfor %}
-  {% endif %}
-</div>
+{% else %}
+    <div class="card">
+        <div class="card-body" style="text-align: center; padding: 2rem;">
+            <span class="iconify" data-icon="mdi:calendar-blank" data-width="48" data-height="48" style="color: #94A3B8;"></span>
+            <p style="margin-top: 0.5rem;">No sessions on {{ selected_date|date:"F j, Y" }}</p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

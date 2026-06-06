@@ -1,0 +1,183 @@
+{% extends "attendance/base.html" %}
+{% block title %}Security Alerts - Admin{% endblock %}
+
+{% block content %}
+<style>
+    [data-theme="dark"] .alert-card {
+        background: var(--bg-card);
+        border-color: var(--border);
+    }
+    
+    .alert-card {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        transition: transform 0.2s;
+    }
+    
+    .alert-card.unresolved {
+        border-left: 4px solid var(--error);
+    }
+    
+    .alert-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .alert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+    
+    .alert-type {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .alert-type .iconify {
+        color: var(--error);
+    }
+    
+    .badge-active {
+        background: var(--error);
+        color: white;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .badge-resolved {
+        background: var(--success);
+        color: white;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .detail-label {
+        width: 110px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    
+    .detail-value {
+        color: var(--text-primary);
+    }
+    
+    .detail-value code {
+        background: var(--border-light);
+        padding: 0.2rem 0.4rem;
+        border-radius: 6px;
+        font-family: monospace;
+    }
+    
+    .alert-footer {
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: var(--bg-card);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+    }
+</style>
+
+<div class="dash-wrapper">
+    <div class="dash-header">
+        <h1>Security Alerts</h1>
+        <p>Monitor unauthorized code usage attempts</p>
+    </div>
+
+    {% if alerts %}
+        {% for alert in alerts %}
+        <div class="alert-card {% if not alert.is_resolved %}unresolved{% endif %}">
+            <div class="alert-header">
+                <div class="alert-type">
+                    <span class="iconify" data-icon="mdi:alert-decagram" data-width="20" data-height="20"></span>
+                    <strong>Code Misuse Detected</strong>
+                </div>
+                {% if alert.is_resolved %}
+                    <span class="badge-resolved">✓ Resolved</span>
+                {% else %}
+                    <span class="badge-active">⚠ Active</span>
+                {% endif %}
+            </div>
+            
+            <div class="detail-row">
+                <div class="detail-label">Code String:</div>
+                <div class="detail-value"><code>{{ alert.code.code_string }}</code></div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Attempted By:</div>
+                <div class="detail-value">
+                    {{ alert.attempted_by.username }} 
+                    ({{ alert.attempted_by.get_full_name|default:"No name" }})
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Code Owner:</div>
+                <div class="detail-value">
+                    {{ alert.code.student.username }}
+                    ({{ alert.code.student.get_full_name|default:"No name" }})
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Session:</div>
+                <div class="detail-value">
+                    {{ alert.code.class_session.course.code }} - 
+                    {{ alert.code.class_session.date|date:"M d, Y" }}
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Attempted At:</div>
+                <div class="detail-value">{{ alert.attempted_at|date:"M d, Y g:i a" }}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Reason:</div>
+                <div class="detail-value">{{ alert.reason }}</div>
+            </div>
+            
+            {% if not alert.is_resolved %}
+            <div class="alert-footer">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                    <button type="submit" class="btn-primary btn-sm">
+                        <span class="iconify" data-icon="mdi:check-circle" data-width="14" data-height="14"></span>
+                        Mark as Resolved
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <span class="iconify" data-icon="mdi:shield-check" data-width="48" data-height="48" style="color: var(--success);"></span>
+            <h3 style="margin-top: 1rem;">No Security Alerts</h3>
+            <p style="color: var(--text-muted);">All students are using their own codes correctly</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

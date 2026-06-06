@@ -1,58 +1,789 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Swasa Attendance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>SWASA Attendance System</title>
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .messages { list-style: none; padding: 0; }
-        .messages li { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .btn { padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; }
-        nav { margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .logout-form { display: inline; }
-        .logout-btn { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 16px; text-decoration: underline; padding: 0; }
-        .logout-btn:hover { color: #a71d2a; }
+        :root {
+            --navy:           #0D2472;
+            --navy-light:     #1B3A9C;
+            --navy-dark:      #091A55;
+            --gold:           #F2C31A;
+            --gold-dark:      #C9A00E;
+            --teal:           #00A896;
+            --red:            #C0392B;
+            --green:          #1E9E5E;
+            --blue:           #4A90D9;
+
+            --bg-base:        #F4F6FB;
+            --bg-surface:     #FFFFFF;
+            --bg-subtle:      #EEF1F8;
+            --bg-overlay:     rgba(13,36,114,0.04);
+
+            --text-primary:   #0D1B3E;
+            --text-secondary: #4A5568;
+            --text-muted:     #8896AB;
+            --text-inverse:   #FFFFFF;
+
+            --border:         #E4E9F2;
+            --border-strong:  #C8D0E0;
+
+            --sidebar-width:  260px;
+            --topbar-height:  60px;
+
+            --shadow-xs: 0 1px 2px rgba(13,36,114,0.06);
+            --shadow-sm: 0 1px 4px rgba(13,36,114,0.08);
+            --shadow-md: 0 4px 16px rgba(13,36,114,0.10);
+            --shadow-lg: 0 8px 32px rgba(13,36,114,0.14);
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background-color: #F4F6FB !important;
+            background-image: none !important;
+        }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            color: #0D1B3E;
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* ─── LAYOUT ─── */
+        .app {
+            display: flex;
+            min-height: 100vh;
+            background-color: #F4F6FB;
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: calc(-1 * var(--sidebar-width));
+            width: var(--sidebar-width);
+            height: 100%;
+            background: var(--navy);
+            z-index: 1000;
+            transition: left 0.28s cubic-bezier(0.4,0,0.2,1);
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 0; }
+        .sidebar.open { left: 0; }
+
+        .sidebar-header {
+            padding: 1.25rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--gold);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy-dark);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.03em;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .logo-text span {
+            color: var(--gold);
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0.75rem;
+            flex: 1;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.28);
+            padding: 0.6rem 0.75rem 0.35rem;
+            margin-top: 0.25rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.65rem 0.75rem;
+            margin-bottom: 2px;
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.65);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border-left-color: var(--gold);
+        }
+
+        .nav-item .iconify {
+            font-size: 17px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .nav-item:hover .iconify,
+        .nav-item.active .iconify { opacity: 1; }
+
+        .sidebar-footer {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 11px;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+        }
+
+        /* ─── OVERLAY ─── */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.active { display: block; }
+
+        /* ─── MAIN CONTENT ─── */
+        .main-content {
+            flex: 1;
+            width: 100%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            background-color: #F4F6FB;
+        }
+
+        /* ─── TOP BAR ─── */
+        .top-bar {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.25rem;
+            height: var(--topbar-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-xs);
+            gap: 1rem;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.45rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .menu-btn:hover {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .page-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: none;
+        }
+
+        @media (min-width: 480px) { .page-title { display: block; } }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info {
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        @media (min-width: 640px) { .user-info { display: flex; } }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.45rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-subtle);
+            color: var(--text-primary);
+        }
+
+        .icon-btn.danger:hover {
+            background: #FDECEA;
+            color: var(--red);
+        }
+
+        /* ─── CONTAINER ─── */
+        .container {
+            padding: 1.25rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) { .container { padding: 2rem 1.5rem; } }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-xs);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover { box-shadow: var(--shadow-sm); }
+
+        .card-header {
+            padding: 1rem 1.25rem;
+            background: var(--bg-subtle);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body { padding: 1.25rem; }
+
+        /* ─── STAT CARDS ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        }
+
+        .stat-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xs);
+            border-left-width: 4px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.total   { border-left-color: var(--navy); }
+        .stat-card.present { border-left-color: var(--green); }
+        .stat-card.absent  { border-left-color: var(--red); }
+        .stat-card.late    { border-left-color: var(--gold); }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            font-size: 17px;
+        }
+
+        .stat-card.total   .stat-icon { background: rgba(13,36,114,0.08); color: var(--navy); }
+        .stat-card.present .stat-icon { background: rgba(30,158,94,0.1);  color: var(--green); }
+        .stat-card.absent  .stat-icon { background: rgba(192,57,43,0.1);  color: var(--red); }
+        .stat-card.late    .stat-icon { background: rgba(242,195,26,0.15); color: var(--gold-dark); }
+
+        .stat-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.1;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ─── BUTTONS ─── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            padding: 0.6rem 1.1rem;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            min-height: 40px;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+            background: var(--navy);
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(13,36,114,0.25);
+        }
+        .btn-primary:hover { background: var(--navy-dark); }
+
+        .btn-accent {
+            background: var(--gold);
+            color: var(--navy-dark);
+        }
+        .btn-accent:hover { background: var(--gold-dark); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border-strong);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .btn-ghost:hover { background: var(--bg-subtle); color: var(--text-primary); }
+
+        /* ─── FORM ─── */
+        .form-group { margin-bottom: 1.1rem; }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            border: 1.5px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+            appearance: none;
+        }
+
+        .form-control::placeholder { color: var(--text-muted); }
+
+        .form-control:focus {
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(13,36,114,0.1);
+        }
+
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238896AB' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2.25rem;
+        }
+
+        /* ─── TABLES ─── */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--radius-md);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        .data-table thead tr { background: var(--bg-subtle); }
+
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 0.875rem 1rem;
+            font-size: 13px;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr { transition: background 0.12s; }
+        .data-table tbody tr:hover { background: var(--bg-overlay); }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        /* ─── BADGES ─── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-present { background: rgba(30,158,94,0.12);  color: var(--green); }
+        .badge-absent  { background: rgba(192,57,43,0.10);  color: var(--red); }
+        .badge-late    { background: rgba(201,160,14,0.12); color: var(--gold-dark); }
+        .badge-pending { background: rgba(74,144,217,0.12); color: var(--blue); }
+        .badge-navy    { background: rgba(13,36,114,0.1);   color: var(--navy); }
+
+        /* ─── ALERTS ─── */
+        .alert {
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-size: 13px;
+            border-left: 3px solid;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+
+        .alert-info    { background: rgba(74,144,217,0.08);  color: #1B4F9C; border-left-color: var(--blue); }
+        .alert-success { background: rgba(30,158,94,0.08);   color: #14532D; border-left-color: var(--green); }
+        .alert-error   { background: rgba(192,57,43,0.08);   color: #7F1D1D; border-left-color: var(--red); }
+        .alert-warning { background: rgba(242,195,26,0.10);  color: #713F12; border-left-color: var(--gold); }
+
+        /* ─── WEEK GRID ─── */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 480px) { .week-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .week-card {
+            background: var(--bg-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.875rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .week-card:hover {
+            border-color: var(--navy);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ─── DESKTOP SIDEBAR ─── */
+        @media (min-width: 1024px) {
+            .sidebar {
+                left: 0;
+                box-shadow: none;
+                border-right: 1px solid rgba(255,255,255,0.06);
+            }
+            .sidebar-overlay { display: none !important; }
+            .main-content { margin-left: var(--sidebar-width); }
+            .menu-btn { display: none; }
+        }
+
+        /* ─── UTILS ─── */
+        .desktop-only { display: none; }
+
+        @media (min-width: 768px) {
+            .desktop-only { display: flex; }
+            .mobile-only  { display: none; }
+        }
+
+        .text-muted   { color: var(--text-muted); }
+        .text-sm      { font-size: 12px; }
+        .font-mono    { font-family: 'DM Mono', monospace; }
+        .flex         { display: flex; }
+        .items-center { align-items: center; }
+        .gap-2        { gap: 0.5rem; }
+        .gap-3        { gap: 0.75rem; }
+        .mt-1         { margin-top: 0.25rem; }
+        .mt-4         { margin-top: 1rem; }
+        .mb-4         { margin-bottom: 1rem; }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <nav>
-        {% if user.is_authenticated %}
-            <a href="{% url 'attendance:dashboard' %}">Dashboard</a> |
-            <a href="{% url 'attendance:history' %}">My History</a> |
-            {% if user.is_staff or user.is_superuser %}
-                <a href="{% url 'attendance:lecturer_dashboard' %}">Lecturer Dashboard</a> |
-            {% endif %}
-            {% if user.is_superuser %}
-                <a href="{% url 'attendance:admin_dashboard' %}">Admin Dashboard</a> |
-            {% endif %}
-            <span>Hello, {{ user.username }}</span> |
-            <form method="post" action="{% url 'logout' %}" class="logout-form">
-                {% csrf_token %}
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        {% else %}
-            <a href="{% url 'login' %}">Login</a>
-        {% endif %}
 
-<!-- Add this inside the nav when user is authenticated -->
-{% if user.is_authenticated and not user.is_staff %}
-    <a href="{% url 'attendance:export_my_pdf' %}">📄 Export PDF</a> |
-    <a href="{% url 'attendance:export_my_csv' %}">📊 Export CSV</a> |
-{% endif %}
+<div class="app">
 
-    </nav>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    {% block extra_head %}{% endblock %}
-    {% block content %}{% endblock %}
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'attendance:dashboard' %}" class="logo">
+                <div class="logo-icon">SW</div>
+                <div class="logo-text">
+                    SWASA
+                    <span>Attendance</span>
+                </div>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Main Menu</div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
+                </a>
+                <a href="{% url 'attendance:history' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:history"></span> My History
+                </a>
+                {% if not user.is_staff %}
+                    <a href="{% url 'attendance:course_registration' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
+                    </a>
+                    <a href="{% url 'attendance:support' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+                    </a>
+                    <a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+                    </a>
+                {% endif %}
+                {% if user.is_staff %}
+                    <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:chalkboard"></span> Lecturer Control
+                    </a>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <div class="nav-label">Administration</div>
+                    <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:shield-account-outline"></span> Admin Central
+                    </a>
+                    <a href="{% url 'attendance:admin_support' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:ticket-outline"></span> Support Tickets
+                    </a>
+                    <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
+                    </a>
+                {% endif %}
+            {% endif %}
+
+            <a href="{% url 'attendance:student_guide' %}" class="nav-item">
+    <span class="iconify" data-icon="mdi:book-open-variant"></span>
+    Student Guide
+</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            University of Ghana · SWASA
+        </div>
+    </aside>
+
+    <div class="main-content">
+
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+                    <span class="iconify" data-icon="mdi:menu" data-width="22" data-height="22"></span>
+                </button>
+                <span class="page-title">SWASA Attendance</span>
+            </div>
+
+            <div class="user-menu">
+                {% if user.is_authenticated %}
+                    <div class="user-info">
+                        <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                        <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% else %}Student{% endif %}</span>
+                    </div>
+                    <div class="user-avatar">{{ user.username|first|upper }}</div>
+                    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="icon-btn danger" aria-label="Logout">
+                            <span class="iconify" data-icon="mdi:logout" data-width="18" data-height="18"></span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="container">
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-info">
+                    <span class="iconify" data-icon="mdi:information-outline" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) closeSidebar();
+    });
+</script>
 </body>
 </html>

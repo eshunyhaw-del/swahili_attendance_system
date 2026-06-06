@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWASA Attendance - Student Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:        #0D2472;
+            --navy-light:  #1B3A9C;
+            --navy-dark:   #091A55;
+            --gold:        #F2C31A;
+            --gold-dark:   #C9A00E;
+            --green:       #1E9E5E;
+            --red:         #C0392B;
+            --blue:        #4A90D9;
+
+            --bg:          #F4F6FB;
+            --surface:     #FFFFFF;
+            --subtle:      #EEF1F8;
+            --text:        #0D1B3E;
+            --text-sec:    #4A5568;
+            --text-muted:  #8896AB;
+            --border:      #E4E9F2;
+            --border-str:  #C8D0E0;
+
+            --r-sm: 8px;
+            --r-md: 12px;
+            --r-lg: 16px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Page wrapper ── */
+        .guide-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.25rem 3rem;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--navy);
+            border-radius: var(--r-lg);
+            padding: 2rem 2rem 1.75rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 10% 50%, rgba(242,195,26,0.12) 0%, transparent 55%),
+                radial-gradient(circle at 90% 20%, rgba(74,144,217,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--navy-dark), var(--navy-light), var(--gold));
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gold);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--navy-dark);
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(242,195,26,0.4);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .logo-text span { color: var(--gold); }
+
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.35rem;
+            position: relative;
+        }
+
+        .header .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+        }
+
+        .header .university {
+            color: rgba(255,255,255,0.45);
+            font-size: 11px;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Quick ref banner ── */
+        .quick-ref {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--navy);
+            border-radius: var(--r-md);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(13,36,114,0.06);
+        }
+
+        .quick-ref-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--navy);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .quick-ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem 1.5rem;
+        }
+
+        .quick-ref-item {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        .quick-ref-item strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .mono {
+            font-family: 'DM Mono', monospace;
+            background: var(--subtle);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 1px 6px;
+            font-size: 12px;
+            color: var(--navy);
+            font-weight: 500;
+        }
+
+        /* ── Two column ── */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 700px) {
+            .two-column { grid-template-columns: 1fr; }
+            body { font-size: 13px; }
+        }
+
+        /* ── Step cards ── */
+        .step-card {
+            background: var(--surface);
+            border-radius: var(--r-lg);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(13,36,114,0.05);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .step-card:last-child { margin-bottom: 0; }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--navy);
+            color: white;
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .step-desc {
+            color: var(--text-sec);
+            font-size: 13px;
+            margin-bottom: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* ── Screenshot placeholder ── */
+        .screenshot {
+            background: var(--subtle);
+            border-radius: var(--r-md);
+            padding: 1rem;
+            text-align: center;
+            border: 1px dashed var(--border-str);
+        }
+
+        .screenshot-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        .screenshot-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* ── Alert boxes ── */
+        .info-box, .warning-box, .success-box, .error-box {
+            border-radius: var(--r-sm);
+            padding: 0.65rem 0.875rem;
+            font-size: 12px;
+            margin-top: 0.75rem;
+            border-left: 3px solid;
+            line-height: 1.5;
+        }
+
+        .info-box    { background: rgba(13,36,114,0.06);  border-left-color: var(--navy);    color: var(--text-sec); }
+        .warning-box { background: rgba(242,195,26,0.1);  border-left-color: var(--gold-dark); color: #6B4F00; }
+        .success-box { background: rgba(30,158,94,0.08);  border-left-color: var(--green);   color: #14532D; }
+        .error-box   { background: rgba(192,57,43,0.07);  border-left-color: var(--red);     color: #7F1D1D; }
+
+        .info-box strong, .warning-box strong, .success-box strong, .error-box strong {
+            display: block;
+            margin-bottom: 2px;
+            font-weight: 700;
+        }
+
+        /* ── Status pills in step 6 ── */
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Table ── */
+        .section-block {
+            background: var(--surface);
+            border-radius: var(--r-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 3px rgba(13,36,114,0.05);
+        }
+
+        .section-block-header {
+            background: var(--subtle);
+            padding: 0.75rem 1.25rem;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table th {
+            background: var(--subtle);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            padding: 0.65rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-table td {
+            padding: 0.65rem 1rem;
+            font-size: 12px;
+            color: var(--text-sec);
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .info-table tbody tr:last-child td { border-bottom: none; }
+        .info-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
+
+        .info-table td:first-child { font-weight: 600; color: var(--text); }
+
+        /* ── Quick tips ── */
+        .quick-tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.6rem;
+            padding: 1rem 1.25rem 1.25rem;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 12px;
+            color: var(--text-sec);
+            line-height: 1.5;
+        }
+
+        .tip-check {
+            width: 18px;
+            height: 18px;
+            background: rgba(30,158,94,0.1);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .tip-check::after {
+            content: '✓';
+            font-size: 10px;
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* ── Important dates ── */
+        .dates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            padding: 1rem 1.25rem 1.25rem;
+        }
+
+        .date-item {
+            background: var(--subtle);
+            border-radius: var(--r-sm);
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .date-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+
+        .date-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* ── Print ── */
+        @media print {
+            body { background: #fff; padding: 0; font-size: 11px; }
+            .header { background: var(--navy) !important; -webkit-print-color-adjust: exact; }
+            .step-card, .section-block { break-inside: avoid; }
+            .two-column { break-inside: avoid; }
+            .guide-container { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="guide-container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">SW</div>
+            <div class="logo-text">SWASA <span>Attendance</span></div>
+        </div>
+        <h1>Your Student Guide</h1>
+        <div class="subtitle">A simple guide to tracking your attendance with the SWASA Attendance System</div>
+        <div class="university">University of Ghana, Department of African and Asian Languages</div>
+    </div>
+
+    <!-- Quick Reference -->
+    <div class="quick-ref">
+        <div class="quick-ref-title">📌 Quick Look</div>
+        <div class="quick-ref-grid">
+            <div class="quick-ref-item">Website: <strong>swasa-attendance.onrender.com</strong></div>
+            <div class="quick-ref-item">Login: Use your <span class="mono">Student ID</span> for both your username and password</div>
+            <div class="quick-ref-item">Example: If your ID is <span class="mono">10809707</span>, use it for both fields.</div>
+        </div>
+    </div>
+
+    <!-- Steps - Two Column -->
+    <div class="two-column">
+
+        <!-- Left: Steps 1–4 -->
+        <div>
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Set Up Your Account</div>
+                </div>
+                <div class="step-desc">Head to the registration page and create your account using your student information.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">📝</span>
+                    <div class="screenshot-label">Registration Form — Fill your details</div>
+                </div>
+                <div class="info-box">
+                    <strong>What you'll need:</strong>
+                    Your Student ID, UG Email (@st.ug.edu.gh), and academic level.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Log In</div>
+                </div>
+                <div class="step-desc">Simply use your Student ID for both your username and password to log in.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">🔐</span>
+                    <div class="screenshot-label">Login Page — Enter Student ID</div>
+                </div>
+                <div class="warning-box">
+                    <strong>Crucial:</strong>
+                    Your Student ID serves as both your username and password. Keep it confidential and never share it!
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Enroll in Your Courses</div>
+                </div>
+                <div class="step-desc">Choose all the courses you're taking this semester.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">📚</span>
+                    <div class="screenshot-label">Course Selection — Check your courses</div>
+                </div>
+                <div class="info-box">
+                    <strong>Helpful Tip:</strong>
+                    You only need to register once per semester. You can update your course selections anytime before the deadline.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Receive Your TA Code During Class</div>
+                </div>
+                <div class="step-desc">In every class session, your Teaching Assistant will provide a unique 2–5 digit code.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">🎫</span>
+                    <div class="screenshot-label">TA gives you a code during class</div>
+                </div>
+                <div class="warning-box">
+                    <strong>Please Note:</strong>
+                    Each code is unique to you and your specific class session. It cannot be shared with others.
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Steps 5–7 -->
+        <div>
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Submit Your Attendance Code</div>
+                </div>
+                <div class="step-desc">From your dashboard, locate the current week, click "Submit Code," and enter the code provided by your TA.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">⌨️</span>
+                    <div class="screenshot-label">Dashboard — Enter code and submit</div>
+                </div>
+                <div class="success-box">
+                    <strong>Great News!</strong>
+                    Once submitted, the status will update to "Submitted" with a green checkmark.
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Monitor Your Progress</div>
+                </div>
+                <div class="step-desc">Check your attendance history to see which weeks you've attended or missed.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">📊</span>
+                    <div class="screenshot-label">History Page — See your attendance record</div>
+                </div>
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-dot" style="background:#1E9E5E;"></div>
+                        <span><strong>Present</strong> — Code submitted successfully</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot" style="background:#C0392B;"></div>
+                        <span><strong>Absent</strong> — No code submitted</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-dot" style="background:#F2C31A;"></div>
+                        <span><strong>Upcoming</strong> — Session yet to occur</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">7</div>
+                    <div class="step-title">Download Your Records (Optional)</div>
+                </div>
+                <div class="step-desc">You have the option to download your attendance record as a CSV file for your personal reference.</div>
+                <div class="screenshot">
+                    <span class="screenshot-icon">📥</span>
+                    <div class="screenshot-label">Export CSV — Download your attendance data</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support notice -->
+    <div class="section-block" style="margin-bottom:1.25rem;">
+        <div class="section-block-header">📞 Need a Hand?</div>
+        <div style="padding:0.875rem 1.25rem;font-size:13px;color:var(--text-sec);line-height:1.8;">
+            If you need assistance, use the <strong style="color:var(--text);">Support</strong> feature on your dashboard to submit a ticket. You can also reach out to your TA during class hours. Our admin team aims to respond to support tickets within <strong style="color:var(--text);">24–48 hours</strong>.
+        </div>
+    </div>
+
+    <!-- Quick Reference Table -->
+    <div class="section-block">
+        <div class="section-block-header">📋 Quick Guide</div>
+        <table class="info-table">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>How to Do It</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Login</td><td>Student ID / Student ID</td><td>Login page</td></tr>
+                <tr><td>Register courses</td><td>Check boxes → Submit</td><td>Dashboard → Register Courses</td></tr>
+                <tr><td>Submit attendance</td><td>Enter TA code → Submit</td><td>Dashboard → Week card</td></tr>
+                <tr><td>View history</td><td>Click "My History"</td><td>Sidebar menu</td></tr>
+                <tr><td>Get help</td><td>Submit support ticket</td><td>Dashboard → Support</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pro Tips -->
+    <div class="section-block">
+        <div class="section-block-header">💡 Student Pro Tips</div>
+        <div class="quick-tips-grid">
+            <div class="tip-item"><div class="tip-check"></div><span>Save the website link to your phone's home screen for super quick access.</span></div>
+            <div class="tip-item"><div class="tip-check"></div><span>Your Student ID is your only password – keep it safe and secure!</span></div>
+            <div class="tip-item"><div class="tip-check"></div><span>Submit your code right after your TA gives it to you, so you don't forget.</span></div>
+            <div class="tip-item"><div class="tip-check"></div><span>Make it a habit to check your attendance history weekly to stay on top of your progress.</span></div>
+            <div class="tip-item"><div class="tip-check"></div><span>At the end of the semester, export your attendance as a CSV for your personal records.</span></div>
+        </div>
+    </div>
+
+    <!-- Important Dates -->
+    <div class="section-block" style="margin-bottom:1.5rem;">
+        <div class="section-block-header" style="border-left:3px solid var(--gold-dark);color:var(--gold-dark);">📅 Key Dates — Second Semester 2025/2026</div>
+        <div class="dates-grid">
+            <div class="date-item">
+                <div class="date-label">Semester Begins</div>
+                <div class="date-value">June 1, 2026</div>
+            </div>
+            <div class="date-item">
+                <div class="date-label">Semester Ends</div>
+                <div class="date-value">October 31, 2026</div>
+            </div>
+            <div class="date-item">
+                <div class="date-label">Course Registration Closes</div>
+                <div class="date-value">End of Week 2</div>
+            </div>
+            <div class="date-item">
+                <div class="date-label">Final Attendance Submission</div>
+                <div class="date-value">End of Semester</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>SWASA Attendance System | Department of African and Asian Languages | University of Ghana</p>
+        <p>For technical support, please contact your TA or submit a ticket through the system.</p>
+        <p>Version 2.0 | Last Updated: May 2026</p>
+    </div>
+
+</div>
+</body>
+</html>
