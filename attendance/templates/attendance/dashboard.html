@@ -1,6 +1,8 @@
 {% extends "attendance/base.html" %}
 {% block title %}Dashboard{% endblock %}
 
+{% block greeting %}{% endblock %}
+
 {% block content %}
 <style>
     body {
@@ -45,12 +47,17 @@
     }
 
     .dash-greeting {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: rgba(255,255,255,0.65);
+        font-size: 12px;
+        font-weight: 700;
+        color: rgba(255,255,255,0.8);
         margin-bottom: 4px;
+        letter-spacing: 0.01em;
+    }
+    .dash-proverb {
+        font-size: 11px;
+        color: rgba(255,255,255,0.48);
+        margin-top: 0.4rem;
+        line-height: 1.5;
     }
 
     .dash-header h1 {
@@ -639,11 +646,14 @@
     <div class="dash-header">
         <div class="dash-header-top">
             <div>
-                <div class="dash-greeting">Welcome back</div>
-                <h1>{{ user.get_full_name|default:user.username }}</h1>
+                <div class="dash-greeting">
+                    <span class="swahili-greeting-kw" data-swahili-kw></span>
+                </div>
+                <h1>{{ user.first_name|default:user.username }}!</h1>
                 <div class="dash-header-sub">
                     Student ID: {{ user.userprofile.student_id_number }}
                 </div>
+                <div class="dash-proverb" data-swahili-proverb></div>
             </div>
             <div class="dash-courses-badge">
                 <span class="iconify" data-icon="mdi:book-open-outline" data-width="13"></span>

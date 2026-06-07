@@ -1,6 +1,8 @@
 {% extends "attendance/base.html" %}
 {% block title %}TA Dashboard{% endblock %}
 
+{% block greeting %}{% endblock %}
+
 {% block content %}
 <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
 
@@ -67,7 +69,9 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 }
 
 .ta-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
+.ta-greeting-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 0.2rem; }
 .ta-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+.ta-proverb { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 0.35rem; line-height: 1.5; }
 
 .level-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.875rem; }
 .level-pill {
@@ -625,8 +629,12 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
     <!-- ── Header ── -->
     <div class="ta-header">
         <div>
-            <h1>TA Dashboard</h1>
-            <div class="ta-header-sub">Welcome back, {{ user.get_full_name|default:user.username }}</div>
+            <div class="ta-greeting-label">
+                <span class="swahili-greeting-kw" data-swahili-kw></span>
+            </div>
+            <h1>{{ user.first_name|default:user.username }}!</h1>
+            <div class="ta-header-sub">Teaching Assistant Dashboard</div>
+            <div class="ta-proverb" data-swahili-proverb></div>
             <div class="level-pills">
                 {% for level in assigned_levels %}
                 <span class="level-pill">

@@ -822,6 +822,37 @@
         .mt-1         { margin-top: 0.25rem; }
         .mt-4         { margin-top: 1rem; }
         .mb-4         { margin-bottom: 1rem; }
+
+        /* ─── SWAHILI GREETING BANNER ─── */
+        .swahili-greeting-banner {
+            background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 60%, #0D2472 100%);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.375rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .swahili-greeting-banner::before {
+            content: '';
+            position: absolute; top: -40px; right: -30px;
+            width: 130px; height: 130px;
+            background: rgba(242,195,26,0.06);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .swahili-banner-text { position: relative; z-index: 1; min-width: 0; }
+        .swahili-greeting-line { font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.3; }
+        .swahili-greeting-kw  { color: #F2C31A; }
+        .swahili-proverb-line { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 0.25rem; line-height: 1.5; }
+        .swahili-inline-proverb { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; line-height: 1.45; }
+        @media (max-width: 480px) {
+            .swahili-greeting-banner { padding: 0.875rem 1rem; }
+            .swahili-greeting-line { font-size: 0.9rem; }
+        }
     </style>
     {% block extra_head %}{% endblock %}
     <script>
@@ -970,6 +1001,19 @@
                 {% endfor %}
             {% endif %}
 
+            {% block greeting %}
+            {% if user.is_authenticated %}
+            <div class="swahili-greeting-banner">
+                <div class="swahili-banner-text">
+                    <div class="swahili-greeting-line">
+                        <span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!
+                    </div>
+                    <div class="swahili-proverb-line" data-swahili-proverb></div>
+                </div>
+            </div>
+            {% endif %}
+            {% endblock %}
+
             {% block content %}{% endblock %}
         </div>
 
@@ -1001,6 +1045,65 @@
         html.setAttribute('data-theme', next);
         localStorage.setItem('swasa_theme', next);
     }
+
+    /* ── Swahili Greeting ── */
+    (function () {
+        var GREETINGS = [
+            [5,  12, 'Habari za asubuhi'],
+            [12, 16, 'Habari za mchana'],
+            [16, 19, 'Habari za jioni'],
+            [19, 24, 'Habari za usiku'],
+            [0,  5,  'Habari za usiku']
+        ];
+        var PROVERBS = [
+            ['Adui mpende',                                                              'Love your enemy.'],
+            ['Akipenda chongo huita kengeza',                                            'Love is blind.'],
+            ['Haina tabibu ndwele ya mapenzi',                                           'The disease of love has no cure.'],
+            ['Hakukuwa kupendana, bila kuheshimiana',                                    'There has never been mutual love without mutual respect.'],
+            ['Hamu haiji bila kupenda',                                                  'Longing does not come without loving.'],
+            ['Heri kufa macho kuliko moyo',                                              'Better to be blind than to be despairing.'],
+            ['Heri moyo mkubwa kuliko akili kubwa',                                      'A big heart is better than a big brain.'],
+            ['Heshima ni moyo',                                                          'Respect is of the heart.'],
+            ['Johari bora ni mapenzi kuliko maisha yetu',                                'Love is a more precious jewel than life.'],
+            ['Kidole chako kibaya si kikate',                                            'Do not abandon family.'],
+            ['Kipendacho moyo ni dawa',                                                  'What the heart desires is like medicine.'],
+            ['Kofi la mahaba haliumizi',                                                 'A slap of love does not hurt.'],
+            ['Kupendana kulishana',                                                      'Loving one another is feeding one another.'],
+            ['Kupenda sana ni ugonjwa usiotibika',                                       'Being deeply in love is a sickness that cannot be cured.'],
+            ['Mapenzi hayana macho, wala hayana maarifa',                                'Love has neither eyes nor understanding.'],
+            ['Mapenzi ni kikohozi, hayawezi kufichika',                                  'Love is like a cough, it cannot be hidden.'],
+            ['Mapenzi yakifa yazike na usiweke maua juu ya kaburi',                      'If love dies, bury it and do not put flowers on the grave.'],
+            ['Moyo hauna subira',                                                        'The heart has no patience.'],
+            ['Moyo hujua uchungu wa nafsi yake',                                         'The heart knows its own pain.'],
+            ['Moyo ni kilindi',                                                          'The heart is deep.'],
+            ['Moyo safi silaha ya kutosha',                                              'A pure heart is weapon enough.'],
+            ['Moyo wa kupenda hauna mithali',                                            'A loving heart has no equal.'],
+            ['Mpende nduguyo',                                                           'Love your brother.'],
+            ['Mpenzi hana kinyongo',                                                     'A lover has no grudge.'],
+            ['Penzi la kujitolea ndilo penzi la daima',                                  'Love of self-renouncing is an eternal love.'],
+            ['Penzi ni maua maji hutilia',                                               'Love is like a flower, it must be watered.'],
+            ['Radhi ni ushindi',                                                         'Forgiving is victory.'],
+            ['Toa upendo mwingi kuliko unaopokea',                                       'Give more love than you receive.'],
+            ['Ukipenda damu upende na usaha',                                            'If you love someone in health, love them also in sickness.'],
+            ['Undugu wapita urafiki',                                                    'Brotherhood is greater than friendship.']
+        ];
+
+        function updateSwahiliGreeting() {
+            var h = new Date().getHours();
+            var kw = 'Habari za usiku';
+            for (var i = 0; i < GREETINGS.length; i++) {
+                if (h >= GREETINGS[i][0] && h < GREETINGS[i][1]) { kw = GREETINGS[i][2]; break; }
+            }
+            var prov = PROVERBS[(new Date().getDate() - 1) % 30];
+            document.querySelectorAll('[data-swahili-kw]').forEach(function (el) { el.textContent = kw; });
+            document.querySelectorAll('[data-swahili-proverb]').forEach(function (el) {
+                el.textContent = '”' + prov[0] + '” — ' + prov[1];
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', updateSwahiliGreeting);
+        setInterval(updateSwahiliGreeting, 60000);
+    })();
 </script>
 </body>
 </html>
