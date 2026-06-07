@@ -1,0 +1,426 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>
+        {% if purpose == 'login' %}Verify Login
+        {% elif purpose == 'registration' %}Verify Email
+        {% else %}Verify Code
+        {% endif %} — SWASA Attendance
+    </title>
+    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy:      #0D2472;
+            --navy-dark: #091A55;
+            --gold:      #F2C31A;
+            --green:     #1A9E60;
+            --r-sm: 8px; --r-md: 12px; --r-xl: 24px;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background:
+                linear-gradient(135deg, rgba(9,26,85,0.68) 0%, rgba(13,36,114,0.55) 50%, rgba(9,26,85,0.74) 100%),
+                url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;
+            height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+            -webkit-font-smoothing: antialiased;
+            color: #fff;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-radius: var(--r-xl);
+            width: 100%; max-width: 420px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.18);
+            position: relative;
+        }
+
+        /* ─── Success overlay ─── */
+        .success-overlay {
+            position: absolute; inset: 0;
+            background: rgba(9,26,85,0.88);
+            backdrop-filter: blur(12px);
+            border-radius: var(--r-xl);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 0.75rem; z-index: 20; padding: 2.5rem;
+            text-align: center;
+        }
+        .checkmark-wrap {
+            width: 76px; height: 76px;
+            background: rgba(26,158,96,0.2);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 0.25rem;
+        }
+        .checkmark {
+            width: 52px; height: 52px;
+            stroke: #4ade80; stroke-width: 4;
+            stroke-miterlimit: 10; fill: none;
+        }
+        .checkmark-circle {
+            stroke-dasharray: 166; stroke-dashoffset: 166;
+            animation: drawStroke 0.6s cubic-bezier(0.65,0,0.45,1) forwards;
+        }
+        .checkmark-check {
+            stroke-dasharray: 48; stroke-dashoffset: 48;
+            animation: drawStroke 0.35s cubic-bezier(0.65,0,0.45,1) 0.7s forwards;
+        }
+        @keyframes drawStroke { 100% { stroke-dashoffset: 0; } }
+        .success-title { font-size: 1.3rem; font-weight: 800; color: #4ade80; letter-spacing: -0.02em; }
+        .success-sub   { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
+
+        /* ─── Navy header ─── */
+        .card-top {
+            background: linear-gradient(145deg, rgba(9,26,85,0.95) 0%, rgba(26,58,156,0.90) 55%, rgba(9,26,85,0.95) 100%);
+            padding: 1.75rem 2rem 1.6rem;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .card-top::before {
+            content: ''; position: absolute; top: -60px; left: -60px;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.04); border-radius: 50%;
+        }
+        .card-top::after {
+            content: ''; position: absolute; bottom: -40px; right: -40px;
+            width: 150px; height: 150px;
+            background: rgba(242,195,26,0.07); border-radius: 50%;
+        }
+        .brand-icon {
+            width: 54px; height: 54px;
+            background: var(--gold);
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-size: 27px; color: var(--navy-dark);
+            box-shadow: 0 4px 12px rgba(242,195,26,0.45);
+            position: relative; z-index: 1;
+        }
+        .card-top h1 {
+            font-size: 1.15rem; font-weight: 800;
+            color: #fff; letter-spacing: -0.02em;
+            margin-bottom: 0.5rem; position: relative; z-index: 1;
+        }
+        .email-pill {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 99px;
+            padding: 0.28rem 0.75rem;
+            font-size: 12px; color: rgba(255,255,255,0.9);
+            font-weight: 600; position: relative; z-index: 1;
+        }
+        .email-pill .iconify { font-size: 13px; opacity: 0.75; }
+
+        /* ─── Card body ─── */
+        .card-body { padding: 1.5rem 1.75rem 1.25rem; }
+
+        .error-banner {
+            background: rgba(192,57,43,0.2); border: 1px solid rgba(231,76,60,0.35);
+            border-left: 3px solid #e74c3c;
+            border-radius: var(--r-sm); padding: 0.6rem 0.875rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 12.5px; color: #ffaaaa; margin-bottom: 1rem; line-height: 1.4;
+        }
+        .success-banner {
+            background: rgba(26,158,96,0.2); border: 1px solid rgba(26,158,96,0.35);
+            border-left: 3px solid #2ecc71;
+            border-radius: var(--r-sm); padding: 0.6rem 0.875rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 12.5px; color: #7fffc4; margin-bottom: 1rem; line-height: 1.4;
+        }
+        .error-banner .iconify, .success-banner .iconify { font-size: 16px; flex-shrink: 0; }
+
+        /* ─── OTP boxes ─── */
+        .otp-label {
+            font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,0.55);
+            text-transform: uppercase; letter-spacing: 0.07em;
+            text-align: center; margin-bottom: 0.875rem; display: block;
+        }
+        .otp-boxes {
+            display: flex; gap: clamp(0.35rem, 2.5vw, 0.6rem);
+            justify-content: center; margin-bottom: 0.6rem;
+        }
+        .otp-box {
+            width: clamp(42px, 12vw, 52px);
+            height: clamp(50px, 14vw, 62px);
+            border: 2px solid rgba(255,255,255,0.28);
+            border-radius: var(--r-sm);
+            font-size: clamp(1.35rem, 4.5vw, 1.65rem);
+            font-weight: 700;
+            text-align: center;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            transition: border-color 0.13s, box-shadow 0.13s, background 0.13s;
+            outline: none;
+            caret-color: #fff;
+            font-family: 'DM Mono', monospace;
+        }
+        .otp-box:focus {
+            border-color: rgba(255,255,255,0.65);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+        }
+        .otp-box.filled { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+        .otp-box.error-shake {
+            border-color: #e74c3c;
+            background: rgba(192,57,43,0.2);
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-5px); }
+            40%       { transform: translateX(5px); }
+            60%       { transform: translateX(-3px); }
+            80%       { transform: translateX(3px); }
+        }
+
+        .expiry-row {
+            display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+            font-size: 11.5px; color: rgba(255,255,255,0.5); font-weight: 500;
+            margin-bottom: 1.25rem; text-align: center;
+        }
+        .expiry-row .iconify { font-size: 13px; }
+        .expiry-row strong { color: rgba(255,255,255,0.85); margin: 0 2px; }
+
+        .btn-verify {
+            width: 100%; padding: 0.75rem;
+            background: var(--navy); color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--r-sm);
+            font-family: inherit; font-size: 14.5px; font-weight: 800;
+            cursor: pointer; letter-spacing: 0.01em;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: all 0.13s; box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+        }
+        .btn-verify:hover { background: var(--navy-dark); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+        .btn-verify:active { transform: scale(0.98); }
+
+        .btn-resend {
+            width: 100%; margin-top: 0.5rem;
+            padding: 0.65rem; background: transparent;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            border-radius: var(--r-sm);
+            font-family: inherit; font-size: 13px; font-weight: 700;
+            color: rgba(255,255,255,0.55); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+            transition: all 0.13s;
+        }
+        .btn-resend:not(:disabled):hover {
+            border-color: rgba(255,255,255,0.5); color: #fff;
+            background: rgba(255,255,255,0.08);
+        }
+        .btn-resend:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .back-link {
+            display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+            margin-top: 1rem; font-size: 12.5px; font-weight: 600;
+            color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.13s;
+        }
+        .back-link:hover { color: #fff; }
+
+        .card-foot {
+            text-align: center; padding: 0 1.75rem 1.25rem;
+            font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    {% if success %}
+    <div class="success-overlay">
+        <div class="checkmark-wrap">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark-circle" cx="26" cy="26" r="25"/>
+                <path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        <p class="success-title">Verified!</p>
+        <p class="success-sub">Redirecting you now&hellip;</p>
+    </div>
+    <script>setTimeout(function () { window.location.href = "{{ redirect_url }}"; }, 1600);</script>
+    {% endif %}
+
+    <div class="card-top">
+        <div class="brand-icon">
+            <span class="iconify" data-icon="mdi:shield-key-outline"></span>
+        </div>
+        <h1>
+            {% if purpose == 'login' %}Two-Factor Verification
+            {% elif purpose == 'registration' %}Verify Your Email
+            {% else %}Enter Verification Code
+            {% endif %}
+        </h1>
+        <div class="email-pill">
+            <span class="iconify" data-icon="mdi:email-outline"></span>
+            {{ email }}
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        {% for message in messages %}
+        <div class="{% if message.tags == 'success' %}success-banner{% else %}error-banner{% endif %}">
+            <span class="iconify" data-icon="mdi:{% if message.tags == 'success' %}check-circle-outline{% else %}alert-circle-outline{% endif %}"></span>
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {% if error %}
+        <div class="error-banner">
+            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" id="otpForm">
+            {% csrf_token %}
+
+            <span class="otp-label">Enter 6-digit code</span>
+
+            <div class="otp-boxes" id="otpBoxes">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+            </div>
+            <input type="hidden" name="otp_code" id="otpCombined">
+
+            <div class="expiry-row">
+                <span class="iconify" data-icon="mdi:clock-outline"></span>
+                Code expires in <strong>{{ expiry_minutes }} min{{ expiry_minutes|pluralize }}</strong>
+                &nbsp;·&nbsp; Check spam if you don't see it
+            </div>
+
+            <button type="submit" class="btn-verify" id="verifyBtn">
+                <span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:18px;"></span>
+                Verify Code
+            </button>
+        </form>
+
+        <form method="post" id="resendForm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="resend">
+            <button type="submit" class="btn-resend" id="resendBtn" disabled>
+                <span class="iconify" data-icon="mdi:email-sync-outline" style="font-size:16px;"></span>
+                <span id="resendText">Resend Code (60s)</span>
+            </button>
+        </form>
+
+        {% if purpose == 'login' %}
+        <a href="{% url 'login' %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to sign in
+        </a>
+        {% elif purpose == 'registration' %}
+        <a href="{% if reg_type == 'ta' %}{% url 'attendance:ta_register' %}{% else %}{% url 'attendance:register' %}{% endif %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to registration
+        </a>
+        {% else %}
+        <a href="{% url 'password_reset' %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back
+        </a>
+        {% endif %}
+
+    </div>
+
+    <div class="card-foot">
+        SWASA Attendance · University of Ghana<br>
+        Department of African and Asian Languages
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var boxes    = Array.from(document.querySelectorAll('.otp-box'));
+    var combined = document.getElementById('otpCombined');
+    var form     = document.getElementById('otpForm');
+
+    function updateCombined() {
+        combined.value = boxes.map(function (b) { return b.value; }).join('');
+    }
+    function tryAutoSubmit() {
+        if (boxes.every(function (b) { return b.value !== ''; })) {
+            updateCombined();
+            form.submit();
+        }
+    }
+
+    boxes.forEach(function (box, idx) {
+        box.addEventListener('input', function () {
+            var digit = this.value.replace(/\D/g, '');
+            this.value = digit ? digit[digit.length - 1] : '';
+            this.classList.toggle('filled', !!this.value);
+            if (this.value && idx < boxes.length - 1) boxes[idx + 1].focus();
+            updateCombined();
+            tryAutoSubmit();
+        });
+        box.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace') {
+                if (!this.value && idx > 0) {
+                    boxes[idx - 1].value = '';
+                    boxes[idx - 1].classList.remove('filled');
+                    boxes[idx - 1].focus();
+                    updateCombined();
+                }
+            } else if (e.key === 'ArrowLeft'  && idx > 0) { boxes[idx - 1].focus(); }
+              else if (e.key === 'ArrowRight' && idx < boxes.length - 1) { boxes[idx + 1].focus(); }
+        });
+        box.addEventListener('paste', function (e) {
+            e.preventDefault();
+            var digits = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+            digits.split('').forEach(function (d, i) {
+                if (boxes[idx + i]) { boxes[idx + i].value = d; boxes[idx + i].classList.add('filled'); }
+            });
+            updateCombined();
+            boxes[Math.min(idx + digits.length - 1, boxes.length - 1)].focus();
+            tryAutoSubmit();
+        });
+        box.addEventListener('focus', function () { this.select(); });
+    });
+
+    {% if error %}
+    boxes.forEach(function (b) { b.classList.add('error-shake'); });
+    setTimeout(function () { boxes.forEach(function (b) { b.classList.remove('error-shake'); }); }, 500);
+    {% endif %}
+
+    var first = boxes.find(function (b) { return !b.value; });
+    if (first) first.focus();
+
+    var cooldown  = 60;
+    var resendBtn = document.getElementById('resendBtn');
+    var resendTxt = document.getElementById('resendText');
+    (function tick() {
+        if (cooldown > 0) {
+            resendTxt.textContent = 'Resend Code (' + cooldown + 's)';
+            cooldown--;
+            setTimeout(tick, 1000);
+        } else {
+            resendBtn.disabled = false;
+            resendTxt.textContent = 'Resend Code';
+        }
+    })();
+});
+</script>
+</body>
+</html>

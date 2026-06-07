@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body style="font-family:sans-serif;color:#333;max-width:600px;margin:0 auto;padding:24px;">
+    <h2 style="color:#0D2472;">SWASA Attendance System</h2>
+    <p>Dear {{ ta_profile.user.get_full_name|default:ta_profile.user.username }},</p>
+    <p>
+        Congratulations! Your Teaching Assistant application on the SWASA Attendance System
+        has been approved. You can now log in and access your TA dashboard.
+    </p>
+    <p>
+        <a href="{{ dashboard_url }}"
+           style="display:inline-block;background:#0D2472;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;">
+            Go to TA Dashboard
+        </a>
+    </p>
+    <p>
+        If the button above doesn't work, sign in at
+        <a href="{{ login_url }}" style="color:#0D2472;">{{ login_url }}</a>
+        using your registered email and password.
+    </p>
+    <p style="margin-top:32px;color:#666;font-size:0.9em;">
+        This is an automated message from the SWASA Attendance System.
+        Please do not reply to this email.
+    </p>
+</body>
+</html>

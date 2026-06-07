@@ -1,214 +1,367 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Create Account - SWASA Attendance</title>
+    <title>Create Account — SWASA Attendance</title>
+    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
     <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0D2472;
-            --primary-hover: #091A55;
-            --primary-light: rgba(13,36,114,0.07);
-            --surface: #FFFFFF;
-            --bg-main: #F4F6FB;
-            --text-main: #0D1B3E;
-            --text-muted: #8896AB;
-            --border: #E4E9F2;
-            --radius-lg: 16px;
-            --radius-sm: 8px;
-            --danger: #D32F2F;
-            --danger-light: rgba(211,47,47,0.1);
+            --navy:      #0D2472;
+            --navy-dark: #091A55;
+            --gold:      #F2C31A;
+            --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'DM Sans', system-ui, sans-serif;
-            background: var(--bg-main);
+            background:
+                linear-gradient(135deg, rgba(9,26,85,0.68) 0%, rgba(13,36,114,0.55) 50%, rgba(9,26,85,0.74) 100%),
+                url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 2rem 1rem;
+            padding: 1.5rem 1rem 3rem;
+            -webkit-font-smoothing: antialiased;
+            color: #fff;
         }
 
-        .register-container { max-width: 500px; width: 100%; }
-
-        .register-card {
-            background: var(--surface);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(13,36,114,0.1);
-            position: relative;
+        .card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-radius: var(--r-xl);
+            width: 100%; max-width: 460px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.18);
         }
 
-        .register-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #0D2472, #1B3A9C);
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        .card-top {
+            background: linear-gradient(145deg, rgba(9,26,85,0.95) 0%, rgba(26,58,156,0.90) 55%, rgba(9,26,85,0.95) 100%);
+            padding: 2rem 2rem 1.75rem;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .card-top::before {
+            content: ''; position: absolute; top: -60px; left: -60px;
+            width: 220px; height: 220px;
+            background: rgba(255,255,255,0.04); border-radius: 50%;
+        }
+        .card-top::after {
+            content: ''; position: absolute; bottom: -40px; right: -40px;
+            width: 160px; height: 160px;
+            background: rgba(242,195,26,0.07); border-radius: 50%;
+        }
+        .brand-icon {
+            width: 56px; height: 56px;
+            background: var(--gold);
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 0.875rem;
+            font-size: 26px; color: var(--navy-dark);
+            box-shadow: 0 4px 12px rgba(242,195,26,0.45);
+            position: relative; z-index: 1;
+        }
+        .card-top h1 {
+            font-size: 1.3rem; font-weight: 800;
+            color: #fff; letter-spacing: -0.02em;
+            margin-bottom: 0.25rem; position: relative; z-index: 1;
+        }
+        .card-top-sub {
+            font-size: 12.5px; color: rgba(255,255,255,0.6);
+            font-weight: 500; position: relative; z-index: 1;
         }
 
-        h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-main); text-align: center; }
-        .subtitle { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 2rem; }
-
-        .field-wrapper { margin-bottom: 1.25rem; }
-        .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        
-        label { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
-
-        .input-relative { position: relative; display: flex; align-items: center; }
-        
-        input, select {
-            width: 100%; padding: 0.85rem 1rem 0.85rem 2.75rem;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            transition: all 0.2s ease;
+        .steps {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0; margin-top: 1.25rem; position: relative; z-index: 1;
         }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
-
-        .field-icon { position: absolute; left: 12px; color: var(--text-muted); font-size: 18px; pointer-events: none; }
-        
-        .password-toggle { position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; }
-        .password-toggle:hover { color: var(--primary); }
-
-        .help-text { font-size: 11px; color: var(--text-muted); margin-top: 0.4rem; }
-        .errorlist { list-style: none; color: var(--danger); font-size: 11px; margin-top: 0.4rem; font-weight: 600; }
-        .form-error-alert { background: var(--danger-light); padding: 0.75rem; border-radius: var(--radius-sm); color: var(--danger); font-size: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
-
-        button[type="submit"] {
-            width: 100%; padding: 0.9rem; background: var(--primary); color: white;
-            border: none; border-radius: var(--radius-sm); font-weight: 700; cursor: pointer; margin-top: 1rem;
-            transition: all 0.2s;
+        .step-item {
+            display: flex; align-items: center; gap: 0.375rem;
+            font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5);
         }
-        button[type="submit"]:hover { background: var(--primary-hover); }
+        .step-item.active { color: rgba(255,255,255,0.95); }
+        .step-dot {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.5);
+        }
+        .step-item.active .step-dot { background: var(--gold); color: var(--navy-dark); }
+        .step-line { width: 32px; height: 1px; background: rgba(255,255,255,0.2); margin: 0 0.375rem; }
 
-        .login-link { text-align: center; margin-top: 1.5rem; font-size: 13px; color: var(--text-muted); }
-        .login-link a { color: var(--primary); font-weight: 700; text-decoration: none; }
-        
-        .info-note {
-            background: var(--primary-light);
-            padding: 0.75rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 1.5rem;
-            font-size: 12px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .card-body { padding: 1.75rem 2rem 2rem; }
+
+        .error-banner {
+            background: rgba(192,57,43,0.2);
+            border: 1px solid rgba(231,76,60,0.35);
+            border-left: 3px solid #e74c3c;
+            border-radius: var(--r-sm);
+            padding: 0.7rem 0.875rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 13px; color: #ffaaaa;
+            margin-bottom: 1.25rem; line-height: 1.4;
+        }
+        .error-banner .iconify { font-size: 17px; flex-shrink: 0; }
+
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        @media (max-width: 440px) { .field-row { grid-template-columns: 1fr; } }
+
+        .field { margin-bottom: 1rem; }
+        .field-label { display: block; font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 0.4rem; }
+        .field-hint  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+        .field-error { font-size: 11.5px; color: #ff9999; font-weight: 600; margin-top: 0.3rem; list-style: none; }
+
+        .field-wrap { position: relative; }
+        .field-icon {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            color: rgba(255,255,255,0.45); font-size: 18px; pointer-events: none;
+        }
+        .field-input {
+            width: 100%;
+            padding: 0.7rem 2.75rem 0.7rem 2.75rem;
+            border: 1.5px solid rgba(255,255,255,0.22);
+            border-radius: var(--r-sm);
+            font-family: inherit; font-size: 14px; color: #fff;
+            background: rgba(255,255,255,0.1); outline: none;
+            transition: border-color 0.13s, background 0.13s, box-shadow 0.13s;
+        }
+        .field-input.no-right-icon { padding-right: 0.875rem; }
+        .field-input:focus {
+            border-color: rgba(255,255,255,0.55);
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+        .field-input::placeholder { color: rgba(255,255,255,0.38); }
+        .field-input.has-error { border-color: #e74c3c; }
+
+        select.field-input { cursor: pointer; appearance: none; -webkit-appearance: none; }
+        select.field-input option { background: #0D2472; color: #fff; }
+
+        .pw-toggle {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: rgba(255,255,255,0.45); font-size: 20px; padding: 2px;
+            display: flex; align-items: center; border-radius: 6px;
+            transition: color 0.13s;
+        }
+        .pw-toggle:hover { color: #fff; }
+
+        .section-divider { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 1.25rem 0 1rem; }
+
+        .btn-register {
+            width: 100%; padding: 0.8rem;
+            background: var(--navy); color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: var(--r-sm);
+            font-family: inherit; font-size: 14.5px; font-weight: 800;
+            cursor: pointer; letter-spacing: 0.01em;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            transition: all 0.13s; box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+            margin-top: 0.25rem;
+        }
+        .btn-register:hover { background: var(--navy-dark); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+        .btn-register:active { transform: scale(0.98); }
+
+        .otp-note {
+            display: flex; align-items: flex-start; gap: 0.5rem;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: var(--r-sm); padding: 0.7rem 0.875rem;
+            font-size: 12.5px; color: rgba(255,255,255,0.7); line-height: 1.5;
+            margin-top: 0.875rem;
+        }
+        .otp-note .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; color: var(--gold); }
+
+        .login-row { text-align: center; margin-top: 1.25rem; font-size: 13px; color: rgba(255,255,255,0.55); }
+        .login-row a { color: var(--gold); font-weight: 700; text-decoration: none; }
+        .login-row a:hover { text-decoration: underline; }
+
+        .card-foot {
+            text-align: center; padding: 0 2rem 1.5rem;
+            font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.7;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="register-card">
-            <h2>Student Registration</h2>
-            <p class="subtitle">Create your attendance account</p>
-            
-            <div class="info-note">
-                <span class="iconify" data-icon="lucide:info" style="font-size: 16px;"></span>
-                <span>Your Student ID will be your username and password for login.</span>
+
+<div class="card">
+
+    <div class="card-top">
+        <div class="brand-icon">
+            <span class="iconify" data-icon="mdi:account-plus-outline"></span>
+        </div>
+        <h1>Create Your Account</h1>
+        <div class="card-top-sub">SWASA Attendance · Student Registration</div>
+
+        <div class="steps">
+            <div class="step-item active">
+                <div class="step-dot">1</div>
+                Your details
             </div>
-            
-            <form method="post">
-                {% csrf_token %}
-                
-                {% if form.non_field_errors %}
-                    <div class="form-error-alert">
-                        <span class="iconify" data-icon="lucide:alert-circle"></span>
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %}
-
-                <div class="name-row">
-                    <div class="field-wrapper">
-                        <label>First Name</label>
-                        <div class="input-relative">
-                            {{ form.first_name }}
-                            <span class="iconify field-icon" data-icon="lucide:user"></span>
-                        </div>
-                        {{ form.first_name.errors }}
-                    </div>
-                    <div class="field-wrapper">
-                        <label>Last Name</label>
-                        <div class="input-relative">
-                            {{ form.last_name }}
-                            <span class="iconify field-icon" data-icon="lucide:user"></span>
-                        </div>
-                        {{ form.last_name.errors }}
-                    </div>
-                </div>
-
-                <div class="field-wrapper">
-                    <label>Student ID</label>
-                    <div class="input-relative">
-                        {{ form.student_id }}
-                        <span class="iconify field-icon" data-icon="lucide:contact-2"></span>
-                    </div>
-                    <div class="help-text">This will be your username and password (e.g., 10809707)</div>
-                    {{ form.student_id.errors }}
-                </div>
-
-                <div class="field-wrapper">
-                    <label>Level</label>
-                    <div class="input-relative">
-                        {{ form.level }}
-                        <span class="iconify field-icon" data-icon="lucide:graduation-cap"></span>
-                    </div>
-                    {{ form.level.errors }}
-                </div>
-
-                <div class="field-wrapper">
-                    <label>Email (UG Email)</label>
-                    <div class="input-relative">
-                        {{ form.email }}
-                        <span class="iconify field-icon" data-icon="lucide:mail"></span>
-                    </div>
-                    <div class="help-text">Enter a valid email address (e.g., student@gmail.com)</div>
-                    {{ form.email.errors }}
-                </div>
-
-                <div class="field-wrapper">
-                    <label>Confirm Student ID</label>
-                    <div class="input-relative">
-                        {{ form.confirm_student_id }}
-                        <span class="iconify field-icon" data-icon="lucide:shield-check"></span>
-                        <button type="button" class="password-toggle" data-target="id_confirm_student_id">
-                            <span class="iconify eye-icon" data-icon="lucide:eye"></span>
-                        </button>
-                    </div>
-                    <div class="help-text">Re-enter your Student ID to confirm</div>
-                    {{ form.confirm_student_id.errors }}
-                </div>
-
-                <button type="submit">Register Now</button>
-
-                <div class="login-link">
-                    Already have an account? <a href="{% url 'login' %}">Login here</a>
-                </div>
-            </form>
+            <div class="step-line"></div>
+            <div class="step-item">
+                <div class="step-dot">2</div>
+                Verify email
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item">
+                <div class="step-dot">3</div>
+                Done
+            </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Password visibility toggles
-            document.querySelectorAll('.password-toggle').forEach(toggle => {
-                toggle.addEventListener('click', function () {
-                    const input = document.getElementById(this.getAttribute('data-target'));
-                    const icon = this.querySelector('.eye-icon');
-                    const isPass = input.type === 'password';
-                    input.type = isPass ? 'text' : 'password';
-                    icon.setAttribute('data-icon', isPass ? 'lucide:eye-off' : 'lucide:eye');
-                });
-            });
-        });
-    </script>
+    <div class="card-body">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="error-banner">
+            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+        <div class="error-banner">
+            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+            {{ form.non_field_errors|join:" " }}
+        </div>
+        {% endif %}
+
+        <form method="post" autocomplete="off" id="regForm" novalidate>
+            {% csrf_token %}
+
+            <div class="field-row">
+                <div class="field">
+                    <label class="field-label" for="id_full_name">Full Name</label>
+                    <div class="field-wrap">
+                        <span class="iconify field-icon" data-icon="mdi:account-outline"></span>
+                        {{ form.full_name }}
+                    </div>
+                    {% if form.full_name.errors %}
+                    <ul class="field-error">{% for e in form.full_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="id_student_id">Student ID</label>
+                    <div class="field-wrap">
+                        <span class="iconify field-icon" data-icon="mdi:card-account-details-outline"></span>
+                        {{ form.student_id }}
+                    </div>
+                    {% if form.student_id.errors %}
+                    <ul class="field-error">{% for e in form.student_id.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="id_level">Academic Level</label>
+                <div class="field-wrap">
+                    <span class="iconify field-icon" data-icon="mdi:school-outline"></span>
+                    {{ form.level }}
+                </div>
+                {% if form.level.errors %}
+                <ul class="field-error">{% for e in form.level.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="id_email">Email Address</label>
+                <div class="field-wrap">
+                    <span class="iconify field-icon" data-icon="mdi:email-outline"></span>
+                    {{ form.email }}
+                </div>
+                <div class="field-hint">A 6-digit verification code will be sent here after you register.</div>
+                {% if form.email.errors %}
+                <ul class="field-error">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="field">
+                <label class="field-label" for="id_password">Password</label>
+                <div class="field-wrap">
+                    <span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
+                    {{ form.password }}
+                    <button type="button" class="pw-toggle" onclick="togglePw('id_password', this)">
+                        <span class="iconify" data-icon="mdi:eye-outline"></span>
+                    </button>
+                </div>
+                <div class="field-hint">At least 8 characters. Cannot match your Student ID.</div>
+                {% if form.password.errors %}
+                <ul class="field-error">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="id_password2">Confirm Password</label>
+                <div class="field-wrap">
+                    <span class="iconify field-icon" data-icon="mdi:lock-check-outline"></span>
+                    {{ form.password2 }}
+                    <button type="button" class="pw-toggle" onclick="togglePw('id_password2', this)">
+                        <span class="iconify" data-icon="mdi:eye-outline"></span>
+                    </button>
+                </div>
+                {% if form.password2.errors %}
+                <ul class="field-error">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-register">
+                <span class="iconify" data-icon="mdi:arrow-right-circle-outline" style="font-size:18px;"></span>
+                Create Account
+            </button>
+
+            <div class="otp-note">
+                <span class="iconify" data-icon="mdi:numeric-6-box-outline"></span>
+                After submitting, we'll email you a 6-digit code to verify your account. Check your inbox — it arrives within a minute.
+            </div>
+
+            <div class="login-row">
+                Already have an account? <a href="{% url 'login' %}">Sign in</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-foot">
+        SWASA Attendance · University of Ghana<br>
+        Department of African and Asian Languages
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], select').forEach(function (el) {
+        el.classList.add('field-input');
+        if (el.type === 'password') return;
+        if (el.tagName === 'SELECT') el.classList.add('no-right-icon');
+    });
+});
+
+function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('.iconify');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-icon', 'mdi:eye-off-outline');
+    } else {
+        input.type = 'password';
+        icon.setAttribute('data-icon', 'mdi:eye-outline');
+    }
+}
+</script>
 </body>
 </html>

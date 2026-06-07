@@ -7,106 +7,153 @@ import re
 
 
 class StudentRegistrationForm(forms.ModelForm):
+    full_name = forms.CharField(max_length=100, required=True, label="Full Name")
     email = forms.EmailField(required=True)
     student_id = forms.CharField(max_length=50, required=True, label="Student ID Number")
     level = forms.ChoiceField(choices=[('100', 'Level 100'), ('200', 'Level 200'), ('300', 'Level 300'), ('400', 'Level 400')], required=True)
-    first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=30, required=True)
-    confirm_student_id = forms.CharField(max_length=50, required=True, label="Confirm Student ID", widget=forms.PasswordInput)
-    
+    password = forms.CharField(
+        min_length=8, required=True, label="Password",
+        widget=forms.PasswordInput(attrs={'minlength': '8'})
+    )
+    password2 = forms.CharField(
+        required=True, label="Confirm Password", widget=forms.PasswordInput
+    )
+
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
-    
+        fields = ['email']
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # Basic email validation (accepts any valid email - Gmail, Yahoo, Outlook, UG, etc.)
         if not email or '@' not in email or '.' not in email:
             raise forms.ValidationError("Please enter a valid email address.")
-        
-        # Optional: Add regex for stricter validation
+
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_regex, email):
             raise forms.ValidationError("Please enter a valid email address (e.g., name@example.com).")
-        
+
+        existing = User.objects.filter(email__iexact=email).first()
+        if existing:
+            if existing.is_active:
+                raise forms.ValidationError("An account with this email already exists. Please log in.")
+            else:
+                raise forms.ValidationError(
+                    "This email is registered but not yet verified. "
+                    "Check your inbox for the verification code."
+                )
         return email
-    
+
     def clean_student_id(self):
         student_id = self.cleaned_data.get('student_id')
-        if UserProfile.objects.filter(student_id_number=student_id).exists():
-            raise forms.ValidationError("This student ID is already registered")
+        existing = UserProfile.objects.filter(student_id_number=student_id).first()
+        if existing:
+            if existing.user.is_active:
+                raise forms.ValidationError("This student ID is already registered. Please log in.")
+            else:
+                raise forms.ValidationError(
+                    "This student ID is registered but email not yet verified. "
+                    "Check your inbox for the verification code."
+                )
         return student_id
-    
-    def clean_confirm_student_id(self):
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
         student_id = self.cleaned_data.get('student_id')
-        confirm = self.cleaned_data.get('confirm_student_id')
-        if student_id != confirm:
-            raise forms.ValidationError("Student ID does not match")
-        return confirm
-    
+        if password and student_id and password == student_id:
+            raise forms.ValidationError("Password cannot be the same as your Student ID.")
+        return password
+
+    def clean_password2(self):
+        password = self.cleaned_data.get('password')
+        password2 = self.cleaned_data.get('password2')
+        if password and password2 and password != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        return password2
+
     def save(self, commit=True):
         student_id = self.cleaned_data['student_id']
-        
+
+        full_name = self.cleaned_data['full_name'].strip()
+        parts = full_name.split(' ', 1)
         user = User(
             username=student_id,
             email=self.cleaned_data['email'],
-            first_name=self.cleaned_data['first_name'],
-            last_name=self.cleaned_data['last_name'],
-            is_active=True  # Changed to True - Account active immediately (no email verification needed)
+            first_name=parts[0],
+            last_name=parts[1] if len(parts) > 1 else '',
+            is_active=False,
         )
-        user.set_password(student_id)
-        
+        user.set_password(self.cleaned_data['password'])
+
         if commit:
             user.save()
             level_name = self.cleaned_data['level']
             level = Level.objects.get(name=level_name)
-            
+
             UserProfile.objects.create(
                 user=user,
                 level=level,
                 student_id_number=student_id,
                 student_email=self.cleaned_data['email'],
-                email_verified=True,  # Changed to True - Auto-verified
-                # email_verification_token removed since no verification needed
+                email_verified=True,
+                must_change_password=False,
             )
         return user
 
 
 class TARegistrationForm(UserCreationForm):
+    full_name = forms.CharField(max_length=100, required=True, label="Full Name")
     email = forms.EmailField(required=True)
-    phone_number = forms.CharField(max_length=15, required=True)
     assigned_levels = forms.ModelMultipleChoiceField(
         queryset=Level.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=True,
         label="Select the levels you will be teaching"
     )
-    first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=30, required=True)
-    
+
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
-    
+        fields = ['email', 'password1', 'password2']
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        # Basic email validation for TA as well
         if not email or '@' not in email or '.' not in email:
             raise forms.ValidationError("Please enter a valid email address.")
-        
+
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_regex, email):
             raise forms.ValidationError("Please enter a valid email address.")
-        
+
+        existing = User.objects.filter(email__iexact=email).first()
+        if existing:
+            if existing.is_active:
+                raise forms.ValidationError("An account with this email already exists.")
+            else:
+                raise forms.ValidationError(
+                    "This email is registered but not yet verified. "
+                    "Check your inbox for the verification code."
+                )
         return email
     
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
+
+        # Split full name into first/last
+        full_name = self.cleaned_data['full_name'].strip()
+        parts = full_name.split(' ', 1)
+        user.first_name = parts[0]
+        user.last_name = parts[1] if len(parts) > 1 else ''
+
+        # Auto-generate a unique username from the email prefix
+        base = self.cleaned_data['email'].split('@')[0]
+        username, n = base, 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base}{n}"
+            n += 1
+        user.username = username
+
         user.is_staff = False
-        user.is_active = True  # TA can login but needs approval to generate codes
+        user.is_active = False
 
         if commit:
             user.save()
@@ -114,8 +161,7 @@ class TARegistrationForm(UserCreationForm):
             user.groups.add(ta_group)
             profile = TAProfile.objects.create(
                 user=user,
-                phone_number=self.cleaned_data['phone_number'],
-                is_approved=False  # Requires admin approval
+                is_approved=False
             )
             profile.assigned_levels.add(*self.cleaned_data['assigned_levels'])
         return user

@@ -1,116 +1,208 @@
 {% extends "attendance/base.html" %}
-{% block title %}Support Center{% endblock %}
+{% block title %}Support{% endblock %}
 
 {% block content %}
 <style>
-    /* Inherit from dashboard base settings */
-    body { background: #F4F6FB !important; }
+:root {
+    --primary:    #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.10);
+    --amber:      #B8920C;
+    --amber-lt:   rgba(184,146,12,0.10);
+    --red:        #C0392B;
+    --red-lt:     rgba(192,57,43,0.09);
+    --blue:       #2563EB;
+    --blue-lt:    rgba(37,99,235,0.09);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
 
-    .dash-wrapper {
-        max-width: 580px;
-        margin: 0 auto;
-        padding: 0.5rem 0 2rem;
-    }
+.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-    /* Unified Header */
-    .dash-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
-    .dash-header h1 { font-size: 1.55rem; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.03em; }
-    .dash-header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+/* ─── Page header ─── */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
 
-    /* Card Styling */
-    .course-panel {
-        background: #FFFFFF;
-        border-radius: var(--radius-lg);
-        margin-bottom: 1.5rem;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-xs);
-        overflow: hidden;
-    }
-    .card-header-custom { 
-        padding: 1.25rem; border-bottom: 1px solid var(--border); 
-        font-weight: 700; color: var(--text-primary); font-size: 14px;
-    }
-    .card-body { padding: 1.25rem; }
+/* ─── Cards ─── */
+.card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1.125rem;
+    overflow: hidden;
+}
+.card-head {
+    padding: 1rem 1.25rem;
+    background: #F8F9FD;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px; font-weight: 800; color: var(--text);
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.card-head .iconify { font-size: 16px; color: var(--primary); }
+.card-body { padding: 1.25rem; }
 
-    /* Form Fields */
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    input, textarea {
-        width: 100%; padding: 0.75rem; border: 1px solid var(--border);
-        border-radius: var(--radius-sm); font-size: 14px; background: var(--bg-subtle);
-        box-sizing: border-box; transition: 0.2s;
-    }
-    input:focus, textarea:focus { outline: none; border-color: var(--navy); background: #FFFFFF; }
-    textarea { min-height: 100px; resize: vertical; }
+/* ─── Form ─── */
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.form-input, .form-textarea {
+    width: 100%;
+    padding: 0.65rem 0.875rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; color: var(--text);
+    background: #FAFBFD; outline: none; transition: border-color 0.13s;
+    box-sizing: border-box;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--primary); background: #fff; }
+.form-textarea { min-height: 110px; resize: vertical; }
 
-    .btn-submit {
-        background: var(--navy); color: #fff; width: 100%; padding: 0.75rem;
-        border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: 0.2s;
-    }
-    .btn-submit:hover { background: var(--navy-dark); }
+.btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+    transition: all 0.13s; box-shadow: 0 2px 6px rgba(13,36,114,0.22);
+    margin-top: 0.25rem;
+}
+.btn-submit:hover { background: #0a1b5c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.28); }
+.btn-submit:active { transform: scale(0.97); }
 
-    /* Ticket List */
-    .ticket-item { padding: 1rem 0; border-bottom: 1px solid var(--border); }
-    .ticket-item:last-child { border-bottom: none; }
-    .ticket-subject { font-weight: 700; font-size: 14px; display: block; margin-bottom: 0.25rem; }
-    .ticket-status { font-size: 10px; font-weight: 700; background: var(--bg-subtle); padding: 2px 8px; border-radius: 4px; color: var(--navy); }
-    .ticket-msg { font-size: 13px; color: var(--text-primary); margin: 0.5rem 0; line-height: 1.5; }
-    .admin-reply { 
-        margin-top: 0.75rem; padding: 0.75rem; background: var(--bg-subtle); 
-        border-left: 3px solid var(--navy); font-size: 13px; border-radius: 0 4px 4px 0;
-    }
+/* ─── Ticket list ─── */
+.ticket-list { display: flex; flex-direction: column; }
+.ticket-item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+.ticket-item:last-child { border-bottom: none; }
+
+.ticket-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
+.ticket-subject { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+.ticket-date { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+
+.status-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 99px;
+    white-space: nowrap; margin-bottom: 0.5rem;
+}
+.status-open     { background: var(--amber-lt); color: var(--amber); }
+.status-resolved { background: var(--green-lt); color: var(--green); }
+.status-replied  { background: var(--blue-lt);  color: var(--blue); }
+
+.ticket-msg { font-size: 13px; color: #4A5568; line-height: 1.6; }
+
+.admin-reply {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--primary-lt);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    font-size: 13px; color: var(--text); line-height: 1.6;
+}
+.admin-reply strong { font-size: 11px; font-weight: 800; color: var(--primary); display: block; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.empty-tickets {
+    text-align: center; padding: 2rem;
+}
+.empty-tickets .iconify { font-size: 2rem; color: var(--muted); display: block; margin-bottom: 0.5rem; }
+.empty-tickets p { color: var(--muted); font-size: 13px; font-weight: 500; }
 </style>
 
-<div class="dash-wrapper">
-    <div class="dash-header">
+<div class="wrap">
+
+    <div class="page-header">
         <h1>Support Center</h1>
-        <p>Need help? Submit a ticket and we'll get back to you.</p>
+        <div class="page-header-sub">Need help? Submit a ticket and we'll get back to you within 24–48 hours</div>
     </div>
 
-    <!-- Ticket Form -->
-    <div class="course-panel">
-        <div class="card-header-custom">New Ticket</div>
+    <!-- New ticket form -->
+    <div class="card">
+        <div class="card-head">
+            <span class="iconify" data-icon="mdi:ticket-outline"></span>
+            New Ticket
+        </div>
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <label class="form-label">Subject</label>
-                    {{ form.subject }}
+                    <input type="text" name="subject" class="form-input"
+                           placeholder="Brief description of your issue"
+                           value="{{ form.subject.value|default:'' }}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Message</label>
-                    {{ form.message }}
+                    <textarea name="message" class="form-textarea"
+                              placeholder="Describe your issue in detail…" required>{{ form.message.value|default:'' }}</textarea>
                 </div>
-                <button type="submit" class="btn-submit">Submit Ticket</button>
+                <button type="submit" class="btn-submit">
+                    <span class="iconify" data-icon="mdi:send-outline"></span>
+                    Submit Ticket
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Ticket History -->
-    <div class="course-panel">
-        <div class="card-header-custom">My Tickets</div>
-        <div class="card-body">
+    <!-- Ticket history -->
+    <div class="card">
+        <div class="card-head">
+            <span class="iconify" data-icon="mdi:history"></span>
+            My Tickets
+        </div>
+        <div class="ticket-list">
             {% for ticket in tickets %}
             <div class="ticket-item">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span class="ticket-subject">{{ ticket.subject }}</span>
-                    <span class="ticket-status">{{ ticket.get_status_display }}</span>
+                <div class="ticket-top">
+                    <div class="ticket-subject">{{ ticket.subject }}</div>
+                    <div class="ticket-date">{{ ticket.created_at|date:"d M Y" }}</div>
                 </div>
-                <p class="ticket-msg">{{ ticket.message }}</p>
-                <div style="font-size: 11px; color: var(--text-muted);">{{ ticket.created_at|date:"M d, Y" }}</div>
-                
+                <span class="status-badge
+                    {% if ticket.status == 'open' %}status-open
+                    {% elif ticket.status == 'resolved' %}status-resolved
+                    {% else %}status-replied{% endif %}">
+                    <span class="iconify"
+                        data-icon="{% if ticket.status == 'open' %}mdi:clock-outline{% elif ticket.status == 'resolved' %}mdi:check-circle{% else %}mdi:reply{% endif %}"
+                        style="font-size:12px;"></span>
+                    {{ ticket.get_status_display }}
+                </span>
+                <div class="ticket-msg">{{ ticket.message }}</div>
                 {% if ticket.admin_response %}
                 <div class="admin-reply">
-                    <strong>Response:</strong> {{ ticket.admin_response }}
+                    <strong>Admin Response</strong>
+                    {{ ticket.admin_response }}
                 </div>
                 {% endif %}
             </div>
             {% empty %}
-            <div style="text-align:center; color: var(--text-muted); font-size: 14px; padding: 1rem 0;">
-                No tickets opened yet.
+            <div class="empty-tickets">
+                <span class="iconify" data-icon="mdi:ticket-outline"></span>
+                <p>No tickets submitted yet.</p>
             </div>
             {% endfor %}
         </div>
     </div>
+
 </div>
 {% endblock %}

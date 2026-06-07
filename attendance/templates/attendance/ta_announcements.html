@@ -1,0 +1,332 @@
+{% extends "attendance/base.html" %}
+{% block title %}Announcements{% endblock %}
+
+{% block content %}
+<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+
+<style>
+:root {
+    --primary:    #0D2472;
+    --primary-dk: #091A55;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.10);
+    --green-bd:   rgba(26,158,96,0.25);
+    --red:        #DC2626;
+    --red-lt:     rgba(220,38,38,0.08);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+/* ─── Header ─── */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    color: rgba(255,255,255,0.72); font-size: 12px; font-weight: 600;
+    text-decoration: none; margin-bottom: 0.75rem; transition: color 0.13s;
+}
+.back-link:hover { color: #fff; }
+.page-header h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+
+/* ─── Alerts ─── */
+.alert {
+    padding: 0.875rem 1rem; border-radius: var(--r-lg); margin-bottom: 1rem;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.alert-success { background: var(--green-lt); color: var(--green); border: 1px solid var(--green-bd); }
+.alert-error   { background: var(--red-lt);   color: var(--red);   border: 1px solid rgba(220,38,38,0.2); }
+
+/* ─── Compose card ─── */
+.compose-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+.compose-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 13px; font-weight: 700; color: var(--text);
+}
+.compose-card-header .iconify { color: var(--primary); font-size: 16px; }
+.compose-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+label.field-label {
+    display: block;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.07em; margin-bottom: 0.4rem;
+}
+
+.field-input, .field-textarea {
+    width: 100%;
+    padding: 0.65rem 0.875rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 13.5px; font-family: inherit; color: var(--text);
+    background: var(--surface); outline: none;
+    transition: border-color 0.13s, box-shadow 0.13s;
+}
+.field-input:focus, .field-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
+}
+html[data-theme="dark"] .field-input:focus,
+html[data-theme="dark"] .field-textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(242,195,26,0.15);
+}
+html[data-theme="dark"] .compose-card-header .iconify,
+html[data-theme="dark"] .preview-strip .iconify { color: var(--gold); opacity: 0.85; }
+html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var(--gold); background: rgba(242,195,26,0.08); }
+.field-textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
+
+/* ─── Level checkboxes (target audience) ─── */
+.levels-grid {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+}
+.lvl-opt { position: relative; }
+.lvl-opt input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.lvl-label {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.35rem 0.875rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9999px;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    background: var(--bg);
+    cursor: pointer; transition: all 0.13s; user-select: none;
+}
+.lvl-label:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-lt); }
+.lvl-opt input:checked + .lvl-label {
+    background: var(--primary); border-color: var(--primary); color: #fff;
+}
+
+.char-count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 0.25rem; }
+.char-count.warn { color: #B8920C; }
+.char-count.over { color: var(--red); }
+
+/* ─── Preview strip ─── */
+.preview-strip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.75rem 0.875rem;
+    font-size: 12.5px; color: var(--muted);
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.preview-strip .iconify { flex-shrink: 0; font-size: 15px; color: var(--primary); opacity: 0.7; }
+
+/* ─── Send button ─── */
+.btn-send {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-lg);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.13s;
+    box-shadow: 0 2px 8px rgba(13,36,114,0.2);
+    align-self: flex-end;
+}
+.btn-send:hover { background: var(--primary-dk); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,36,114,0.25); }
+.btn-send:active { transform: scale(0.98); }
+
+/* ─── History ─── */
+.history-label {
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.history-label .iconify { font-size: 13px; }
+
+.announcement-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--sh-sm);
+}
+.ann-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;
+}
+.ann-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.ann-meta  { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.ann-message {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word;
+}
+.ann-footer {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-top: 0.75rem; flex-wrap: wrap;
+}
+.ann-badge {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-size: 11px; font-weight: 700;
+    padding: 3px 9px; border-radius: 9999px;
+    background: var(--green-lt); color: var(--green);
+    border: 1px solid var(--green-bd);
+}
+.ann-level-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 9999px;
+    background: var(--primary-lt); color: var(--primary);
+    border: 1px solid rgba(13,36,114,0.15);
+}
+html[data-theme="dark"] .ann-level-badge {
+    color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
+}
+
+/* Empty history */
+.empty-hist {
+    text-align: center; padding: 2.5rem 1.5rem;
+    background: var(--surface); border-radius: var(--r-lg);
+    border: 1.5px dashed var(--border);
+    color: var(--muted); font-size: 13px;
+}
+.empty-hist strong { display: block; margin-bottom: 0.3rem; font-size: 14px; color: var(--text); }
+</style>
+
+<div class="wrap">
+
+    <div class="page-header">
+        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+        </a>
+        <h1>Send Announcement</h1>
+        <div class="page-header-sub">Notify your students about important updates</div>
+    </div>
+
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+        <span class="iconify" data-icon="{% if message.tags == 'error' %}mdi:alert-circle-outline{% else %}mdi:check-circle-outline{% endif %}"></span>
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    <!-- Compose form -->
+    <div class="compose-card">
+        <div class="compose-card-header">
+            <span class="iconify" data-icon="mdi:pencil-outline"></span>
+            Compose Announcement
+        </div>
+        <form method="post" class="compose-body">
+            {% csrf_token %}
+
+            <div>
+                <label class="field-label">Subject / Title</label>
+                <input type="text" name="title" class="field-input"
+                       placeholder="e.g. Assignment reminder, Class reschedule…"
+                       maxlength="200" required>
+            </div>
+
+            <div>
+                <label class="field-label">Message</label>
+                <textarea name="message" class="field-textarea"
+                          placeholder="Write your announcement here…"
+                          id="msgBody" oninput="updateCharCount(this)"></textarea>
+                <div class="char-count" id="charCount">0 characters</div>
+            </div>
+
+            <div>
+                <label class="field-label">Send To (leave all unchecked to send to all your levels)</label>
+                <div class="levels-grid">
+                    {% for level in assigned_levels %}
+                    <div class="lvl-opt">
+                        <input type="checkbox" name="levels" value="{{ level.id }}" id="lv-{{ level.id }}">
+                        <label class="lvl-label" for="lv-{{ level.id }}">
+                            <span class="iconify" data-icon="mdi:school-outline"></span>
+                            Level {{ level.name }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="font-size:11.5px;color:var(--muted);margin-top:0.5rem;">
+                    If none selected, the announcement is sent to all students in all your levels.
+                </div>
+            </div>
+
+            <div class="preview-strip">
+                <span class="iconify" data-icon="mdi:email-outline"></span>
+                Students will receive this as an email with subject <strong>&ldquo;[SWASA] Your Title&rdquo;</strong>
+            </div>
+
+            <button type="submit" class="btn-send">
+                <span class="iconify" data-icon="mdi:send"></span>
+                Send Announcement
+            </button>
+        </form>
+    </div>
+
+    <!-- History -->
+    <div class="history-label">
+        <span class="iconify" data-icon="mdi:history"></span>
+        Previously Sent
+    </div>
+
+    {% if past %}
+        {% for ann in past %}
+        <div class="announcement-card">
+            <div class="ann-top">
+                <div class="ann-title">{{ ann.title }}</div>
+                <div class="ann-meta">{{ ann.sent_at|date:"N j, Y · g:i A" }}</div>
+            </div>
+            <div class="ann-message">{{ ann.message }}</div>
+            <div class="ann-footer">
+                <span class="ann-badge">
+                    <span class="iconify" data-icon="mdi:account-group-outline"></span>
+                    {{ ann.recipient_count }} recipient{{ ann.recipient_count|pluralize }}
+                </span>
+                {% for level in ann.target_levels.all %}
+                <span class="ann-level-badge">Level {{ level.name }}</span>
+                {% empty %}
+                <span class="ann-level-badge">All Levels</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-hist">
+        <strong>No announcements sent yet</strong>
+        Use the form above to send your first announcement.
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function updateCharCount(el) {
+    const n = el.value.length;
+    const counter = document.getElementById('charCount');
+    counter.textContent = n + ' character' + (n !== 1 ? 's' : '');
+    counter.className = 'char-count' + (n > 1000 ? ' warn' : '');
+}
+</script>
+{% endblock %}

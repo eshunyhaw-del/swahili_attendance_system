@@ -3,764 +3,772 @@
 
 {% block content %}
 <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        background: #F4F6FB !important;
-        background-image: none !important;
-    }
-
-    :root {
-        --primary:        #0D2472;
-        --primary-hover:  #091A55;
-        --primary-light:  rgba(13,36,114,0.07);
-        --surface:        #FFFFFF;
-        --bg-main:        #F4F6FB;
-        --text-main:      #0D1B3E;
-        --text-muted:     #8896AB;
-        --border:         #E4E9F2;
-
-        --success:        #1E9E5E;
-        --success-light:  rgba(30,158,94,0.1);
-        --warning:        #C9A00E;
-        --warning-light:  rgba(242,195,26,0.12);
-        --info:           #4A90D9;
-        --info-light:     rgba(74,144,217,0.1);
-
-        --shadow-sm: 0 1px 2px rgba(13,36,114,0.06);
-        --shadow-md: 0 4px 12px rgba(13,36,114,0.1);
-        --shadow-lg: 0 8px 24px rgba(13,36,114,0.12);
-
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 20px;
-
-        --transition: all 0.15s ease;
-    }
-
-    .dash-wrapper {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 0.5rem 0 3rem;
-        font-family: 'DM Sans', 'Plus Jakarta Sans', system-ui, sans-serif;
-        color: var(--text-main);
-        background-color: var(--bg-main);
-        min-height: 100vh;
-    }
-
-    /* ── Header ── */
-    .dash-header {
-        margin-bottom: 1.5rem;
-        background: var(--surface);
-        padding: 1.75rem;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .dash-header::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #0D2472, #1B3A9C, #F2C31A);
-    }
-
-    .dash-header h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-        letter-spacing: -0.02em;
-        color: var(--text-main);
-    }
-
-    .dash-header p {
-        color: var(--text-muted);
-        font-size: 13px;
-        margin-bottom: 1rem;
-    }
-
-    .level-badges {
-        display: inline-flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        align-items: center;
-        background: var(--bg-main);
-        padding: 0.5rem 0.875rem;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-    }
-
-    .level-badge {
-        background: var(--surface);
-        color: var(--primary);
-        padding: 3px 10px;
-        border-radius: 9999px;
-        font-size: 11px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border);
-    }
-
-    /* ── Stats ── */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        padding: 1.25rem;
-        border: 1px solid var(--border);
-        border-left: 4px solid transparent;
-        box-shadow: var(--shadow-sm);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: var(--transition);
-    }
-
-    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-    .stat-card:nth-child(1) { border-left-color: #0D2472; }
-    .stat-card:nth-child(2) { border-left-color: #1E9E5E; }
-    .stat-card:nth-child(3) { border-left-color: #4A90D9; }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: var(--radius-sm);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        flex-shrink: 0;
-    }
-
-    .stat-icon.generated { background: rgba(13,36,114,0.08);  color: #0D2472; }
-    .stat-icon.used      { background: var(--success-light);  color: var(--success); }
-    .stat-icon.students  { background: var(--info-light);     color: var(--info); }
-
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-        color: var(--text-main);
-        font-family: 'DM Mono', monospace;
-    }
-
-    .stat-label {
-        font-size: 10px;
-        color: var(--text-muted);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin-top: 3px;
-    }
-
-    /* ── Course Section ── */
-    .course-section { margin-bottom: 2.5rem; }
-
-    .course-title {
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        color: var(--text-main);
-        letter-spacing: -0.01em;
-    }
-
-    .course-title .iconify {
-        color: #0D2472;
-        background: rgba(13,36,114,0.08);
-        padding: 0.35rem;
-        border-radius: var(--radius-sm);
-        font-size: 20px;
-    }
-
-    /* ── Week selector ── */
-    .week-selector {
-        display: inline-flex;
-        gap: 3px;
-        margin-bottom: 1.25rem;
-        padding: 4px;
-        background: #EEF1F8;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
-        flex-wrap: wrap;
-    }
-
-    .week-btn {
-        padding: 0.45rem 1rem;
-        border-radius: var(--radius-sm);
-        border: none;
-        background: transparent;
-        color: var(--text-muted);
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 600;
-        transition: var(--transition);
-        font-family: inherit;
-    }
-
-    .week-btn:hover:not(.active) { color: var(--text-main); background: rgba(255,255,255,0.6); }
-
-    .week-btn.active {
-        background: var(--surface);
-        color: #0D2472;
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border);
-    }
-
-    /* ── Session Card ── */
-    .session-card {
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border);
-        overflow: hidden;
-    }
-
-    .session-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 1.25rem;
-        background: #EEF1F8;
-        border-bottom: 1px solid var(--border);
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .session-meta strong {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text-main);
-        display: block;
-        margin-bottom: 0.3rem;
-    }
-
-    .session-meta small {
-        color: var(--text-muted);
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        margin-right: 1rem;
-        font-weight: 500;
-    }
-
-    .session-meta small .iconify { color: #0D2472; opacity: 0.6; }
-
-    /* ── Buttons ── */
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-        border: none;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        font-weight: 600;
-        transition: var(--transition);
-        font-family: inherit;
-    }
-
-    .btn:active { transform: scale(0.97); }
-
-    .generate-all-btn {
-        background: #1E9E5E;
-        color: white;
-        padding: 0.6rem 1.1rem;
-        font-size: 13px;
-        box-shadow: 0 1px 3px rgba(30,158,94,0.25);
-    }
-
-    .generate-all-btn:hover { background: #167a48; box-shadow: 0 3px 8px rgba(30,158,94,0.3); }
-
-    .generate-one-btn {
-        background: #0D2472;
-        color: white;
-        padding: 0.4rem 0.875rem;
-        font-size: 12px;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .generate-one-btn:hover { background: #091A55; }
-
-    .generate-one-btn.outline {
-        background: transparent;
-        color: #0D2472;
-        border: 1.5px solid #C8D0E0;
-        box-shadow: none;
-    }
-
-    .generate-one-btn.outline:hover { border-color: #0D2472; background: rgba(13,36,114,0.05); }
-
-    /* ── Table Controls ── */
-    .table-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.875rem 1.25rem;
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .search-wrapper {
-        position: relative;
-        flex: 1;
-        min-width: 220px;
-        max-width: 360px;
-    }
-
-    .search-wrapper .iconify {
-        position: absolute;
-        left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
-        font-size: 1.1rem;
-        pointer-events: none;
-    }
-
-    .search-input {
-        width: 100%;
-        padding: 0.55rem 0.875rem 0.55rem 2.4rem;
-        border: 1.5px solid #C8D0E0;
-        border-radius: var(--radius-sm);
-        font-family: inherit;
-        font-size: 13px;
-        outline: none;
-        color: var(--text-main);
-        background: #EEF1F8;
-        transition: var(--transition);
-    }
-
-    .search-input:focus {
-        border-color: #0D2472;
-        background: var(--surface);
-        box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
-    }
-
-    .search-input::placeholder { color: var(--text-muted); }
-
-    .status-filters {
-        display: flex;
-        gap: 2px;
-        background: #EEF1F8;
-        padding: 3px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-    }
-
-    .filter-btn {
-        padding: 0.35rem 0.75rem;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
-        cursor: pointer;
-        transition: var(--transition);
-        font-family: inherit;
-    }
-
-    .filter-btn:hover:not(.active) { color: var(--text-main); background: rgba(255,255,255,0.5); }
-
-    .filter-btn.active {
-        background: var(--surface);
-        color: #0D2472;
-        box-shadow: var(--shadow-sm);
-    }
-
-    /* ── Table ── */
-    .table-responsive {
-        overflow-x: auto;
-        width: 100%;
-        min-height: 400px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .students-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-
-    .students-table th {
-        background: #EEF1F8;
-        color: var(--text-muted);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-weight: 600;
-        padding: 0.75rem 1rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .students-table td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--border);
-        vertical-align: middle;
-        font-size: 13px;
-        transition: background 0.12s;
-    }
-
-    .students-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
-    .students-table tbody tr:last-child td { border-bottom: none; }
-
-    /* ── Loading state ── */
-    .loading-spinner {
-        text-align: center;
-        padding: 3rem;
-        color: var(--text-muted);
-    }
-    
-    .loading-spinner .iconify {
-        animation: spin 1s linear infinite;
-        margin-bottom: 0.5rem;
-    }
-    
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* ── Code display ── */
-    .code-display {
-        font-family: 'JetBrains Mono', 'Fira Code', 'DM Mono', 'Courier New', monospace;
-        font-weight: 700;
-        background: #EEF1F8;
-        color: var(--text-main);
-        padding: 3px 10px;
-        border-radius: var(--radius-sm);
-        letter-spacing: 1.5px;
-        border: 1px solid var(--border);
-        font-size: 13px;
-    }
-
-    /* ── Badges ── */
-    .badge {
-        padding: 3px 10px;
-        border-radius: 9999px;
-        font-size: 11px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    .badge-used        { background: var(--success-light);  color: var(--success); }
-    .badge-pending     { background: var(--warning-light);  color: var(--warning); }
-    .badge-distributed { background: var(--info-light);     color: var(--info); }
-    .badge-empty       { background: #EEF1F8; color: var(--text-muted); border: 1px solid var(--border); }
-
-    /* ── Pagination ── */
-    .pagination-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.875rem 1.25rem;
-        background: var(--surface);
-        border-top: 1px solid var(--border);
-    }
-
-    .page-info { color: var(--text-muted); font-size: 12px; font-weight: 500; }
-    .page-controls { display: flex; gap: 0.4rem; }
-
-    .page-btn {
-        padding: 0.4rem 0.875rem;
-        border: 1px solid var(--border);
-        background: var(--surface);
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        color: #4A5568;
-        font-weight: 600;
-        transition: var(--transition);
-        font-size: 12px;
-        font-family: inherit;
-    }
-
-    .page-btn:hover:not(:disabled) { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
-    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    /* ── Empty state ── */
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: var(--text-muted);
-        background: var(--surface);
-        border-radius: var(--radius-lg);
-        border: 2px dashed #C8D0E0;
-    }
-
-    .empty-state h3 { color: var(--text-main); font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
-
-    /* ── Custom Modal Styles ── */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(13,27,62,0.5);
-        backdrop-filter: blur(6px);
-        z-index: 2000;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-    }
-
-    .modal-card {
-        background: var(--surface);
-        border-radius: var(--radius-xl);
-        max-width: 380px;
-        width: 100%;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 24px 48px rgba(13,27,62,0.2);
-        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
-    }
-
-    .modal-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.25rem;
-        font-size: 28px;
-    }
-
-    .modal-icon.confirm { background: rgba(13,36,114,0.1); color: var(--primary); }
-    .modal-icon.error   { background: rgba(192,57,43,0.1); color: #C0392B; }
-    .modal-icon.success { background: rgba(30,158,94,0.1); color: var(--success); }
-
-    .modal-card h3 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: var(--text-main);
-    }
-
-    .modal-card p {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-bottom: 1.5rem;
-        line-height: 1.5;
-    }
-
-    .modal-buttons {
-        display: flex;
-        gap: 0.75rem;
-        justify-content: center;
-    }
-
-    .modal-btn {
-        padding: 0.6rem 1.25rem;
-        border-radius: var(--radius-sm);
-        font-weight: 600;
-        font-size: 13px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.15s;
-    }
-
-    .modal-btn-primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .modal-btn-primary:hover {
-        background: var(--primary-hover);
-        transform: translateY(-1px);
-    }
-
-    .modal-btn-secondary {
-        background: var(--bg-main);
-        color: var(--text-main);
-        border: 1px solid var(--border);
-    }
-
-    .modal-btn-secondary:hover {
-        background: var(--border);
-    }
-
-    .modal-btn-danger {
-        background: #C0392B;
-        color: white;
-    }
-
-    .modal-btn-danger:hover {
-        background: #A93226;
-    }
-
-    .toast-success {
-        position: fixed;
-        top: 72px;
-        right: 1.25rem;
-        padding: 0.7rem 1.1rem;
-        border-radius: var(--radius-md);
-        z-index: 2000;
-        animation: fadeInOut 2.2s ease forwards;
-        background: rgba(30,158,94,0.1);
-        color: #1E9E5E;
-        border: 1px solid rgba(30,158,94,0.2);
-        box-shadow: var(--shadow-md);
-        font-weight: 600;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 280px;
-    }
-
-    /* Pending Approval Banner */
-    .pending-approval-banner {
-        background: #FEF3C7;
-        border-left: 4px solid #F2C31A;
-        padding: 1rem 1.25rem;
-        border-radius: var(--radius-md);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .pending-approval-banner .iconify {
-        color: #C9A00E;
-        font-size: 1.25rem;
-    }
-
-    .pending-approval-banner p {
-        margin: 0;
-        color: #7A5C00;
-        font-weight: 500;
-    }
-
-    @keyframes fadeInOut {
-        0%   { opacity: 0; transform: translateY(-12px); }
-        12%  { opacity: 1; transform: translateY(0); }
-        85%  { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-12px); }
-    }
-
-    @keyframes scaleUp {
-        from { transform: scale(0.94) translateY(8px); opacity: 0; }
-        to   { transform: scale(1) translateY(0);      opacity: 1; }
-    }
+:root {
+    --primary:      #0D2472;
+    --primary-dk:   #091A55;
+    --primary-lt:   rgba(13,36,114,0.07);
+    --gold:         #F2C31A;
+    --surface:      #FFFFFF;
+    --bg:           #EEF1F8;
+    --text:         #0D1B3E;
+    --muted:        #8896AB;
+    --border:       #DDE3EF;
+    --green:        #1A9E60;
+    --green-lt:     rgba(26,158,96,0.1);
+    --amber:        #B8920C;
+    --amber-lt:     rgba(242,195,26,0.13);
+    --blue:         #2563EB;
+    --blue-lt:      rgba(37,99,235,0.09);
+    --red:          #DC2626;
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+    --sh-lg: 0 8px 28px rgba(13,36,114,0.14);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+
+.ta-wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+/* ─── Header ─── */
+.ta-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff;
+    border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.125rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--sh-md);
+}
+
+.ta-header::before {
+    content: '';
+    position: absolute; top: -50px; right: -40px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+}
+
+.ta-header::after {
+    content: '';
+    position: absolute; bottom: -60px; left: 35%;
+    width: 170px; height: 170px;
+    background: rgba(242,195,26,0.07);
+    border-radius: 50%;
+}
+
+.ta-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
+.ta-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+
+.level-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.875rem; }
+.level-pill {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 9999px;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+}
+
+/* ─── Stats ─── */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.375rem;
+}
+
+.stat-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
+
+.stat-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 21px; flex-shrink: 0;
+}
+
+.stat-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
+.stat-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
+
+/* ─── Course card ─── */
+.course-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.course-header {
+    padding: 1rem 1.25rem;
+    background: linear-gradient(90deg, #0D2472 0%, #1B3A9C 100%);
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    color: #fff;
+}
+
+.course-icon {
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+}
+
+.course-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+
+.course-code {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 10.5px; font-weight: 700;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 2px 9px;
+    border-radius: 9999px;
+}
+
+.course-sessions-count {
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 600;
+    opacity: 0.75;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+/* ─── Week tabs ─── */
+.week-tabs-bar {
+    background: #F4F6FC;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.25rem 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.week-tabs-bar::-webkit-scrollbar { display: none; }
+
+.week-tabs {
+    display: flex;
+    gap: 4px;
+    min-width: max-content;
+    padding-bottom: 0.75rem;
+}
+
+.week-tab {
+    padding: 0.45rem 0.875rem;
+    border-radius: var(--r-sm);
+    border: 1.5px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.13s;
+    text-align: center;
+    min-width: 68px;
+    line-height: 1.25;
+}
+
+.week-tab:hover:not(.active) {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.week-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(13,36,114,0.28);
+}
+
+.wk-num { display: block; font-size: 12px; font-weight: 700; }
+.wk-date { display: block; font-size: 10px; font-weight: 500; margin-top: 1px; opacity: 0.72; }
+.week-tab.active .wk-date { opacity: 0.82; }
+
+/* ─── Session panel ─── */
+.session-panel { display: none; }
+.session-panel.active { display: block; }
+
+/* ─── Session info bar ─── */
+.session-info-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.session-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    padding: 4px 10px;
+    background: #F0F3FA;
+    border-radius: 9999px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.chip .iconify { color: var(--primary); opacity: 0.65; font-size: 13px; }
+
+.chip-topic {
+    color: var(--primary);
+    background: var(--primary-lt);
+    border-color: rgba(13,36,114,0.13);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chip-students { color: var(--blue); background: var(--blue-lt); border-color: rgba(37,99,235,0.15); }
+.chip-students .iconify { color: var(--blue); opacity: 1; }
+
+.btn-gen-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.1rem;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-sm);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.13s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(26,158,96,0.3);
+}
+
+.btn-gen-all:hover { background: #148050; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(26,158,96,0.35); }
+.btn-gen-all:active { transform: scale(0.97); }
+
+.session-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+
+.btn-export-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.1rem;
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--r-sm);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.13s;
+    white-space: nowrap;
+    text-decoration: none;
+}
+.btn-export-csv:hover { background: var(--primary); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.18); }
+.btn-export-csv:active { transform: scale(0.97); }
+
+/* ─── Table controls ─── */
+.table-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.7rem 1.25rem;
+    background: #F8F9FD;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.search-box { position: relative; flex: 1; min-width: 160px; max-width: 300px; }
+.search-box .iconify {
+    position: absolute; left: 0.6rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted); font-size: 1rem; pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.48rem 0.875rem 0.48rem 2rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 12.5px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.13s, box-shadow 0.13s;
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
+}
+.search-input::placeholder { color: var(--muted); }
+
+.filter-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--border);
+    padding: 2px;
+    border-radius: var(--r-sm);
+}
+
+.filter-tab {
+    padding: 0.3rem 0.7rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.11s;
+    white-space: nowrap;
+}
+
+.filter-tab:hover:not(.active) { background: rgba(255,255,255,0.55); color: var(--text); }
+.filter-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
+
+/* ─── Table ─── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.student-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+
+.student-table th {
+    background: #EEF1F8;
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.student-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #F0F3FA;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.student-table tbody tr:last-child td { border-bottom: none; }
+.student-table tbody tr:hover td { background: rgba(13,36,114,0.018); }
+
+.cell-num { color: var(--muted); font-size: 11px; font-weight: 700; }
+.cell-name { font-weight: 700; color: var(--text); }
+.cell-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 500; }
+
+.code-chip {
+    font-family: 'DM Mono', monospace;
+    font-weight: 700;
+    background: #EEF1F8;
+    color: var(--text);
+    padding: 3px 10px;
+    border-radius: var(--r-sm);
+    letter-spacing: 1.5px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-used     { background: var(--green-lt);  color: var(--green); }
+.badge-given    { background: var(--blue-lt);   color: var(--blue); }
+.badge-pending  { background: var(--amber-lt);  color: var(--amber); }
+.badge-none     { background: #EEF1F8; color: var(--muted); border: 1px solid var(--border); }
+
+/* ─── Action buttons ─── */
+.btn-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.38rem 0.875rem;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+    box-shadow: 0 1px 3px rgba(26,158,96,0.25);
+}
+
+.btn-generate:hover { background: #148050; }
+
+.btn-mark-given {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.38rem 0.875rem;
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid #C8D0E0;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+}
+
+.btn-mark-given:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* ─── Loading ─── */
+.loading-state {
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.spinner {
+    width: 26px; height: 26px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    margin: 0 auto 0.75rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Pagination ─── */
+.pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: #F8F9FD;
+    font-size: 12px;
+}
+
+.page-info { color: var(--muted); font-weight: 500; }
+.page-btns { display: flex; gap: 0.4rem; }
+
+.page-btn {
+    padding: 0.35rem 0.875rem;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    transition: all 0.12s;
+}
+
+.page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Empty states ─── */
+.empty-table-row td {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.empty-dash {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 2px dashed var(--border);
+}
+
+.empty-dash h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+.empty-dash p  { font-size: 13px; color: var(--muted); }
+
+/* ─── Modals ─── */
+.modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(5,15,45,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center; justify-content: center;
+    padding: 1.5rem;
+}
+
+.modal-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    max-width: 360px;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--sh-lg);
+    animation: modalIn 0.2s cubic-bezier(0.34,1.46,0.64,1) forwards;
+}
+
+.modal-icon {
+    width: 52px; height: 52px;
+    border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; font-size: 26px;
+}
+
+.modal-icon.confirm { background: rgba(13,36,114,0.08); color: var(--primary); }
+.modal-icon.error   { background: rgba(220,38,38,0.09); color: var(--red); }
+
+.modal-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.modal-card p  { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 1.5rem; }
+.modal-actions { display: flex; gap: 0.6rem; justify-content: center; }
+
+.modal-btn {
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--r-sm);
+    font-weight: 700; font-size: 13px;
+    border: none; cursor: pointer; font-family: inherit;
+    transition: all 0.12s;
+}
+
+.modal-btn-primary   { background: var(--primary); color: #fff; }
+.modal-btn-primary:hover  { background: var(--primary-dk); }
+.modal-btn-secondary { background: #F0F3FA; color: var(--text); border: 1px solid var(--border); }
+.modal-btn-secondary:hover { background: var(--border); }
+
+/* ─── Toast ─── */
+.toast-msg {
+    position: fixed; top: 72px; right: 1.25rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--r-md);
+    z-index: 3000;
+    animation: toastAnim 2.6s ease forwards;
+    background: rgba(26,158,96,0.1);
+    color: var(--green);
+    border: 1px solid rgba(26,158,96,0.22);
+    box-shadow: var(--sh-md);
+    font-weight: 700; font-size: 12.5px;
+    display: flex; align-items: center; gap: 0.4rem;
+    max-width: 260px;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.94) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0);      opacity: 1; }
+}
+
+@keyframes toastAnim {
+    0%   { opacity: 0; transform: translateY(-10px); }
+    10%  { opacity: 1; transform: translateY(0); }
+    82%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+@media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stats-row .stat-card:last-child { grid-column: span 2; }
+    .session-info-bar { flex-direction: column; align-items: flex-start; }
+    .session-actions { width: 100%; }
+    .btn-gen-all, .btn-export-csv { flex: 1; justify-content: center; }
+    .ta-header h1 { font-size: 1.15rem; }
+}
 </style>
 
-<div class="dash-wrapper">
-    <div class="dash-header">
-        <h1>TA Dashboard</h1>
-        <p>Welcome back, {{ user.get_full_name|default:user.username }}</p>
-        <div class="level-badges">
-            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Assigned Levels:</span>
-            {% for level in assigned_levels %}
-                <span class="level-badge">
-                    <span class="iconify" data-icon="mdi:check-decagram"></span>
+<div class="ta-wrap">
+
+    <!-- ── Header ── -->
+    <div class="ta-header">
+        <div>
+            <h1>TA Dashboard</h1>
+            <div class="ta-header-sub">Welcome back, {{ user.get_full_name|default:user.username }}</div>
+            <div class="level-pills">
+                {% for level in assigned_levels %}
+                <span class="level-pill">
+                    <span class="iconify" data-icon="mdi:school-outline"></span>
                     Level {{ level.name }}
                 </span>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <!-- Pending Approval Banner - Show only if TA is not approved -->
-    {% if ta_profile and not ta_profile.is_approved %}
-    <div class="pending-approval-banner">
-        <span class="iconify" data-icon="mdi:clock-alert-outline"></span>
-        <p>
-            <strong>Account Pending Approval</strong> — Your TA account is awaiting admin approval. 
-            You will be notified via email once approved. You cannot generate codes until then.
-        </p>
-    </div>
-    {% endif %}
+    {% if ta_profile.is_approved %}
 
-    <!-- Only show dashboard content if TA is approved -->
-    {% if ta_profile and ta_profile.is_approved %}
-    <div class="stats-grid">
+    <!-- ── Stats ── -->
+    <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-icon generated"><span class="iconify" data-icon="mdi:barcode-scan"></span></div>
-            <div class="stat-info"><div class="stat-value">{{ total_codes_generated }}</div><div class="stat-label">Codes Generated</div></div>
+            <div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
+                <span class="iconify" data-icon="mdi:barcode-scan"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_codes_generated }}</div>
+                <div class="stat-label">Codes Generated</div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon used"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-            <div class="stat-info"><div class="stat-value">{{ total_codes_used }}</div><div class="stat-label">Codes Used</div></div>
+            <div class="stat-icon" style="background:var(--green-lt);color:var(--green);">
+                <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_codes_used }}</div>
+                <div class="stat-label">Codes Used</div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon students"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
-            <div class="stat-info"><div class="stat-value">{{ total_students }}</div><div class="stat-label">Total Students</div></div>
+            <div class="stat-icon" style="background:var(--blue-lt);color:var(--blue);">
+                <span class="iconify" data-icon="mdi:account-group-outline"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_students }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
         </div>
     </div>
 
+    <!-- ── Course cards ── -->
     {% for course_id, course_data in sessions_by_course.items %}
-    <div class="course-section">
-        <div class="course-title">
-            <span class="iconify" data-icon="mdi:book-open-variant"></span>
-            {{ course_data.course.code }} - {{ course_data.course.name }}
+    <div class="course-card">
+
+        <!-- Course header -->
+        <div class="course-header">
+            <div class="course-icon">
+                <span class="iconify" data-icon="mdi:book-open-variant"></span>
+            </div>
+            <div>
+                <div class="course-name">{{ course_data.course.name }}</div>
+                <span class="course-code">{{ course_data.course.code }}</span>
+            </div>
+            <div class="course-sessions-count">
+                {{ course_data.sessions|length }} session{{ course_data.sessions|length|pluralize }}
+            </div>
         </div>
-        
-        <div class="week-selector">
-            {% for session in course_data.sessions %}
-            <button class="week-btn {% if forloop.first %}active{% endif %}" onclick="showWeek(event, {{ course_id }}, {{ session.id }})">
-                Week {{ forloop.counter }}
-            </button>
-            {% endfor %}
+
+        <!-- Week tab bar -->
+        <div class="week-tabs-bar">
+            <div class="week-tabs">
+                {% for session in course_data.sessions %}
+                <button class="week-tab {% if forloop.first %}active{% endif %}"
+                        onclick="switchWeek(event, {{ course_id }}, {{ session.id }})">
+                    <span class="wk-num">Week {{ forloop.counter }}</span>
+                    <span class="wk-date">{{ session.date|date:"M j" }}</span>
+                </button>
+                {% endfor %}
+            </div>
         </div>
-        
+
+        <!-- Session panels -->
         {% for session in course_data.sessions %}
-        <div class="session-card" id="session-{{ course_id }}-{{ session.id }}" style="{% if not forloop.first %}display: none;{% endif %}" data-session-id="{{ session.id }}">
-            <div class="session-header">
-                <div class="session-meta">
-                    <strong>{{ session.date|date:"l, F d, Y" }}</strong>
-                    <small><span class="iconify" data-icon="mdi:clock-outline"></span> {{ session.start_time|time:"g:i A" }} - {{ session.end_time|time:"g:i A" }}</small>
-                    <small><span class="iconify" data-icon="mdi:text-box-outline"></span> {{ session.topic }}</small>
+        <div class="session-panel {% if forloop.first %}active{% endif %}"
+             id="session-{{ course_id }}-{{ session.id }}"
+             data-session-id="{{ session.id }}">
+
+            <!-- Info bar + Generate All -->
+            <div class="session-info-bar">
+                <div class="session-chips">
+                    <span class="chip">
+                        <span class="iconify" data-icon="mdi:calendar-month-outline"></span>
+                        {{ session.date|date:"l, N j, Y" }}
+                    </span>
+                    <span class="chip">
+                        <span class="iconify" data-icon="mdi:clock-outline"></span>
+                        {{ session.start_time|time:"g:i A" }} – {{ session.end_time|time:"g:i A" }}
+                    </span>
+                    {% if session.topic %}
+                    <span class="chip chip-topic" title="{{ session.topic }}">
+                        {{ session.topic }}
+                    </span>
+                    {% endif %}
+                    <span class="chip chip-students">
+                        <span class="iconify" data-icon="mdi:account-multiple-outline"></span>
+                        {{ session.student_count }} student{{ session.student_count|pluralize }}
+                    </span>
                 </div>
-                <div>
-                    <button class="btn generate-all-btn" onclick="generateAllCodes({{ session.id }})">
-                        <span class="iconify" data-icon="mdi:creation"></span> Generate All
+                <div class="session-actions">
+                    <a href="{% url 'attendance:ta_export_session_csv' session.id %}" class="btn-export-csv">
+                        <span class="iconify" data-icon="mdi:download-outline"></span>
+                        Export CSV
+                    </a>
+                    <button class="btn-gen-all" onclick="generateAllCodes({{ session.id }})">
+                        <span class="iconify" data-icon="mdi:lightning-bolt"></span>
+                        Generate All
                     </button>
                 </div>
             </div>
 
+            <!-- Search + filter -->
             <div class="table-controls">
-                <div class="search-wrapper">
+                <div class="search-box">
                     <span class="iconify" data-icon="mdi:magnify"></span>
-                    <input type="text" class="search-input" id="search-{{ session.id }}" placeholder="Search by name or ID..." onkeyup="debouncedLoadStudents({{ session.id }})">
+                    <input type="text" class="search-input"
+                           id="search-{{ session.id }}"
+                           placeholder="Search name or student ID…"
+                           onkeyup="debouncedLoadStudents({{ session.id }})">
                 </div>
-                
-                <div class="status-filters" id="filters-{{ session.id }}">
-                    <button class="filter-btn active" onclick="setFilter({{ session.id }}, 'all', this)">All</button>
-                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'pending', this)">Pending</button>
-                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'given', this)">Given</button>
-                    <button class="filter-btn" onclick="setFilter({{ session.id }}, 'used', this)">Used</button>
+                <div class="filter-tabs" id="filters-{{ session.id }}">
+                    <button class="filter-tab active" onclick="setFilter({{ session.id }}, 'all', this)">All</button>
+                    <button class="filter-tab" onclick="setFilter({{ session.id }}, 'pending', this)">Pending</button>
+                    <button class="filter-tab" onclick="setFilter({{ session.id }}, 'given', this)">Given</button>
+                    <button class="filter-tab" onclick="setFilter({{ session.id }}, 'used', this)">Used</button>
                 </div>
             </div>
-            
-            <div class="table-responsive">
-                <div class="loading-spinner" id="loading-{{ session.id }}">
-                    <span class="iconify" data-icon="mdi:loading" data-width="32" data-height="32"></span><br>
-                    Loading students...
+
+            <!-- Table -->
+            <div class="table-scroll">
+                <div class="loading-state" id="loading-{{ session.id }}">
+                    <div class="spinner"></div>
+                    Loading students…
                 </div>
-                <div id="table-container-{{ session.id }}" style="display: none;">
-                    <table class="students-table">
+                <div id="table-container-{{ session.id }}" style="display:none;">
+                    <table class="student-table">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="width:40px;">#</th>
                                 <th>Student Name</th>
                                 <th>Student ID</th>
                                 <th>Code</th>
@@ -768,82 +776,83 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="students-tbody-{{ session.id }}">
-                        </tbody>
+                        <tbody id="students-tbody-{{ session.id }}"></tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="pagination-footer" id="pagination-{{ session.id }}" style="display: none;">
-                <div class="page-info" id="page-info-{{ session.id }}"></div>
-                <div class="page-controls">
-                    <button class="page-btn" onclick="changePage({{ session.id }}, -1)">Previous</button>
-                    <button class="page-btn" onclick="changePage({{ session.id }}, 1)">Next</button>
+            <!-- Pagination -->
+            <div class="pagination-bar" id="pagination-{{ session.id }}" style="display:none;">
+                <span class="page-info" id="page-info-{{ session.id }}"></span>
+                <div class="page-btns">
+                    <button class="page-btn" onclick="changePage({{ session.id }}, -1)">&#8592; Prev</button>
+                    <button class="page-btn" onclick="changePage({{ session.id }}, 1)">Next &#8594;</button>
                 </div>
             </div>
+
         </div>
         {% endfor %}
+
     </div>
     {% empty %}
-    <div class="empty-state">
-        <span class="iconify" data-icon="mdi:calendar-blank" style="font-size: 3.5rem; color: var(--primary); margin-bottom: 1rem; opacity: 0.8;"></span>
-        <h3>No upcoming sessions</h3>
-        <p>You don't have any sessions scheduled for your assigned levels yet.</p>
+    <div class="empty-dash">
+        <span class="iconify" style="font-size:2.75rem;color:var(--muted);display:block;margin-bottom:0.875rem;" data-icon="mdi:calendar-blank-outline"></span>
+        <h3>No sessions scheduled</h3>
+        <p>You don't have any sessions for your assigned levels yet.</p>
     </div>
     {% endfor %}
-    
+
     {% else %}
-    <!-- Show message when TA is not approved yet -->
-    <div class="empty-state">
-        <span class="iconify" data-icon="mdi:account-clock-outline" data-width="48" data-height="48" style="color: var(--warning);"></span>
+    <div class="empty-dash">
+        <span class="iconify" style="font-size:2.75rem;color:#B8920C;display:block;margin-bottom:0.875rem;" data-icon="mdi:account-clock-outline"></span>
         <h3>Account Pending Approval</h3>
-        <p>Your TA account is waiting for admin approval. You will receive an email once approved.</p>
-        <p style="margin-top: 0.5rem;">If you have questions, please contact the administrator.</p>
+        <p>Your TA account is awaiting admin approval. You'll receive an email once approved.</p>
     </div>
     {% endif %}
+
 </div>
 
-<!-- Custom Confirmation Modal -->
+<!-- Confirm modal -->
 <div id="confirmModal" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-icon confirm">
-            <span class="iconify" data-icon="mdi:help-circle-outline" data-width="28"></span>
+            <span class="iconify" data-icon="mdi:help-circle-outline" data-width="26"></span>
         </div>
         <h3 id="confirmTitle">Confirm Action</h3>
         <p id="confirmMessage">Are you sure you want to proceed?</p>
-        <div class="modal-buttons">
+        <div class="modal-actions">
             <button class="modal-btn modal-btn-secondary" id="confirmCancelBtn">Cancel</button>
-            <button class="modal-btn modal-btn-primary" id="confirmOkBtn">Yes, Proceed</button>
+            <button class="modal-btn modal-btn-primary"   id="confirmOkBtn">Yes, Proceed</button>
         </div>
     </div>
 </div>
 
-<!-- Custom Error Modal -->
+<!-- Error modal -->
 <div id="errorModal" class="modal-overlay">
     <div class="modal-card">
         <div class="modal-icon error">
-            <span class="iconify" data-icon="mdi:alert-circle-outline" data-width="28"></span>
+            <span class="iconify" data-icon="mdi:alert-circle-outline" data-width="26"></span>
         </div>
-        <h3>Error</h3>
-        <p id="errorMessage">Something went wrong.</p>
-        <div class="modal-buttons">
+        <h3>Something went wrong</h3>
+        <p id="errorMessage">An error occurred. Please try again.</p>
+        <div class="modal-actions">
             <button class="modal-btn modal-btn-primary" id="errorOkBtn">Got it</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- Existing Django API Functions ---
 function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
+    return document.querySelector('meta[name="csrf-token"]')?.content
+        || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
 }
 
-// --- Custom Modal Functions ---
+// ── Modals ──
 let pendingConfirmAction = null;
 
 function showConfirmModal(message, title, onConfirm) {
     document.getElementById('confirmMessage').innerText = message;
-    document.getElementById('confirmTitle').innerText = title || 'Confirm Action';
+    document.getElementById('confirmTitle').innerText   = title || 'Confirm Action';
     pendingConfirmAction = onConfirm;
     document.getElementById('confirmModal').style.display = 'flex';
 }
@@ -862,101 +871,72 @@ function closeErrorModal() {
     document.getElementById('errorModal').style.display = 'none';
 }
 
-function showSuccessToast(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-success';
-    toast.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span> ' + message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2200);
+function showToast(message) {
+    const t = document.createElement('div');
+    t.className = 'toast-msg';
+    t.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span>' + message;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2600);
 }
 
-// Modal event listeners
 document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirmModal);
 document.getElementById('confirmOkBtn').addEventListener('click', () => {
-    if (pendingConfirmAction) {
-        pendingConfirmAction();
-        pendingConfirmAction = null;
-    }
+    if (pendingConfirmAction) { pendingConfirmAction(); pendingConfirmAction = null; }
     closeConfirmModal();
 });
 document.getElementById('errorOkBtn').addEventListener('click', closeErrorModal);
+document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmModal(); });
+document.getElementById('errorModal').addEventListener('click',  e => { if (e.target === e.currentTarget) closeErrorModal(); });
 
-// Close modals on backdrop click
-document.getElementById('confirmModal').addEventListener('click', function(e) {
-    if (e.target === this) closeConfirmModal();
-});
-document.getElementById('errorModal').addEventListener('click', function(e) {
-    if (e.target === this) closeErrorModal();
-});
-
-// --- Updated API Functions with Custom Modals ---
+// ── API actions ──
 async function generateCode(sessionId, studentUsername) {
     try {
         const res = await fetch("{% url 'attendance:ta_generate_code' %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
-            body: `session_id=${sessionId}&student_username=${studentUsername}`
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `session_id=${sessionId}&student_username=${encodeURIComponent(studentUsername)}`
         });
-        if (res.ok) {
-            location.reload();
-        } else {
-            const data = await res.json();
-            showErrorModal(data.error || 'Failed to generate code');
-        }
-    } catch (error) {
-        showErrorModal('Network error. Please try again.');
-    }
+        if (res.ok) { loadStudents(sessionId); }
+        else { const d = await res.json(); showErrorModal(d.error || 'Failed to generate code.'); }
+    } catch { showErrorModal('Network error. Please try again.'); }
 }
 
 async function generateAllCodes(sessionId) {
     showConfirmModal(
-        'Generate codes for ALL students in this session? This action can be performed once.',
+        'Generate codes for ALL students in this session? This can only be done once.',
         'Generate All Codes',
         async () => {
             try {
                 const res = await fetch("{% url 'attendance:ta_generate_all_codes' %}", {
-                    method: "POST",
-                    headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `session_id=${sessionId}`
                 });
-                if (res.ok) {
-                    showSuccessToast('Codes generated successfully!');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    const data = await res.json();
-                    showErrorModal(data.error || 'Failed to generate codes');
-                }
-            } catch (error) {
-                showErrorModal('Network error. Please try again.');
-            }
+                if (res.ok) { showToast('Codes generated!'); loadStudents(sessionId); }
+                else { const d = await res.json(); showErrorModal(d.error || 'Failed to generate codes.'); }
+            } catch { showErrorModal('Network error. Please try again.'); }
         }
     );
 }
 
-async function markDistributed(codeId) {
+async function markDistributed(codeId, sessionId) {
     showConfirmModal(
         'Mark this code as given to the student?',
         'Mark as Given',
         async () => {
             try {
                 const res = await fetch(`/ta/mark-distributed/${codeId}/`, {
-                    method: "POST",
-                    headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" }
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
-                if (res.ok) {
-                    showSuccessToast('Code marked as given!');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showErrorModal('Error marking as distributed');
-                }
-            } catch (error) {
-                showErrorModal('Network error. Please try again.');
-            }
+                if (res.ok) { showToast('Code marked as given!'); loadStudents(sessionId); }
+                else { showErrorModal('Error marking as given.'); }
+            } catch { showErrorModal('Network error. Please try again.'); }
         }
     );
 }
 
-// --- AJAX Pagination Variables ---
+// ── Pagination state ──
 let sessionStates = {};
 let debounceTimers = {};
 
@@ -966,164 +946,163 @@ function debouncedLoadStudents(sessionId) {
 }
 
 async function loadStudents(sessionId) {
-    const state = sessionStates[sessionId] || { page: 1, filter: 'all', search: '' };
-    const searchInput = document.getElementById(`search-${sessionId}`);
-    const search = searchInput ? searchInput.value : '';
-    
-    document.getElementById(`loading-${sessionId}`).style.display = 'block';
+    const state  = sessionStates[sessionId] || { page: 1, filter: 'all', search: '' };
+    const search = document.getElementById(`search-${sessionId}`)?.value ?? '';
+
+    document.getElementById(`loading-${sessionId}`).style.display        = 'block';
     document.getElementById(`table-container-${sessionId}`).style.display = 'none';
-    document.getElementById(`pagination-${sessionId}`).style.display = 'none';
-    
+    document.getElementById(`pagination-${sessionId}`).style.display      = 'none';
+
     try {
-        const res = await fetch(`/ta/get-students-ajax/?session_id=${sessionId}&page=${state.page}&search=${encodeURIComponent(search)}&status=${state.filter}`);
+        const res  = await fetch(`/ta/get-students-ajax/?session_id=${sessionId}&page=${state.page}&search=${encodeURIComponent(search)}&status=${state.filter}`);
         const data = await res.json();
-        
         const tbody = document.getElementById(`students-tbody-${sessionId}`);
         tbody.innerHTML = '';
-        
-        data.students.forEach((student, idx) => {
+
+        if (!data.students.length) {
             const row = tbody.insertRow();
-            
-            const numCell = row.insertCell(0);
-            numCell.style.color = 'var(--text-muted)';
-            numCell.style.fontWeight = '600';
-            numCell.textContent = ((data.page - 1) * 50) + idx + 1;
-            
-            const nameCell = row.insertCell(1);
-            nameCell.style.fontWeight = '600';
-            nameCell.textContent = student.full_name;
-            
-            const idCell = row.insertCell(2);
-            idCell.style.color = 'var(--text-muted)';
-            idCell.style.fontFamily = 'monospace';
-            idCell.textContent = student.student_id;
-            
-            const codeCell = row.insertCell(3);
-            if (student.code && student.code.code_string) {
-                const codeSpan = document.createElement('span');
-                codeSpan.className = 'code-display';
-                codeSpan.textContent = student.code.code_string;
-                codeCell.appendChild(codeSpan);
-            } else {
-                const badge = document.createElement('span');
-                badge.className = 'badge badge-empty';
-                badge.textContent = 'Not generated';
-                codeCell.appendChild(badge);
-            }
-            
-            const statusCell = row.insertCell(4);
-            if (student.code) {
-                const badge = document.createElement('span');
-                badge.className = 'badge';
-                if (student.code.is_used) {
-                    badge.className += ' badge-used';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
-                } else if (student.code.is_distributed) {
-                    badge.className += ' badge-distributed';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
+            const cell = row.insertCell(0);
+            cell.colSpan = 6;
+            cell.className = '';
+            cell.style.cssText = 'padding:2.5rem 1rem;text-align:center;color:#8896AB;font-size:13px;';
+            cell.textContent = state.filter !== 'all' || search
+                ? 'No students match your search or filter.'
+                : 'No students are enrolled in this course.';
+        } else {
+            data.students.forEach((student, idx) => {
+                const row = tbody.insertRow();
+
+                const n = row.insertCell(0);
+                n.className = 'cell-num';
+                n.textContent = ((data.page - 1) * 50) + idx + 1;
+
+                const name = row.insertCell(1);
+                name.className = 'cell-name';
+                name.textContent = student.full_name;
+
+                const sid = row.insertCell(2);
+                sid.className = 'cell-id';
+                sid.textContent = student.student_id;
+
+                const codeCell = row.insertCell(3);
+                if (student.code?.code_string) {
+                    const s = document.createElement('span');
+                    s.className = 'code-chip';
+                    s.textContent = student.code.code_string;
+                    codeCell.appendChild(s);
                 } else {
-                    badge.className += ' badge-pending';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
+                    const b = document.createElement('span');
+                    b.className = 'badge badge-none';
+                    b.textContent = '—';
+                    codeCell.appendChild(b);
                 }
-                statusCell.appendChild(badge);
-            } else {
-                const badge = document.createElement('span');
-                badge.className = 'badge badge-empty';
-                badge.textContent = '-';
-                statusCell.appendChild(badge);
-            }
-            
-            const actionCell = row.insertCell(5);
-            if (student.code) {
-                if (!student.code.is_used && !student.code.is_distributed) {
+
+                const statusCell = row.insertCell(4);
+                if (student.code) {
+                    const b = document.createElement('span');
+                    b.className = 'badge';
+                    if (student.code.is_used) {
+                        b.className += ' badge-used';
+                        b.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
+                    } else if (student.code.is_distributed) {
+                        b.className += ' badge-given';
+                        b.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
+                    } else {
+                        b.className += ' badge-pending';
+                        b.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
+                    }
+                    statusCell.appendChild(b);
+                } else {
+                    const b = document.createElement('span');
+                    b.className = 'badge badge-none';
+                    b.textContent = '—';
+                    statusCell.appendChild(b);
+                }
+
+                const actionCell = row.insertCell(5);
+                if (student.code) {
+                    if (!student.code.is_used && !student.code.is_distributed) {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-mark-given';
+                        btn.innerHTML = '<span class="iconify" data-icon="mdi:send-outline"></span> Mark Given';
+                        btn.onclick = () => markDistributed(student.code.id, sessionId);
+                        actionCell.appendChild(btn);
+                    }
+                } else {
                     const btn = document.createElement('button');
-                    btn.className = 'btn generate-one-btn outline';
-                    btn.textContent = 'Mark Given';
-                    btn.onclick = () => markDistributed(student.code.id);
+                    btn.className = 'btn-generate';
+                    btn.innerHTML = '<span class="iconify" data-icon="mdi:key-outline"></span> Generate';
+                    btn.onclick = () => generateCode(sessionId, student.username);
                     actionCell.appendChild(btn);
                 }
-            } else {
-                const btn = document.createElement('button');
-                btn.className = 'btn generate-one-btn';
-                btn.textContent = 'Generate';
-                btn.onclick = () => generateCode(sessionId, student.username);
-                actionCell.appendChild(btn);
-            }
-        });
-        
-        const startNum = ((data.page - 1) * 50) + 1;
-        const endNum = Math.min(data.page * 50, data.total);
-        document.getElementById(`page-info-${sessionId}`).textContent = `Showing ${startNum} to ${endNum} of ${data.total} students`;
-        
-        if (data.total_pages > 1) {
-            document.getElementById(`pagination-${sessionId}`).style.display = 'flex';
-        } else {
-            document.getElementById(`pagination-${sessionId}`).style.display = 'none';
+            });
         }
-        
+
+        const startNum = ((data.page - 1) * 50) + 1;
+        const endNum   = Math.min(data.page * 50, data.total);
+        document.getElementById(`page-info-${sessionId}`).textContent =
+            `Showing ${startNum}–${endNum} of ${data.total} student${data.total !== 1 ? 's' : ''}`;
+
+        document.getElementById(`pagination-${sessionId}`).style.display =
+            data.total_pages > 1 ? 'flex' : 'none';
+
         document.getElementById(`table-container-${sessionId}`).style.display = 'block';
-        document.getElementById(`loading-${sessionId}`).style.display = 'none';
-        
-        sessionStates[sessionId] = { 
-            page: data.page, 
-            filter: state.filter, 
-            search: search, 
-            total_pages: data.total_pages 
-        };
-        
-    } catch (error) {
-        console.error('Error loading students:', error);
-        document.getElementById(`loading-${sessionId}`).innerHTML = '<span style="color: red;">Error loading students. Please refresh.</span>';
+        document.getElementById(`loading-${sessionId}`).style.display          = 'none';
+
+        sessionStates[sessionId] = { page: data.page, filter: state.filter, search, total_pages: data.total_pages };
+
+    } catch (err) {
+        console.error('loadStudents error:', err);
+        document.getElementById(`loading-${sessionId}`).innerHTML =
+            '<span style="color:#DC2626;font-size:13px;">Failed to load students — please refresh.</span>';
     }
 }
 
-function setFilter(sessionId, filter, btnElement) {
-    sessionStates[sessionId] = { ...sessionStates[sessionId], page: 1, filter: filter };
-    
-    const filterDiv = document.getElementById(`filters-${sessionId}`);
-    if (filterDiv) {
-        filterDiv.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        btnElement.classList.add('active');
-    }
-    
+function setFilter(sessionId, filter, btnEl) {
+    sessionStates[sessionId] = { ...sessionStates[sessionId], page: 1, filter };
+    document.getElementById(`filters-${sessionId}`)
+        .querySelectorAll('.filter-tab')
+        .forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
     loadStudents(sessionId);
 }
 
 function changePage(sessionId, delta) {
     const state = sessionStates[sessionId];
     if (!state) return;
-    
     const newPage = state.page + delta;
-    if (newPage < 1) return;
-    if (state.total_pages && newPage > state.total_pages) return;
-    
+    if (newPage < 1 || (state.total_pages && newPage > state.total_pages)) return;
     state.page = newPage;
     loadStudents(sessionId);
 }
 
-function showWeek(event, courseId, sessionId) {
-    document.querySelectorAll(`[id^="session-${courseId}-"]`).forEach(div => div.style.display = 'none');
-    document.getElementById(`session-${courseId}-${sessionId}`).style.display = 'block';
-    
-    const buttons = event.target.closest('.week-selector').querySelectorAll('.week-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
+function switchWeek(event, courseId, sessionId) {
+    // Hide all panels for this course
+    document.querySelectorAll(`[id^="session-${courseId}-"]`).forEach(el => el.classList.remove('active'));
+    document.getElementById(`session-${courseId}-${sessionId}`).classList.add('active');
+
+    // Update tab highlight (handle click on child span)
+    const clickedTab = event.target.closest('.week-tab');
+    if (clickedTab) {
+        clickedTab.closest('.week-tabs').querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
+        clickedTab.classList.add('active');
+    }
+
     if (!sessionStates[sessionId]) {
         sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
     }
     loadStudents(sessionId);
 }
 
+// Auto-load the first visible session of every course on page load
 document.addEventListener('DOMContentLoaded', () => {
-    const visibleSession = document.querySelector('.session-card[style*="display: block"], .session-card:not([style*="display: none"])');
-    if (visibleSession) {
-        const sessionId = visibleSession.dataset.sessionId;
+    document.querySelectorAll('.session-panel.active').forEach(panel => {
+        const sessionId = panel.dataset.sessionId;
         if (sessionId) {
             sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
             loadStudents(sessionId);
         }
-    }
+    });
 });
 </script>
 {% endblock %}

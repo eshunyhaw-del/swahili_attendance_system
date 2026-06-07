@@ -1,0 +1,335 @@
+{% extends "attendance/base.html" %}
+{% block title %}TA Code History{% endblock %}
+
+{% block content %}
+<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+
+<style>
+:root {
+    --primary:    #0D2472;
+    --primary-dk: #091A55;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.1);
+    --amber:      #B8920C;
+    --amber-lt:   rgba(242,195,26,0.13);
+    --blue:       #2563EB;
+    --blue-lt:    rgba(37,99,235,0.09);
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+
+.hist-wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+/* ─── Header ─── */
+.hist-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff;
+    border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.125rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--sh-md);
+}
+.hist-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.hist-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
+.hist-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    color: rgba(255,255,255,0.75);
+    font-size: 12px; font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+    transition: color 0.13s;
+}
+.back-link:hover { color: #fff; }
+
+/* ─── Summary stats ─── */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+.stat-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    display: flex; align-items: center; gap: 0.75rem;
+}
+.stat-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+}
+.stat-value { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.stat-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
+
+/* ─── Course block ─── */
+.course-block {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.course-block-header {
+    padding: 0.9rem 1.25rem;
+    background: linear-gradient(90deg, #0D2472 0%, #1B3A9C 100%);
+    display: flex; align-items: center; gap: 0.875rem;
+    color: #fff;
+}
+.course-icon {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.12);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+}
+.course-name { font-size: 0.95rem; font-weight: 700; line-height: 1.2; }
+.course-code-pill {
+    display: inline-block; margin-top: 4px;
+    font-size: 10.5px; font-weight: 700;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; padding: 2px 9px; border-radius: 9999px;
+}
+
+/* ─── Table ─── */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.hist-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+
+.hist-table th {
+    background: #EEF1F8;
+    color: var(--muted);
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.08em; font-weight: 700;
+    padding: 0.6rem 1rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.hist-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #F0F3FA;
+    font-size: 13px; vertical-align: middle;
+}
+
+.hist-table tbody tr:last-child td { border-bottom: none; }
+.hist-table tbody tr:hover td { background: rgba(13,36,114,0.018); }
+
+.cell-week { font-weight: 700; color: var(--primary); }
+.cell-date { color: var(--muted); font-size: 12px; }
+.cell-num  { font-weight: 700; }
+
+/* Coverage bar */
+.coverage-wrap { display: flex; align-items: center; gap: 0.5rem; min-width: 110px; }
+.coverage-bar {
+    flex: 1; height: 6px;
+    background: #E4E9F2; border-radius: 9999px; overflow: hidden;
+}
+.coverage-fill {
+    height: 100%; border-radius: 9999px;
+    background: var(--green);
+    transition: width 0.4s ease;
+}
+.coverage-pct { font-size: 11.5px; font-weight: 700; color: var(--text); min-width: 32px; text-align: right; }
+
+/* Badges */
+.badge {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 3px 9px; border-radius: 9999px;
+    font-size: 11px; font-weight: 700;
+}
+.badge-used    { background: var(--green-lt); color: var(--green); }
+.badge-given   { background: var(--blue-lt);  color: var(--blue); }
+.badge-pending { background: var(--amber-lt); color: var(--amber); }
+.badge-none    { background: #EEF1F8; color: var(--muted); border: 1px solid var(--border); }
+
+/* Empty state */
+.empty-state {
+    padding: 3.5rem 2rem; text-align: center;
+    background: var(--surface); border-radius: var(--r-xl);
+    border: 2px dashed var(--border);
+}
+.empty-state h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
+.empty-state p  { font-size: 13px; color: var(--muted); }
+
+@media (max-width: 640px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stats-row .stat-card:nth-child(3),
+    .stats-row .stat-card:nth-child(4) { grid-column: span 1; }
+    .hist-header h1 { font-size: 1.15rem; }
+}
+</style>
+
+<div class="hist-wrap">
+
+    <div class="hist-header">
+        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+        </a>
+        <h1>Code Generation History</h1>
+        <div class="hist-header-sub">A record of all attendance codes you have generated</div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
+                <span class="iconify" data-icon="mdi:calendar-check-outline"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_sessions }}</div>
+                <div class="stat-label">Sessions</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
+                <span class="iconify" data-icon="mdi:barcode-scan"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_generated }}</div>
+                <div class="stat-label">Codes Generated</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green-lt);color:var(--green);">
+                <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ total_used }}</div>
+                <div class="stat-label">Codes Used</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--blue-lt);color:var(--blue);">
+                <span class="iconify" data-icon="mdi:percent"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ overall_coverage }}%</div>
+                <div class="stat-label">Overall Usage</div>
+            </div>
+        </div>
+    </div>
+
+    {% if courses_history %}
+        {% for course_id, data in courses_history.items %}
+        <div class="course-block">
+            <div class="course-block-header">
+                <div class="course-icon">
+                    <span class="iconify" data-icon="mdi:book-open-variant"></span>
+                </div>
+                <div>
+                    <div class="course-name">{{ data.course.name }}</div>
+                    <span class="course-code-pill">{{ data.course.code }}</span>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table class="hist-table">
+                    <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Date</th>
+                            <th>Enrolled</th>
+                            <th>Generated</th>
+                            <th>Given Out</th>
+                            <th>Used</th>
+                            <th>Pending</th>
+                            <th>Usage Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in data.sessions %}
+                        <tr>
+                            <td class="cell-week">Week {{ entry.week_num }}</td>
+                            <td>
+                                <div style="font-weight:600;">{{ entry.session.date|date:"N j, Y" }}</div>
+                                <div class="cell-date">{{ entry.session.start_time|time:"g:i A" }} – {{ entry.session.end_time|time:"g:i A" }}</div>
+                            </td>
+                            <td class="cell-num">{{ entry.enrolled }}</td>
+                            <td class="cell-num">
+                                {% if entry.generated %}
+                                    <span style="font-weight:700;">{{ entry.generated }}</span>
+                                {% else %}
+                                    <span style="color:var(--muted);">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.given %}
+                                    <span class="badge badge-given">
+                                        <span class="iconify" data-icon="mdi:send-check"></span>
+                                        {{ entry.given }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-none">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.used %}
+                                    <span class="badge badge-used">
+                                        <span class="iconify" data-icon="mdi:check-bold"></span>
+                                        {{ entry.used }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-none">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.pending %}
+                                    <span class="badge badge-pending">
+                                        <span class="iconify" data-icon="mdi:clock-outline"></span>
+                                        {{ entry.pending }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-none">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if entry.generated %}
+                                <div class="coverage-wrap">
+                                    <div class="coverage-bar">
+                                        <div class="coverage-fill" style="width:{{ entry.coverage }}%;{% if entry.coverage < 40 %}background:#B8920C;{% elif entry.coverage < 80 %}background:#2563EB;{% endif %}"></div>
+                                    </div>
+                                    <span class="coverage-pct">{{ entry.coverage }}%</span>
+                                </div>
+                                {% else %}
+                                <span style="color:var(--muted);font-size:12px;">No codes</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <span class="iconify" style="font-size:2.75rem;color:var(--muted);display:block;margin-bottom:0.875rem;" data-icon="mdi:history"></span>
+        <h3>No history yet</h3>
+        <p>You haven't generated any attendance codes yet.<br>Head to the dashboard to get started.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

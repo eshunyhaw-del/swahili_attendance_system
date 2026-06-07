@@ -46,6 +46,31 @@
             --radius-xl: 20px;
         }
 
+        html[data-theme="dark"] {
+            --bg-base:        #0F1923;
+            --bg-surface:     #1E2A3B;
+            --bg-subtle:      #162131;
+            --bg-overlay:     rgba(255,255,255,0.04);
+
+            --text-primary:   #E8EDF5;
+            --text-secondary: #C4CDD8;
+            --text-muted:     #8896AB;
+
+            --border:         #2E3D50;
+            --border-strong:  #3A4E66;
+
+            --shadow-xs: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-sm: 0 1px 5px rgba(0,0,0,0.6);
+            --shadow-md: 0 4px 18px rgba(0,0,0,0.7);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.8);
+
+            /* Aliases matching template-local :root variable names */
+            --surface: #1E2A3B;
+            --bg:      #0F1923;
+            --text:    #E8EDF5;
+            --muted:   #8896AB;
+        }
+
         *, *::before, *::after {
             margin: 0;
             padding: 0;
@@ -53,13 +78,13 @@
         }
 
         html, body {
-            background-color: #F4F6FB !important;
+            background-color: var(--bg-base) !important;
             background-image: none !important;
         }
 
         body {
             font-family: 'DM Sans', system-ui, sans-serif;
-            color: #0D1B3E;
+            color: var(--text-primary);
             font-size: 14px;
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -70,7 +95,7 @@
         .app {
             display: flex;
             min-height: 100vh;
-            background-color: #F4F6FB;
+            background-color: var(--bg-base);
         }
 
         /* ─── SIDEBAR ─── */
@@ -214,12 +239,12 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
-            background-color: #F4F6FB;
+            background-color: var(--bg-base);
         }
 
         /* ─── TOP BAR ─── */
         .top-bar {
-            background: #FFFFFF;
+            background: var(--bg-surface);
             border-bottom: 1px solid var(--border);
             padding: 0 1.25rem;
             height: var(--topbar-height);
@@ -332,6 +357,152 @@
             color: var(--red);
         }
 
+        html[data-theme="dark"] .icon-btn.danger:hover {
+            background: rgba(192,57,43,0.2);
+        }
+
+        /* Dark mode: alert text must be light, not the dark colours designed for white bg */
+        html[data-theme="dark"] .alert-info    { background: rgba(74,144,217,0.14);  color: #7EC8F5; border-left-color: #4A90D9; }
+        html[data-theme="dark"] .alert-success { background: rgba(30,158,94,0.14);   color: #5DD6A5; border-left-color: #1E9E5E; }
+        html[data-theme="dark"] .alert-error   { background: rgba(192,57,43,0.14);   color: #F08888; border-left-color: #C0392B; }
+        html[data-theme="dark"] .alert-warning { background: rgba(242,195,26,0.14);  color: #F2C31A; border-left-color: #C9A00E; }
+
+        /* Dark mode: navy brand colour as text is invisible on dark surfaces — use gold */
+        html[data-theme="dark"] .badge-navy {
+            color: #F2C31A;
+            background: rgba(242,195,26,0.12);
+            border: 1px solid rgba(242,195,26,0.22);
+        }
+
+        /* Dark mode: form focus rings — navy is invisible, use gold */
+        html[data-theme="dark"] .form-control:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(242,195,26,0.2);
+        }
+
+        /* Dark mode: catch-all for inline style navy text across all templates */
+        html[data-theme="dark"] [style*="color:#0D2472"] { color: var(--gold) !important; }
+
+        /* Dark mode: navy text in CSS-class elements across templates */
+        html[data-theme="dark"] .sup-avatar,
+        html[data-theme="dark"] .pta-avatar { color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2); }
+        html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; background: rgba(100,160,230,0.12); }
+        html[data-theme="dark"] .ad-level-chip,
+        html[data-theme="dark"] .ad-num          { color: var(--text-primary); }
+        html[data-theme="dark"] .ld-stat-chip.enrolled .ld-stat-val { color: #7BAEE8; }
+        html[data-theme="dark"] .ld-stat-chip.enrolled { background: rgba(100,160,230,0.1); }
+
+        /* Dark mode: focus states — border + background */
+        html[data-theme="dark"] .sup-textarea:focus,
+        html[data-theme="dark"] .sup-status-select:focus,
+        html[data-theme="dark"] .ld-date-input:focus,
+        html[data-theme="dark"] .pta-notes:focus { border-color: var(--gold) !important; background: var(--bg-subtle) !important; }
+
+        /* Dark mode: section-head accordions (student guide, TA guide pages) */
+        html[data-theme="dark"] .section-head { background: var(--bg-subtle) !important; }
+
+        /* Dark mode: navy as text colour is invisible — switch to gold or light blue */
+        html[data-theme="dark"] .step-text strong,
+        html[data-theme="dark"] .quick-ref-title,
+        html[data-theme="dark"] .mono { color: var(--gold) !important; }
+
+        /* Dark mode: tip/info boxes */
+        html[data-theme="dark"] .tip-box { background: rgba(242,195,26,0.08) !important; color: #E8D98A !important; border-color: rgba(242,195,26,0.2) !important; }
+        html[data-theme="dark"] .info-box { background: rgba(46,61,80,0.6) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .info-box .iconify { color: var(--gold) !important; }
+
+        /* Dark mode: ad-notify (admin dashboard announcement strip) */
+        html[data-theme="dark"] .ad-notify { background: rgba(242,195,26,0.08) !important; border-color: rgba(242,195,26,0.15) !important; }
+        html[data-theme="dark"] .ad-notify,
+        html[data-theme="dark"] .ad-notify-item { color: #E8D98A !important; }
+
+        /* Dark mode: hardcoded light backgrounds common across templates */
+        html[data-theme="dark"] .week-tabs-bar,
+        html[data-theme="dark"] .table-controls,
+        html[data-theme="dark"] .card-head { background: var(--bg-subtle) !important; }
+        html[data-theme="dark"] .student-table th { background: var(--bg-subtle) !important; color: var(--text-muted) !important; }
+        html[data-theme="dark"] .badge-none { background: rgba(46,61,80,0.5) !important; color: var(--text-muted) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .code-chip { background: var(--bg-subtle) !important; }
+        html[data-theme="dark"] .modal-btn-secondary { background: var(--bg-subtle) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
+
+        /* Dark mode: TA history table */
+        html[data-theme="dark"] .hist-table th { background: var(--bg-subtle) !important; }
+        html[data-theme="dark"] .hist-table td { border-bottom-color: var(--border) !important; }
+        html[data-theme="dark"] .coverage-bar { background: var(--bg-subtle) !important; }
+
+        /* Dark mode: course registration */
+        html[data-theme="dark"] .course-code-chip { color: var(--gold) !important; background: rgba(242,195,26,0.08) !important; border-color: rgba(242,195,26,0.15) !important; }
+        html[data-theme="dark"] .course-label:has(input:checked) .course-label-name { color: var(--gold) !important; }
+
+        /* Dark mode: support page inputs */
+        html[data-theme="dark"] .form-input,
+        html[data-theme="dark"] .form-textarea { background: var(--bg-subtle) !important; color: var(--text-primary) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .form-input:focus,
+        html[data-theme="dark"] .form-textarea:focus { background: var(--bg-subtle) !important; border-color: var(--gold) !important; }
+        html[data-theme="dark"] .admin-reply strong { color: var(--gold) !important; }
+
+        /* Dark mode: ref table text */
+        html[data-theme="dark"] .ref-table td { color: var(--text-secondary) !important; }
+        html[data-theme="dark"] .quick-ref-item { color: var(--text-secondary) !important; }
+        html[data-theme="dark"] .tip-item { color: var(--text-secondary) !important; }
+
+        /* Dark mode: skeleton/shimmer loader (dashboard) */
+        html[data-theme="dark"] .shimmer {
+            background: linear-gradient(90deg, #162131 25%, #1E2A3B 50%, #162131 75%) !important;
+            background-size: 200% 100% !important;
+        }
+        html[data-theme="dark"] .skel-header-row {
+            background: linear-gradient(135deg, #162131 0%, #1E2A3B 100%) !important;
+        }
+
+        /* Dark mode: ta_dashboard table rows and pagination */
+        html[data-theme="dark"] .student-table td { border-bottom-color: var(--border) !important; }
+        html[data-theme="dark"] .pagination-bar { background: var(--bg-subtle) !important; }
+        html[data-theme="dark"] .chip { background: var(--bg-subtle) !important; color: var(--text-muted) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .chip-topic { background: rgba(242,195,26,0.08) !important; color: var(--gold) !important; border-color: rgba(242,195,26,0.15) !important; }
+        html[data-theme="dark"] .chip .iconify { color: var(--gold) !important; }
+
+        /* Dark mode: navy used as text/icon colour in dashboard elements */
+        html[data-theme="dark"] .course-code,
+        html[data-theme="dark"] .stat-val.navy { color: var(--gold) !important; }
+        html[data-theme="dark"] .course-code { background: rgba(242,195,26,0.08) !important; }
+        html[data-theme="dark"] .pop-card-icon,
+        html[data-theme="dark"] .modal-icon.confirm { color: var(--gold) !important; background: rgba(242,195,26,0.08) !important; }
+
+        /* Dark mode: TA dashboard action buttons with navy outline */
+        html[data-theme="dark"] .btn-export-csv { color: var(--gold) !important; border-color: var(--gold) !important; }
+        html[data-theme="dark"] .btn-export-csv:hover { background: var(--gold) !important; color: #0D1B3E !important; }
+        html[data-theme="dark"] .btn-mark-given { color: var(--text-secondary) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .btn-mark-given:hover { background: var(--gold) !important; color: #0D1B3E !important; border-color: var(--gold) !important; }
+
+        /* Dark mode: history trigger open state */
+        html[data-theme="dark"] details[open] .history-trigger { color: var(--gold) !important; }
+
+        /* Dark mode: card-head icon (support, course_registration) */
+        html[data-theme="dark"] .card-head { background: var(--bg-subtle) !important; }
+        html[data-theme="dark"] .card-head .iconify { color: var(--gold) !important; }
+        html[data-theme="dark"] .ctx-chip .iconify { color: var(--gold) !important; }
+
+        /* Dark mode: admin-reply box in support page */
+        html[data-theme="dark"] .admin-reply { background: rgba(242,195,26,0.06) !important; border-left-color: var(--gold) !important; }
+
+        /* Dark mode: search input in ta_dashboard */
+        html[data-theme="dark"] .search-input { background: var(--bg-subtle) !important; color: var(--text-primary) !important; border-color: var(--border) !important; }
+        html[data-theme="dark"] .search-input:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 3px rgba(242,195,26,0.12) !important; }
+        html[data-theme="dark"] .filter-tabs { background: var(--border) !important; }
+        html[data-theme="dark"] .filter-tab.active { background: var(--bg-surface) !important; color: var(--gold) !important; }
+
+        /* Dark mode: week tab active state */
+        html[data-theme="dark"] .week-tab.active { background: var(--gold) !important; border-color: var(--gold) !important; color: #0D1B3E !important; }
+        html[data-theme="dark"] .week-tab:hover:not(.active) { background: var(--bg-surface) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+
+        /* Dark mode: spinner border */
+        html[data-theme="dark"] .spinner { border-top-color: var(--gold) !important; }
+
+        .theme-dark-icon { display: none; }
+        html[data-theme="dark"] .theme-light-icon { display: none; }
+        html[data-theme="dark"] .theme-dark-icon  { display: flex; align-items: center; justify-content: center; }
+
         /* ─── CONTAINER ─── */
         .container {
             padding: 1.25rem 1rem;
@@ -344,7 +515,7 @@
 
         /* ─── CARDS ─── */
         .card {
-            background: #FFFFFF;
+            background: var(--bg-surface);
             border-radius: var(--radius-lg);
             border: 1px solid var(--border);
             overflow: hidden;
@@ -384,7 +555,7 @@
         }
 
         .stat-card {
-            background: #FFFFFF;
+            background: var(--bg-surface);
             border-radius: var(--radius-lg);
             padding: 1.25rem;
             border: 1px solid var(--border);
@@ -503,7 +674,7 @@
             border-radius: var(--radius-md);
             font-size: 14px;
             color: var(--text-primary);
-            background: #FFFFFF;
+            background: var(--bg-surface);
             font-family: inherit;
             transition: border-color 0.15s, box-shadow 0.15s;
             outline: none;
@@ -653,6 +824,9 @@
         .mb-4         { margin-bottom: 1rem; }
     </style>
     {% block extra_head %}{% endblock %}
+    <script>
+        (function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
 </head>
 <body>
 
@@ -672,52 +846,84 @@
         </div>
 
         <nav class="sidebar-nav">
-            <div class="nav-label">Main Menu</div>
             {% if user.is_authenticated %}
-                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
-                </a>
-                <a href="{% url 'attendance:history' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:history"></span> My History
-                </a>
-                {% if not user.is_staff %}
-                    <a href="{% url 'attendance:course_registration' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
+
+                {% if user.is_staff %}
+                    <!-- ── Lecturer / Staff ── -->
+                    <div class="nav-label">Portal</div>
+                    <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:chart-bar-outline"></span> Analytics Dashboard
+                    </a>
+                    <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:calendar-today-outline"></span> Daily Sessions
+                    </a>
+                    <div class="nav-label">Students</div>
+                    <a href="{% url 'attendance:admin_search' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:account-search-outline"></span> Search Students
+                    </a>
+                    <a href="{% url 'attendance:student_report' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:file-chart-outline"></span> Student Report
+                    </a>
+                    <div class="nav-label">Management</div>
+                    <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
+                    </a>
+
+                {% elif user.taprofile %}
+                    <!-- ── Teaching Assistant ── -->
+                    <div class="nav-label">Main Menu</div>
+                    <a href="{% url 'attendance:dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
+                    </a>
+                    <a href="{% url 'attendance:ta_history' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:history"></span> My History
+                    </a>
+                    <a href="{% url 'attendance:ta_add_levels' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:book-edit-outline"></span> Manage Courses
+                    </a>
+                    <a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
+                    </a>
+                    <div class="nav-label">Account</div>
+                    <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
                     </a>
                     <a href="{% url 'attendance:support' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
                     </a>
+                    <a href="{% url 'attendance:ta_guide' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:book-open-variant"></span> TA Guide
+                    </a>
+
+                {% else %}
+                    <!-- ── Student ── -->
+                    <div class="nav-label">Main Menu</div>
+                    <a href="{% url 'attendance:dashboard' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
+                    </a>
+                    <a href="{% url 'attendance:history' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:history"></span> My History
+                    </a>
+                    <a href="{% url 'attendance:course_registration' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
+                    </a>
                     <a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
                     </a>
-                {% endif %}
-                {% if user.is_staff %}
-                    <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:chalkboard"></span> Lecturer Control
+                    <a href="{% url 'attendance:support' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+                    </a>
+                    <a href="{% url 'attendance:student_guide' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:book-open-variant"></span> Student Guide
                     </a>
                 {% endif %}
-                {% if user.is_superuser %}
-                    <div class="nav-label">Administration</div>
-                    <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:shield-account-outline"></span> Admin Central
-                    </a>
-                    <a href="{% url 'attendance:admin_support' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:ticket-outline"></span> Support Tickets
-                    </a>
-                    <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
-                    </a>
-                {% endif %}
-            {% endif %}
 
-            <a href="{% url 'attendance:student_guide' %}" class="nav-item">
-    <span class="iconify" data-icon="mdi:book-open-variant"></span>
-    Student Guide
-</a>
+            {% endif %}
         </nav>
 
         <div class="sidebar-footer">
-            University of Ghana · SWASA
+            University of Ghana · SWASA<br>
+            <a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.2);text-decoration:none;">Developed by Cradle Premier Network</a>
         </div>
     </aside>
 
@@ -732,10 +938,14 @@
             </div>
 
             <div class="user-menu">
+                <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+                    <span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
+                    <span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
+                </button>
                 {% if user.is_authenticated %}
                     <div class="user-info">
                         <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
-                        <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% else %}Student{% endif %}</span>
+                        <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
                     </div>
                     <div class="user-avatar">{{ user.username|first|upper }}</div>
                     <form method="post" action="{% url 'logout' %}" style="display:inline;">
@@ -753,8 +963,8 @@
         <div class="container">
             {% if messages %}
                 {% for message in messages %}
-                <div class="alert alert-info">
-                    <span class="iconify" data-icon="mdi:information-outline" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
+                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
+                    <span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
                     {{ message }}
                 </div>
                 {% endfor %}
@@ -784,6 +994,13 @@
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 1024) closeSidebar();
     });
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('swasa_theme', next);
+    }
 </script>
 </body>
 </html>

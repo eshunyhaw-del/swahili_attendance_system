@@ -4,7 +4,7 @@
 {% block content %}
 <style>
     body {
-        background: #F4F6FB !important;
+        background: var(--bg-base) !important;
         background-image: none !important;
         background-attachment: unset !important;
     }
@@ -17,9 +17,23 @@
 
     /* ── Header ── */
     .dash-header {
-        margin-bottom: 1.75rem;
-        padding-bottom: 1.25rem;
-        border-bottom: 1px solid var(--border);
+        background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+        color: #fff;
+        border-radius: var(--radius-xl, 20px);
+        padding: 1.5rem 1.75rem;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .dash-header::before {
+        content: '';
+        position: absolute;
+        top: -50px; right: -40px;
+        width: 180px; height: 180px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 50%;
     }
 
     .dash-header-top {
@@ -27,6 +41,7 @@
         justify-content: space-between;
         align-items: flex-start;
         gap: 1rem;
+        position: relative;
     }
 
     .dash-greeting {
@@ -34,35 +49,63 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--text-muted);
+        color: rgba(255,255,255,0.65);
         margin-bottom: 4px;
     }
 
     .dash-header h1 {
-        font-size: 1.55rem;
-        font-weight: 700;
-        color: var(--text-primary);
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #fff;
         letter-spacing: -0.03em;
         line-height: 1.2;
         margin: 0;
     }
 
-    .dash-date-badge {
-        background: #FFFFFF;
-        border: 1px solid var(--border);
+    .dash-header-sub {
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    .dash-courses-badge {
+        background: rgba(255,255,255,0.14);
+        border: 1px solid rgba(255,255,255,0.2);
         border-radius: var(--radius-sm);
-        padding: 0.4rem 0.75rem;
+        padding: 0.35rem 0.7rem;
         font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
+        font-weight: 700;
+        color: rgba(255,255,255,0.85);
         white-space: nowrap;
         flex-shrink: 0;
-        box-shadow: var(--shadow-xs);
+        display: flex; align-items: center; gap: 0.3rem;
     }
+
+    /* ── Quick action row ── */
+    .quick-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .qa-chip {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        background: var(--bg-surface); border: 1px solid var(--border);
+        border-radius: 99px; padding: 0.35rem 0.875rem;
+        font-size: 12px; font-weight: 700; color: var(--navy);
+        text-decoration: none; white-space: nowrap;
+        box-shadow: var(--shadow-xs);
+        transition: all 0.13s;
+    }
+    html[data-theme="dark"] .qa-chip { color: var(--text-primary); }
+    .qa-chip:hover { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: var(--shadow-sm); }
+    .qa-chip .iconify { font-size: 14px; }
 
     /* ── Course Panel ── */
     .course-panel {
-        background: #FFFFFF;
+        background: var(--bg-surface);
         border-radius: var(--radius-lg);
         margin-bottom: 1rem;
         border: 1px solid var(--border);
@@ -264,7 +307,7 @@
     .blank-state {
         text-align: center;
         padding: 3.5rem 2rem;
-        background: #FFFFFF;
+        background: var(--bg-surface);
         border-radius: var(--radius-lg);
         border: 2px dashed var(--border-strong);
         box-shadow: var(--shadow-xs);
@@ -316,7 +359,7 @@
     }
 
     .pop-card {
-        background: #FFFFFF;
+        background: var(--bg-surface);
         border-radius: var(--radius-xl, 20px);
         max-width: 360px;
         width: 100%;
@@ -381,7 +424,7 @@
 
     .pop-input:focus {
         border-color: var(--navy);
-        background: #FFFFFF;
+        background: var(--bg-surface);
         box-shadow: 0 0 0 4px rgba(13,36,114,0.1);
     }
 
@@ -442,7 +485,7 @@
     }
 
     .error-card {
-        background: #FFFFFF;
+        background: var(--bg-surface);
         border-radius: var(--radius-xl, 20px);
         max-width: 340px;
         width: 100%;
@@ -517,8 +560,80 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Skeleton Loader ── */
+    .shimmer {
+        background: linear-gradient(90deg, #e3e7f3 25%, #eff2f9 50%, #e3e7f3 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite ease-in-out;
+        border-radius: 6px;
+    }
+
+    @keyframes shimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .skel-panel {
+        background: var(--bg-surface);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xs);
+    }
+
+    .skel-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .skel-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 1.5rem 1.75rem;
+        background: linear-gradient(135deg, #c5cde8 0%, #d0d8ee 100%);
+        border-radius: 20px;
+    }
+
+    #skeletonLoader { transition: opacity 0.3s ease; }
+    #realContent    { display: none; opacity: 0; transition: opacity 0.3s ease; }
 </style>
 
+<!-- ── Skeleton Loader ── -->
+<div id="skeletonLoader" class="dash-wrapper" aria-hidden="true">
+    <div class="skel-header-row">
+        <div>
+            <div class="shimmer" style="width:70px;height:11px;margin-bottom:10px;"></div>
+            <div class="shimmer" style="width:200px;height:26px;border-radius:8px;"></div>
+            <div class="shimmer" style="width:130px;height:11px;margin-top:8px;"></div>
+        </div>
+        <div class="shimmer" style="width:80px;height:28px;border-radius:8px;flex-shrink:0;"></div>
+    </div>
+
+    {% for i in "123" %}
+    <div class="skel-panel">
+        <div class="skel-top">
+            <div>
+                <div class="shimmer" style="width:60px;height:19px;border-radius:6px;margin-bottom:10px;"></div>
+                <div class="shimmer" style="width:175px;height:15px;border-radius:5px;"></div>
+            </div>
+            <div class="shimmer" style="width:52px;height:36px;border-radius:8px;flex-shrink:0;"></div>
+        </div>
+        <div class="shimmer" style="height:6px;border-radius:99px;"></div>
+        <div class="shimmer" style="width:140px;height:11px;border-radius:5px;margin:14px auto 2px;"></div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ── Real Content ── -->
+<div id="realContent">
 <div class="dash-wrapper">
 
     <div class="dash-header">
@@ -526,15 +641,31 @@
             <div>
                 <div class="dash-greeting">Welcome back</div>
                 <h1>{{ user.get_full_name|default:user.username }}</h1>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                <div class="dash-header-sub">
                     Student ID: {{ user.userprofile.student_id_number }}
-                </p>
+                </div>
             </div>
-            <div class="dash-date-badge">
-                <span class="iconify" data-icon="mdi:calendar-outline" data-width="12" style="vertical-align:middle;margin-right:3px;"></span>
-                My Courses
+            <div class="dash-courses-badge">
+                <span class="iconify" data-icon="mdi:book-open-outline" data-width="13"></span>
+                {{ course_data|length }} course{{ course_data|length|pluralize }}
             </div>
         </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-actions">
+        <a href="{% url 'attendance:course_registration' %}" class="qa-chip">
+            <span class="iconify" data-icon="mdi:plus-circle-outline"></span>
+            Register Courses
+        </a>
+        <a href="{% url 'attendance:history' %}" class="qa-chip">
+            <span class="iconify" data-icon="mdi:history"></span>
+            My History
+        </a>
+        <a href="{% url 'attendance:export_my_csv' %}" class="qa-chip">
+            <span class="iconify" data-icon="mdi:download-outline"></span>
+            Export CSV
+        </a>
     </div>
 
     {% if course_data %}
@@ -746,6 +877,26 @@ document.getElementById('errorModal').addEventListener('click', function(e) {
 // Submit on Enter
 document.getElementById('taCodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') submitTaCode();
+});
+</script>
+</div><!-- end #realContent -->
+
+<script>
+/* Skeleton → real content swap */
+document.addEventListener('DOMContentLoaded', function () {
+    var skeleton = document.getElementById('skeletonLoader');
+    var real = document.getElementById('realContent');
+
+    setTimeout(function () {
+        skeleton.style.opacity = '0';
+        setTimeout(function () {
+            skeleton.style.display = 'none';
+            real.style.display = 'block';
+            requestAnimationFrame(function () {
+                real.style.opacity = '1';
+            });
+        }, 300);
+    }, 500);
 });
 </script>
 {% endblock %}

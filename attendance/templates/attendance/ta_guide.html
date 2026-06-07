@@ -1,0 +1,272 @@
+{% extends "attendance/base.html" %}
+{% block title %}TA Guide{% endblock %}
+
+{% block content %}
+<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+
+<style>
+:root {
+    --primary:    #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.10);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+
+/* Sections */
+.guide-section {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1.125rem;
+    overflow: hidden;
+}
+
+.section-head {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #F8F9FD;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+}
+.section-num {
+    width: 28px; height: 28px;
+    background: var(--primary); color: #fff;
+    border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.section-title { font-size: 14px; font-weight: 700; flex: 1; }
+.chevron { font-size: 18px; color: var(--muted); transition: transform 0.2s; }
+.section-head[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+.section-body { padding: 1.25rem; display: none; }
+.section-body.open { display: block; }
+
+/* Steps */
+.step-list { display: flex; flex-direction: column; gap: 0.875rem; }
+.step {
+    display: flex; gap: 0.875rem; align-items: flex-start;
+}
+.step-icon {
+    width: 36px; height: 36px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    background: var(--primary-lt); color: var(--primary);
+}
+.step-icon.green { background: var(--green-lt); color: var(--green); }
+.step-text { font-size: 13.5px; line-height: 1.6; padding-top: 0.4rem; }
+.step-text strong { color: var(--primary); }
+
+/* Tip box */
+.tip-box {
+    background: rgba(242,195,26,0.1);
+    border: 1px solid rgba(242,195,26,0.3);
+    border-radius: var(--r-sm);
+    padding: 0.75rem 1rem;
+    display: flex; gap: 0.625rem; align-items: flex-start;
+    font-size: 12.5px; color: #7A5C00; margin-top: 1rem; line-height: 1.55;
+}
+.tip-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: #B8920C; }
+</style>
+
+<div class="wrap">
+
+    <div class="page-header">
+        <h1>TA Quick Guide</h1>
+        <div class="page-header-sub">Everything you need to know to run your sessions</div>
+    </div>
+
+    <!-- 1. Dashboard -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="true">
+            <div class="section-num">1</div>
+            <div class="section-title">Using Your Dashboard</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body open">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
+                    <div class="step-text">Your dashboard shows all <strong>sessions grouped by course</strong>. Each course card lists every week as a tab at the top.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:calendar-week"></span></div>
+                    <div class="step-text">Click a <strong>Week tab</strong> to open that session. You'll see the date, time, topic, and the list of enrolled students below.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
+                    <div class="step-text">The <strong>student count chip</strong> next to the session date shows how many students are registered for that course.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Generating codes -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">2</div>
+            <div class="section-title">Generating Attendance Codes</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:lightning-bolt"></span></div>
+                    <div class="step-text"><strong>Generate All</strong> — click the green button at the top of a session to generate codes for every student at once. You'll be asked to confirm before it runs.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:key-outline"></span></div>
+                    <div class="step-text"><strong>Generate one</strong> — find the student in the table and click the green <em>Generate</em> button in their row. The code appears instantly without reloading the page.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:send-outline"></span></div>
+                    <div class="step-text">Once a code is generated, click <strong>Mark Given</strong> after you hand it to the student. This changes the status from <em>Pending</em> to <em>Given</em>.</div>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+                Codes remain on the current week tab after generation — the page does not reload or switch tabs.
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Status badges -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">3</div>
+            <div class="section-title">Understanding Code Statuses</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:minus-circle-outline"></span></div>
+                    <div class="step-text"><strong>Not generated</strong> — no code has been created for this student yet for this session.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon" style="background:rgba(184,146,12,0.1);color:#B8920C;"><span class="iconify" data-icon="mdi:clock-outline"></span></div>
+                    <div class="step-text"><strong>Pending</strong> — a code was generated but has not been given to the student or used yet.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon" style="background:rgba(37,99,235,0.09);color:#2563EB;"><span class="iconify" data-icon="mdi:send-check"></span></div>
+                    <div class="step-text"><strong>Given</strong> — you marked the code as distributed. The student has the code but hasn't submitted attendance yet.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+                    <div class="step-text"><strong>Used</strong> — the student submitted their attendance using this code. No further action needed.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Manage courses -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">4</div>
+            <div class="section-title">Managing Your Courses</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:book-edit-outline"></span></div>
+                    <div class="step-text">Go to <strong>Manage Courses</strong> in the sidebar to see all available levels. Your currently assigned ones are shown in green.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:plus-circle-outline"></span></div>
+                    <div class="step-text">Check any level you want to add. New levels will appear on your dashboard after saving.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon" style="background:rgba(220,38,38,0.08);color:#DC2626;"><span class="iconify" data-icon="mdi:minus-circle-outline"></span></div>
+                    <div class="step-text">Uncheck a green level to remove it. Click <strong>Save Changes</strong> to confirm. The level will no longer appear on your dashboard.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Announcements -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">5</div>
+            <div class="section-title">Sending Announcements</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:bullhorn-outline"></span></div>
+                    <div class="step-text">Click <strong>Announcements</strong> in the sidebar. Write a subject and your message, then choose which levels to target — or leave all unchecked to send to every student in your levels.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
+                    <div class="step-text">Students receive the announcement as an email. The subject line will be prefixed with <em>[SWASA]</em> so it is easy to identify.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
+                    <div class="step-text">All past announcements are listed below the compose form, showing how many students received each one.</div>
+                </div>
+            </div>
+            <div class="tip-box">
+                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+                Only students registered in active-semester courses for your assigned levels will receive the email.
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. History -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">6</div>
+            <div class="section-title">Viewing Your History</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
+                    <div class="step-text">Click <strong>My History</strong> in the sidebar for a full record of every session — codes generated, given out, used, and the overall usage rate per week.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:percent"></span></div>
+                    <div class="step-text">The <strong>usage rate bar</strong> for each session shows what percentage of generated codes were actually used to submit attendance.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function toggle(head) {
+    const body = head.nextElementSibling;
+    const open = body.classList.toggle('open');
+    head.setAttribute('aria-expanded', open);
+}
+</script>
+{% endblock %}

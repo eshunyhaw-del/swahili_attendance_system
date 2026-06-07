@@ -196,3 +196,53 @@ class CodeMisuseAlert(models.Model):
 
     def __str__(self):
         return f"Misuse alert: {self.code.code_string} by {self.attempted_by.username}"
+
+
+class TAnnouncement(models.Model):
+    """Announcement sent by a TA to students in their assigned levels."""
+    ta = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_announcements')
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+    target_levels = models.ManyToManyField(Level, blank=True)
+    recipient_count = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-sent_at']
+
+    def __str__(self):
+        return f"Announcement: {self.title} by {self.ta.get_full_name()}"
+
+
+class OTPCode(models.Model):
+    PURPOSE_LOGIN = 'login'
+    PURPOSE_PASSWORD_RESET = 'password_reset'
+    PURPOSE_REGISTRATION = 'registration'
+    PURPOSE_CHOICES = [
+        (PURPOSE_LOGIN, 'Login'),
+        (PURPOSE_PASSWORD_RESET, 'Password Reset'),
+        (PURPOSE_REGISTRATION, 'Registration'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_codes')
+    code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'purpose', 'is_used']),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=5)
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    def __str__(self):
+        return f"OTP({self.purpose}) for {self.user.username} — {'used' if self.is_used else 'active'}"

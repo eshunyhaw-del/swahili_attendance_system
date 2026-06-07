@@ -3,103 +3,272 @@
 
 {% block content %}
 <style>
-    /* Inherit from dashboard base settings */
-    body { background: #F4F6FB !important; }
+:root {
+    --primary:    #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.10);
+    --amber:      #B8920C;
+    --amber-lt:   rgba(184,146,12,0.10);
+    --red:        #C0392B;
+    --red-lt:     rgba(192,57,43,0.09);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
 
-    .dash-wrapper {
-        max-width: 580px;
-        margin: 0 auto;
-        padding: 0.5rem 0 2rem;
-    }
+.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-    /* Reuse Header style from dashboard */
-    .dash-header { margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
-    .dash-header h1 { font-size: 1.55rem; font-weight: 700; color: var(--text-primary); margin: 0; letter-spacing: -0.03em; }
+/* ─── Page header ─── */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -60px; right: -50px;
+    width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
 
-    /* Reuse Course Panel style from dashboard */
-    .course-panel {
-        background: #FFFFFF;
-        border-radius: var(--radius-lg);
-        margin-bottom: 1rem;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-xs);
-        overflow: hidden;
-    }
+/* ─── Stat cards ─── */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+}
+.stat-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    padding: 0.875rem 1rem;
+    text-align: center;
+}
+.stat-val { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; }
+.stat-lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.stat-val.green { color: var(--green); }
+.stat-val.amber { color: var(--amber); }
+.stat-val.red   { color: var(--red); }
+.stat-val.navy  { color: var(--primary); }
 
-    .card-inner { padding: 1.25rem; }
+/* ─── Course card ─── */
+.course-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
 
-    .course-meta { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
-    .course-info { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 0; }
-    .course-code { align-self: flex-start; color: var(--navy); font-size: 10px; font-weight: 700; background: rgba(13,36,114,0.07); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
-    .course-name { font-weight: 600; font-size: 15px; color: var(--text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    .course-score { font-size: 13px; font-weight: 700; color: var(--text-primary); background: var(--bg-subtle); padding: 0.4rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.course-head {
+    padding: 1.125rem 1.25rem 1rem;
+}
+.course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.875rem; }
+.course-code-chip {
+    display: inline-block;
+    background: var(--primary-lt);
+    color: var(--primary);
+    font-size: 10px; font-weight: 800;
+    padding: 3px 8px; border-radius: 6px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+.course-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.course-score {
+    font-size: 13px; font-weight: 800;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 0.35rem 0.75rem;
+    white-space: nowrap; flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+}
 
-    /* Progress bar */
-    .track-line { height: 6px; background: var(--bg-subtle); border-radius: 99px; overflow: hidden; margin-bottom: 0.5rem; }
-    .track-fill { height: 100%; border-radius: 99px; }
-    .track-fill.good { background: linear-gradient(90deg, #1E9E5E 0%, #2ECC71 100%); }
-    .track-fill.medium { background: linear-gradient(90deg, #C9A00E 0%, #F2C31A 100%); }
-    .track-fill.low { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
+.progress-bar {
+    height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden;
+}
+.progress-fill {
+    height: 100%; border-radius: 99px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+.progress-fill.good   { background: linear-gradient(90deg, #1A9E60 0%, #2ECC71 100%); }
+.progress-fill.medium { background: linear-gradient(90deg, #B8920C 0%, #F2C31A 100%); }
+.progress-fill.low    { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
 
-    /* Week grid adapted to match dashboard list style */
-    .weeks-box { border-top: 1px solid var(--border); background: var(--bg-subtle); }
-    .week-item { display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border); }
-    .week-item:last-child { border-bottom: none; }
-    .week-title { font-weight: 600; font-size: 13px; color: var(--text-primary); }
-    .week-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
-    
-    .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 0.3rem; }
-    .status-attended { background: rgba(30,158,94,0.1); color: #1E9E5E; }
-    .status-absent { background: rgba(239,76,60,0.1); color: #E74C3C; }
-    .status-upcoming { background: var(--border); color: var(--text-muted); }
+.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
+.progress-pct  { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+
+/* ─── Week list ─── */
+.week-list { border-top: 1px solid var(--border); }
+.week-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    transition: background 0.1s;
+}
+.week-row:last-child { border-bottom: none; }
+.week-row:hover { background: rgba(13,36,114,0.02); }
+
+.week-left { display: flex; align-items: center; gap: 0.75rem; }
+.week-num-badge {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--muted);
+    flex-shrink: 0;
+}
+.week-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.week-date  { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+.badge {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    white-space: nowrap;
+}
+.badge-attended { background: var(--green-lt); color: var(--green); }
+.badge-absent   { background: var(--red-lt);   color: var(--red); }
+.badge-upcoming { background: var(--bg);        color: var(--muted); border: 1px solid var(--border); }
+
+/* ─── Empty state ─── */
+.empty {
+    text-align: center; padding: 3.5rem 2rem;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 2px dashed var(--border);
+    box-shadow: var(--sh-sm);
+}
+.empty .iconify { font-size: 2.5rem; color: var(--muted); margin-bottom: 0.75rem; display: block; }
+.empty p { color: var(--muted); font-size: 14px; font-weight: 500; }
+
+@media (max-width: 500px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 
-<div class="dash-wrapper">
-    <div class="dash-header">
+<div class="wrap">
+
+    <div class="page-header">
         <h1>Attendance History</h1>
+        <div class="page-header-sub">Your full attendance record across all courses</div>
     </div>
 
+    <!-- Summary stats -->
+    {% if history_data %}
+    {% with total_sessions=0 total_attended=0 total_absent=0 %}
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-val navy">
+                {% with ns=0 %}{% for item in history_data %}{% with ns=ns|add:item.total %}{% endwith %}{% endfor %}
+                {{ history_data|length }}{% endwith %}
+            </div>
+            <div class="stat-lbl">Courses</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val navy" id="stat-total">—</div>
+            <div class="stat-lbl">Sessions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val green" id="stat-attended">—</div>
+            <div class="stat-lbl">Attended</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-val red" id="stat-absent">—</div>
+            <div class="stat-lbl">Absent</div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endif %}
+
+    <!-- Course cards -->
     {% for item in history_data %}
-    <div class="course-panel">
-        <div class="card-inner">
-            <div class="course-meta">
-                <div class="course-info">
-                    <span class="course-code">{{ item.course.code }}</span>
-                    <span class="course-name">{{ item.course.name }}</span>
+    <div class="course-card">
+        <div class="course-head">
+            <div class="course-top">
+                <div>
+                    <div class="course-code-chip">{{ item.course.code }}</div>
+                    <div class="course-name">{{ item.course.name }}</div>
                 </div>
                 <div class="course-score">{{ item.attended }} / {{ item.total }}</div>
             </div>
-            <div class="track-line">
-                <div class="track-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}" 
-                     style="width: {{ item.percentage }}%;"></div>
+            <div class="progress-bar">
+                <div class="progress-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}"
+                     style="width:{{ item.percentage }}%;"></div>
+            </div>
+            <div class="progress-meta">
+                <span class="progress-pct" style="color:{% if item.percentage >= 75 %}var(--green){% elif item.percentage >= 50 %}var(--amber){% else %}var(--red){% endif %};">
+                    {{ item.percentage|floatformat:0 }}% attendance
+                </span>
+                <span class="progress-pct">{{ item.total }} session{{ item.total|pluralize }}</span>
             </div>
         </div>
 
-        <div class="weeks-box">
+        <div class="week-list">
             {% for week in item.weeks %}
-            <div class="week-item">
-                <div>
-                    <div class="week-title">Week {{ week.week_num }}</div>
-                    <div class="week-date">{{ week.session.date|date:"d M Y" }}</div>
+            <div class="week-row">
+                <div class="week-left">
+                    <div class="week-num-badge">{{ week.week_num }}</div>
+                    <div>
+                        <div class="week-title">Week {{ week.week_num }}</div>
+                        <div class="week-date">{{ week.session.date|date:"l, d M Y" }}</div>
+                    </div>
                 </div>
-                <div>
-                    {% if week.status == 'attended' %}
-                        <span class="status-badge status-attended">Attended</span>
-                    {% elif week.status == 'absent' %}
-                        <span class="status-badge status-absent">Absent</span>
-                    {% else %}
-                        <span class="status-badge status-upcoming">Upcoming</span>
-                    {% endif %}
-                </div>
+                {% if week.status == 'attended' %}
+                    <span class="badge badge-attended">
+                        <span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Attended
+                    </span>
+                {% elif week.status == 'absent' %}
+                    <span class="badge badge-absent">
+                        <span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
+                    </span>
+                {% else %}
+                    <span class="badge badge-upcoming">Upcoming</span>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
     {% empty %}
-    <div class="blank-state" style="padding: 3rem; text-align: center; border: 2px dashed var(--border); border-radius: var(--radius-lg);">
-        <p style="color: var(--text-muted);">No history recorded yet.</p>
+    <div class="empty">
+        <span class="iconify" data-icon="mdi:history"></span>
+        <p>No attendance history yet.</p>
     </div>
     {% endfor %}
+
 </div>
+
+<script>
+/* Compute aggregate stats client-side from hidden data attributes */
+document.addEventListener('DOMContentLoaded', function () {
+    let total = 0, attended = 0, absent = 0;
+    document.querySelectorAll('.week-row').forEach(function (row) {
+        const badge = row.querySelector('.badge');
+        if (!badge) return;
+        const txt = badge.textContent.trim();
+        if (txt.includes('Upcoming')) return;
+        total++;
+        if (txt.includes('Attended')) attended++;
+        else if (txt.includes('Absent')) absent++;
+    });
+    const st = document.getElementById('stat-total');
+    const sa = document.getElementById('stat-attended');
+    const sb = document.getElementById('stat-absent');
+    if (st) st.textContent = total;
+    if (sa) sa.textContent = attended;
+    if (sb) sb.textContent = absent;
+});
+</script>
 {% endblock %}

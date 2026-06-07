@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+</head>
+<body style="margin:0;padding:0;background:#EEF1F8;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#EEF1F8;padding:32px 16px;">
+  <tr>
+    <td align="center">
+      <table width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0D2472 0%,#1A3A9C 100%);border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;">
+            <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">SWASA Attendance</div>
+            <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.02em;">Announcement from your TA</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="background:#fff;padding:28px 32px;">
+            <p style="margin:0 0 16px;font-size:14px;color:#8896AB;font-weight:500;">
+                Hi {{ student_name }},
+            </p>
+            <h2 style="margin:0 0 16px;font-size:18px;font-weight:800;color:#0D1B3E;letter-spacing:-0.01em;">
+                {{ title }}
+            </h2>
+            <div style="font-size:14px;color:#4A5568;line-height:1.7;white-space:pre-wrap;border-left:3px solid #0D2472;padding-left:16px;margin-bottom:24px;">{{ message }}</div>
+            <p style="margin:0;font-size:13px;color:#8896AB;">
+                This announcement was sent by your TA, <strong style="color:#0D1B3E;">{{ ta_name }}</strong>.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#F4F6FB;border-radius:0 0 16px 16px;padding:18px 32px;text-align:center;border-top:1px solid #DDE3EF;">
+            <p style="margin:0;font-size:11px;color:#8896AB;">SWASA Attendance System · University of Ghana</p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

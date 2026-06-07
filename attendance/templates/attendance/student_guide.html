@@ -1,675 +1,425 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWASA Attendance - Student Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --navy:        #0D2472;
-            --navy-light:  #1B3A9C;
-            --navy-dark:   #091A55;
-            --gold:        #F2C31A;
-            --gold-dark:   #C9A00E;
-            --green:       #1E9E5E;
-            --red:         #C0392B;
-            --blue:        #4A90D9;
+{% extends "attendance/base.html" %}
+{% block title %}Student Guide{% endblock %}
 
-            --bg:          #F4F6FB;
-            --surface:     #FFFFFF;
-            --subtle:      #EEF1F8;
-            --text:        #0D1B3E;
-            --text-sec:    #4A5568;
-            --text-muted:  #8896AB;
-            --border:      #E4E9F2;
-            --border-str:  #C8D0E0;
+{% block content %}
+<style>
+:root {
+    --primary:    #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.10);
+    --amber:      #B8920C;
+    --amber-lt:   rgba(184,146,12,0.10);
+    --red:        #C0392B;
+    --red-lt:     rgba(192,57,43,0.09);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
 
-            --r-sm: 8px;
-            --r-md: 12px;
-            --r-lg: 16px;
-        }
+.wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+/* ─── Page header ─── */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
 
-        body {
-            font-family: 'DM Sans', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            font-size: 14px;
-            -webkit-font-smoothing: antialiased;
-        }
+/* ─── Quick ref bar ─── */
+.quick-ref {
+    background: var(--surface); border-radius: var(--r-lg);
+    border: 1px solid var(--border); border-left: 4px solid var(--primary);
+    box-shadow: var(--sh-sm); padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.quick-ref-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+.quick-ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem 1.25rem; }
+.quick-ref-item { font-size: 13px; color: #4A5568; }
+.quick-ref-item strong { color: var(--text); font-weight: 700; }
+.mono { font-family: 'DM Mono', monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 12px; color: var(--primary); font-weight: 600; }
 
-        /* ── Page wrapper ── */
-        .guide-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem 1.25rem 3rem;
-        }
+/* ─── Accordion sections ─── */
+.guide-section {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    margin-bottom: 0.875rem;
+    overflow: hidden;
+}
 
-        /* ── Header ── */
-        .header {
-            background: var(--navy);
-            border-radius: var(--r-lg);
-            padding: 2rem 2rem 1.75rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-        }
+.section-head {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #F8F9FD;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; user-select: none;
+}
+.section-num {
+    width: 28px; height: 28px;
+    background: var(--primary); color: #fff;
+    border-radius: 9999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.section-title { font-size: 14px; font-weight: 700; flex: 1; }
+.chevron { font-size: 18px; color: var(--muted); transition: transform 0.2s; }
+.section-head[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at 10% 50%, rgba(242,195,26,0.12) 0%, transparent 55%),
-                radial-gradient(circle at 90% 20%, rgba(74,144,217,0.1) 0%, transparent 50%);
-            pointer-events: none;
-        }
+.section-body { padding: 1.25rem; display: none; }
+.section-body.open { display: block; }
 
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--navy-dark), var(--navy-light), var(--gold));
-        }
+/* ─── Steps ─── */
+.step-list { display: flex; flex-direction: column; gap: 0.875rem; }
+.step { display: flex; gap: 0.875rem; align-items: flex-start; }
+.step-icon {
+    width: 36px; height: 36px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    background: var(--primary-lt); color: var(--primary);
+}
+.step-icon.green { background: var(--green-lt); color: var(--green); }
+.step-icon.amber { background: var(--amber-lt); color: var(--amber); }
+.step-icon.red   { background: var(--red-lt);   color: var(--red); }
+.step-text { font-size: 13.5px; line-height: 1.6; padding-top: 0.4rem; }
+.step-text strong { color: var(--primary); }
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            position: relative;
-        }
+/* Status row */
+.status-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; font-size: 13px; }
+.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--gold);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--navy-dark);
-            font-weight: 700;
-            font-size: 1.1rem;
-            box-shadow: 0 2px 8px rgba(242,195,26,0.4);
-        }
+/* Tip box */
+.tip-box {
+    background: var(--amber-lt); border: 1px solid rgba(184,146,12,0.25);
+    border-radius: var(--r-sm); padding: 0.75rem 1rem;
+    display: flex; gap: 0.625rem; align-items: flex-start;
+    font-size: 12.5px; color: #7A5C00; margin-top: 1rem; line-height: 1.55;
+}
+.tip-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: var(--amber); }
 
-        .logo-text {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #fff;
-        }
+/* Info box */
+.info-box {
+    background: var(--primary-lt); border: 1px solid rgba(13,36,114,0.12);
+    border-radius: var(--r-sm); padding: 0.75rem 1rem;
+    display: flex; gap: 0.625rem; align-items: flex-start;
+    font-size: 12.5px; color: #2A3A6B; margin-top: 1rem; line-height: 1.55;
+}
+.info-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: var(--primary); }
 
-        .logo-text span { color: var(--gold); }
+/* ─── Quick ref table ─── */
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ref-table th { background: var(--bg); color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.5rem 0.875rem; border-bottom: 1px solid var(--border); text-align: left; }
+.ref-table td { padding: 0.6rem 0.875rem; border-bottom: 1px solid var(--border); color: #4A5568; }
+.ref-table tbody tr:last-child td { border-bottom: none; }
+.ref-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
+.ref-table td:first-child { font-weight: 700; color: var(--text); }
 
-        .header h1 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.35rem;
-            position: relative;
-        }
+/* ─── Key dates ─── */
+.dates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.625rem; margin-top: 1rem; }
+.date-card {
+    background: var(--bg); border-radius: var(--r-sm); border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+}
+.date-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 3px; }
+.date-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
 
-        .header .subtitle {
-            color: rgba(255,255,255,0.7);
-            font-size: 13px;
-        }
+/* ─── Tips grid ─── */
+.tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.625rem; }
+.tip-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 13px; color: #4A5568; line-height: 1.5; }
+.tip-check { width: 18px; height: 18px; background: var(--green-lt); border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.tip-check::after { content: '✓'; font-size: 10px; color: var(--green); font-weight: 800; }
+</style>
 
-        .header .university {
-            color: rgba(255,255,255,0.45);
-            font-size: 11px;
-            margin-top: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-        }
+<div class="wrap">
 
-        /* ── Quick ref banner ── */
-        .quick-ref {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--navy);
-            border-radius: var(--r-md);
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(13,36,114,0.06);
-        }
-
-        .quick-ref-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--navy);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .quick-ref-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.5rem 1.5rem;
-        }
-
-        .quick-ref-item {
-            font-size: 13px;
-            color: var(--text-sec);
-        }
-
-        .quick-ref-item strong {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        .mono {
-            font-family: 'DM Mono', monospace;
-            background: var(--subtle);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 1px 6px;
-            font-size: 12px;
-            color: var(--navy);
-            font-weight: 500;
-        }
-
-        /* ── Two column ── */
-        .two-column {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-
-        @media (max-width: 700px) {
-            .two-column { grid-template-columns: 1fr; }
-            body { font-size: 13px; }
-        }
-
-        /* ── Step cards ── */
-        .step-card {
-            background: var(--surface);
-            border-radius: var(--r-lg);
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(13,36,114,0.05);
-            break-inside: avoid;
-            page-break-inside: avoid;
-        }
-
-        .step-card:last-child { margin-bottom: 0; }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .step-number {
-            width: 30px;
-            height: 30px;
-            background: var(--navy);
-            color: white;
-            border-radius: var(--r-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
-        }
-
-        .step-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.01em;
-        }
-
-        .step-desc {
-            color: var(--text-sec);
-            font-size: 13px;
-            margin-bottom: 0.875rem;
-            line-height: 1.5;
-        }
-
-        /* ── Screenshot placeholder ── */
-        .screenshot {
-            background: var(--subtle);
-            border-radius: var(--r-md);
-            padding: 1rem;
-            text-align: center;
-            border: 1px dashed var(--border-str);
-        }
-
-        .screenshot-icon {
-            font-size: 1.75rem;
-            margin-bottom: 0.35rem;
-            display: block;
-        }
-
-        .screenshot-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* ── Alert boxes ── */
-        .info-box, .warning-box, .success-box, .error-box {
-            border-radius: var(--r-sm);
-            padding: 0.65rem 0.875rem;
-            font-size: 12px;
-            margin-top: 0.75rem;
-            border-left: 3px solid;
-            line-height: 1.5;
-        }
-
-        .info-box    { background: rgba(13,36,114,0.06);  border-left-color: var(--navy);    color: var(--text-sec); }
-        .warning-box { background: rgba(242,195,26,0.1);  border-left-color: var(--gold-dark); color: #6B4F00; }
-        .success-box { background: rgba(30,158,94,0.08);  border-left-color: var(--green);   color: #14532D; }
-        .error-box   { background: rgba(192,57,43,0.07);  border-left-color: var(--red);     color: #7F1D1D; }
-
-        .info-box strong, .warning-box strong, .success-box strong, .error-box strong {
-            display: block;
-            margin-bottom: 2px;
-            font-weight: 700;
-        }
-
-        /* ── Status pills in step 6 ── */
-        .status-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-            margin-top: 0.5rem;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        /* ── Table ── */
-        .section-block {
-            background: var(--surface);
-            border-radius: var(--r-lg);
-            border: 1px solid var(--border);
-            overflow: hidden;
-            margin-bottom: 1.25rem;
-            box-shadow: 0 1px 3px rgba(13,36,114,0.05);
-        }
-
-        .section-block-header {
-            background: var(--subtle);
-            padding: 0.75rem 1.25rem;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .info-table th {
-            background: var(--subtle);
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            color: var(--text-muted);
-            padding: 0.65rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .info-table td {
-            padding: 0.65rem 1rem;
-            font-size: 12px;
-            color: var(--text-sec);
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        .info-table tbody tr:last-child td { border-bottom: none; }
-        .info-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
-
-        .info-table td:first-child { font-weight: 600; color: var(--text); }
-
-        /* ── Quick tips ── */
-        .quick-tips-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.6rem;
-            padding: 1rem 1.25rem 1.25rem;
-        }
-
-        .tip-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            font-size: 12px;
-            color: var(--text-sec);
-            line-height: 1.5;
-        }
-
-        .tip-check {
-            width: 18px;
-            height: 18px;
-            background: rgba(30,158,94,0.1);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .tip-check::after {
-            content: '✓';
-            font-size: 10px;
-            color: var(--green);
-            font-weight: 700;
-        }
-
-        /* ── Important dates ── */
-        .dates-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.75rem;
-            padding: 1rem 1.25rem 1.25rem;
-        }
-
-        .date-item {
-            background: var(--subtle);
-            border-radius: var(--r-sm);
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-        }
-
-        .date-label {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            color: var(--text-muted);
-            margin-bottom: 3px;
-        }
-
-        .date-value {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text);
-            font-family: 'DM Mono', monospace;
-        }
-
-        /* ── Footer ── */
-        .footer {
-            text-align: center;
-            padding-top: 1.25rem;
-            border-top: 1px solid var(--border);
-            font-size: 11px;
-            color: var(--text-muted);
-            line-height: 1.8;
-        }
-
-        /* ── Print ── */
-        @media print {
-            body { background: #fff; padding: 0; font-size: 11px; }
-            .header { background: var(--navy) !important; -webkit-print-color-adjust: exact; }
-            .step-card, .section-block { break-inside: avoid; }
-            .two-column { break-inside: avoid; }
-            .guide-container { padding: 0.5rem; }
-        }
-    </style>
-</head>
-<body>
-<div class="guide-container">
-
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">SW</div>
-            <div class="logo-text">SWASA <span>Attendance</span></div>
-        </div>
-        <h1>Your Student Guide</h1>
-        <div class="subtitle">A simple guide to tracking your attendance with the SWASA Attendance System</div>
-        <div class="university">University of Ghana, Department of African and Asian Languages</div>
+    <div class="page-header">
+        <h1>Student Quick Guide</h1>
+        <div class="page-header-sub">Everything you need to track your attendance with SWASA</div>
     </div>
 
-    <!-- Quick Reference -->
+    <!-- Quick ref -->
     <div class="quick-ref">
-        <div class="quick-ref-title">📌 Quick Look</div>
+        <div class="quick-ref-title">
+            <span class="iconify" data-icon="mdi:pin-outline" style="font-size:14px;"></span>
+            Quick Look
+        </div>
         <div class="quick-ref-grid">
             <div class="quick-ref-item">Website: <strong>swasa-attendance.onrender.com</strong></div>
-            <div class="quick-ref-item">Login: Use your <span class="mono">Student ID</span> for both your username and password</div>
-            <div class="quick-ref-item">Example: If your ID is <span class="mono">10809707</span>, use it for both fields.</div>
+            <div class="quick-ref-item">Login with: <span class="mono">Email address</span> + your password</div>
+            <div class="quick-ref-item">Password: the one you chose when you registered — not your Student ID</div>
         </div>
     </div>
 
-    <!-- Steps - Two Column -->
-    <div class="two-column">
-
-        <!-- Left: Steps 1–4 -->
-        <div>
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">1</div>
-                    <div class="step-title">Set Up Your Account</div>
+    <!-- 1. Set up account -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="true">
+            <div class="section-num">1</div>
+            <div class="section-title">Set Up Your Account</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body open">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:account-plus-outline"></span></div>
+                    <div class="step-text">Go to the <strong>registration page</strong> and fill in your <strong>Full Name</strong>, <strong>Student ID</strong>, <strong>Level</strong>, <strong>Email address</strong>, and a <strong>Password</strong> of your choice.</div>
                 </div>
-                <div class="step-desc">Head to the registration page and create your account using your student information.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">📝</span>
-                    <div class="screenshot-label">Registration Form — Fill your details</div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:numeric-6-box-outline"></span></div>
+                    <div class="step-text">A <strong>6-digit verification code</strong> is sent to the email you provided. Enter that code on the next page to activate your account.</div>
                 </div>
-                <div class="info-box">
-                    <strong>What you'll need:</strong>
-                    Your Student ID, UG Email (@st.ug.edu.gh), and academic level.
-                </div>
-            </div>
-
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">2</div>
-                    <div class="step-title">Log In</div>
-                </div>
-                <div class="step-desc">Simply use your Student ID for both your username and password to log in.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">🔐</span>
-                    <div class="screenshot-label">Login Page — Enter Student ID</div>
-                </div>
-                <div class="warning-box">
-                    <strong>Crucial:</strong>
-                    Your Student ID serves as both your username and password. Keep it confidential and never share it!
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+                    <div class="step-text">Once verified, you are <strong>automatically logged in</strong> and taken straight to the course registration page — no extra steps needed.</div>
                 </div>
             </div>
+            <div class="info-box">
+                <span class="iconify" data-icon="mdi:information-outline"></span>
+                Use any valid email address you have access to. Check your <strong>spam folder</strong> if you don't see the verification code within a minute.
+            </div>
+        </div>
+    </div>
 
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">3</div>
-                    <div class="step-title">Enroll in Your Courses</div>
+    <!-- 2. Log in -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">2</div>
+            <div class="section-title">Log In</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
+                    <div class="step-text">On the login page enter your <strong>email address</strong> — the same one you registered with.</div>
                 </div>
-                <div class="step-desc">Choose all the courses you're taking this semester.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">📚</span>
-                    <div class="screenshot-label">Course Selection — Check your courses</div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div>
+                    <div class="step-text">Enter the <strong>password you chose</strong> when you registered. This is not your Student ID — it is the password you set during sign-up.</div>
                 </div>
-                <div class="info-box">
-                    <strong>Helpful Tip:</strong>
-                    You only need to register once per semester. You can update your course selections anytime before the deadline.
+                <div class="step">
+                    <div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div>
+                    <div class="step-text">If you forget your password, click <strong>Forgot Password</strong> on the login page. A reset code will be sent to your email.</div>
                 </div>
             </div>
+            <div class="tip-box">
+                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+                Never share your password with anyone. Your Student ID is only used for identification — it is not your password.
+            </div>
+        </div>
+    </div>
 
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">4</div>
-                    <div class="step-title">Receive Your TA Code During Class</div>
+    <!-- 3. Register courses -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">3</div>
+            <div class="section-title">Register Your Courses</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div>
+                    <div class="step-text">Click <strong>Register Courses</strong> in the sidebar. You will see all courses available for your level and semester.</div>
                 </div>
-                <div class="step-desc">In every class session, your Teaching Assistant will provide a unique 2–5 digit code.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">🎫</span>
-                    <div class="screenshot-label">TA gives you a code during class</div>
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:checkbox-marked-outline"></span></div>
+                    <div class="step-text"><strong>Check every course you are taking</strong> this semester, then click Register. You only need to do this once per semester.</div>
                 </div>
-                <div class="warning-box">
-                    <strong>Please Note:</strong>
-                    Each code is unique to you and your specific class session. It cannot be shared with others.
+            </div>
+            <div class="tip-box">
+                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+                Register early — the course list may be locked after the registration deadline.
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Receive TA code -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">4</div>
+            <div class="section-title">Receive Your TA Code in Class</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div>
+                    <div class="step-text">During each class session, your <strong>Teaching Assistant</strong> will generate a unique 2–5 digit code and hand it to you in person.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon red"><span class="iconify" data-icon="mdi:shield-alert-outline"></span></div>
+                    <div class="step-text">Each code is <strong>unique to you</strong> and this specific session. It cannot be shared or used more than once.</div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Right: Steps 5–7 -->
-        <div>
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">5</div>
-                    <div class="step-title">Submit Your Attendance Code</div>
+    <!-- 5. Submit attendance -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">5</div>
+            <div class="section-title">Submit Your Attendance Code</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
+                    <div class="step-text">Go to your <strong>Dashboard</strong>. Find the course and locate the current week in the session list.</div>
                 </div>
-                <div class="step-desc">From your dashboard, locate the current week, click "Submit Code," and enter the code provided by your TA.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">⌨️</span>
-                    <div class="screenshot-label">Dashboard — Enter code and submit</div>
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:keyboard-outline"></span></div>
+                    <div class="step-text">Click <strong>Submit Code</strong>, type the code your TA gave you, then tap <em>Submit Attendance</em>.</div>
                 </div>
-                <div class="success-box">
-                    <strong>Great News!</strong>
-                    Once submitted, the status will update to "Submitted" with a green checkmark.
+                <div class="step">
+                    <div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+                    <div class="step-text">The week row will immediately update to a green <strong>"Submitted"</strong> badge — no page reload needed.</div>
                 </div>
             </div>
+            <div class="tip-box">
+                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+                Submit as soon as your TA hands you the code — codes expire after the session ends.
+            </div>
+        </div>
+    </div>
 
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">6</div>
-                    <div class="step-title">Monitor Your Progress</div>
+    <!-- 6. Track progress -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">6</div>
+            <div class="section-title">Track Your Attendance Progress</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div>
+                    <div class="step-text">Your <strong>Dashboard</strong> shows each course with an attendance progress bar and a score (e.g., <em>5 / 8</em>).</div>
                 </div>
-                <div class="step-desc">Check your attendance history to see which weeks you've attended or missed.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">📊</span>
-                    <div class="screenshot-label">History Page — See your attendance record</div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
+                    <div class="step-text">Click <strong>My History</strong> in the sidebar for a full week-by-week breakdown with colour-coded status badges:</div>
                 </div>
-                <div class="status-list">
-                    <div class="status-item">
-                        <div class="status-dot" style="background:#1E9E5E;"></div>
-                        <span><strong>Present</strong> — Code submitted successfully</span>
+            </div>
+            <div style="margin-top:0.875rem;display:flex;flex-direction:column;gap:0.4rem;">
+                <div class="status-row"><div class="status-dot" style="background:#1A9E60;"></div><span><strong>Attended</strong> — code submitted for this session</span></div>
+                <div class="status-row"><div class="status-dot" style="background:#C0392B;"></div><span><strong>Absent</strong> — no code submitted</span></div>
+                <div class="status-row"><div class="status-dot" style="background:#8896AB;"></div><span><strong>Upcoming</strong> — session has not happened yet</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Export & support -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num">7</div>
+            <div class="section-title">Export Records &amp; Get Support</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="step-list">
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:download-outline"></span></div>
+                    <div class="step-text">Click <strong>Export CSV</strong> in the sidebar to download your full attendance record as a spreadsheet for personal reference.</div>
+                </div>
+                <div class="step">
+                    <div class="step-icon"><span class="iconify" data-icon="mdi:lifebuoy"></span></div>
+                    <div class="step-text">If you have a problem, click <strong>Support</strong> in the sidebar to submit a help ticket. The admin team responds within 24–48 hours.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick reference table -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num" style="background:var(--green);">
+                <span class="iconify" data-icon="mdi:table" style="font-size:13px;"></span>
+            </div>
+            <div class="section-title">Quick Reference Table</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body" style="padding:0;">
+            <table class="ref-table">
+                <thead>
+                    <tr><th>Action</th><th>How</th><th>Where</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Create account</td><td>Register with Student ID + UG email</td><td>Register page</td></tr>
+                    <tr><td>Log in</td><td>Email address / password</td><td>Login page</td></tr>
+                    <tr><td>Register courses</td><td>Check courses → Register</td><td>Sidebar → Register Courses</td></tr>
+                    <tr><td>Submit attendance</td><td>Click Submit Code → enter TA code</td><td>Dashboard</td></tr>
+                    <tr><td>View history</td><td>Open My History</td><td>Sidebar → My History</td></tr>
+                    <tr><td>Download records</td><td>Export CSV</td><td>Sidebar → Export CSV</td></tr>
+                    <tr><td>Get help</td><td>Submit a support ticket</td><td>Sidebar → Support</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Student tips -->
+    <div class="guide-section">
+        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
+            <div class="section-num" style="background:#B8920C;">
+                <span class="iconify" data-icon="mdi:lightbulb-outline" style="font-size:13px;"></span>
+            </div>
+            <div class="section-title">Student Pro Tips</div>
+            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+        </div>
+        <div class="section-body">
+            <div class="tips-grid">
+                <div class="tip-item"><div class="tip-check"></div><span>Save the website to your phone's home screen for quick access.</span></div>
+                <div class="tip-item"><div class="tip-check"></div><span>Submit your code right away — don't wait until after class.</span></div>
+                <div class="tip-item"><div class="tip-check"></div><span>Check your history weekly to catch any missed sessions early.</span></div>
+                <div class="tip-item"><div class="tip-check"></div><span>Use a strong, unique password — not something easy to guess. Never share it.</span></div>
+                <div class="tip-item"><div class="tip-check"></div><span>Export your CSV at the end of semester for your personal records.</span></div>
+            </div>
+
+            <div style="margin-top:1.25rem;">
+                <div class="dates-grid">
+                    <div class="date-card">
+                        <div class="date-lbl">Semester Begins</div>
+                        <div class="date-val">June 1, 2026</div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-dot" style="background:#C0392B;"></div>
-                        <span><strong>Absent</strong> — No code submitted</span>
+                    <div class="date-card">
+                        <div class="date-lbl">Semester Ends</div>
+                        <div class="date-val">October 31, 2026</div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-dot" style="background:#F2C31A;"></div>
-                        <span><strong>Upcoming</strong> — Session yet to occur</span>
+                    <div class="date-card">
+                        <div class="date-lbl">Registration Closes</div>
+                        <div class="date-val">End of Week 2</div>
+                    </div>
+                    <div class="date-card">
+                        <div class="date-lbl">Final Submission</div>
+                        <div class="date-val">End of Semester</div>
                     </div>
                 </div>
             </div>
-
-            <div class="step-card">
-                <div class="step-header">
-                    <div class="step-number">7</div>
-                    <div class="step-title">Download Your Records (Optional)</div>
-                </div>
-                <div class="step-desc">You have the option to download your attendance record as a CSV file for your personal reference.</div>
-                <div class="screenshot">
-                    <span class="screenshot-icon">📥</span>
-                    <div class="screenshot-label">Export CSV — Download your attendance data</div>
-                </div>
-            </div>
         </div>
-    </div>
-
-    <!-- Support notice -->
-    <div class="section-block" style="margin-bottom:1.25rem;">
-        <div class="section-block-header">📞 Need a Hand?</div>
-        <div style="padding:0.875rem 1.25rem;font-size:13px;color:var(--text-sec);line-height:1.8;">
-            If you need assistance, use the <strong style="color:var(--text);">Support</strong> feature on your dashboard to submit a ticket. You can also reach out to your TA during class hours. Our admin team aims to respond to support tickets within <strong style="color:var(--text);">24–48 hours</strong>.
-        </div>
-    </div>
-
-    <!-- Quick Reference Table -->
-    <div class="section-block">
-        <div class="section-block-header">📋 Quick Guide</div>
-        <table class="info-table">
-            <thead>
-                <tr>
-                    <th>Action</th>
-                    <th>How to Do It</th>
-                    <th>Location</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>Login</td><td>Student ID / Student ID</td><td>Login page</td></tr>
-                <tr><td>Register courses</td><td>Check boxes → Submit</td><td>Dashboard → Register Courses</td></tr>
-                <tr><td>Submit attendance</td><td>Enter TA code → Submit</td><td>Dashboard → Week card</td></tr>
-                <tr><td>View history</td><td>Click "My History"</td><td>Sidebar menu</td></tr>
-                <tr><td>Get help</td><td>Submit support ticket</td><td>Dashboard → Support</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pro Tips -->
-    <div class="section-block">
-        <div class="section-block-header">💡 Student Pro Tips</div>
-        <div class="quick-tips-grid">
-            <div class="tip-item"><div class="tip-check"></div><span>Save the website link to your phone's home screen for super quick access.</span></div>
-            <div class="tip-item"><div class="tip-check"></div><span>Your Student ID is your only password – keep it safe and secure!</span></div>
-            <div class="tip-item"><div class="tip-check"></div><span>Submit your code right after your TA gives it to you, so you don't forget.</span></div>
-            <div class="tip-item"><div class="tip-check"></div><span>Make it a habit to check your attendance history weekly to stay on top of your progress.</span></div>
-            <div class="tip-item"><div class="tip-check"></div><span>At the end of the semester, export your attendance as a CSV for your personal records.</span></div>
-        </div>
-    </div>
-
-    <!-- Important Dates -->
-    <div class="section-block" style="margin-bottom:1.5rem;">
-        <div class="section-block-header" style="border-left:3px solid var(--gold-dark);color:var(--gold-dark);">📅 Key Dates — Second Semester 2025/2026</div>
-        <div class="dates-grid">
-            <div class="date-item">
-                <div class="date-label">Semester Begins</div>
-                <div class="date-value">June 1, 2026</div>
-            </div>
-            <div class="date-item">
-                <div class="date-label">Semester Ends</div>
-                <div class="date-value">October 31, 2026</div>
-            </div>
-            <div class="date-item">
-                <div class="date-label">Course Registration Closes</div>
-                <div class="date-value">End of Week 2</div>
-            </div>
-            <div class="date-item">
-                <div class="date-label">Final Attendance Submission</div>
-                <div class="date-value">End of Semester</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <p>SWASA Attendance System | Department of African and Asian Languages | University of Ghana</p>
-        <p>For technical support, please contact your TA or submit a ticket through the system.</p>
-        <p>Version 2.0 | Last Updated: May 2026</p>
     </div>
 
 </div>
-</body>
-</html>
+
+<script>
+function toggle(head) {
+    const body = head.nextElementSibling;
+    const open = body.classList.toggle('open');
+    head.setAttribute('aria-expanded', open);
+}
+</script>
+{% endblock %}

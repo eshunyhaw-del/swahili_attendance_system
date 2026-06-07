@@ -43,40 +43,40 @@
 
     /* Dark Mode Overrides */
     [data-theme="dark"] {
-        --dash-bg: linear-gradient(135deg, #0F172A 0%, #020617 100%);
-        --panel-bg: #1E293B;
-        --text-primary: #F8FAFC;
-        --text-secondary: #E2E8F0;
-        --text-muted: #94A3B8;
-        --border-color: #334155;
+        --dash-bg: linear-gradient(135deg, #0F1923 0%, #0A1018 100%);
+        --panel-bg: #1E2A3B;
+        --text-primary: #E8EDF5;
+        --text-secondary: #C4CDD8;
+        --text-muted: #8896AB;
+        --border-color: #2E3D50;
         --panel-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-        
-        --input-bg: #0F172A;
-        --input-border: #475569;
-        --input-focus: rgba(59, 130, 246, 0.25);
-        --input-focus-border: #3B82F6;
-        
-        --btn-main-bg: #2563EB;
-        --btn-main-hover: #1D4ED8;
+
+        --input-bg: #162131;
+        --input-border: #3A4E66;
+        --input-focus: rgba(242, 195, 26, 0.15);
+        --input-focus-border: #F2C31A;
+
+        --btn-main-bg: #0D2472;
+        --btn-main-hover: #0A1B56;
         --btn-main-text: #FFFFFF;
-        
+
         --btn-out-bg: transparent;
-        --btn-out-text: #60A5FA;
-        --btn-out-border: #3B82F6;
-        --btn-out-hover: rgba(59, 130, 246, 0.1);
-        
-        --table-head-bg: #0F172A;
-        --table-row-hover: #1e293bd3;
-        
-        --badge-good-bg: rgba(16, 185, 129, 0.15);
-        --badge-good-text: #34D399;
+        --btn-out-text: #F2C31A;
+        --btn-out-border: #F2C31A;
+        --btn-out-hover: rgba(242, 195, 26, 0.08);
+
+        --table-head-bg: #162131;
+        --table-row-hover: rgba(46, 61, 80, 0.5);
+
+        --badge-good-bg: rgba(30, 158, 94, 0.15);
+        --badge-good-text: #4ADE80;
         --badge-danger-bg: rgba(239, 68, 68, 0.15);
         --badge-danger-text: #F87171;
-        
-        --action-bg: #334155;
-        --action-text: #CBD5E1;
-        --action-hover-bg: #475569;
-        --action-hover-text: #F8FAFC;
+
+        --action-bg: #2E3D50;
+        --action-text: #C4CDD8;
+        --action-hover-bg: #3A4E66;
+        --action-hover-text: #E8EDF5;
     }
 
     /* Layout */
@@ -391,8 +391,8 @@
                 Export All (CSV)
             </a>
             {% if selected_level %}
-                <a href="{% url 'attendance:admin_export_level_csv' selected_level %}" class="btn btn-outline">
-                    <span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span> 
+                <a href="{% url 'attendance:export_level' selected_level %}" class="btn btn-outline">
+                    <span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span>
                     Export Level (CSV)
                 </a>
             {% endif %}
@@ -434,13 +434,10 @@
                         </td>
                         <td>
                             <div class="action-group">
-                                <a href="{% url 'attendance:admin_export_student_pdf' student.profile.id %}" class="action-icon" title="Export PDF">
-                                    <span class="iconify" data-icon="mdi:file-pdf-box" style="font-size: 1.2rem; color: #DC2626;"></span>
-                                </a>
                                 <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="action-icon" title="Export CSV">
                                     <span class="iconify" data-icon="mdi:file-delimited" style="font-size: 1.2rem; color: #059669;"></span>
                                 </a>
-                                <a href="{% url 'attendance:student_detail' student.profile.id %}" class="action-text">
+                                <a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="action-text">
                                     Details
                                 </a>
                             </div>

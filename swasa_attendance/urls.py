@@ -1,29 +1,21 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
+from attendance.views import token_login_view, token_logout_view, otp_password_reset_request
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Auth
-    path('login/', auth_views.LoginView.as_view(template_name='attendance/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    # REST API — OTP auth
+    path('api/auth/', include('attendance.api_urls')),
 
-    # Password Reset URLs
-    path('password-reset/',
-         auth_views.PasswordResetView.as_view(template_name='attendance/password_reset.html'),
-         name='password_reset'),
-    path('password-reset/done/',
-         auth_views.PasswordResetDoneView.as_view(template_name='attendance/password_reset_done.html'),
-         name='password_reset_done'),
-    path('reset/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(template_name='attendance/password_reset_confirm.html'),
-         name='password_reset_confirm'),
-    path('reset/done/',
-         auth_views.PasswordResetCompleteView.as_view(template_name='attendance/password_reset_complete.html'),
-         name='password_reset_complete'),
+    # Auth
+    path('login/', token_login_view, name='login'),
+    path('logout/', token_logout_view, name='logout'),
+
+    # Password reset — OTP-based (keeps the 'password_reset' name so the login page link works)
+    path('password-reset/', otp_password_reset_request, name='password_reset'),
 
     # Attendance app
     path('', include('attendance.urls')),

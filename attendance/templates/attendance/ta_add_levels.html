@@ -1,0 +1,379 @@
+{% extends "attendance/base.html" %}
+{% block title %}Manage My Courses{% endblock %}
+
+{% block content %}
+<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+
+<style>
+:root {
+    --primary:    #0D2472;
+    --primary-dk: #091A55;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --green-lt:   rgba(26,158,96,0.1);
+    --green-bd:   rgba(26,158,96,0.25);
+    --red:        #DC2626;
+    --red-lt:     rgba(220,38,38,0.08);
+    --red-bd:     rgba(220,38,38,0.22);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+
+.wrap { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+/* Header */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff;
+    border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+    box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    color: rgba(255,255,255,0.72); font-size: 12px; font-weight: 600;
+    text-decoration: none; margin-bottom: 0.75rem;
+    transition: color 0.13s;
+}
+.back-link:hover { color: #fff; }
+.page-header h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+
+/* Messages */
+.alert {
+    padding: 0.875rem 1rem;
+    border-radius: var(--r-lg);
+    margin-bottom: 1rem;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--green-lt);
+    color: var(--green);
+    border: 1px solid var(--green-bd);
+}
+
+/* Section label */
+.section-label {
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.625rem;
+    margin-top: 1.25rem;
+    display: flex; align-items: center; gap: 0.4rem;
+}
+.section-label:first-of-type { margin-top: 0; }
+.section-label .iconify { font-size: 13px; }
+
+/* Level cards */
+.level-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.level-option { position: relative; }
+.level-option input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+/* Currently assigned — green tint, checked by default */
+.level-label-assigned {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--green-bd);
+    border-radius: var(--r-lg);
+    background: var(--green-lt);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.level-label-assigned:hover {
+    border-color: var(--red-bd);
+    background: var(--red-lt);
+}
+
+.level-option input:not(:checked) + .level-label-assigned {
+    border-color: var(--red-bd);
+    background: var(--red-lt);
+}
+
+/* Available to add — normal, unchecked by default */
+.level-label-available {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.level-label-available:hover {
+    border-color: var(--primary);
+    background: var(--primary-lt);
+}
+
+.level-option input:checked + .level-label-available {
+    border-color: var(--green-bd);
+    background: var(--green-lt);
+}
+
+/* Toggle icon area */
+.toggle-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+/* Assigned: green icon, turns red on hover to signal removal */
+.level-label-assigned .toggle-icon {
+    background: var(--green-lt);
+    color: var(--green);
+    border: 1.5px solid var(--green-bd);
+}
+.level-label-assigned:hover .toggle-icon {
+    background: var(--red-lt);
+    color: var(--red);
+    border-color: var(--red-bd);
+}
+.level-option input:not(:checked) + .level-label-assigned .toggle-icon {
+    background: var(--red-lt);
+    color: var(--red);
+    border-color: var(--red-bd);
+}
+
+/* Available: muted icon, turns green when checked */
+.level-label-available .toggle-icon {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+}
+.level-label-available:hover .toggle-icon {
+    background: var(--primary-lt);
+    color: var(--primary);
+    border-color: rgba(13,36,114,0.2);
+}
+.level-option input:checked + .level-label-available .toggle-icon {
+    background: var(--green-lt);
+    color: var(--green);
+    border-color: var(--green-bd);
+}
+
+/* Level info text */
+.level-name { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.level-hint { font-size: 11px; font-weight: 600; margin-top: 2px; }
+
+.level-label-assigned .level-hint            { color: var(--green); }
+.level-label-assigned:hover .level-hint      { color: var(--red); }
+.level-option input:not(:checked) + .level-label-assigned .level-hint { color: var(--red); }
+
+.level-label-available .level-hint           { color: var(--muted); }
+.level-label-available:hover .level-hint     { color: var(--primary); }
+.level-option input:checked + .level-label-available .level-hint { color: var(--green); }
+
+/* Hint text for assigned vs unchecked states */
+.hint-assigned { display: block; }
+.hint-remove   { display: none; }
+
+.level-label-assigned:hover .hint-assigned     { display: none; }
+.level-label-assigned:hover .hint-remove       { display: block; }
+.level-option input:not(:checked) + .level-label-assigned .hint-assigned { display: none; }
+.level-option input:not(:checked) + .level-label-assigned .hint-remove   { display: block; }
+
+.hint-add     { display: block; }
+.hint-added   { display: none; }
+
+.level-label-available:hover .hint-add         { display: none; }
+.level-label-available:hover .hint-added       { display: block; }
+.level-option input:checked + .level-label-available .hint-add   { display: none; }
+.level-option input:checked + .level-label-available .hint-added { display: block; }
+
+/* Divider */
+.divider {
+    border: none; border-top: 1px dashed var(--border);
+    margin: 1.25rem 0;
+}
+
+/* No levels placeholder */
+.no-levels {
+    padding: 1.5rem; text-align: center;
+    color: var(--muted); font-size: 13px;
+    background: var(--surface); border-radius: var(--r-lg);
+    border: 1px dashed var(--border);
+}
+
+/* Submit */
+.btn-save {
+    width: 100%;
+    padding: 0.875rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-lg);
+    font-family: inherit;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.13s;
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 2px 8px rgba(13,36,114,0.2);
+}
+.btn-save:hover { background: var(--primary-dk); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,36,114,0.25); }
+.btn-save:active { transform: scale(0.98); }
+</style>
+
+<div class="wrap">
+
+    <div class="page-header">
+        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+        </a>
+        <h1>Manage My Courses</h1>
+        <div class="page-header-sub">Add or remove the levels you teach</div>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert">
+        <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% with assigned=all_levels|dictsort:"name" %}
+
+        {# ── Currently assigned levels ── #}
+        {% if assigned_ids %}
+        <div class="section-label">
+            <span class="iconify" data-icon="mdi:check-circle-outline" style="color:var(--green);"></span>
+            Currently Teaching — uncheck to remove
+        </div>
+        <div class="level-list">
+            {% for level in all_levels %}
+            {% if level.id in assigned_ids %}
+            <div class="level-option">
+                <input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}" checked>
+                <label class="level-label-assigned" for="lvl-{{ level.id }}">
+                    <div class="toggle-icon">
+                        <span class="iconify icon-check" data-icon="mdi:check-bold"></span>
+                        <span class="iconify icon-remove" data-icon="mdi:minus-circle-outline" style="display:none;"></span>
+                    </div>
+                    <div>
+                        <div class="level-name">Level {{ level.name }}</div>
+                        <div class="level-hint">
+                            <span class="hint-assigned">Currently teaching</span>
+                            <span class="hint-remove">Uncheck to remove</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {# ── Available levels to add ── #}
+        {% with has_available=False %}
+        {% for level in all_levels %}{% if level.id not in assigned_ids %}{% with has_available=True %}{% endwith %}{% endif %}{% endfor %}
+        {% endwith %}
+
+        {% comment %}Check if there are any unassigned levels{% endcomment %}
+        {% for level in all_levels %}{% if level.id not in assigned_ids %}
+        {% if forloop.first %}
+        {% if assigned_ids %}<hr class="divider">{% endif %}
+        <div class="section-label">
+            <span class="iconify" data-icon="mdi:plus-circle-outline"></span>
+            Available to Add — check to add
+        </div>
+        <div class="level-list">
+        {% endif %}
+            <div class="level-option">
+                <input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}">
+                <label class="level-label-available" for="lvl-{{ level.id }}">
+                    <div class="toggle-icon">
+                        <span class="iconify" data-icon="mdi:plus"></span>
+                    </div>
+                    <div>
+                        <div class="level-name">Level {{ level.name }}</div>
+                        <div class="level-hint">
+                            <span class="hint-add">Tap to add to your levels</span>
+                            <span class="hint-added">Will be added on save</span>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        {% if forloop.last %}</div>{% endif %}
+        {% endif %}{% endfor %}
+
+        {% if not all_levels %}
+        <div class="no-levels">No levels have been set up yet. Contact the administrator.</div>
+        {% endif %}
+
+        {% endwith %}
+
+        <button type="submit" class="btn-save">
+            <span class="iconify" data-icon="mdi:content-save-outline"></span>
+            Save Changes
+        </button>
+    </form>
+
+</div>
+
+<script>
+// Swap the check/minus icon on assigned cards when hovering or unchecked
+document.querySelectorAll('.level-label-assigned').forEach(label => {
+    const checkIcon  = label.querySelector('.icon-check');
+    const removeIcon = label.querySelector('.icon-remove');
+    const input = label.previousElementSibling;
+
+    function syncIcons() {
+        const isChecked = input.checked;
+        checkIcon.style.display  = isChecked ? 'block' : 'none';
+        removeIcon.style.display = isChecked ? 'none'  : 'block';
+    }
+
+    syncIcons();
+    input.addEventListener('change', syncIcons);
+    label.addEventListener('mouseenter', () => {
+        if (input.checked) {
+            checkIcon.style.display  = 'none';
+            removeIcon.style.display = 'block';
+        }
+    });
+    label.addEventListener('mouseleave', syncIcons);
+});
+
+// Swap the plus icon on available cards when checked
+document.querySelectorAll('.level-label-available').forEach(label => {
+    const icon  = label.querySelector('.iconify');
+    const input = label.previousElementSibling;
+
+    function syncIcon() {
+        icon.setAttribute('data-icon', input.checked ? 'mdi:check-bold' : 'mdi:plus');
+    }
+
+    syncIcon();
+    input.addEventListener('change', syncIcon);
+});
+</script>
+{% endblock %}

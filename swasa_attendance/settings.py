@@ -8,7 +8,10 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
+
+from decouple import config, Csv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-_secret_key = os.environ.get('DJANGO_SECRET_KEY', '')
+_secret_key = config('DJANGO_SECRET_KEY', default='')
 if not _secret_key:
     _fallback = 'django-insecure-dt-mxq$5f#jm2)m-b7_0ufmx-nw#e)*)po7eo^x@z!k-^+=nb='
     import sys
@@ -27,7 +30,7 @@ if not _secret_key:
     _secret_key = _fallback
 SECRET_KEY = _secret_key
 
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 
 # ALLOWED_HOSTS - Updated for both ngrok and PythonAnywhere
 ALLOWED_HOSTS = [
@@ -48,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_simplejwt',
     'attendance',
 ]
 
@@ -57,10 +62,34 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'attendance.middleware.JWTAuthMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'attendance.middleware.ForcePasswordChangeMiddleware',
 ]
+
+# JWT Settings (cookie-based sessions — existing system)
+JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEY)
+
+# djangorestframework-simplejwt (API tokens)
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': JWT_SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
 
 ROOT_URLCONF = 'swasa_attendance.urls'
 
@@ -136,6 +165,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'assets'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -161,25 +191,21 @@ CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 
 # ========== EMAIL CONFIGURATION ==========
-# For development, use console backend (emails appear in terminal)
-# For PythonAnywhere, use Gmail SMTP
+# Credentials are read from .env via python-decouple.
+# When EMAIL_HOST_USER / EMAIL_HOST_PASSWORD are present, Gmail SMTP is used.
+# Leave them blank in .env to fall back to the console backend (dev/testing).
 
-# Check if running on PythonAnywhere
-ON_PYTHONANYWHERE = 'PYTHONANYWHERE_SITE' in os.environ
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = 'SWASA <jifunzekiswahilisasa@gmail.com>'
 
-if ON_PYTHONANYWHERE:
-    # Production email settings for PythonAnywhere
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-else:
-    # Development email settings (emails printed to console)
+# Fall back to console backend when credentials are absent (avoids SMTP errors in dev)
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-DEFAULT_FROM_EMAIL = 'SWASA Attendance <noreply@swasa.edu.gh>'
 
 # Email timeout (seconds)
 EMAIL_TIMEOUT = 30

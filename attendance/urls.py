@@ -15,8 +15,15 @@ urlpatterns = [
     path("export/my-csv/", views.export_my_attendance_csv, name="export_my_csv"),
     path("student-guide/", views.student_guide, name="student_guide"),
     
-    # Email Verification
+    # Email Verification (legacy link-based)
     path("verify-email/<str:token>/", views.verify_email, name="verify_email"),
+
+    # OTP flows
+    path("otp/registration/verify/", views.otp_verify_registration, name="otp_verify_registration"),
+    path("otp/login/verify/", views.otp_verify_login, name="otp_verify_login"),
+    path("otp/password-reset/", views.otp_password_reset_request, name="otp_password_reset"),
+    path("otp/password-reset/verify/", views.otp_verify_password_reset, name="otp_verify_password_reset"),
+    path("otp/password-reset/set-password/", views.otp_set_password, name="otp_set_password"),
     
     # AJAX endpoints
     path("generate-code/", views.generate_code, name="generate_code"),
@@ -30,6 +37,12 @@ urlpatterns = [
     
     # TA
     path("ta/dashboard/", views.ta_dashboard, name="ta_dashboard"),
+    path("ta/history/", views.ta_history, name="ta_history"),
+    path("ta/add-levels/", views.ta_add_levels, name="ta_add_levels"),
+    path("ta/announcements/", views.ta_announcements, name="ta_announcements"),
+    path("ta/guide/", views.ta_guide, name="ta_guide"),
+    path("ta/change-password/", views.ta_change_password, name="ta_change_password"),
+    path("ta/export/session/<int:session_id>/", views.ta_export_session_csv, name="ta_export_session_csv"),
     path("ta/generate-code/", views.ta_generate_code, name="ta_generate_code"),
     path("ta/mark-distributed/<int:code_id>/", views.ta_mark_distributed, name="ta_mark_distributed"),
     path("ta/generate-all-codes/", views.ta_generate_all_codes, name="ta_generate_all_codes"),

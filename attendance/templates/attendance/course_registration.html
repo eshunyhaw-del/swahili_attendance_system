@@ -1,186 +1,230 @@
 {% extends "attendance/base.html" %}
-{% block title %}Course Registration{% endblock %}
+{% block title %}Register Courses{% endblock %}
 
 {% block content %}
 <style>
-    /* Full-page soft gradient background */
-    body {
-        background: linear-gradient(135deg, #F8FAFC 0%, #E0E7FF 100%);
-        min-height: 100vh;
-        margin: 0;
-        background-attachment: fixed;
-    }
+:root {
+    --primary:    #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --surface:    #FFFFFF;
+    --bg:         #EEF1F8;
+    --text:       #0D1B3E;
+    --muted:      #8896AB;
+    --border:     #DDE3EF;
+    --green:      #1A9E60;
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
 
-    .reg-wrapper {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        max-width: 650px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
-        color: #1E293B;
-    }
+.wrap { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-    .reg-header {
-        margin-bottom: 2.5rem;
-    }
+/* ─── Page header ─── */
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header::before {
+    content: ''; position: absolute; top: -50px; right: -40px;
+    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
 
-    .reg-header h1 {
-        font-size: 1.8rem;
-        font-weight: 800;
-        margin: 0 0 0.25rem 0;
-        letter-spacing: -0.5px;
-        color: #0F172A;
-    }
+/* ─── Context bar ─── */
+.context-bar {
+    display: flex; align-items: center; gap: 0.625rem;
+    margin-bottom: 1.25rem; flex-wrap: wrap;
+}
+.ctx-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 99px; padding: 0.3rem 0.75rem;
+    font-size: 12px; font-weight: 600; color: var(--text);
+    box-shadow: var(--sh-sm);
+}
+.ctx-chip .iconify { font-size: 14px; color: var(--primary); }
 
-    .reg-header p {
-        color: #64748B;
-        font-size: 0.95rem;
-        margin: 0;
-        font-weight: 500;
-    }
+/* ─── Card ─── */
+.card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    overflow: hidden;
+}
+.card-head {
+    padding: 1rem 1.25rem;
+    background: #F8F9FD;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 800; color: var(--text);
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.card-head .iconify { font-size: 16px; color: var(--primary); }
+.card-body { padding: 1.25rem; }
 
-    /* Form Card Structure */
-    .reg-card {
-        background: #FFFFFF;
-        border-radius: 14px;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+/* ─── Course checkboxes ─── */
+.course-list { display: flex; flex-direction: column; gap: 0.625rem; margin-bottom: 1.25rem; }
 
-    /* Lift effect on hover */
-    .reg-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px -3px rgba(13, 36, 114, 0.08), 0 4px 6px -4px rgba(13, 36, 114, 0.04);
-    }
+.course-label {
+    display: flex; align-items: center; gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-lg);
+    cursor: pointer;
+    background: var(--surface);
+    transition: all 0.15s;
+    user-select: none;
+}
+.course-label:hover { border-color: #A8B4D0; background: #FAFBFF; }
+.course-label:has(input:checked) {
+    border-color: var(--primary);
+    background: var(--primary-lt);
+}
 
-    .card-header {
-        padding: 1.25rem 1.5rem;
-        background: #F8FAFC;
-        border-bottom: 1px solid #E2E8F0;
-        font-weight: 700;
-        font-size: 1.05rem;
-        color: #0F172A;
-    }
+/* Custom checkbox */
+.custom-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.13s;
+    position: relative;
+}
+.course-label:has(input:checked) .custom-check {
+    background: var(--primary); border-color: var(--primary);
+}
+.custom-check::after {
+    content: ''; display: none;
+    width: 5px; height: 9px;
+    border: 2px solid #fff; border-top: none; border-left: none;
+    transform: rotate(45deg) translate(-1px, -1px);
+}
+.course-label:has(input:checked) .custom-check::after { display: block; }
 
-    .card-body {
-        padding: 1.5rem;
-    }
+.course-label input[type="checkbox"] {
+    position: absolute; opacity: 0; width: 0; height: 0;
+}
 
-    /* Custom Checkbox Group Styling */
-    .checkbox-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-        margin-bottom: 1.75rem;
-    }
+.course-label-text {
+    flex: 1; min-width: 0;
+}
+.course-label-name {
+    font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.3;
+}
+.course-label:has(input:checked) .course-label-name { color: var(--primary); }
 
-    .course-label {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
-        border: 2px solid #E2E8F0;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: #FFFFFF;
-        font-weight: 600;
-        color: #1E293B;
-    }
+/* ─── Submit button ─── */
+.btn-register {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+    transition: all 0.13s; box-shadow: 0 2px 6px rgba(13,36,114,0.22);
+}
+.btn-register:hover { background: #0a1b5c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.28); }
+.btn-register:active { transform: scale(0.97); }
 
-    .course-label:hover {
-        border-color: #CBD5E1;
-        background: #F8FAFC;
-    }
+/* ─── Empty ─── */
+.empty {
+    text-align: center; padding: 2.5rem 1.5rem;
+    background: var(--bg); border-radius: var(--r-lg);
+    border: 1.5px dashed var(--border);
+}
+.empty p { color: var(--muted); font-size: 14px; font-weight: 500; }
 
-    /* Magic UX: Highlight entire row when the box is checked */
-    .course-label:has(input:checked) {
-        border-color: #0D2472;
-        background: #EEF2FF;
-        color: #0D2472;
-        box-shadow: 0 4px 6px -1px rgba(13, 36, 114, 0.05);
-    }
-
-    /* Enlarge and color the native checkbox */
-    .course-label input[type="checkbox"] {
-        width: 1.25rem;
-        height: 1.25rem;
-        accent-color: #0D2472;
-        cursor: pointer;
-    }
-
-    .course-label span {
-        flex: 1;
-        line-height: 1.4;
-    }
-
-    /* Primary Button */
-    .btn-submit {
-        width: 100%;
-        background: #0D2472;
-        color: #FFFFFF;
-        padding: 0.85rem;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 700;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-submit:hover {
-        background: #0A1B56;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 6px -1px rgba(13, 36, 114, 0.2);
-    }
-
-    .btn-submit:active {
-        transform: translateY(0);
-    }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 2rem;
-        background: #F8FAFC;
-        border-radius: 12px;
-        border: 1px dashed #CBD5E1;
-        color: #64748B;
-    }
+/* ─── Selection counter ─── */
+.selection-hint {
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    margin-bottom: 0.875rem;
+}
+.selection-hint span { color: var(--primary); font-weight: 800; }
 </style>
 
-<div class="reg-wrapper">
-    <div class="reg-header">
-        <h1>Lectures Registration</h1>
-        <p>Level {{ level.name }} · {{ semester.name }} {{ semester.year }}</p>
+<div class="wrap">
+
+    <div class="page-header">
+        <h1>Register Courses</h1>
+        <div class="page-header-sub">Select all the courses you are taking this semester</div>
     </div>
 
-    <div class="reg-card">
-        <div class="card-header">Select your courses</div>
+    <div class="context-bar">
+        <div class="ctx-chip">
+            <span class="iconify" data-icon="mdi:school-outline"></span>
+            Level {{ level.name }}
+        </div>
+        <div class="ctx-chip">
+            <span class="iconify" data-icon="mdi:calendar-outline"></span>
+            {{ semester.name }} {{ semester.year }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <span class="iconify" data-icon="mdi:book-open-variant"></span>
+            Available Courses
+        </div>
         <div class="card-body">
             <form method="post" id="regForm">
                 {% csrf_token %}
-                <div class="checkbox-group">
+
+                <div class="selection-hint" id="selectionHint">
+                    <span id="selCount">0</span> course{{ '' }} selected
+                </div>
+
+                <div class="course-list">
                     {% for checkbox in form.courses %}
                     <label class="course-label">
-                        <!-- Django automatically renders the <input type="checkbox"> here -->
                         {{ checkbox.tag }}
-                        <span>{{ checkbox.choice_label }}</span>
+                        <div class="custom-check"></div>
+                        <div class="course-label-text">
+                            <div class="course-label-name">{{ checkbox.choice_label }}</div>
+                        </div>
                     </label>
                     {% empty %}
-                    <div class="empty-state">
-                        <span class="iconify" data-icon="mdi:book-cancel-outline" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></span>
-                        <p style="margin: 0;">No courses available for registration.</p>
+                    <div class="empty">
+                        <span class="iconify" data-icon="mdi:book-cancel-outline" style="font-size:2rem;color:var(--muted);display:block;margin-bottom:0.5rem;"></span>
+                        <p>No courses available for registration right now.</p>
                     </div>
                     {% endfor %}
                 </div>
-                
+
                 {% if form.courses %}
-                <button type="submit" class="btn-submit">Register Selected Lectures</button>
+                <button type="submit" class="btn-register" id="submitBtn">
+                    <span class="iconify" data-icon="mdi:check-bold"></span>
+                    Register Selected Courses
+                </button>
                 {% endif %}
             </form>
         </div>
     </div>
+
 </div>
+
+<script>
+(function () {
+    const hint = document.getElementById('selCount');
+    const btn  = document.getElementById('submitBtn');
+
+    function updateCount() {
+        const n = document.querySelectorAll('.course-label input:checked').length;
+        if (hint) hint.textContent = n;
+        const hintEl = document.getElementById('selectionHint');
+        if (hintEl) hintEl.innerHTML = '<span id="selCount">' + n + '</span> course' + (n !== 1 ? 's' : '') + ' selected';
+        if (btn) btn.disabled = n === 0;
+    }
+
+    document.querySelectorAll('.course-label input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', updateCount);
+    });
+    updateCount();
+})();
+</script>
 {% endblock %}
