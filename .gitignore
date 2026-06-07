@@ -24,3 +24,10 @@ build/
 .vscode/
 .idea/
 *.swp
+node_modules/
+screenshot.mjs
+screenshots/
+server.log
+server_err.log
+server_test.log
+server_test_err.log
