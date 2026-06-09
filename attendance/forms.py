@@ -38,8 +38,8 @@ class StudentRegistrationForm(forms.ModelForm):
                 raise forms.ValidationError("An account with this email already exists. Please log in.")
             else:
                 raise forms.ValidationError(
-                    "This email is registered but not yet verified. "
-                    "Check your inbox for the verification code."
+                    "This email is registered but not yet verified.",
+                    code='email_unverified',
                 )
         return email
 
@@ -51,8 +51,8 @@ class StudentRegistrationForm(forms.ModelForm):
                 raise forms.ValidationError("This student ID is already registered. Please log in.")
             else:
                 raise forms.ValidationError(
-                    "This student ID is registered but email not yet verified. "
-                    "Check your inbox for the verification code."
+                    "This student ID is registered but not yet verified.",
+                    code='student_id_unverified',
                 )
         return student_id
 

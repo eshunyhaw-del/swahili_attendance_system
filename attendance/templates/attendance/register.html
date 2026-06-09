@@ -334,6 +334,9 @@
             <div class="login-row">
                 Already have an account? <a href="{% url 'login' %}">Sign in</a>
             </div>
+            <div class="login-row" style="margin-top:0.5rem;">
+                Registered but never verified? <a href="{% url 'attendance:resend_verification' %}">Resend your code</a>
+            </div>
         </form>
     </div>
 

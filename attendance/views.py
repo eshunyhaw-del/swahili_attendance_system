@@ -240,12 +240,77 @@ def register(request):
             request.session['pending_reg_user_id'] = user.id
             request.session['pending_reg_type'] = 'student'
             return redirect("attendance:otp_verify_registration")
-        else:
-            messages.error(request, "Please correct the errors below.")
+
+        # Detect unverified-account errors and redirect to OTP instead of dead-ending
+        email_unverified = (
+            'email' in form.errors and
+            any(e.code == 'email_unverified' for e in form['email'].errors.as_data())
+        )
+        student_id_unverified = (
+            'student_id' in form.errors and
+            any(e.code == 'student_id_unverified' for e in form['student_id'].errors.as_data())
+        )
+        if email_unverified or student_id_unverified:
+            unverified_user = None
+            if email_unverified:
+                email_val = form.data.get('email', '').strip().lower()
+                unverified_user = User.objects.filter(email__iexact=email_val, is_active=False).first()
+            if not unverified_user and student_id_unverified:
+                sid = form.data.get('student_id', '').strip()
+                try:
+                    profile = UserProfile.objects.get(student_id_number=sid)
+                    if not profile.user.is_active:
+                        unverified_user = profile.user
+                except UserProfile.DoesNotExist:
+                    pass
+            if unverified_user:
+                try:
+                    generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                except Exception:
+                    pass
+                request.session['pending_reg_user_id'] = unverified_user.id
+                request.session['pending_reg_type'] = 'student'
+                messages.success(
+                    request,
+                    f"We sent a new verification code to {unverified_user.email}. Please check your inbox."
+                )
+                return redirect("attendance:otp_verify_registration")
+
+        messages.error(request, "Please correct the errors below.")
     else:
         form = StudentRegistrationForm()
 
     return render(request, "attendance/register.html", {"form": form})
+
+
+def resend_verification(request):
+    """Let students request a fresh OTP if they never completed email verification."""
+    if request.user.is_authenticated:
+        return redirect("attendance:dashboard")
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        unverified_user = User.objects.filter(email__iexact=email, is_active=False).first()
+        if unverified_user:
+            try:
+                generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+            except Exception:
+                messages.error(request, "Could not send the code. Please try again.")
+                return render(request, "attendance/resend_verification.html")
+            request.session['pending_reg_user_id'] = unverified_user.id
+            request.session['pending_reg_type'] = 'student'
+            messages.success(
+                request,
+                f"A new verification code has been sent to {email}. Please check your inbox."
+            )
+            return redirect("attendance:otp_verify_registration")
+        # No unverified account found — non-revealing response, stay on page
+        messages.success(
+            request,
+            "If that email has an unverified account, a new code has been sent."
+        )
+
+    return render(request, "attendance/resend_verification.html")
 
 
 def verify_email(request, token):

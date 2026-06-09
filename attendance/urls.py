@@ -20,6 +20,7 @@ urlpatterns = [
 
     # OTP flows
     path("otp/registration/verify/", views.otp_verify_registration, name="otp_verify_registration"),
+    path("otp/resend-verification/", views.resend_verification, name="resend_verification"),
     path("otp/login/verify/", views.otp_verify_login, name="otp_verify_login"),
     path("otp/password-reset/", views.otp_password_reset_request, name="otp_password_reset"),
     path("otp/password-reset/verify/", views.otp_verify_password_reset, name="otp_verify_password_reset"),
