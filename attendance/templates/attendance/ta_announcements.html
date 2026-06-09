@@ -2,18 +2,16 @@
 {% block title %}Announcements{% endblock %}
 
 {% block content %}
-<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-
 <style>
 :root {
     --primary:    #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
     --surface:    #FFFFFF;
-    --bg:         #EEF1F8;
-    --text:       #0D1B3E;
-    --muted:      #8896AB;
-    --border:     #DDE3EF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
     --green:      #1A9E60;
     --green-lt:   rgba(26,158,96,0.10);
     --green-bd:   rgba(26,158,96,0.25);
@@ -24,7 +22,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -48,15 +46,6 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .back-link:hover { color: #fff; }
 .page-header h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
 .page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
-
-/* ─── Alerts ─── */
-.alert {
-    padding: 0.875rem 1rem; border-radius: var(--r-lg); margin-bottom: 1rem;
-    font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; gap: 0.5rem;
-}
-.alert-success { background: var(--green-lt); color: var(--green); border: 1px solid var(--green-bd); }
-.alert-error   { background: var(--red-lt);   color: var(--red);   border: 1px solid rgba(220,38,38,0.2); }
 
 /* ─── Compose card ─── */
 .compose-card {
@@ -84,7 +73,7 @@ label.field-label {
     letter-spacing: 0.07em; margin-bottom: 0.4rem;
 }
 
-.field-input, .field-textarea {
+.field-input, .field-textarea, .field-select {
     width: 100%;
     padding: 0.65rem 0.875rem;
     border: 1.5px solid var(--border);
@@ -92,44 +81,41 @@ label.field-label {
     font-size: 13.5px; font-family: inherit; color: var(--text);
     background: var(--surface); outline: none;
     transition: border-color 0.13s, box-shadow 0.13s;
+    appearance: none;
 }
-.field-input:focus, .field-textarea:focus {
+.field-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238896AB' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    padding-right: 2.25rem;
+}
+.field-input:focus, .field-textarea:focus, .field-select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
 }
 html[data-theme="dark"] .field-input:focus,
-html[data-theme="dark"] .field-textarea:focus {
+html[data-theme="dark"] .field-textarea:focus,
+html[data-theme="dark"] .field-select:focus {
     border-color: var(--gold);
     box-shadow: 0 0 0 3px rgba(242,195,26,0.15);
 }
-html[data-theme="dark"] .compose-card-header .iconify,
-html[data-theme="dark"] .preview-strip .iconify { color: var(--gold); opacity: 0.85; }
-html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var(--gold); background: rgba(242,195,26,0.08); }
+html[data-theme="dark"] .field-input,
+html[data-theme="dark"] .field-textarea,
+html[data-theme="dark"] .field-select {
+    background: var(--bg-subtle) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+}
+html[data-theme="dark"] .compose-card-header .iconify { color: var(--gold); opacity: 0.85; }
+html[data-theme="dark"] .compose-card-header { background: var(--bg-subtle) !important; }
 .field-textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
 
-/* ─── Level checkboxes (target audience) ─── */
-.levels-grid {
-    display: flex; flex-wrap: wrap; gap: 0.5rem;
+.course-hint {
+    font-size: 11.5px; color: var(--muted); margin-top: 0.35rem;
+    display: flex; align-items: center; gap: 0.3rem;
 }
-.lvl-opt { position: relative; }
-.lvl-opt input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
-.lvl-label {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.35rem 0.875rem;
-    border: 1.5px solid var(--border);
-    border-radius: 9999px;
-    font-size: 12px; font-weight: 600; color: var(--muted);
-    background: var(--bg);
-    cursor: pointer; transition: all 0.13s; user-select: none;
-}
-.lvl-label:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-lt); }
-.lvl-opt input:checked + .lvl-label {
-    background: var(--primary); border-color: var(--primary); color: #fff;
-}
-
 .char-count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 0.25rem; }
 .char-count.warn { color: #B8920C; }
-.char-count.over { color: var(--red); }
 
 /* ─── Preview strip ─── */
 .preview-strip {
@@ -141,6 +127,7 @@ html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var
     display: flex; align-items: center; gap: 0.5rem;
 }
 .preview-strip .iconify { flex-shrink: 0; font-size: 15px; color: var(--primary); opacity: 0.7; }
+html[data-theme="dark"] .preview-strip .iconify { color: var(--gold); opacity: 0.85; }
 
 /* ─── Send button ─── */
 .btn-send {
@@ -169,11 +156,14 @@ html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    padding: 1rem 1.25rem;
     margin-bottom: 0.75rem;
     box-shadow: var(--sh-sm);
+    overflow: hidden;
 }
 .ann-top {
+    padding: 1rem 1.25rem 0.75rem;
+}
+.ann-header-row {
     display: flex; align-items: flex-start; justify-content: space-between;
     gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;
 }
@@ -181,12 +171,17 @@ html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var
 .ann-meta  { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
 .ann-message {
     font-size: 13px; color: var(--muted); line-height: 1.6;
-    white-space: pre-wrap; word-break: break-word;
+    white-space: pre-wrap; word-break: break-word; padding: 0 1.25rem 0.75rem;
 }
 .ann-footer {
-    display: flex; align-items: center; gap: 0.75rem;
-    margin-top: 0.75rem; flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.625rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    flex-wrap: wrap; gap: 0.5rem;
 }
+html[data-theme="dark"] .ann-footer { background: var(--bg-subtle) !important; }
+.ann-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .ann-badge {
     display: inline-flex; align-items: center; gap: 0.25rem;
     font-size: 11px; font-weight: 700;
@@ -194,15 +189,28 @@ html[data-theme="dark"] .lvl-label:hover { border-color: var(--gold); color: var
     background: var(--green-lt); color: var(--green);
     border: 1px solid var(--green-bd);
 }
-.ann-level-badge {
+.ann-course-badge {
     font-size: 11px; font-weight: 600;
     padding: 3px 9px; border-radius: 9999px;
     background: var(--primary-lt); color: var(--primary);
     border: 1px solid rgba(13,36,114,0.15);
 }
-html[data-theme="dark"] .ann-level-badge {
+html[data-theme="dark"] .ann-course-badge {
     color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
 }
+.ann-actions { display: flex; align-items: center; gap: 0.4rem; }
+.btn-ann-edit, .btn-ann-del {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 11.5px; font-weight: 600; padding: 4px 10px;
+    border-radius: 6px; border: 1.5px solid; cursor: pointer;
+    font-family: inherit; transition: all 0.13s;
+}
+.btn-ann-edit { color: var(--primary); border-color: rgba(13,36,114,0.2); background: var(--primary-lt); }
+.btn-ann-edit:hover { background: var(--primary); color: #fff; }
+html[data-theme="dark"] .btn-ann-edit { color: var(--gold); border-color: rgba(242,195,26,0.2); background: rgba(242,195,26,0.08); }
+html[data-theme="dark"] .btn-ann-edit:hover { background: var(--gold); color: #0D1B3E; }
+.btn-ann-del { color: var(--red); border-color: rgba(220,38,38,0.2); background: var(--red-lt); }
+.btn-ann-del:hover { background: var(--red); color: #fff; }
 
 /* Empty history */
 .empty-hist {
@@ -212,6 +220,48 @@ html[data-theme="dark"] .ann-level-badge {
     color: var(--muted); font-size: 13px;
 }
 .empty-hist strong { display: block; margin-bottom: 0.3rem; font-size: 14px; color: var(--text); }
+
+/* ─── Edit modal ─── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(9,26,85,0.45); backdrop-filter: blur(4px);
+    z-index: 2000; align-items: center; justify-content: center; padding: 1.5rem;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+    background: var(--surface); border-radius: var(--r-xl);
+    width: 100%; max-width: 480px;
+    box-shadow: 0 20px 60px rgba(9,26,85,0.3);
+    overflow: hidden;
+}
+html[data-theme="dark"] .modal-box { background: var(--bg-surface); }
+.modal-head {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; font-weight: 700; color: var(--text);
+}
+html[data-theme="dark"] .modal-head { color: var(--text-primary); }
+.modal-close {
+    background: none; border: none; cursor: pointer; padding: 4px;
+    color: var(--muted); border-radius: 6px; display: flex; align-items: center;
+    transition: color 0.12s, background 0.12s;
+}
+.modal-close:hover { color: var(--red); background: var(--red-lt); }
+.modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+.modal-actions { display: flex; gap: 0.625rem; justify-content: flex-end; padding: 0 1.25rem 1.25rem; }
+.btn-modal-cancel {
+    padding: 0.55rem 1.1rem; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    background: none; color: var(--muted); font-family: inherit; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.12s;
+}
+.btn-modal-cancel:hover { border-color: var(--text); color: var(--text); }
+.btn-modal-save {
+    padding: 0.55rem 1.25rem; background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: background 0.12s;
+}
+.btn-modal-save:hover { background: var(--primary-dk); }
 </style>
 
 <div class="wrap">
@@ -221,15 +271,8 @@ html[data-theme="dark"] .ann-level-badge {
             <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
         </a>
         <h1>Send Announcement</h1>
-        <div class="page-header-sub">Notify your students about important updates</div>
+        <div class="page-header-sub">Notify students registered in a specific course</div>
     </div>
-
-    {% for message in messages %}
-    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
-        <span class="iconify" data-icon="{% if message.tags == 'error' %}mdi:alert-circle-outline{% else %}mdi:check-circle-outline{% endif %}"></span>
-        {{ message }}
-    </div>
-    {% endfor %}
 
     <!-- Compose form -->
     <div class="compose-card">
@@ -239,6 +282,22 @@ html[data-theme="dark"] .ann-level-badge {
         </div>
         <form method="post" class="compose-body">
             {% csrf_token %}
+
+            <div>
+                <label class="field-label">Target Course</label>
+                <select name="course_id" class="field-select" required>
+                    <option value="">— Select a course —</option>
+                    {% for course in available_courses %}
+                    <option value="{{ course.id }}">{{ course.code }} — {{ course.name }} (Level {{ course.level.name }})</option>
+                    {% empty %}
+                    <option disabled>No courses available for your assigned levels</option>
+                    {% endfor %}
+                </select>
+                <div class="course-hint">
+                    <span class="iconify" data-icon="mdi:information-outline" data-width="13"></span>
+                    Only students registered for this course will receive the notification.
+                </div>
+            </div>
 
             <div>
                 <label class="field-label">Subject / Title</label>
@@ -255,27 +314,9 @@ html[data-theme="dark"] .ann-level-badge {
                 <div class="char-count" id="charCount">0 characters</div>
             </div>
 
-            <div>
-                <label class="field-label">Send To (leave all unchecked to send to all your levels)</label>
-                <div class="levels-grid">
-                    {% for level in assigned_levels %}
-                    <div class="lvl-opt">
-                        <input type="checkbox" name="levels" value="{{ level.id }}" id="lv-{{ level.id }}">
-                        <label class="lvl-label" for="lv-{{ level.id }}">
-                            <span class="iconify" data-icon="mdi:school-outline"></span>
-                            Level {{ level.name }}
-                        </label>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div style="font-size:11.5px;color:var(--muted);margin-top:0.5rem;">
-                    If none selected, the announcement is sent to all students in all your levels.
-                </div>
-            </div>
-
             <div class="preview-strip">
-                <span class="iconify" data-icon="mdi:email-outline"></span>
-                Students will receive this as an email with subject <strong>&ldquo;[SWASA] Your Title&rdquo;</strong>
+                <span class="iconify" data-icon="mdi:bell-ring-outline"></span>
+                Students will see this in their notification bell and on their Notifications page.
             </div>
 
             <button type="submit" class="btn-send">
@@ -295,20 +336,43 @@ html[data-theme="dark"] .ann-level-badge {
         {% for ann in past %}
         <div class="announcement-card">
             <div class="ann-top">
-                <div class="ann-title">{{ ann.title }}</div>
-                <div class="ann-meta">{{ ann.sent_at|date:"N j, Y · g:i A" }}</div>
+                <div class="ann-header-row">
+                    <div class="ann-title">{{ ann.title }}</div>
+                    <div class="ann-meta">{{ ann.sent_at|date:"N j, Y · g:i A" }}</div>
+                </div>
             </div>
             <div class="ann-message">{{ ann.message }}</div>
             <div class="ann-footer">
-                <span class="ann-badge">
-                    <span class="iconify" data-icon="mdi:account-group-outline"></span>
-                    {{ ann.recipient_count }} recipient{{ ann.recipient_count|pluralize }}
-                </span>
-                {% for level in ann.target_levels.all %}
-                <span class="ann-level-badge">Level {{ level.name }}</span>
-                {% empty %}
-                <span class="ann-level-badge">All Levels</span>
-                {% endfor %}
+                <div class="ann-badges">
+                    <span class="ann-badge">
+                        <span class="iconify" data-icon="mdi:account-group-outline"></span>
+                        {{ ann.recipient_count }} recipient{{ ann.recipient_count|pluralize }}
+                    </span>
+                    {% if ann.course %}
+                    <span class="ann-course-badge">{{ ann.course.code }}</span>
+                    {% else %}
+                    {% for level in ann.target_levels.all %}
+                    <span class="ann-course-badge">Level {{ level.name }}</span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="ann-actions">
+                    <button class="btn-ann-edit"
+                            onclick="openEditModal({{ ann.id }}, this)"
+                            data-title="{{ ann.title|escapejs }}"
+                            data-message="{{ ann.message|escapejs }}"
+                            data-id="{{ ann.id }}">
+                        <span class="iconify" data-icon="mdi:pencil-outline"></span> Edit
+                    </button>
+                    <form method="post" action="{% url 'attendance:ta_delete_announcement' ann.id %}"
+                          style="display:inline;"
+                          onsubmit="return confirm('Delete this announcement and all student notifications?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-ann-del">
+                            <span class="iconify" data-icon="mdi:trash-can-outline"></span> Delete
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -321,6 +385,35 @@ html[data-theme="dark"] .ann-level-badge {
 
 </div>
 
+<!-- Edit modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <span>Edit Announcement</span>
+            <button class="modal-close" onclick="closeEditModal()">
+                <span class="iconify" data-icon="mdi:close"></span>
+            </button>
+        </div>
+        <form method="post" id="editForm" action="">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div>
+                    <label class="field-label">Title</label>
+                    <input type="text" name="title" id="editTitle" class="field-input" maxlength="200" required>
+                </div>
+                <div>
+                    <label class="field-label">Message</label>
+                    <textarea name="message" id="editMessage" class="field-textarea" required></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn-modal-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function updateCharCount(el) {
     const n = el.value.length;
@@ -328,5 +421,22 @@ function updateCharCount(el) {
     counter.textContent = n + ' character' + (n !== 1 ? 's' : '');
     counter.className = 'char-count' + (n > 1000 ? ' warn' : '');
 }
+
+function openEditModal(id, btn) {
+    const title   = btn.dataset.title;
+    const message = btn.dataset.message;
+    document.getElementById('editTitle').value   = title;
+    document.getElementById('editMessage').value = message;
+    document.getElementById('editForm').action   = '/ta/announcements/' + id + '/edit/';
+    document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('open');
+}
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
 </script>
 {% endblock %}

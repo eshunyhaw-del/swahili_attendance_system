@@ -36,6 +36,25 @@
         width: 180px; height: 180px;
         background: rgba(255,255,255,0.04);
         border-radius: 50%;
+        z-index: 0;
+    }
+
+    .dash-header::after {
+        content: '';
+        position: absolute; inset: 0;
+        background-image:
+            repeating-linear-gradient(
+                45deg,
+                rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+                transparent 1px, transparent 18px
+            ),
+            repeating-linear-gradient(
+                -45deg,
+                rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+                transparent 1px, transparent 18px
+            );
+        pointer-events: none;
+        z-index: 0;
     }
 
     .dash-header-top {
@@ -47,24 +66,30 @@
     }
 
     .dash-greeting {
-        font-size: 12px;
+        font-size: 22px;
         font-weight: 700;
-        color: rgba(255,255,255,0.8);
-        margin-bottom: 4px;
-        letter-spacing: 0.01em;
+        color: var(--gold);
+        margin-bottom: 2px;
+        line-height: 1.2;
+        position: relative;
+        z-index: 1;
     }
     .dash-proverb {
-        font-size: 11px;
-        color: rgba(255,255,255,0.48);
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
         margin-top: 0.4rem;
         line-height: 1.5;
+        font-style: italic;
+        position: relative;
+        z-index: 1;
     }
 
+    .dash-header-top { position: relative; z-index: 1; }
     .dash-header h1 {
         font-size: 1.45rem;
-        font-weight: 800;
+        font-weight: 600;
         color: #fff;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.02em;
         line-height: 1.2;
         margin: 0;
     }
@@ -74,6 +99,8 @@
         color: rgba(255,255,255,0.6);
         margin-top: 4px;
         font-weight: 500;
+        position: relative;
+        z-index: 1;
     }
 
     .dash-courses-badge {
@@ -306,8 +333,37 @@
     }
 
     .txt-done {
-        background: rgba(30,158,94,0.1);
-        color: #1E9E5E;
+        background: #DCFCE7;
+        color: #166534;
+    }
+
+    .txt-absent {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .txt-na {
+        background: #F3F4F6;
+        color: #6B7280;
+    }
+
+    .txt-upcoming {
+        background: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .na-note {
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-subtle);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        line-height: 1.4;
     }
 
     /* ── Empty state ── */
@@ -662,6 +718,13 @@
         </div>
     </div>
 
+    {% if has_na_sessions %}
+    <div class="na-note">
+        <span class="iconify" data-icon="mdi:information-outline" data-width="12"></span>
+        Sessions before your registration date are marked as N/A and not counted in your attendance percentage.
+    </div>
+    {% endif %}
+
     <!-- Quick actions -->
     <div class="quick-actions">
         <a href="{% url 'attendance:course_registration' %}" class="qa-chip">
@@ -677,6 +740,7 @@
             Export CSV
         </a>
     </div>
+
 
     {% if course_data %}
         {% for course in course_data %}
@@ -709,6 +773,14 @@
                         {% if week.status == 'submitted' %}
                             <span class="txt-status txt-done">
                                 <span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
+                            </span>
+                        {% elif week.status == 'na' %}
+                            <span class="txt-status txt-na">N/A</span>
+                        {% elif week.status == 'upcoming' %}
+                            <span class="txt-status txt-upcoming">Upcoming</span>
+                        {% elif week.status == 'absent' %}
+                            <span class="txt-status txt-absent">
+                                <span class="iconify" data-icon="mdi:close-circle" data-width="13"></span> Absent
                             </span>
                         {% else %}
                             <button class="action-link act-submit" onclick="openTaCodeModal({{ week.session.id }})">

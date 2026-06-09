@@ -1,19 +1,17 @@
-{% extends "attendance/base.html" %}
+﻿{% extends "attendance/base.html" %}
 {% block title %}TA Code History{% endblock %}
 
 {% block content %}
-<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-
 <style>
 :root {
     --primary:    #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
     --surface:    #FFFFFF;
-    --bg:         #EEF1F8;
-    --text:       #0D1B3E;
-    --muted:      #8896AB;
-    --border:     #DDE3EF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
     --green:      #1A9E60;
     --green-lt:   rgba(26,158,96,0.1);
     --amber:      #B8920C;
@@ -25,7 +23,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
 
 .hist-wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
 
@@ -119,7 +117,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .hist-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
 
 .hist-table th {
-    background: #EEF1F8;
+    background: #F8F4EF;
     color: var(--muted);
     font-size: 10px; text-transform: uppercase;
     letter-spacing: 0.08em; font-weight: 700;
@@ -162,7 +160,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .badge-used    { background: var(--green-lt); color: var(--green); }
 .badge-given   { background: var(--blue-lt);  color: var(--blue); }
 .badge-pending { background: var(--amber-lt); color: var(--amber); }
-.badge-none    { background: #EEF1F8; color: var(--muted); border: 1px solid var(--border); }
+.badge-none    { background: #F8F4EF; color: var(--muted); border: 1px solid var(--border); }
 
 /* Empty state */
 .empty-state {

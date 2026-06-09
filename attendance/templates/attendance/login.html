@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Sign In — SWASA Attendance</title>
     <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="{% static 'js/iconify.min.js' %}"></script>
     <style>
         :root {
             --navy:      #0D2472;
@@ -22,7 +24,7 @@
         html, body { height: 100%; overflow: hidden; }
 
         body {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background:
                 linear-gradient(135deg, rgba(9,26,85,0.68) 0%, rgba(13,36,114,0.55) 50%, rgba(9,26,85,0.74) 100%),
                 url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;
@@ -107,7 +109,7 @@
         /* Fields */
         .field { margin-bottom: 0.875rem; }
         .field-label {
-            display: block; font-size: 12px; font-weight: 700;
+            display: block; font-size: 12px; font-weight: 600;
             color: rgba(255,255,255,0.85); margin-bottom: 0.35rem;
         }
         .field-wrap { position: relative; }
@@ -117,19 +119,19 @@
         }
         .field-input {
             width: 100%;
-            padding: 0.65rem 2.75rem 0.65rem 2.75rem;
-            border: 1.5px solid rgba(255,255,255,0.22);
+            padding: 0.85rem 2.75rem 0.85rem 2.75rem;
+            border: 1.5px solid rgba(255,255,255,0.18);
             border-radius: var(--r-sm);
             font-family: inherit; font-size: 14px; color: #fff;
-            background: rgba(255,255,255,0.1); outline: none;
-            transition: border-color 0.13s, background 0.13s, box-shadow 0.13s;
+            background: rgba(255,255,255,0.08); outline: none;
+            transition: border-color 0.13s, box-shadow 0.13s;
         }
         .field-input:focus {
-            border-color: rgba(255,255,255,0.55);
-            background: rgba(255,255,255,0.18);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+            border-color: var(--gold);
+            background: rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 3px rgba(242,195,26,0.18);
         }
-        .field-input::placeholder { color: rgba(255,255,255,0.38); }
+        .field-input::placeholder { color: rgba(255,255,255,0.35); }
 
         /* Password toggle */
         .pw-toggle {
@@ -139,7 +141,7 @@
             display: flex; align-items: center; border-radius: 6px;
             transition: color 0.13s;
         }
-        .pw-toggle:hover { color: #fff; }
+        .pw-toggle:hover { color: var(--gold); }
 
         /* Utilities row */
         .util-row {
@@ -148,42 +150,53 @@
         }
         .check-label {
             display: flex; align-items: center; gap: 0.45rem;
-            color: rgba(255,255,255,0.65); cursor: pointer; user-select: none; font-weight: 500;
+            color: rgba(255,255,255,0.6); cursor: pointer; user-select: none; font-weight: 500;
         }
         .check-label input[type="checkbox"] {
             appearance: none; -webkit-appearance: none;
             width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 4px;
+            border: 2px solid rgba(255,255,255,0.25); border-radius: 4px;
             cursor: pointer; flex-shrink: 0;
-            transition: all 0.13s; background: rgba(255,255,255,0.1);
+            transition: all 0.13s; background: rgba(255,255,255,0.08);
             position: relative;
         }
-        .check-label input:checked { background: var(--navy); border-color: rgba(255,255,255,0.5); }
+        .check-label input:checked { background: var(--gold); border-color: var(--gold); }
         .check-label input:checked::after {
             content: ''; position: absolute;
             left: 3px; top: 0;
             width: 5px; height: 9px;
-            border: 2px solid #fff; border-top: none; border-left: none;
+            border: 2px solid var(--navy-dark); border-top: none; border-left: none;
             transform: rotate(45deg);
         }
         .forgot-link {
-            color: var(--gold); font-weight: 700; text-decoration: none; font-size: 12.5px;
+            color: var(--gold); font-weight: 600; text-decoration: none; font-size: 12.5px;
         }
         .forgot-link:hover { text-decoration: underline; }
 
+        /* Kiswahili CTA label */
+        .kiswahili-cta {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 0.5rem;
+        }
+
         /* Sign-in button */
         .btn-signin {
-            width: 100%; padding: 0.75rem;
-            background: var(--navy); color: #fff;
-            border: 1px solid rgba(255,255,255,0.15);
+            width: 100%; padding: 0.75rem 1.5rem;
+            background: var(--gold); color: var(--navy-dark);
+            border: none;
             border-radius: var(--r-sm);
-            font-family: inherit; font-size: 14.5px; font-weight: 800;
-            cursor: pointer; letter-spacing: 0.01em;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-            transition: all 0.13s;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+            transition: all 0.15s;
+            box-shadow: 0 2px 10px rgba(242,195,26,0.4);
         }
-        .btn-signin:hover { background: var(--navy-dark); transform: translateY(-1px); box-shadow: 0 4px 18px rgba(0,0,0,0.45); }
+        .btn-signin:hover { background: var(--gold-hover, #D4A900); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(242,195,26,0.5); }
         .btn-signin:active { transform: scale(0.98); }
 
         /* Divider */
@@ -191,25 +204,25 @@
             display: flex; align-items: center; margin: 1rem 0 0.75rem;
         }
         .divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid rgba(255,255,255,0.15); }
-        .divider span { padding: 0 0.75rem; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
+        .divider span { padding: 0 0.75rem; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
 
         /* Register links */
         .reg-link {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.6rem 0.875rem;
-            border: 1.5px solid rgba(255,255,255,0.16);
+            border: 1.5px solid rgba(255,255,255,0.15);
             border-radius: var(--r-sm);
             text-decoration: none;
             margin-bottom: 0.4rem;
             transition: all 0.13s;
-            background: rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.06);
         }
         .reg-link:last-child { margin-bottom: 0; }
-        .reg-link:hover { border-color: rgba(255,255,255,0.38); background: rgba(255,255,255,0.13); }
+        .reg-link:hover { border-color: var(--gold); background: rgba(255,255,255,0.1); }
 
         .reg-link-icon {
             width: 34px; height: 34px;
-            background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
             border-radius: var(--r-sm);
             display: flex; align-items: center; justify-content: center;
             font-size: 17px; flex-shrink: 0;
@@ -218,16 +231,17 @@
         .reg-link:hover .reg-link-icon { background: var(--gold); color: var(--navy-dark); }
 
         .reg-link-text { flex: 1; }
-        .reg-link-title { font-size: 13px; font-weight: 700; color: #fff; }
-        .reg-link-sub   { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 500; margin-top: 1px; }
+        .reg-link-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
+        .reg-link-sub   { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; }
 
-        .reg-link-chevron { color: rgba(255,255,255,0.4); font-size: 18px; flex-shrink: 0; }
+        .reg-link-chevron { color: rgba(255,255,255,0.35); font-size: 18px; flex-shrink: 0; }
 
         /* Branding footer */
         .card-foot {
             text-align: center; padding: 0 1.75rem 1rem;
-            font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.7;
+            font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.7;
         }
+        .card-foot a { color: rgba(255,255,255,0.35); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -288,6 +302,7 @@
                 <a href="{% url 'attendance:otp_password_reset' %}" class="forgot-link">Forgot password?</a>
             </div>
 
+            <div class="kiswahili-cta">Ingia Sasa</div>
             <button type="submit" class="btn-signin">
                 Sign In
                 <span class="iconify" data-icon="mdi:arrow-right" style="font-size:18px;"></span>
@@ -301,7 +316,7 @@
                 <span class="iconify" data-icon="mdi:school-outline"></span>
             </div>
             <div class="reg-link-text">
-                <div class="reg-link-title">Register as Student</div>
+                <div class="reg-link-title">Jisajili — Register as Student</div>
                 <div class="reg-link-sub">Create your student portal account</div>
             </div>
             <span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
@@ -312,8 +327,8 @@
                 <span class="iconify" data-icon="mdi:account-tie-outline"></span>
             </div>
             <div class="reg-link-text">
-                <div class="reg-link-title">Register as Teaching Assistant</div>
-                <div class="reg-link-sub">Create your TA account</div>
+                <div class="reg-link-title">Jisajili — Register as TA</div>
+                <div class="reg-link-sub">Create your Teaching Assistant account</div>
             </div>
             <span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
         </a>
@@ -323,7 +338,7 @@
     <div class="card-foot">
         SWASA Attendance · University of Ghana<br>
         Department of African and Asian Languages<br>
-        <a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.2);text-decoration:none;">Developed by Cradle Premier Network</a>
+        <a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener">Developed by Cradle Premier Network</a>
     </div>
 
 </div>

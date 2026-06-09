@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import (
-    Level, Semester, Course, ClassSession, UserProfile, 
-    TAProfile, TACode, AttendanceCode, AttendanceRecord, 
-    SupportTicket, CodeMisuseAlert
+    Level, Semester, Course, ClassSession, UserProfile,
+    TAProfile, TACode, AttendanceCode, AttendanceRecord,
+    SupportTicket, CodeMisuseAlert, CulturalDate, SystemNotification,
 )
 
 
@@ -107,3 +107,28 @@ class CodeMisuseAlertAdmin(admin.ModelAdmin):
     list_display = ('code', 'attempted_by', 'attempted_at', 'is_resolved')
     list_filter = ('is_resolved',)
     search_fields = ('code__code_string', 'attempted_by__username')
+
+
+@admin.register(CulturalDate)
+class CulturalDateAdmin(admin.ModelAdmin):
+    list_display = ('emoji', 'name', 'day', 'month', 'is_active', 'created_at')
+    list_filter = ('is_active', 'month')
+    list_editable = ('is_active',)
+    ordering = ('month', 'day')
+    search_fields = ('name',)
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'emoji', 'day', 'month', 'is_active'),
+        }),
+        ('Message', {
+            'fields': ('description',),
+        }),
+    )
+
+
+@admin.register(SystemNotification)
+class SystemNotificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'notification_type', 'is_read', 'created_at')
+    list_filter  = ('notification_type', 'is_read')
+    search_fields = ('title', 'user__username')
+    readonly_fields = ('created_at', 'read_at')

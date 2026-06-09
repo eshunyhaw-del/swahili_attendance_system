@@ -1,6 +1,6 @@
 import csv
 import string
-import random
+import secrets
 import uuid
 import jwt
 from datetime import timedelta, datetime
@@ -15,6 +15,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q, Max
 from django.contrib import messages
@@ -27,7 +29,8 @@ from .forms import StudentRegistrationForm, CourseRegistrationForm, SupportTicke
 from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
-    TAProfile, TACode, OTPCode, TAnnouncement,
+    TAProfile, TACode, OTPCode, TAnnouncement, Notification, StudentNotification,
+    CulturalDate, SystemNotification,
 )
 
 
@@ -65,12 +68,16 @@ def send_verification_email(user, token, request):
     )
 
 
+def create_notification(recipient, message, link=''):
+    Notification.objects.create(recipient=recipient, message=message, link=link)
+
+
 def send_ta_approval_email(ta_profile):
     try:
         html_message = render_to_string('attendance/ta_approval_email.html', {
             'ta_profile': ta_profile,
-            'login_url': '/login/',
-            'dashboard_url': '/ta/dashboard/',
+            'login_url': reverse('login'),
+            'dashboard_url': reverse('attendance:ta_dashboard'),
         })
         send_mail(
             subject='Your TA Account Approved - SWASA Attendance',
@@ -103,9 +110,12 @@ def send_ta_rejection_email(ta_profile):
 
 def generate_and_send_otp(user, purpose, expiry_minutes=5):
     """Generate a 6-digit OTP, invalidate old ones, persist, and email it."""
+    from django.core.cache import cache
     OTPCode.objects.filter(user=user, purpose=purpose, is_used=False).update(is_used=True)
+    cache.set(f"otp_resend_{user.id}_{purpose}", True, 60)
+    cache.delete(f"otp_attempts_{user.id}_{purpose}")
 
-    code = f"{random.randint(0, 999999):06d}"
+    code = f"{secrets.randbelow(1000000):06d}"
     OTPCode.objects.create(
         user=user,
         code=code,
@@ -277,13 +287,19 @@ def otp_verify_registration(request):
         action = request.POST.get('action')
 
         if action == 'resend':
-            try:
-                generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
-                messages.success(request, "A new verification code was sent.")
-            except Exception:
-                messages.error(request, "Could not resend. Please try again.")
+            from django.core.cache import cache
+            if cache.get(f"otp_resend_{user.id}_{OTPCode.PURPOSE_REGISTRATION}"):
+                messages.error(request, "Please wait 60 seconds before requesting another code.")
+            else:
+                try:
+                    generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                    messages.success(request, "A new verification code was sent.")
+                except Exception:
+                    messages.error(request, "Could not resend. Please try again.")
             return redirect('attendance:otp_verify_registration')
 
+        from django.core.cache import cache
+        attempts_key = f"otp_attempts_{user.id}_{OTPCode.PURPOSE_REGISTRATION}"
         entered = request.POST.get('otp_code', '').strip()
         otp = OTPCode.objects.filter(
             user=user, code=entered,
@@ -291,7 +307,14 @@ def otp_verify_registration(request):
         ).first()
 
         if not otp or otp.is_expired():
-            error = 'Invalid or expired code. Please try again or request a new code.'
+            attempts = cache.get(attempts_key, 0) + 1
+            if attempts >= 5:
+                OTPCode.objects.filter(user=user, purpose=OTPCode.PURPOSE_REGISTRATION, is_used=False).update(is_used=True)
+                cache.delete(attempts_key)
+                error = 'Too many failed attempts. Please request a new code.'
+            else:
+                cache.set(attempts_key, attempts, 300)
+                error = f'Invalid or expired code. {5 - attempts} attempt{"s" if 5 - attempts != 1 else ""} remaining.'
         else:
             otp.is_used = True
             otp.save()
@@ -377,13 +400,19 @@ def otp_verify_login(request):
         action = request.POST.get('action')
 
         if action == 'resend':
-            try:
-                generate_and_send_otp(user, OTPCode.PURPOSE_LOGIN, expiry_minutes=5)
-                messages.success(request, "A new code was sent.")
-            except Exception:
-                messages.error(request, "Could not resend. Please try again.")
+            from django.core.cache import cache
+            if cache.get(f"otp_resend_{user.id}_{OTPCode.PURPOSE_LOGIN}"):
+                messages.error(request, "Please wait 60 seconds before requesting another code.")
+            else:
+                try:
+                    generate_and_send_otp(user, OTPCode.PURPOSE_LOGIN, expiry_minutes=5)
+                    messages.success(request, "A new code was sent.")
+                except Exception:
+                    messages.error(request, "Could not resend. Please try again.")
             return redirect('attendance:otp_verify_login')
 
+        from django.core.cache import cache
+        attempts_key = f"otp_attempts_{user.id}_{OTPCode.PURPOSE_LOGIN}"
         entered = request.POST.get('otp_code', '').strip()
         otp = OTPCode.objects.filter(
             user=user, code=entered,
@@ -391,7 +420,14 @@ def otp_verify_login(request):
         ).first()
 
         if not otp or otp.is_expired():
-            error = 'Invalid or expired code. Please try again or request a new code.'
+            attempts = cache.get(attempts_key, 0) + 1
+            if attempts >= 5:
+                OTPCode.objects.filter(user=user, purpose=OTPCode.PURPOSE_LOGIN, is_used=False).update(is_used=True)
+                cache.delete(attempts_key)
+                error = 'Too many failed attempts. Please request a new code.'
+            else:
+                cache.set(attempts_key, attempts, 300)
+                error = f'Invalid or expired code. {5 - attempts} attempt{"s" if 5 - attempts != 1 else ""} remaining.'
         else:
             otp.is_used = True
             otp.save()
@@ -467,13 +503,19 @@ def otp_verify_password_reset(request):
         action = request.POST.get('action')
 
         if action == 'resend':
-            try:
-                generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5)
-                messages.success(request, "A new code was sent.")
-            except Exception:
-                messages.error(request, "Could not resend. Please try again.")
+            from django.core.cache import cache
+            if cache.get(f"otp_resend_{user.id}_{OTPCode.PURPOSE_PASSWORD_RESET}"):
+                messages.error(request, "Please wait 60 seconds before requesting another code.")
+            else:
+                try:
+                    generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5)
+                    messages.success(request, "A new code was sent.")
+                except Exception:
+                    messages.error(request, "Could not resend. Please try again.")
             return redirect('attendance:otp_verify_password_reset')
 
+        from django.core.cache import cache
+        attempts_key = f"otp_attempts_{user.id}_{OTPCode.PURPOSE_PASSWORD_RESET}"
         entered = request.POST.get('otp_code', '').strip()
         otp = OTPCode.objects.filter(
             user=user, code=entered,
@@ -481,7 +523,14 @@ def otp_verify_password_reset(request):
         ).first()
 
         if not otp or otp.is_expired():
-            error = 'Invalid or expired code. Please try again or request a new code.'
+            attempts = cache.get(attempts_key, 0) + 1
+            if attempts >= 5:
+                OTPCode.objects.filter(user=user, purpose=OTPCode.PURPOSE_PASSWORD_RESET, is_used=False).update(is_used=True)
+                cache.delete(attempts_key)
+                error = 'Too many failed attempts. Please request a new code.'
+            else:
+                cache.set(attempts_key, attempts, 300)
+                error = f'Invalid or expired code. {5 - attempts} attempt{"s" if 5 - attempts != 1 else ""} remaining.'
         else:
             otp.is_used = True
             otp.save()
@@ -602,34 +651,60 @@ def dashboard(request):
     if not profile.registered_courses.exists():
         return redirect("attendance:course_registration")
 
-    courses = profile.registered_courses.filter(semester__is_archived=False).select_related("semester")
+    courses = list(profile.registered_courses.filter(semester__is_active=True).select_related("semester"))
     course_data = []
     today = timezone.now().date()
+    registration_date = request.user.date_joined.date()
+
+    # Bulk-fetch all sessions for enrolled courses — 1 query
+    all_sessions = list(
+        ClassSession.objects.filter(course__in=courses).order_by("course_id", "date")
+    )
+    course_id_to_sessions = {}
+    for s in all_sessions:
+        course_id_to_sessions.setdefault(s.course_id, []).append(s)
+
+    session_ids = [s.id for s in all_sessions]
+
+    # Bulk-fetch attendance codes for this student — 1 query
+    codes_by_session = {
+        ac.class_session_id: ac
+        for ac in AttendanceCode.objects.filter(
+            student=request.user, class_session_id__in=session_ids
+        )
+    }
+
+    # Bulk-fetch attendance records for this student — 1 query
+    records_by_session = {
+        ar.class_session_id: ar
+        for ar in AttendanceRecord.objects.filter(
+            student=request.user, class_session_id__in=session_ids
+        )
+    }
 
     for course in courses:
-        sessions = ClassSession.objects.filter(course=course).order_by("date")
+        sessions = course_id_to_sessions.get(course.id, [])
         weeks = []
-        
-        for i, session in enumerate(sessions, start=1):
-            code_obj = AttendanceCode.objects.filter(
-                student=request.user, class_session=session
-            ).first()
-            record = AttendanceRecord.objects.filter(
-                student=request.user, class_session=session
-            ).first()
 
-            is_future = session.date > today
-            
+        for i, session in enumerate(sessions, start=1):
+            code_obj = codes_by_session.get(session.id)
+            record   = records_by_session.get(session.id)
+
             if record:
                 status = "submitted"
-                status_text = "✓ Submitted"
-                status_class = "submitted"
                 can_submit = False
-            else:
+            elif session.date <= registration_date:
+                status = "na"
+                can_submit = False
+            elif session.date > today:
+                status = "upcoming"
+                can_submit = False
+            elif session.date == today:
                 status = "not_started"
-                status_text = "Submit Code"
-                status_class = "pending"
                 can_submit = True
+            else:
+                status = "absent"
+                can_submit = False
 
             weeks.append({
                 "week_num": i,
@@ -637,25 +712,33 @@ def dashboard(request):
                 "code_obj": code_obj,
                 "record": record,
                 "status": status,
-                "status_text": status_text,
-                "status_class": status_class,
                 "can_submit": can_submit,
-                "is_future": is_future,
+                "is_future": session.date > today,
             })
-        
-        total_sessions = len(sessions)
-        attended = sum(1 for w in weeks if w['record'])
-        percentage = round((attended / total_sessions) * 100) if total_sessions > 0 else 0
-        
+
+        # Only count sessions from registration date onward (exclude N/A and upcoming)
+        eligible_total = sum(1 for w in weeks if w['status'] not in ('na', 'upcoming'))
+        attended = sum(1 for w in weeks if w['status'] == 'submitted')
+        percentage = round((attended / eligible_total) * 100) if eligible_total > 0 else 0
+
         course_data.append({
             "course": course,
             "weeks": weeks,
-            "total_sessions": total_sessions,
+            "total_sessions": eligible_total,
             "attended": attended,
             "percentage": percentage,
         })
 
-    return render(request, "attendance/dashboard.html", {"course_data": course_data})
+    has_na_sessions = any(
+        w['status'] == 'na'
+        for cd in course_data
+        for w in cd['weeks']
+    )
+
+    return render(request, "attendance/dashboard.html", {
+        "course_data": course_data,
+        "has_na_sessions": has_na_sessions,
+    })
 
 
 # ── AJAX: Generate Code ───────────────────────────────────────────────────────
@@ -746,14 +829,39 @@ def support(request):
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.student = request.user
+            try:
+                student_level = request.user.userprofile.level
+                if student_level:
+                    ta_profile = TAProfile.objects.filter(
+                        assigned_levels=student_level,
+                        is_approved=True,
+                        is_active=True,
+                    ).first()
+                    if ta_profile:
+                        ticket.assigned_ta = ta_profile.user
+            except UserProfile.DoesNotExist:
+                pass
             ticket.save()
-            messages.success(request, "Support ticket submitted successfully! Admin will respond soon.")
+            if ticket.assigned_ta:
+                student_name = request.user.get_full_name() or request.user.username
+                create_notification(
+                    ticket.assigned_ta,
+                    f"New support ticket from {student_name}: \"{ticket.subject}\"",
+                    reverse('attendance:ta_support'),
+                )
+            messages.success(request, "Support ticket submitted successfully! Your TA will respond soon.")
             return redirect('attendance:support')
     else:
         form = SupportTicketForm()
-    
+        # Auto-clear response notifications when student opens support page
+        Notification.objects.filter(
+            recipient=request.user,
+            is_read=False,
+            link=reverse('attendance:support'),
+        ).update(is_read=True)
+
     tickets = SupportTicket.objects.filter(student=request.user).order_by('-created_at')
-    
+
     context = {
         'form': form,
         'tickets': tickets,
@@ -774,41 +882,67 @@ def student_history(request):
     if not profile:
         return redirect("login")
 
-    courses = profile.registered_courses.filter(semester__is_archived=False)
+    courses = list(profile.registered_courses.filter(semester__is_active=True))
     history_data = []
     today = timezone.now().date()
+    registration_date = request.user.date_joined.date()
+
+    # Bulk-fetch all sessions for enrolled courses — 1 query
+    all_sessions = list(
+        ClassSession.objects.filter(course__in=courses).order_by("course_id", "date")
+    )
+    course_id_to_sessions = {}
+    for s in all_sessions:
+        course_id_to_sessions.setdefault(s.course_id, []).append(s)
+
+    # Bulk-fetch all attendance records for this student — 1 query
+    attended_session_ids = set(
+        AttendanceRecord.objects.filter(
+            student=request.user,
+            class_session_id__in=[s.id for s in all_sessions],
+        ).values_list("class_session_id", flat=True)
+    )
 
     for course in courses:
-        sessions = ClassSession.objects.filter(course=course).order_by("date")
-        total = sessions.count()
+        sessions = course_id_to_sessions.get(course.id, [])
         attended = 0
+        eligible_total = 0
         weeks = []
 
         for i, session in enumerate(sessions, start=1):
-            record = AttendanceRecord.objects.filter(
-                student=request.user, class_session=session
-            ).first()
-
-            if record:
+            if session.id in attended_session_ids:
                 day_status = "attended"
                 attended += 1
-            elif session.date < today:
-                day_status = "absent"
-            else:
+                eligible_total += 1
+            elif session.date <= registration_date:
+                day_status = "na"
+            elif session.date >= today:
                 day_status = "future"
+            else:
+                day_status = "absent"
+                eligible_total += 1
 
             weeks.append({"week_num": i, "session": session, "status": day_status})
 
-        percentage = round((attended / total) * 100) if total else 0
+        percentage = round((attended / eligible_total) * 100) if eligible_total else 0
         history_data.append({
             "course": course,
             "weeks": weeks,
             "attended": attended,
-            "total": total,
+            "total": eligible_total,
             "percentage": percentage,
         })
 
-    return render(request, "attendance/history.html", {"history_data": history_data})
+    has_na_sessions = any(
+        w['status'] == 'na'
+        for item in history_data
+        for w in item['weeks']
+    )
+
+    return render(request, "attendance/history.html", {
+        "history_data": history_data,
+        "has_na_sessions": has_na_sessions,
+    })
 
 
 # ── Student CSV Export ───────────────────────────────────────────────────────
@@ -845,6 +979,8 @@ def export_my_attendance_csv(request):
 
 @login_required
 @user_passes_test(is_lecturer, login_url="/")
+@cache_page(60 * 5)
+@vary_on_cookie
 def lecturer_dashboard(request):
     today = timezone.now().date()
     selected_date_str = request.GET.get("date", today.isoformat())
@@ -1275,6 +1411,64 @@ def admin_support_tickets(request):
     return render(request, 'attendance/admin_support.html', context)
 
 
+# ── TA Support Tickets ────────────────────────────────────────────────────────
+
+@login_required
+def ta_support_tickets(request):
+    try:
+        ta_profile = TAProfile.objects.get(user=request.user)
+    except TAProfile.DoesNotExist:
+        return redirect('/')
+
+    if not ta_profile.is_approved:
+        messages.error(request, "Your account is pending admin approval.")
+        return redirect('login')
+
+    # Auto-clear ticket notifications when TA opens this page
+    Notification.objects.filter(
+        recipient=request.user,
+        is_read=False,
+        link=reverse('attendance:ta_support'),
+    ).update(is_read=True)
+
+    if request.method == 'POST':
+        ticket_id = request.POST.get('ticket_id')
+        response_text = request.POST.get('response')
+        status = request.POST.get('status')
+        ticket = get_object_or_404(SupportTicket, id=ticket_id, assigned_ta=request.user)
+        ticket.admin_response = response_text
+        ticket.status = status
+        ticket.save()
+        ta_name = request.user.get_full_name() or request.user.username
+        create_notification(
+            ticket.student,
+            f"Your ticket \"{ticket.subject}\" has a response from {ta_name}",
+            reverse('attendance:support'),
+        )
+        messages.success(request, f"Response sent to {ticket.student.username}")
+        return redirect('attendance:ta_support')
+
+    tickets = SupportTicket.objects.filter(assigned_ta=request.user).order_by('-created_at').select_related('student')
+    paginator = Paginator(tickets, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    context = {'tickets': page_obj}
+    return render(request, 'attendance/ta_support.html', context)
+
+
+# ── Notifications ─────────────────────────────────────────────────────────────
+
+@require_POST
+@login_required
+def mark_notifications_read(request):
+    if request.POST.get('all'):
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    else:
+        notif_id = request.POST.get('notification_id')
+        Notification.objects.filter(id=notif_id, recipient=request.user).update(is_read=True)
+    return JsonResponse({'ok': True})
+
+
 # ── Admin Alerts ──────────────────────────────────────────────────────────────
 
 @staff_member_required
@@ -1578,57 +1772,56 @@ def ta_dashboard(request):
         messages.error(request, "TA profile not found. Please contact admin.")
         return redirect('/')
 
-    # Check if TA is approved
     if not ta_profile.is_approved:
         messages.error(request, "Your account is pending admin approval. You will be notified via email once approved.")
         return redirect('login')
 
     assigned_levels = ta_profile.assigned_levels.all()
     assigned_level_ids = [level.id for level in assigned_levels]
-    
-    # Get sessions for TA's assigned levels — only from active (non-turned-off) semesters
+
     sessions = ClassSession.objects.filter(
         course__level__id__in=assigned_level_ids,
         course__semester__is_active=True,
-    ).order_by('course__level', 'course__code', 'date').select_related('course')
+    ).order_by('course__level', 'course__code', 'date').select_related('course', 'course__level')
 
-    # Students who have actually registered for courses in this TA's levels (active semesters only)
     courses_in_levels = Course.objects.filter(level__in=assigned_levels, semester__is_active=True)
-    total_students_count = UserProfile.objects.filter(
-        registered_courses__in=courses_in_levels
-    ).distinct().count()
 
-    # Cache per-course registered student counts to avoid N queries in the loop
+    # Single aggregation query instead of one query per course
     course_student_counts = {
-        course.id: UserProfile.objects.filter(registered_courses=course).count()
-        for course in courses_in_levels
+        row['registered_courses']: row['cnt']
+        for row in UserProfile.objects.filter(registered_courses__in=courses_in_levels)
+        .values('registered_courses')
+        .annotate(cnt=Count('id'))
     }
+
+    total_students_count = sum(course_student_counts.values())
 
     # Group sessions by course
     sessions_by_course = {}
 
     for session in sessions:
         course_key = session.course.id
-        student_count = course_student_counts.get(course_key, 0)
-
         if course_key not in sessions_by_course:
             sessions_by_course[course_key] = {
                 'course': session.course,
                 'sessions': []
             }
-
         sessions_by_course[course_key]['sessions'].append({
             'id': session.id,
             'date': session.date,
             'start_time': session.start_time,
             'end_time': session.end_time,
             'topic': session.topic,
-            'student_count': student_count,
+            'student_count': course_student_counts.get(course_key, 0),
         })
-    
-    # Get statistics
-    total_codes_generated = TACode.objects.filter(ta=request.user).count()
-    total_codes_used = TACode.objects.filter(ta=request.user, is_used=True).count()
+
+    # Single query for both code stats
+    ta_code_stats = TACode.objects.filter(ta=request.user).aggregate(
+        total_generated=Count('id'),
+        total_used=Count('id', filter=Q(is_used=True)),
+    )
+    total_codes_generated = ta_code_stats['total_generated']
+    total_codes_used = ta_code_stats['total_used']
     
     context = {
         'ta_profile': ta_profile,
@@ -1685,10 +1878,9 @@ def ta_generate_code(request):
             })
     
     # Generate unique 2-5 digit code
-    import random
     while True:
-        code_length = random.choice([2, 3, 4, 5])
-        code = ''.join([str(random.randint(0, 9)) for _ in range(code_length)])
+        code_length = secrets.choice([2, 3, 4, 5])
+        code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
         if not TACode.objects.filter(code=code, class_session=session).exists():
             break
     
@@ -1722,13 +1914,14 @@ def ta_generate_all_codes(request):
     if not ta_profile.is_approved:
         return JsonResponse({"error": "Your TA account is pending approval."}, status=403)
 
+    if session.course.level not in ta_profile.assigned_levels.all():
+        return JsonResponse({"error": "You are not authorized for this session's level."}, status=403)
+
     # Get all students for this session's course level
     students = UserProfile.objects.filter(level=session.course.level).select_related('user')
     
     generated_count = 0
     skipped_count = 0
-    
-    import random
     
     for student_profile in students:
         # Check if code already exists
@@ -1737,11 +1930,11 @@ def ta_generate_all_codes(request):
             if existing.is_used:
                 skipped_count += 1
             continue
-        
+
         # Generate unique code
         while True:
-            code_length = random.choice([2, 3, 4, 5])
-            code = ''.join([str(random.randint(0, 9)) for _ in range(code_length)])
+            code_length = secrets.choice([2, 3, 4, 5])
+            code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
             if not TACode.objects.filter(code=code, class_session=session).exists():
                 break
         
@@ -2004,7 +2197,9 @@ def ta_export_session_csv(request, session_id):
 
 def student_guide(request):
     """Display student guide page"""
-    return render(request, 'attendance/student_guide.html')
+    return render(request, 'attendance/student_guide.html', {
+        'is_student': request.user.is_authenticated and is_student(request.user),
+    })
 
 
 # ── TA Guide ──────────────────────────────────────────────────────────────────
@@ -2028,77 +2223,194 @@ def ta_announcements(request):
         return redirect('attendance:ta_dashboard')
 
     assigned_levels = ta_profile.assigned_levels.all()
-    past = TAnnouncement.objects.filter(ta=request.user).prefetch_related('target_levels')
+    available_courses = (
+        Course.objects
+        .filter(level__in=assigned_levels, semester__is_active=True)
+        .select_related('level')
+        .order_by('level__name', 'code')
+    )
+    past = (
+        TAnnouncement.objects
+        .filter(ta=request.user)
+        .select_related('course', 'course__level')
+        .prefetch_related('target_levels')
+    )
 
     if request.method == 'POST':
-        title   = request.POST.get('title', '').strip()
-        body    = request.POST.get('message', '').strip()
-        lv_ids  = request.POST.getlist('levels')
+        title     = request.POST.get('title', '').strip()
+        body      = request.POST.get('message', '').strip()
+        course_id = request.POST.get('course_id', '').strip()
 
         if not title or not body:
             messages.error(request, 'Both a title and a message are required.')
+        elif not course_id:
+            messages.error(request, 'Please select a course.')
         else:
-            target_levels = (
-                Level.objects.filter(id__in=lv_ids)
-                if lv_ids
-                else assigned_levels
-            )
-            courses = Course.objects.filter(
-                level__in=target_levels,
-                semester__is_active=True,
-            )
-            students = (
-                UserProfile.objects
-                .filter(registered_courses__in=courses, user__is_active=True)
-                .distinct()
-                .select_related('user')
-            )
-
-            ta_name = request.user.get_full_name() or request.user.username
-            sent_count = 0
-            for profile in students:
-                if profile.user.email:
-                    try:
-                        html_body = render_to_string(
-                            'attendance/announcement_email.html',
-                            {
-                                'ta_name':      ta_name,
-                                'title':        title,
-                                'message':      body,
-                                'student_name': profile.user.get_full_name() or profile.user.username,
-                            },
-                        )
-                        send_mail(
-                            subject=f'[SWASA] {title}',
-                            message=strip_tags(html_body),
-                            from_email='noreply@swasa.edu.gh',
-                            recipient_list=[profile.user.email],
-                            html_message=html_body,
-                            fail_silently=True,
-                        )
-                        sent_count += 1
-                    except Exception:
-                        pass
+            try:
+                course = Course.objects.get(
+                    id=course_id,
+                    level__in=assigned_levels,
+                    semester__is_active=True,
+                )
+            except Course.DoesNotExist:
+                messages.error(request, 'Invalid course selection.')
+                return redirect('attendance:ta_announcements')
 
             ann = TAnnouncement.objects.create(
                 ta=request.user,
                 title=title,
                 message=body,
-                recipient_count=sent_count,
+                course=course,
             )
-            ann.target_levels.set(target_levels)
+
+            students = (
+                UserProfile.objects
+                .filter(registered_courses=course, user__is_active=True)
+                .select_related('user')
+            )
+
+            notifications_to_create = [
+                StudentNotification(student=profile.user, announcement=ann)
+                for profile in students
+            ]
+            StudentNotification.objects.bulk_create(notifications_to_create)
+            sent_count = len(notifications_to_create)
+
+            ann.recipient_count = sent_count
+            ann.save()
 
             messages.success(
                 request,
-                f'Announcement sent to {sent_count} student{"s" if sent_count != 1 else ""}.'
+                f'Announcement sent to {sent_count} student{"s" if sent_count != 1 else ""} in {course.code}.',
             )
             return redirect('attendance:ta_announcements')
 
     return render(request, 'attendance/ta_announcements.html', {
-        'ta_profile':      ta_profile,
-        'assigned_levels': assigned_levels,
-        'past':            past,
+        'ta_profile':        ta_profile,
+        'available_courses': available_courses,
+        'past':              past,
     })
+
+
+@login_required
+@require_POST
+def ta_delete_announcement(request, ann_id):
+    if not hasattr(request.user, 'taprofile'):
+        return redirect('attendance:dashboard')
+    ann = get_object_or_404(TAnnouncement, id=ann_id, ta=request.user)
+    ann.delete()
+    messages.success(request, 'Announcement deleted.')
+    return redirect('attendance:ta_announcements')
+
+
+@login_required
+@require_POST
+def ta_edit_announcement(request, ann_id):
+    if not hasattr(request.user, 'taprofile'):
+        return redirect('attendance:dashboard')
+    ann = get_object_or_404(TAnnouncement, id=ann_id, ta=request.user)
+    title = request.POST.get('title', '').strip()
+    body  = request.POST.get('message', '').strip()
+    if title and body:
+        ann.title   = title
+        ann.message = body
+        ann.save()
+        messages.success(request, 'Announcement updated.')
+    else:
+        messages.error(request, 'Title and message are required.')
+    return redirect('attendance:ta_announcements')
+
+
+# ── Student Notifications Page ────────────────────────────────────────────────
+
+@login_required
+def notifications_page(request):
+    if hasattr(request.user, 'taprofile') or request.user.is_staff:
+        return redirect('attendance:dashboard')
+
+    notifs = (
+        StudentNotification.objects
+        .filter(student=request.user)
+        .select_related('announcement', 'announcement__course', 'announcement__ta')
+        .order_by('-announcement__sent_at')
+    )
+
+    course_filter = request.GET.get('course')
+    if course_filter:
+        notifs = notifs.filter(announcement__course_id=course_filter)
+
+    registered_courses = []
+    profile = get_profile(request.user)
+    if profile:
+        registered_courses = list(
+            profile.registered_courses.filter(semester__is_active=True).order_by('code')
+        )
+
+    return render(request, 'attendance/notifications.html', {
+        'notifs':             notifs,
+        'registered_courses': registered_courses,
+        'course_filter':      course_filter,
+    })
+
+
+@login_required
+@require_POST
+def student_mark_notification_read(request, notif_id):
+    notif = get_object_or_404(StudentNotification, id=notif_id, student=request.user)
+    if not notif.is_read:
+        notif.is_read = True
+        notif.read_at = timezone.now()
+        notif.save()
+    ann_unread  = StudentNotification.objects.filter(student=request.user, is_read=False).count()
+    sys_unread  = SystemNotification.objects.filter(user=request.user, is_read=False).count()
+    return JsonResponse({'ok': True, 'unread_count': ann_unread + sys_unread})
+
+
+@login_required
+@require_POST
+def student_mark_all_notifications_read(request):
+    StudentNotification.objects.filter(student=request.user, is_read=False).update(
+        is_read=True, read_at=timezone.now(),
+    )
+    SystemNotification.objects.filter(user=request.user, is_read=False).update(
+        is_read=True, read_at=timezone.now(),
+    )
+    return JsonResponse({'ok': True, 'unread_count': 0})
+
+
+@login_required
+def notification_unread_count(request):
+    sys_unread = SystemNotification.objects.filter(user=request.user, is_read=False).count()
+    if hasattr(request.user, 'taprofile') or request.user.is_staff:
+        count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    else:
+        count = StudentNotification.objects.filter(student=request.user, is_read=False).count()
+    return JsonResponse({'unread_count': count + sys_unread})
+
+
+@login_required
+@require_POST
+def system_mark_notification_read(request, notif_id):
+    notif = get_object_or_404(SystemNotification, id=notif_id, user=request.user)
+    if not notif.is_read:
+        notif.is_read = True
+        notif.read_at = timezone.now()
+        notif.save()
+    sys_unread = SystemNotification.objects.filter(user=request.user, is_read=False).count()
+    if hasattr(request.user, 'taprofile') or request.user.is_staff:
+        other_unread = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    else:
+        other_unread = StudentNotification.objects.filter(student=request.user, is_read=False).count()
+    return JsonResponse({'ok': True, 'unread_count': sys_unread + other_unread})
+
+
+@login_required
+@require_POST
+def system_mark_all_notifications_read(request):
+    SystemNotification.objects.filter(user=request.user, is_read=False).update(
+        is_read=True, read_at=timezone.now(),
+    )
+    return JsonResponse({'ok': True})
 
 
 # ── Force Password Change ─────────────────────────────────────────────────────

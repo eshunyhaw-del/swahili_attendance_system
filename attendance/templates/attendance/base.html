@@ -5,70 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>SWASA Attendance System</title>
-    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    {% load static %}
+    <script src="{% static 'js/iconify.min.js' %}"></script>
     <style>
         :root {
-            --navy:           #0D2472;
-            --navy-light:     #1B3A9C;
-            --navy-dark:      #091A55;
+            /* ── Design tokens ── */
+            --primary:        #0D2472;
+            --primary-hover:  #091A55;
+            --primary-light:  rgba(13, 36, 114, 0.08);
             --gold:           #F2C31A;
-            --gold-dark:      #C9A00E;
+            --gold-hover:     #D4A900;
+            --orange:         #E85D26;
+            --orange-light:   rgba(232, 93, 38, 0.1);
+
+            --bg-main:        #F8F4EF;
+            --bg-card:        #FFFFFF;
+            --text-main:      #1A1A2E;
+            --text-muted:     #6B7280;
+            --text-hint:      #9CA3AF;
+            --border:         #E8E0D8;
+            --shadow:         0 4px 20px rgba(13, 36, 114, 0.08);
+            --radius-lg:      16px;
+            --radius-sm:      8px;
+
+            /* ── Legacy aliases ── */
+            --navy:           var(--primary);
+            --navy-light:     #1B3A9C;
+            --navy-dark:      var(--primary-hover);
+            --gold-dark:      var(--gold-hover);
             --teal:           #00A896;
             --red:            #C0392B;
             --green:          #1E9E5E;
             --blue:           #4A90D9;
-
-            --bg-base:        #F4F6FB;
-            --bg-surface:     #FFFFFF;
-            --bg-subtle:      #EEF1F8;
-            --bg-overlay:     rgba(13,36,114,0.04);
-
-            --text-primary:   #0D1B3E;
+            --bg-base:        var(--bg-main);
+            --bg-surface:     var(--bg-card);
+            --bg-subtle:      #EDE4D8;
+            --bg-overlay:     rgba(13, 36, 114, 0.04);
+            --text-primary:   var(--text-main);
             --text-secondary: #4A5568;
-            --text-muted:     #8896AB;
             --text-inverse:   #FFFFFF;
-
-            --border:         #E4E9F2;
             --border-strong:  #C8D0E0;
-
             --sidebar-width:  260px;
             --topbar-height:  60px;
-
-            --shadow-xs: 0 1px 2px rgba(13,36,114,0.06);
-            --shadow-sm: 0 1px 4px rgba(13,36,114,0.08);
-            --shadow-md: 0 4px 16px rgba(13,36,114,0.10);
-            --shadow-lg: 0 8px 32px rgba(13,36,114,0.14);
-
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 20px;
+            --shadow-xs:      0 1px 2px rgba(13, 36, 114, 0.06);
+            --shadow-sm:      0 1px 4px rgba(13, 36, 114, 0.08);
+            --shadow-md:      var(--shadow);
+            --shadow-lg:      0 8px 32px rgba(13, 36, 114, 0.14);
+            --radius-md:      12px;
+            --radius-xl:      20px;
         }
 
         html[data-theme="dark"] {
+            --primary:        #1B3A9C;
+            --primary-hover:  #0D2472;
+            --primary-light:  rgba(27, 58, 156, 0.15);
+            --orange:         #F07040;
+            --orange-light:   rgba(240, 112, 64, 0.15);
+            --bg-main:        #0F1923;
+            --bg-card:        #1E2A3B;
+            --text-main:      #E8EDF5;
+            --text-muted:     #8896AB;
+            --text-hint:      #4A5568;
+            --border:         #2E3D50;
+            --shadow:         0 4px 20px rgba(0, 0, 0, 0.3);
+
+            /* Legacy aliases */
             --bg-base:        #0F1923;
             --bg-surface:     #1E2A3B;
             --bg-subtle:      #162131;
             --bg-overlay:     rgba(255,255,255,0.04);
-
             --text-primary:   #E8EDF5;
             --text-secondary: #C4CDD8;
-            --text-muted:     #8896AB;
-
-            --border:         #2E3D50;
             --border-strong:  #3A4E66;
-
-            --shadow-xs: 0 1px 3px rgba(0,0,0,0.5);
-            --shadow-sm: 0 1px 5px rgba(0,0,0,0.6);
-            --shadow-md: 0 4px 18px rgba(0,0,0,0.7);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.8);
-
-            /* Aliases matching template-local :root variable names */
-            --surface: #1E2A3B;
-            --bg:      #0F1923;
-            --text:    #E8EDF5;
-            --muted:   #8896AB;
+            --shadow-xs:      0 1px 3px rgba(0,0,0,0.5);
+            --shadow-sm:      0 1px 5px rgba(0,0,0,0.6);
+            --shadow-md:      0 4px 18px rgba(0,0,0,0.7);
+            --shadow-lg:      0 8px 32px rgba(0,0,0,0.8);
+            --surface:        #1E2A3B;
+            --bg:             #0F1923;
+            --text:           #E8EDF5;
+            --muted:          #8896AB;
         }
 
         *, *::before, *::after {
@@ -83,7 +102,7 @@
         }
 
         body {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             color: var(--text-primary);
             font-size: 14px;
             line-height: 1.6;
@@ -148,18 +167,17 @@
         .logo-text {
             font-size: 15px;
             font-weight: 700;
-            color: #fff;
+            color: var(--gold);
             line-height: 1.2;
         }
 
         .logo-text span {
-            color: var(--gold);
+            color: rgba(255,255,255,0.6);
             display: block;
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            opacity: 0.9;
         }
 
         .sidebar-nav {
@@ -184,7 +202,7 @@
             padding: 0.65rem 0.75rem;
             margin-bottom: 2px;
             border-radius: var(--radius-sm);
-            color: rgba(255,255,255,0.65);
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
@@ -823,6 +841,211 @@
         .mt-4         { margin-top: 1rem; }
         .mb-4         { margin-bottom: 1rem; }
 
+        /* ─── NOTIFICATION BELL ─── */
+        .notif-wrapper { position: relative; }
+        .notif-trigger { position: relative; }
+        .notif-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            min-width: 17px; height: 17px;
+            background: #DC2626;
+            color: #fff;
+            font-size: 10px; font-weight: 700;
+            border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px;
+            pointer-events: none;
+            line-height: 1;
+        }
+        .notif-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 340px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .notif-panel.open { display: block; }
+        .notif-panel-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.875rem 1rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .notif-panel-title {
+            font-size: 13px; font-weight: 700; color: var(--text-primary);
+        }
+        .notif-mark-all {
+            font-size: 11px; font-weight: 600; color: var(--navy);
+            background: none; border: none; cursor: pointer; padding: 0;
+            text-decoration: underline; text-underline-offset: 2px;
+        }
+        html[data-theme="dark"] .notif-mark-all { color: var(--gold); }
+        .notif-mark-all:hover { opacity: 0.75; }
+        .notif-list { max-height: 340px; overflow-y: auto; }
+        .notif-item {
+            display: flex; align-items: flex-start;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            gap: 0.5rem;
+            transition: background 0.12s;
+            border-left: 3px solid transparent;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: var(--bg-subtle); }
+        .notif-item.ann-unread { border-left-color: #F2C31A; }
+        .notif-item.ann-read   { opacity: 0.7; }
+        .notif-link {
+            flex: 1; min-width: 0;
+            text-decoration: none; color: inherit;
+        }
+        .notif-course-chip {
+            display: inline-block;
+            font-size: 10px; font-weight: 700;
+            padding: 1px 7px; border-radius: 4px;
+            background: var(--primary-light); color: var(--primary);
+            margin-bottom: 4px; letter-spacing: 0.04em;
+        }
+        html[data-theme="dark"] .notif-course-chip {
+            background: rgba(242,195,26,0.12); color: var(--gold);
+        }
+        .notif-ann-title {
+            font-size: 12.5px; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 2px; line-height: 1.35;
+        }
+        .notif-msg {
+            font-size: 12px; color: var(--text-muted); line-height: 1.45;
+            margin-bottom: 3px;
+        }
+        .notif-time { font-size: 10.5px; color: var(--text-muted); }
+        .notif-dismiss {
+            background: none; border: none; cursor: pointer; padding: 2px;
+            color: var(--text-muted); flex-shrink: 0; border-radius: 4px;
+            display: flex; align-items: center;
+            transition: color 0.12s, background 0.12s;
+        }
+        .notif-dismiss:hover { color: var(--red); background: rgba(192,57,43,0.08); }
+        .notif-panel-footer {
+            padding: 0.625rem 1rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .notif-view-all {
+            font-size: 12px; font-weight: 600; color: var(--navy); text-decoration: none;
+        }
+        html[data-theme="dark"] .notif-view-all { color: var(--gold); }
+        .notif-view-all:hover { text-decoration: underline; }
+        .notif-empty {
+            padding: 2rem 1rem; text-align: center;
+        }
+        .notif-empty .iconify { font-size: 32px; color: var(--text-muted); display: block; margin: 0 auto 0.5rem; }
+        .notif-empty p { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+        /* Sidebar notification badge */
+        .nav-notif-badge {
+            margin-left: auto;
+            min-width: 18px; height: 18px;
+            background: #DC2626; color: #fff;
+            font-size: 10px; font-weight: 700;
+            border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px; line-height: 1;
+        }
+
+        /* ─── CULTURAL DATE BANNER ─── */
+        @keyframes cultural-glow {
+            0%   { background-position: -200% 0; }
+            100% { background-position:  200% 0; }
+        }
+        .cultural-date-banner {
+            background: linear-gradient(135deg, #0A1E72 0%, #0D2472 45%, #112A8A 100%);
+            border-radius: var(--radius-lg);
+            padding: 1rem 1.375rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(13,36,114,0.28), 0 0 0 1px rgba(242,195,26,0.22);
+            border: 1px solid rgba(242,195,26,0.22);
+        }
+        html[data-theme="dark"] .cultural-date-banner {
+            background: linear-gradient(135deg, #06124A 0%, #0A1A5E 45%, #0E2278 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(242,195,26,0.18);
+        }
+        .cultural-date-banner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(242,195,26,0.09) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: cultural-glow 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .cultural-date-banner::after {
+            content: '';
+            position: absolute; top: -50px; right: -30px;
+            width: 140px; height: 140px;
+            background: rgba(242,195,26,0.07);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .cultural-emoji-wrap {
+            width: 50px; height: 50px;
+            background: rgba(242,195,26,0.15);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            border: 1px solid rgba(242,195,26,0.28);
+            position: relative; z-index: 1;
+        }
+        .cultural-content {
+            flex: 1; min-width: 0;
+            position: relative; z-index: 1;
+        }
+        .cultural-name {
+            font-size: 14.5px; font-weight: 700; color: #fff;
+            line-height: 1.3; margin-bottom: 0.2rem;
+        }
+        .cultural-msg {
+            font-size: 12px; color: rgba(255,255,255,0.68);
+            line-height: 1.55;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .cultural-dismiss {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 6px; padding: 5px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.55);
+            display: flex; align-items: center;
+            flex-shrink: 0;
+            transition: all 0.12s;
+            position: relative; z-index: 1;
+        }
+        .cultural-dismiss:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        @media (max-width: 480px) {
+            .cultural-date-banner { padding: 0.875rem 1rem; gap: 0.75rem; }
+            .cultural-emoji-wrap { width: 42px; height: 42px; font-size: 20px; }
+            .cultural-name { font-size: 13.5px; }
+        }
+
+        /* System notification in bell (cultural date — gold tint) */
+        .notif-item.sys-notif {
+            background: rgba(242,195,26,0.04);
+            border-left-color: #F2C31A;
+        }
+        html[data-theme="dark"] .notif-item.sys-notif { background: rgba(242,195,26,0.06); }
+        .notif-sys-emoji {
+            font-size: 18px; flex-shrink: 0; line-height: 1;
+            margin-top: 2px;
+        }
+
         /* ─── SWAHILI GREETING BANNER ─── */
         .swahili-greeting-banner {
             background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 60%, #0D2472 100%);
@@ -843,15 +1066,33 @@
             background: rgba(242,195,26,0.06);
             border-radius: 50%;
             pointer-events: none;
+            z-index: 0;
+        }
+        .swahili-greeting-banner::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+                    transparent 1px, transparent 18px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+                    transparent 1px, transparent 18px
+                );
+            pointer-events: none;
+            z-index: 0;
         }
         .swahili-banner-text { position: relative; z-index: 1; min-width: 0; }
-        .swahili-greeting-line { font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.3; }
-        .swahili-greeting-kw  { color: #F2C31A; }
-        .swahili-proverb-line { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 0.25rem; line-height: 1.5; }
-        .swahili-inline-proverb { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; line-height: 1.45; }
+        .swahili-greeting-line { font-size: 22px; font-weight: 600; color: #fff; line-height: 1.3; }
+        .swahili-greeting-kw  { color: var(--gold); font-weight: 700; }
+        .swahili-proverb-line { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 0.25rem; line-height: 1.5; font-style: italic; }
+        .swahili-inline-proverb { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; line-height: 1.45; font-style: italic; }
         @media (max-width: 480px) {
             .swahili-greeting-banner { padding: 0.875rem 1rem; }
-            .swahili-greeting-line { font-size: 0.9rem; }
+            .swahili-greeting-line { font-size: 18px; }
         }
     </style>
     {% block extra_head %}{% endblock %}
@@ -915,6 +1156,9 @@
                     <a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
                     </a>
+                    <a href="{% url 'attendance:ta_support' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
+                    </a>
                     <div class="nav-label">Account</div>
                     <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
@@ -934,6 +1178,12 @@
                     </a>
                     <a href="{% url 'attendance:history' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:history"></span> My History
+                    </a>
+                    <a href="{% url 'attendance:notifications' %}" class="nav-item">
+                        <span class="iconify" data-icon="mdi:bell-outline"></span> Notifications
+                        {% if notif_type == 'announcement' and unread_notif_count %}
+                        <span class="nav-notif-badge">{{ unread_notif_count|default:'' }}</span>
+                        {% endif %}
                     </a>
                     <a href="{% url 'attendance:course_registration' %}" class="nav-item">
                         <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
@@ -969,6 +1219,80 @@
             </div>
 
             <div class="user-menu">
+                {% if user.is_authenticated %}
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="icon-btn notif-trigger" id="notifTrigger" aria-label="Notifications" title="Notifications">
+                        <span class="iconify" data-icon="mdi:bell-outline" data-width="18" data-height="18"></span>
+                        {% if unread_notif_count %}
+                        <span class="notif-badge" id="notifBadge">{% if unread_notif_count > 9 %}9+{% else %}{{ unread_notif_count }}{% endif %}</span>
+                        {% endif %}
+                    </button>
+                    <div class="notif-panel" id="notifPanel">
+                        <div class="notif-panel-head">
+                            <span class="notif-panel-title">Notifications</span>
+                            {% if unread_notif_count %}
+                            <button class="notif-mark-all" id="markAllBtn" onclick="markAllRead()">Mark all read</button>
+                            {% endif %}
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            {% if sys_notifications or ann_notifications or generic_notifications %}
+
+                                {% for notif in sys_notifications %}
+                                <div class="notif-item sys-notif" id="sysnotif-{{ notif.id }}">
+                                    <span class="notif-sys-emoji">{{ notif.emoji }}</span>
+                                    <div class="notif-link">
+                                        <div class="notif-ann-title">{{ notif.title }}</div>
+                                        <div class="notif-msg">{{ notif.message|truncatechars:90 }}</div>
+                                        <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+                                    </div>
+                                    <button class="notif-dismiss" onclick="markSysRead({{ notif.id }})" title="Dismiss">
+                                        <span class="iconify" data-icon="mdi:close" data-width="12"></span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+
+                                {% if notif_type == 'announcement' %}
+                                    {% for notif in ann_notifications %}
+                                    <div class="notif-item ann-unread" id="snotif-{{ notif.id }}">
+                                        <a href="{% url 'attendance:notifications' %}" class="notif-link" onclick="markAnnRead({{ notif.id }})">
+                                            {% if notif.announcement.course %}
+                                            <div class="notif-course-chip">{{ notif.announcement.course.code }}</div>
+                                            {% endif %}
+                                            <div class="notif-ann-title">{{ notif.announcement.title }}</div>
+                                            <div class="notif-msg">{{ notif.announcement.message|truncatechars:90 }}</div>
+                                            <div class="notif-time">{{ notif.announcement.sent_at|timesince }} ago</div>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for notif in generic_notifications %}
+                                    <div class="notif-item" id="notif-{{ notif.id }}">
+                                        <a href="{{ notif.link|default:'#' }}" class="notif-link" onclick="markRead({{ notif.id }}, null, '{{ notif.link }}')">
+                                            <div class="notif-msg">{{ notif.message }}</div>
+                                            <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+                                        </a>
+                                        <button class="notif-dismiss" onclick="markRead({{ notif.id }}, null, '')" title="Dismiss">
+                                            <span class="iconify" data-icon="mdi:close" data-width="12"></span>
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+
+                            {% else %}
+                                <div class="notif-empty" id="notifEmpty">
+                                    <span class="iconify" data-icon="mdi:bell-check-outline"></span>
+                                    <p>No new notifications</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if notif_type == 'announcement' %}
+                        <div class="notif-panel-footer">
+                            <a href="{% url 'attendance:notifications' %}" class="notif-view-all">View all notifications</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
                     <span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
                     <span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
@@ -999,6 +1323,21 @@
                     {{ message }}
                 </div>
                 {% endfor %}
+            {% endif %}
+
+            {% if today_cultural_dates %}
+            {% with cd=today_cultural_dates.0 %}
+            <div class="cultural-date-banner" id="culturalDateBanner" style="display:none;">
+                <div class="cultural-emoji-wrap">{{ cd.emoji }}</div>
+                <div class="cultural-content">
+                    <div class="cultural-name">{{ cd.name }}</div>
+                    <div class="cultural-msg">{{ cd.description }}</div>
+                </div>
+                <button class="cultural-dismiss" onclick="dismissCulturalBanner()" title="Dismiss">
+                    <span class="iconify" data-icon="mdi:close" data-width="14"></span>
+                </button>
+            </div>
+            {% endwith %}
             {% endif %}
 
             {% block greeting %}
@@ -1038,6 +1377,153 @@
     window.addEventListener('resize', () => {
         if (window.innerWidth >= 1024) closeSidebar();
     });
+
+    /* ── Notifications ── */
+    var SWASA_NOTIF_TYPE = "{{ notif_type|default:'generic' }}";
+
+    (function () {
+        var trigger = document.getElementById('notifTrigger');
+        var panel   = document.getElementById('notifPanel');
+        if (!trigger || !panel) return;
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            panel.classList.toggle('open');
+        });
+
+        document.addEventListener('click', function (e) {
+            var wrapper = document.getElementById('notifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                panel.classList.remove('open');
+            }
+        });
+    })();
+
+    function getCsrf() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
+    /* Generic notification mark-read (TAs / staff) */
+    function markRead(id, event, link) {
+        fetch('/notifications/mark-read/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'notification_id=' + id,
+        });
+        if (!link) {
+            var el = document.getElementById('notif-' + id);
+            if (el) el.remove();
+            decrementBadge(1);
+        }
+    }
+
+    /* Announcement notification mark-read (students) */
+    function markAnnRead(id) {
+        fetch('/notifications/ann/mark-read/' + id + '/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrf() },
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            var el = document.getElementById('snotif-' + id);
+            if (el) { el.classList.remove('ann-unread'); el.classList.add('ann-read'); }
+            updateBadgeCount(data.unread_count);
+        });
+        return true; // allow href navigation
+    }
+
+    /* System notification dismiss (cultural dates & system alerts) */
+    function markSysRead(id) {
+        fetch('/notifications/sys/mark-read/' + id + '/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrf() },
+        }).then(function(r) { return r.json(); }).then(function(data) {
+            var el = document.getElementById('sysnotif-' + id);
+            if (el) el.remove();
+            updateBadgeCount(data.unread_count);
+            _checkEmptyBell();
+        });
+    }
+
+    function _checkEmptyBell() {
+        var list = document.getElementById('notifList');
+        if (!list) return;
+        if (!list.querySelector('.notif-item')) {
+            list.innerHTML = '<div class="notif-empty" id="notifEmpty"><span class="iconify" data-icon="mdi:bell-check-outline"></span><p>No new notifications</p></div>';
+        }
+    }
+
+    function markAllRead() {
+        var promises = [];
+        // Always clear system notifications
+        promises.push(
+            fetch('/notifications/sys/mark-all-read/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCsrf() },
+            })
+        );
+        if (SWASA_NOTIF_TYPE === 'announcement') {
+            promises.push(
+                fetch('/notifications/ann/mark-all-read/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCsrf() },
+                })
+            );
+        } else {
+            promises.push(
+                fetch('/notifications/mark-read/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCsrf(), 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'all=1',
+                })
+            );
+        }
+        Promise.all(promises).then(function() {
+            var list = document.getElementById('notifList');
+            if (list) list.innerHTML = '<div class="notif-empty" id="notifEmpty"><span class="iconify" data-icon="mdi:bell-check-outline"></span><p>No new notifications</p></div>';
+            updateBadgeCount(0);
+            var btn = document.getElementById('markAllBtn');
+            if (btn) btn.remove();
+        });
+    }
+
+    /* Cultural date banner — show if not dismissed today */
+    (function() {
+        var banner = document.getElementById('culturalDateBanner');
+        if (!banner) return;
+        var today = new Date().toISOString().slice(0, 10);
+        if (localStorage.getItem('cult_dismissed_' + today)) return;
+        banner.style.display = 'flex';
+    })();
+
+    function dismissCulturalBanner() {
+        var today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem('cult_dismissed_' + today, '1');
+        var banner = document.getElementById('culturalDateBanner');
+        if (banner) banner.style.display = 'none';
+    }
+
+    function updateBadgeCount(count) {
+        var badge = document.getElementById('notifBadge');
+        if (count <= 0) {
+            if (badge) badge.remove();
+        } else {
+            if (badge) {
+                badge.textContent = count > 9 ? '9+' : count;
+            }
+        }
+    }
+
+    function decrementBadge(by) {
+        var badge = document.getElementById('notifBadge');
+        if (!badge) return;
+        var cur = parseInt(badge.textContent, 10) || 0;
+        updateBadgeCount(cur - (by || 1));
+        if ((cur - (by || 1)) <= 0) {
+            var list = document.getElementById('notifList');
+            if (list && !list.querySelector('.notif-item:not(.ann-read)')) {
+                list.innerHTML = '<div class="notif-empty"><span class="iconify" data-icon="mdi:bell-check-outline"></span><p>No new notifications</p></div>';
+            }
+        }
+    }
 
     function toggleTheme() {
         const html = document.documentElement;
@@ -1099,6 +1585,8 @@
             document.querySelectorAll('[data-swahili-proverb]').forEach(function (el) {
                 el.textContent = '”' + prov[0] + '” — ' + prov[1];
             });
+            document.querySelectorAll('[data-swahili-proverb-kw]').forEach(function (el) { el.textContent = prov[0]; });
+            document.querySelectorAll('[data-swahili-proverb-en]').forEach(function (el) { el.textContent = prov[1]; });
         }
 
         document.addEventListener('DOMContentLoaded', updateSwahiliGreeting);

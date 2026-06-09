@@ -1,4 +1,4 @@
-{% extends "attendance/base.html" %}
+﻿{% extends "attendance/base.html" %}
 {% block title %}Student Guide{% endblock %}
 
 {% block content %}
@@ -7,10 +7,10 @@
     --primary:    #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface:    #FFFFFF;
-    --bg:         #EEF1F8;
-    --text:       #0D1B3E;
-    --muted:      #8896AB;
-    --border:     #DDE3EF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
     --green:      #1A9E60;
     --green-lt:   rgba(26,158,96,0.10);
     --amber:      #B8920C;
@@ -22,7 +22,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -143,9 +143,249 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .tip-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 13px; color: #4A5568; line-height: 1.5; }
 .tip-check { width: 18px; height: 18px; background: var(--green-lt); border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
 .tip-check::after { content: '✓'; font-size: 10px; color: var(--green); font-weight: 800; }
+
+/* ─── Dictionary Widget ─── */
+.dict-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border);
+    border-top: 4px solid #F2C31A;
+    box-shadow: var(--sh-md);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+html[data-theme="dark"] .dict-card {
+    background: var(--bg-card, #1E2A3B);
+    border-color: var(--border, #2E3D50);
+    border-top-color: #F2C31A;
+}
+.dict-header {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;
+}
+.dict-emoji {
+    font-size: 36px; line-height: 1; flex-shrink: 0; margin-top: 2px;
+}
+.dict-header-text { flex: 1; min-width: 0; }
+.dict-title {
+    font-size: 20px; font-weight: 800; color: var(--primary);
+    letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 3px;
+}
+html[data-theme="dark"] .dict-title { color: #F2C31A; }
+.dict-subtitle {
+    font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 0.4rem;
+}
+.dict-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.dict-badge-gold {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-size: 11px; font-weight: 700;
+    background: rgba(242,195,26,0.15); color: #9A7B00;
+    border: 1px solid rgba(242,195,26,0.3);
+    border-radius: 99px; padding: 2px 10px;
+}
+html[data-theme="dark"] .dict-badge-gold { background: rgba(242,195,26,0.1); color: #F2C31A; border-color: rgba(242,195,26,0.25); }
+.dict-powered {
+    font-size: 11px; color: var(--muted); font-style: italic;
+}
+
+.dict-body { padding: 1.25rem 1.5rem; }
+
+/* Toggle buttons */
+.dict-toggle-row {
+    display: flex; gap: 0.375rem; margin-bottom: 0.875rem; flex-wrap: wrap;
+}
+.dict-toggle {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.45rem 1rem; border-radius: 8px;
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    cursor: pointer; transition: all 0.14s; border: 1.5px solid;
+    white-space: nowrap;
+}
+.dict-toggle.active {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+}
+html[data-theme="dark"] .dict-toggle.active { background: #1B3A9C; border-color: #1B3A9C; }
+.dict-toggle.inactive {
+    background: transparent; color: var(--primary); border-color: rgba(13,36,114,0.3);
+}
+html[data-theme="dark"] .dict-toggle.inactive { color: #7BAEE8; border-color: rgba(123,174,232,0.3); }
+.dict-toggle:hover.inactive { border-color: var(--primary); background: var(--primary-lt); }
+html[data-theme="dark"] .dict-toggle:hover.inactive { border-color: #7BAEE8; background: rgba(123,174,232,0.08); }
+
+/* Search row */
+.dict-search-row {
+    display: flex; gap: 0.625rem; align-items: stretch;
+}
+.dict-input-wrap { flex: 1; position: relative; }
+.dict-input {
+    width: 100%; padding: 0.875rem 1.125rem;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    font-family: inherit; font-size: 15px; color: var(--text);
+    background: var(--bg); outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.4;
+}
+html[data-theme="dark"] .dict-input {
+    background: var(--bg-card, #1E2A3B); color: var(--text-main, #E8EDF5);
+    border-color: var(--border, #2E3D50);
+}
+.dict-input::placeholder { color: var(--muted); font-size: 14px; }
+.dict-input:focus { border-color: #0D2472; box-shadow: 0 0 0 3px rgba(13,36,114,0.1); }
+html[data-theme="dark"] .dict-input:focus { border-color: #F2C31A; box-shadow: 0 0 0 3px rgba(242,195,26,0.12); }
+.dict-input.shake { animation: dict-shake 0.35s ease; border-color: #C0392B !important; }
+.dict-input.empty-hint::placeholder { color: #C0392B; }
+@keyframes dict-shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-5px); }
+    40%       { transform: translateX(5px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+.dict-btn {
+    padding: 0 1.375rem; border-radius: 12px;
+    background: #0D2472; color: #fff;
+    border: none; cursor: pointer;
+    font-family: inherit; font-size: 13.5px; font-weight: 600;
+    white-space: nowrap; transition: all 0.14s;
+    display: flex; align-items: center; gap: 0.4rem;
+    min-height: 52px;
+}
+.dict-btn:hover { background: #091A55; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,36,114,0.25); }
+.dict-btn:active { transform: translateY(0); }
+
+/* Quick chips */
+.dict-chips-section { margin-top: 0.875rem; }
+.dict-chips-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.5rem;
+}
+.dict-chips-row { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.375rem; }
+.dict-chip {
+    display: inline-flex; align-items: center;
+    padding: 4px 12px; border-radius: 99px;
+    border: 1px solid var(--border);
+    font-family: inherit; font-size: 12px; font-weight: 500;
+    color: var(--text); background: var(--bg);
+    cursor: pointer; transition: all 0.13s;
+}
+html[data-theme="dark"] .dict-chip { background: var(--bg-card, #1E2A3B); color: var(--text-main, #E8EDF5); border-color: var(--border, #2E3D50); }
+.dict-chip:hover { background: #0D2472; color: #fff; border-color: #0D2472; }
+html[data-theme="dark"] .dict-chip:hover { background: #1B3A9C; border-color: #1B3A9C; }
+
+/* Tips collapsible */
+.dict-tips-toggle {
+    display: flex; align-items: center; gap: 0.4rem;
+    margin-top: 1rem; padding: 0;
+    background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    color: var(--muted); transition: color 0.13s;
+}
+.dict-tips-toggle:hover { color: var(--primary); }
+html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
+.dict-tips-chevron { font-size: 16px; transition: transform 0.2s; }
+.dict-tips-toggle[aria-expanded="true"] .dict-tips-chevron { transform: rotate(180deg); }
+.dict-tips-body { display: none; margin-top: 0.625rem; }
+.dict-tips-body.open { display: block; }
+.dict-tip-item {
+    display: flex; align-items: flex-start; gap: 0.5rem;
+    font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-bottom: 0.35rem;
+}
+.dict-tip-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #F2C31A; flex-shrink: 0; margin-top: 6px;
+}
+
+/* Mobile */
+@media (max-width: 520px) {
+    .dict-header { flex-direction: column; gap: 0.5rem; }
+    .dict-emoji { font-size: 28px; }
+    .dict-title { font-size: 17px; }
+    .dict-search-row { flex-direction: column; }
+    .dict-btn { width: 100%; justify-content: center; min-height: 48px; }
+    .dict-body { padding: 1rem; }
+    .dict-header { padding: 1rem; }
+}
 </style>
 
 <div class="wrap">
+
+{% if is_student %}
+<div class="dict-card" id="dictWidget">
+
+    <div class="dict-header">
+        <div class="dict-emoji">📖</div>
+        <div class="dict-header-text">
+            <div class="dict-title">Kamusi ya Kiswahili</div>
+            <div class="dict-subtitle">MobiTUKI — English ↔ Swahili Dictionary</div>
+            <div class="dict-badges">
+                <span class="dict-badge-gold">✦ 16,000+ entries</span>
+                <span class="dict-powered">Powered by TUKI — University of Dar es Salaam</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dict-body">
+
+        <div class="dict-toggle-row">
+            <button class="dict-toggle active" id="toggleEN" onclick="setMode('en')">
+                <span>🇬🇧</span> English → Swahili
+            </button>
+            <button class="dict-toggle inactive" id="toggleSW" onclick="setMode('sw')">
+                <span>🇹🇿</span> Swahili → English
+            </button>
+        </div>
+
+        <div class="dict-search-row">
+            <div class="dict-input-wrap">
+                <input
+                    type="text"
+                    class="dict-input"
+                    id="dictInput"
+                    placeholder="Type an English word... (e.g. love, freedom, education)"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                >
+            </div>
+            <button class="dict-btn" id="dictSearchBtn" onclick="doSearch()">
+                <span class="iconify" data-icon="mdi:magnify" data-width="16"></span>
+                Tafuta
+            </button>
+        </div>
+
+        <div class="dict-chips-section">
+            <div class="dict-chips-label">Popular words</div>
+            <div class="dict-chips-row" id="chipsRow1">
+                <button class="dict-chip" onclick="chipSearch('love')">love</button>
+                <button class="dict-chip" onclick="chipSearch('peace')">peace</button>
+                <button class="dict-chip" onclick="chipSearch('education')">education</button>
+                <button class="dict-chip" onclick="chipSearch('family')">family</button>
+                <button class="dict-chip" onclick="chipSearch('freedom')">freedom</button>
+            </div>
+            <div class="dict-chips-row" id="chipsRow2">
+                <button class="dict-chip" onclick="chipSearch('university')">university</button>
+                <button class="dict-chip" onclick="chipSearch('language')">language</button>
+                <button class="dict-chip" onclick="chipSearch('culture')">culture</button>
+                <button class="dict-chip" onclick="chipSearch('literature')">literature</button>
+                <button class="dict-chip" onclick="chipSearch('history')">history</button>
+            </div>
+        </div>
+
+        <button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">
+            <span class="iconify" data-icon="mdi:lightbulb-outline" data-width="14"></span>
+            Tips for searching
+            <span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span>
+        </button>
+        <div class="dict-tips-body" id="dictTipsBody">
+            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Try searching root words (e.g. <strong>run</strong> instead of <strong>running</strong>).</span></div>
+            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use <strong>English → Swahili</strong> when you need help translating an English word.</span></div>
+            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use <strong>Swahili → English</strong> to understand the meaning of a Kiswahili word.</span></div>
+        </div>
+
+    </div>
+</div>
+{% endif %}
 
     <div class="page-header">
         <h1>Student Quick Guide</h1>
@@ -421,5 +661,82 @@ function toggle(head) {
     const open = body.classList.toggle('open');
     head.setAttribute('aria-expanded', open);
 }
+
+{% if is_student %}
+/* ── Dictionary widget ── */
+var dictMode = 'en'; // 'en' = English→Swahili, 'sw' = Swahili→English
+
+var DICT_PLACEHOLDERS = {
+    en: 'Type an English word... (e.g. love, freedom, education)',
+    sw: 'Andika neno la Kiswahili... (mfano: upendo, uhuru)',
+};
+
+function setMode(mode) {
+    dictMode = mode;
+    var input = document.getElementById('dictInput');
+    input.placeholder = DICT_PLACEHOLDERS[mode];
+    input.value = '';
+    input.classList.remove('shake', 'empty-hint');
+    input.focus();
+
+    document.getElementById('toggleEN').className = 'dict-toggle ' + (mode === 'en' ? 'active' : 'inactive');
+    document.getElementById('toggleSW').className = 'dict-toggle ' + (mode === 'sw' ? 'active' : 'inactive');
+}
+
+function buildUrl(term) {
+    var encoded = encodeURIComponent(term.trim().toLowerCase());
+    if (dictMode === 'en') {
+        return 'https://swahili-dictionary.com/english-swahili/' + encoded;
+    }
+    return 'https://swahili-dictionary.com/swahili-english/' + encoded;
+}
+
+function doSearch() {
+    var input = document.getElementById('dictInput');
+    var term  = input.value.trim();
+
+    if (!term) {
+        input.classList.remove('shake', 'empty-hint');
+        /* Force reflow so animation re-triggers if already shaking */
+        void input.offsetWidth;
+        input.classList.add('shake', 'empty-hint');
+        input.addEventListener('animationend', function onEnd() {
+            input.classList.remove('shake');
+            input.removeEventListener('animationend', onEnd);
+        });
+        input.addEventListener('input', function onType() {
+            input.classList.remove('empty-hint');
+            input.removeEventListener('input', onType);
+        });
+        input.focus();
+        return;
+    }
+
+    window.open(buildUrl(term), '_blank', 'noopener,noreferrer');
+}
+
+function chipSearch(word) {
+    var input = document.getElementById('dictInput');
+    input.value = word;
+    input.classList.remove('empty-hint');
+    window.open(buildUrl(word), '_blank', 'noopener,noreferrer');
+}
+
+function toggleTips() {
+    var btn  = document.getElementById('tipToggle');
+    var body = document.getElementById('dictTipsBody');
+    var open = body.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var input = document.getElementById('dictInput');
+    if (input) {
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+        });
+    }
+});
+{% endif %}
 </script>
 {% endblock %}

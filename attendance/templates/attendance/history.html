@@ -1,4 +1,4 @@
-{% extends "attendance/base.html" %}
+﻿{% extends "attendance/base.html" %}
 {% block title %}Attendance History{% endblock %}
 
 {% block content %}
@@ -7,10 +7,10 @@
     --primary:    #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface:    #FFFFFF;
-    --bg:         #EEF1F8;
-    --text:       #0D1B3E;
-    --muted:      #8896AB;
-    --border:     #DDE3EF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
     --green:      #1A9E60;
     --green-lt:   rgba(26,158,96,0.10);
     --amber:      #B8920C;
@@ -22,7 +22,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -139,9 +139,25 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
     display: inline-flex; align-items: center; gap: 0.3rem;
     white-space: nowrap;
 }
-.badge-attended { background: var(--green-lt); color: var(--green); }
-.badge-absent   { background: var(--red-lt);   color: var(--red); }
-.badge-upcoming { background: var(--bg);        color: var(--muted); border: 1px solid var(--border); }
+.badge-attended { background: #DCFCE7; color: #166534; }
+.badge-absent   { background: #FEE2E2; color: #991B1B; }
+.badge-upcoming { background: var(--primary-light, rgba(13,36,114,0.08)); color: var(--primary, #0D2472); }
+.badge-na       { background: #F3F4F6; color: #6B7280; }
+
+.na-note {
+    font-size: 11.5px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.875rem;
+    background: var(--surface);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    box-shadow: var(--sh-sm);
+    line-height: 1.4;
+}
 
 /* ─── Empty state ─── */
 .empty {
@@ -193,6 +209,13 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
     {% endwith %}
     {% endif %}
 
+    {% if has_na_sessions %}
+    <div class="na-note">
+        <span class="iconify" data-icon="mdi:information-outline" data-width="13"></span>
+        Sessions before your registration date are marked as N/A and excluded from your attendance percentage.
+    </div>
+    {% endif %}
+
     <!-- Course cards -->
     {% for item in history_data %}
     <div class="course-card">
@@ -234,6 +257,8 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
                     <span class="badge badge-absent">
                         <span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
                     </span>
+                {% elif week.status == 'na' %}
+                    <span class="badge badge-na">N/A</span>
                 {% else %}
                     <span class="badge badge-upcoming">Upcoming</span>
                 {% endif %}
@@ -258,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const badge = row.querySelector('.badge');
         if (!badge) return;
         const txt = badge.textContent.trim();
-        if (txt.includes('Upcoming')) return;
+        if (txt.includes('Upcoming') || txt === 'N/A') return;
         total++;
         if (txt.includes('Attended')) attended++;
         else if (txt.includes('Absent')) absent++;

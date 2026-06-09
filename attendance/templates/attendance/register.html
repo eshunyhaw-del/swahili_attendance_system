@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     <title>Create Account — SWASA Attendance</title>
     <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="{% static 'js/iconify.min.js' %}"></script>
     <style>
         :root {
             --navy:      #0D2472;
@@ -20,7 +22,7 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'DM Sans', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background:
                 linear-gradient(135deg, rgba(9,26,85,0.68) 0%, rgba(13,36,114,0.55) 50%, rgba(9,26,85,0.74) 100%),
                 url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;

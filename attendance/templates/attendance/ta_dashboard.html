@@ -1,11 +1,9 @@
-{% extends "attendance/base.html" %}
+﻿{% extends "attendance/base.html" %}
 {% block title %}TA Dashboard{% endblock %}
 
 {% block greeting %}{% endblock %}
 
 {% block content %}
-<script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
-
 <style>
 :root {
     --primary:      #0D2472;
@@ -13,10 +11,10 @@
     --primary-lt:   rgba(13,36,114,0.07);
     --gold:         #F2C31A;
     --surface:      #FFFFFF;
-    --bg:           #EEF1F8;
-    --text:         #0D1B3E;
-    --muted:        #8896AB;
-    --border:       #DDE3EF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
     --green:        #1A9E60;
     --green-lt:     rgba(26,158,96,0.1);
     --amber:        #B8920C;
@@ -31,7 +29,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
 
 .ta-wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
 
@@ -374,7 +372,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .student-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
 
 .student-table th {
-    background: #EEF1F8;
+    background: #F8F4EF;
     color: var(--muted);
     font-size: 10px;
     text-transform: uppercase;
@@ -402,7 +400,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .code-chip {
     font-family: 'DM Mono', monospace;
     font-weight: 700;
-    background: #EEF1F8;
+    background: #F8F4EF;
     color: var(--text);
     padding: 3px 10px;
     border-radius: var(--r-sm);
@@ -424,7 +422,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
 .badge-used     { background: var(--green-lt);  color: var(--green); }
 .badge-given    { background: var(--blue-lt);   color: var(--blue); }
 .badge-pending  { background: var(--amber-lt);  color: var(--amber); }
-.badge-none     { background: #EEF1F8; color: var(--muted); border: 1px solid var(--border); }
+.badge-none     { background: #F8F4EF; color: var(--muted); border: 1px solid var(--border); }
 
 /* ─── Action buttons ─── */
 .btn-generate {
@@ -655,7 +653,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
                 <span class="iconify" data-icon="mdi:barcode-scan"></span>
             </div>
             <div>
-                <div class="stat-value">{{ total_codes_generated }}</div>
+                <div class="stat-value" id="stat-codes-generated">{{ total_codes_generated }}</div>
                 <div class="stat-label">Codes Generated</div>
             </div>
         </div>
@@ -664,7 +662,7 @@ body { background: var(--bg) !important; font-family: 'DM Sans', system-ui, sans
                 <span class="iconify" data-icon="mdi:check-circle-outline"></span>
             </div>
             <div>
-                <div class="stat-value">{{ total_codes_used }}</div>
+                <div class="stat-value" id="stat-codes-used">{{ total_codes_used }}</div>
                 <div class="stat-label">Codes Used</div>
             </div>
         </div>
@@ -904,7 +902,14 @@ async function generateCode(sessionId, studentUsername) {
             headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `session_id=${sessionId}&student_username=${encodeURIComponent(studentUsername)}`
         });
-        if (res.ok) { loadStudents(sessionId); }
+        if (res.ok) {
+            loadStudents(sessionId);
+            const d = await res.json();
+            if (!d.existing) {
+                const genEl = document.getElementById('stat-codes-generated');
+                if (genEl) genEl.textContent = parseInt(genEl.textContent || '0') + 1;
+            }
+        }
         else { const d = await res.json(); showErrorModal(d.error || 'Failed to generate code.'); }
     } catch { showErrorModal('Network error. Please try again.'); }
 }
@@ -920,8 +925,17 @@ async function generateAllCodes(sessionId) {
                     headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `session_id=${sessionId}`
                 });
-                if (res.ok) { showToast('Codes generated!'); loadStudents(sessionId); }
-                else { const d = await res.json(); showErrorModal(d.error || 'Failed to generate codes.'); }
+                const data = await res.json();
+                if (res.ok) {
+                    const generated = data.generated || 0;
+                    showToast(generated > 0 ? `${generated} code${generated !== 1 ? 's' : ''} generated!` : 'All codes already existed.');
+                    loadStudents(sessionId);
+                    // Update stat counters live
+                    const genEl = document.getElementById('stat-codes-generated');
+                    if (genEl && generated > 0) genEl.textContent = parseInt(genEl.textContent || '0') + generated;
+                } else {
+                    showErrorModal(data.error || 'Failed to generate codes.');
+                }
             } catch { showErrorModal('Network error. Please try again.'); }
         }
     );

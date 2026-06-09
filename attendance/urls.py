@@ -46,6 +46,16 @@ urlpatterns = [
     path("ta/generate-code/", views.ta_generate_code, name="ta_generate_code"),
     path("ta/mark-distributed/<int:code_id>/", views.ta_mark_distributed, name="ta_mark_distributed"),
     path("ta/generate-all-codes/", views.ta_generate_all_codes, name="ta_generate_all_codes"),
+    path("ta/support/", views.ta_support_tickets, name="ta_support"),
+    path("ta/announcements/<int:ann_id>/delete/", views.ta_delete_announcement, name="ta_delete_announcement"),
+    path("ta/announcements/<int:ann_id>/edit/", views.ta_edit_announcement, name="ta_edit_announcement"),
+    path("notifications/mark-read/", views.mark_notifications_read, name="mark_notifications_read"),
+    path("notifications/", views.notifications_page, name="notifications"),
+    path("notifications/ann/mark-read/<int:notif_id>/", views.student_mark_notification_read, name="student_mark_notification_read"),
+    path("notifications/ann/mark-all-read/", views.student_mark_all_notifications_read, name="student_mark_all_read"),
+    path("notifications/unread-count/", views.notification_unread_count, name="notification_unread_count"),
+    path("notifications/sys/mark-read/<int:notif_id>/", views.system_mark_notification_read, name="system_mark_notification_read"),
+    path("notifications/sys/mark-all-read/", views.system_mark_all_notifications_read, name="system_mark_all_read"),
     
     # Admin
     path("dashboard-admin/", views.admin_dashboard, name="admin_dashboard"),

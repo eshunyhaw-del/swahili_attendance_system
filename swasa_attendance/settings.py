@@ -11,6 +11,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
 from decouple import config, Csv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -32,14 +33,14 @@ SECRET_KEY = _secret_key
 
 DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 
-# ALLOWED_HOSTS - Updated for both ngrok and PythonAnywhere
+# ALLOWED_HOSTS - configured via .env in production
+_extra_hosts = config('ALLOWED_HOSTS', default='', cast=Csv())
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.ngrok-free.dev',           # Allows any ngrok subdomain
-    '.pythonanywhere.com',        # Allows any pythonanywhere subdomain
-    'yourusername.pythonanywhere.com',  # Replace with your actual username
-]
+    '.ngrok-free.dev',
+    '.pythonanywhere.com',
+] + list(_extra_hosts)
 
 
 # Application definition
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -93,17 +95,27 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = 'swasa_attendance.urls'
 
+_TEMPLATE_CONTEXT_PROCESSORS = [
+    'django.template.context_processors.debug',
+    'django.template.context_processors.request',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+    'attendance.context_processors.notifications',
+]
+
+_BASE_LOADERS = [
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+            'context_processors': _TEMPLATE_CONTEXT_PROCESSORS,
+            'loaders': _BASE_LOADERS if DEBUG else [
+                ('django.template.loaders.cached.Loader', _BASE_LOADERS)
             ],
         },
     },
@@ -115,13 +127,28 @@ WSGI_APPLICATION = 'swasa_attendance.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
+DATABASE_URL = config('DATABASE_URL', default=None)
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=0)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+
+# Cache
+CACHES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'swasa-cache',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -169,6 +196,13 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
 # Media files (user uploaded files)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -197,8 +231,8 @@ SESSION_COOKIE_SECURE = not DEBUG
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = 'SWASA <jifunzekiswahilisasa@gmail.com>'
@@ -213,9 +247,16 @@ EMAIL_TIMEOUT = 30
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
 
-# Security settings for production
-# Only enable these when DEBUG=False
+# Security settings — always on
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+# Security settings — production only (behind PythonAnywhere / Render HTTPS proxy)
 if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+    # Tell Django it's behind an HTTPS reverse proxy — prevents redirect loops
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Do NOT set SECURE_SSL_REDIRECT on PythonAnywhere — the proxy handles it
+    # SECURE_SSL_REDIRECT = True  ← causes redirect loops on PA
+    SECURE_HSTS_SECONDS = 31536000      # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = False         # Keep False until fully verified on HSTS preload list

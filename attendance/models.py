@@ -182,9 +182,24 @@ class SupportTicket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     admin_response = models.TextField(blank=True, null=True)
+    assigned_ta = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
 
     def __str__(self):
         return f"{self.subject} - {self.student.username}"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=300)
+    link = models.CharField(max_length=200, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notif → {self.recipient.username}: {self.message[:60]}"
 
 
 class CodeMisuseAlert(models.Model):
@@ -199,19 +214,83 @@ class CodeMisuseAlert(models.Model):
 
 
 class TAnnouncement(models.Model):
-    """Announcement sent by a TA to students in their assigned levels."""
+    """Announcement sent by a TA to all students registered in a specific course."""
     ta = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_announcements')
     title = models.CharField(max_length=200)
     message = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
+    course = models.ForeignKey('Course', on_delete=models.SET_NULL, null=True, blank=True, related_name='announcements')
     target_levels = models.ManyToManyField(Level, blank=True)
     recipient_count = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['-sent_at']
 
     def __str__(self):
         return f"Announcement: {self.title} by {self.ta.get_full_name()}"
+
+
+class StudentNotification(models.Model):
+    """Per-student notification record created when a TA sends an announcement."""
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcement_notifications')
+    announcement = models.ForeignKey(TAnnouncement, on_delete=models.CASCADE, related_name='student_notifications')
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-announcement__sent_at']
+
+    def __str__(self):
+        return f"Notif → {self.student.username}: {self.announcement.title[:50]}"
+
+
+class CulturalDate(models.Model):
+    """A recurring cultural / language celebration date (day + month, no year)."""
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    day = models.IntegerField()
+    month = models.IntegerField()
+    emoji = models.CharField(max_length=10, default='🌍')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['month', 'day']
+        indexes = [
+            models.Index(fields=['day', 'month', 'is_active'], name='att_cultdate_day_month_idx'),
+        ]
+
+    def __str__(self):
+        return f"{self.emoji} {self.name} ({self.day}/{self.month})"
+
+
+class SystemNotification(models.Model):
+    """System-wide notification (e.g. cultural date celebration) sent to a specific user."""
+    TYPE_CULTURAL = 'cultural_date'
+    TYPE_SYSTEM   = 'system'
+    TYPE_CHOICES  = [
+        (TYPE_CULTURAL, 'Cultural Date'),
+        (TYPE_SYSTEM,   'System'),
+    ]
+
+    user     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='system_notifications')
+    title    = models.CharField(max_length=200)
+    message  = models.TextField()
+    emoji    = models.CharField(max_length=10, default='🌍')
+    is_read  = models.BooleanField(default=False)
+    read_at  = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=TYPE_SYSTEM)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read'], name='att_sysnotif_user_unread_idx'),
+        ]
+
+    def __str__(self):
+        return f"SysNotif → {self.user.username}: {self.title[:50]}"
 
 
 class OTPCode(models.Model):
