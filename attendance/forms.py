@@ -173,13 +173,22 @@ class CourseRegistrationForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         required=True
     )
-    
+
     def __init__(self, *args, **kwargs):
         level = kwargs.pop('level', None)
         semester = kwargs.pop('semester', None)
         super().__init__(*args, **kwargs)
         if level and semester:
             self.fields['courses'].queryset = Course.objects.filter(level=level, semester=semester)
+
+    def clean_courses(self):
+        courses = self.cleaned_data.get('courses', [])
+        codes = {c.code for c in courses}
+        if 'KISW 106A' in codes and 'KISW 106B' in codes:
+            raise forms.ValidationError(
+                "Please select only one KISW 106 group — either Monday (106A) or Thursday (106B), not both."
+            )
+        return courses
 
 
 class SupportTicketForm(forms.ModelForm):

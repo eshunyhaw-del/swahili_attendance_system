@@ -337,35 +337,6 @@
         color: #166534;
     }
 
-    .txt-absent {
-        background: #FEE2E2;
-        color: #991B1B;
-    }
-
-    .txt-na {
-        background: #F3F4F6;
-        color: #6B7280;
-    }
-
-    .txt-upcoming {
-        background: var(--primary-light);
-        color: var(--primary);
-    }
-
-    .na-note {
-        font-size: 11px;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        margin-bottom: 0.875rem;
-        padding: 0.5rem 0.75rem;
-        background: var(--bg-subtle);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        line-height: 1.4;
-    }
-
     /* ── Empty state ── */
     .blank-state {
         text-align: center;
@@ -718,13 +689,6 @@
         </div>
     </div>
 
-    {% if has_na_sessions %}
-    <div class="na-note">
-        <span class="iconify" data-icon="mdi:information-outline" data-width="12"></span>
-        Sessions before your registration date are marked as N/A and not counted in your attendance percentage.
-    </div>
-    {% endif %}
-
     <!-- Quick actions -->
     <div class="quick-actions">
         <a href="{% url 'attendance:course_registration' %}" class="qa-chip">
@@ -750,6 +714,11 @@
                     <div class="course-info">
                         <span class="course-code">{{ course.course.code }}</span>
                         <span class="course-name">{{ course.course.name }}</span>
+                        {% if course.course.code == 'KISW 106A' %}
+                        <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#EFF6FF;color:#1D4ED8;margin-top:3px;">Monday Group</span>
+                        {% elif course.course.code == 'KISW 106B' %}
+                        <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#F5F3FF;color:#6D28D9;margin-top:3px;">Thursday Group</span>
+                        {% endif %}
                     </div>
                     <div class="course-score" id="course-score-{{ course.course.id }}">
                         {{ course.attended }} / {{ course.total_sessions }}
@@ -773,14 +742,6 @@
                         {% if week.status == 'submitted' %}
                             <span class="txt-status txt-done">
                                 <span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
-                            </span>
-                        {% elif week.status == 'na' %}
-                            <span class="txt-status txt-na">N/A</span>
-                        {% elif week.status == 'upcoming' %}
-                            <span class="txt-status txt-upcoming">Upcoming</span>
-                        {% elif week.status == 'absent' %}
-                            <span class="txt-status txt-absent">
-                                <span class="iconify" data-icon="mdi:close-circle" data-width="13"></span> Absent
                             </span>
                         {% else %}
                             <button class="action-link act-submit" onclick="openTaCodeModal({{ week.session.id }})">

@@ -263,6 +263,25 @@
             flex-shrink: 0;
         }
         .welcome-banner .banner-close:hover { color: #fff; }
+
+        .iphone-tip {
+            background: rgba(242,195,26,0.13);
+            border: 1px solid rgba(242,195,26,0.4);
+            border-left: 3px solid #F2C31A;
+            border-radius: var(--r-sm);
+            padding: 0.6rem 0.875rem;
+            display: flex; align-items: flex-start; gap: 0.5rem;
+            font-size: 12.5px; color: rgba(255,255,255,0.9);
+            margin-bottom: 1rem; line-height: 1.45;
+        }
+        .iphone-tip .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; color: #F2C31A; }
+        .iphone-tip .tip-close {
+            margin-left: auto; background: none; border: none;
+            color: rgba(255,255,255,0.4); cursor: pointer;
+            font-size: 16px; line-height: 1; padding: 0 0 0 0.5rem;
+            flex-shrink: 0;
+        }
+        .iphone-tip .tip-close:hover { color: #fff; }
     </style>
 </head>
 <body>
@@ -300,6 +319,14 @@
     </div>
 
     <div class="card-body">
+
+        {% if purpose == 'registration' or purpose == 'password_reset' %}
+        <div id="iphoneTip" class="iphone-tip">
+            <span class="iconify" data-icon="mdi:cellphone-check"></span>
+            <span>📱 <strong>On iPhone?</strong> Check your email for a one-tap verification button — no code typing needed!</span>
+            <button type="button" class="tip-close" onclick="this.closest('.iphone-tip').style.display='none';" aria-label="Dismiss">&times;</button>
+        </div>
+        {% endif %}
 
         <div id="welcomeBanner" style="display:none;" class="welcome-banner">
             <span class="iconify" data-icon="mdi:information-outline" style="font-size:16px;flex-shrink:0;"></span>

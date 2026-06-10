@@ -146,6 +146,25 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     margin-bottom: 0.875rem;
 }
 .selection-hint span { color: var(--primary); font-weight: 800; }
+
+/* ─── Group badge ─── */
+.group-badge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 99px;
+    margin-top: 3px; letter-spacing: 0.04em;
+}
+.group-badge.monday { background: #EFF6FF; color: #1D4ED8; }
+.group-badge.thursday { background: #F5F3FF; color: #6D28D9; }
+
+/* ─── Form error ─── */
+.form-error {
+    background: #FEF2F2; border: 1px solid #FECACA;
+    border-radius: var(--r-lg); padding: 0.875rem 1rem;
+    margin-bottom: 1rem; font-size: 13px; color: #991B1B;
+    font-weight: 600; display: flex; align-items: flex-start; gap: 0.5rem;
+}
+.form-error .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
 </style>
 
 <div class="wrap">
@@ -175,6 +194,13 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
             <form method="post" id="regForm">
                 {% csrf_token %}
 
+                {% if form.courses.errors %}
+                <div class="form-error">
+                    <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+                    <span>{{ form.courses.errors|join:" " }}</span>
+                </div>
+                {% endif %}
+
                 <div class="selection-hint" id="selectionHint">
                     <span id="selCount">0</span> course{{ '' }} selected
                 </div>
@@ -186,6 +212,11 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
                         <div class="custom-check"></div>
                         <div class="course-label-text">
                             <div class="course-label-name">{{ checkbox.choice_label }}</div>
+                            {% if 'KISW 106A' in checkbox.choice_label %}
+                            <span class="group-badge monday">Monday Group — 3:30–5:20 PM</span>
+                            {% elif 'KISW 106B' in checkbox.choice_label %}
+                            <span class="group-badge thursday">Thursday Group — 1:30–3:30 PM</span>
+                            {% endif %}
                         </div>
                     </label>
                     {% empty %}

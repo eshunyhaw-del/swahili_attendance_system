@@ -139,25 +139,9 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     display: inline-flex; align-items: center; gap: 0.3rem;
     white-space: nowrap;
 }
-.badge-attended { background: #DCFCE7; color: #166534; }
+.badge-present  { background: #DCFCE7; color: #166534; }
 .badge-absent   { background: #FEE2E2; color: #991B1B; }
-.badge-upcoming { background: var(--primary-light, rgba(13,36,114,0.08)); color: var(--primary, #0D2472); }
 .badge-na       { background: #F3F4F6; color: #6B7280; }
-
-.na-note {
-    font-size: 11.5px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    margin-bottom: 1rem;
-    padding: 0.6rem 0.875rem;
-    background: var(--surface);
-    border-radius: var(--r-sm);
-    border: 1px solid var(--border);
-    box-shadow: var(--sh-sm);
-    line-height: 1.4;
-}
 
 /* ─── Empty state ─── */
 .empty {
@@ -209,13 +193,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     {% endwith %}
     {% endif %}
 
-    {% if has_na_sessions %}
-    <div class="na-note">
-        <span class="iconify" data-icon="mdi:information-outline" data-width="13"></span>
-        Sessions before your registration date are marked as N/A and excluded from your attendance percentage.
-    </div>
-    {% endif %}
-
     <!-- Course cards -->
     {% for item in history_data %}
     <div class="course-card">
@@ -241,7 +218,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
         <div class="week-list">
             {% for week in item.weeks %}
-            <div class="week-row">
+            <div class="week-row" id="hist-row-{{ week.session.id }}">
                 <div class="week-left">
                     <div class="week-num-badge">{{ week.week_num }}</div>
                     <div>
@@ -249,18 +226,16 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
                         <div class="week-date">{{ week.session.date|date:"l, d M Y" }}</div>
                     </div>
                 </div>
-                {% if week.status == 'attended' %}
-                    <span class="badge badge-attended">
-                        <span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Attended
+                {% if week.status == 'present' %}
+                    <span class="badge badge-present">
+                        <span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Present
                     </span>
                 {% elif week.status == 'absent' %}
                     <span class="badge badge-absent">
                         <span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
                     </span>
-                {% elif week.status == 'na' %}
-                    <span class="badge badge-na">N/A</span>
                 {% else %}
-                    <span class="badge badge-upcoming">Upcoming</span>
+                    <span class="badge badge-na">N/A</span>
                 {% endif %}
             </div>
             {% endfor %}
@@ -276,17 +251,13 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 </div>
 
 <script>
-/* Compute aggregate stats client-side from hidden data attributes */
 document.addEventListener('DOMContentLoaded', function () {
     let total = 0, attended = 0, absent = 0;
     document.querySelectorAll('.week-row').forEach(function (row) {
-        const badge = row.querySelector('.badge');
-        if (!badge) return;
-        const txt = badge.textContent.trim();
-        if (txt.includes('Upcoming') || txt === 'N/A') return;
+        if (row.querySelector('.badge-na')) return;
         total++;
-        if (txt.includes('Attended')) attended++;
-        else if (txt.includes('Absent')) absent++;
+        if (row.querySelector('.badge-present')) attended++;
+        else absent++;
     });
     const st = document.getElementById('stat-total');
     const sa = document.getElementById('stat-attended');

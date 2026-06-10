@@ -1,5 +1,6 @@
 import random
 import string
+import uuid
 from datetime import timedelta, datetime
 from django.db import models
 from django.contrib.auth.models import User
@@ -151,7 +152,10 @@ class AttendanceCode(models.Model):
         return timezone.now() > self.expires_at
 
     def __str__(self):
-        return f"{self.code_string} for {self.student.username}"
+        code = self.code_string or 'N/A'
+        student = self.student.username if self.student else 'Unknown'
+        session = str(self.class_session) if self.class_session else 'Unknown'
+        return f"{code} — {student} — {session}"
 
 
 class AttendanceRecord(models.Model):
@@ -210,7 +214,8 @@ class CodeMisuseAlert(models.Model):
     is_resolved = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Misuse alert: {self.code.code_string} by {self.attempted_by.username}"
+        code = self.code.code_string if self.code else 'N/A'
+        return f"Misuse alert: {code} by {self.attempted_by.username}"
 
 
 class TAnnouncement(models.Model):
@@ -309,10 +314,14 @@ class OTPCode(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_used = models.BooleanField(default=False)
+    magic_token = models.UUIDField(null=True, blank=True, unique=True)
+    magic_token_used = models.BooleanField(default=False)
+    magic_token_expires_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         indexes = [
             models.Index(fields=['user', 'purpose', 'is_used']),
+            models.Index(fields=['magic_token'], name='att_otpcode_magic_token_idx'),
         ]
 
     def save(self, *args, **kwargs):

@@ -73,6 +73,9 @@ MIDDLEWARE = [
 # JWT Settings (cookie-based sessions — existing system)
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEY)
 
+# Public URL of this site (used for magic-link emails)
+SITE_URL = config('SITE_URL', default='https://ebenezer.pythonanywhere.com')
+
 # djangorestframework-simplejwt (API tokens)
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),

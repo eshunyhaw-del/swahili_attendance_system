@@ -1,10 +1,24 @@
 {% extends "attendance/base.html" %}
-{% block title %}Daily Sessions — {{ selected_date|date:"M j, Y" }}{% endblock %}
+{% block title %}Weekly Sessions — {{ week_start|date:"M j" }}–{{ week_end|date:"M j, Y" }}{% endblock %}
 
 {% block content %}
 <style>
-body { background: var(--bg-base) !important; background-image: none !important; }
+:root {
+    --bg-base:        #F8F4EF;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F8F4EF;
+    --radius-lg:      16px;
+    --shadow-xs:      0 1px 3px rgba(13,36,114,0.07);
+    --shadow-md:      0 4px 14px rgba(13,36,114,0.10);
+    --text-primary:   #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted:     #6B7280;
+    --border:         #E8E0D8;
+    --border-strong:  #D4C8BE;
+    --gold:           #F2C31A;
+}
 
+body { background: var(--bg-base) !important; background-image: none !important; }
 .ld-wrap { max-width: 780px; margin: 0 auto; padding: 0 0 4rem; }
 
 /* ── Page Header ── */
@@ -33,54 +47,70 @@ body { background: var(--bg-base) !important; background-image: none !important;
 }
 .ld-header-link:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.5); color: #fff; }
 
-/* ── Date Picker ── */
-.ld-date-bar {
+/* ── Week Navigation ── */
+.ld-week-nav {
     background: var(--bg-surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+    border-radius: var(--radius-lg); padding: 0.875rem 1.25rem;
     margin-bottom: 1.375rem; box-shadow: var(--shadow-xs);
-    display: flex; align-items: center; gap: 0.875rem; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
 }
-.ld-date-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
-.ld-date-form { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 200px; }
+.ld-week-btn {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.45rem 0.875rem; border-radius: 8px; font-size: 12.5px; font-weight: 700;
+    font-family: inherit; text-decoration: none; white-space: nowrap;
+    border: 1.5px solid var(--border); color: #0D2472; background: transparent;
+    transition: all 0.13s;
+}
+.ld-week-btn:hover { border-color: #0D2472; background: rgba(13,36,114,0.04); }
+.ld-week-current { background: rgba(13,36,114,0.06); border-color: rgba(13,36,114,0.18); }
+.ld-week-range {
+    flex: 1; text-align: center;
+    font-size: 13px; font-weight: 700; color: var(--text-primary);
+    white-space: nowrap; padding: 0 0.5rem;
+}
+.ld-jump-form { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
 .ld-date-input {
-    flex: 1; padding: 0.55rem 0.875rem;
-    border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: inherit; font-size: 14px; color: var(--text-primary);
+    padding: 0.45rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 13px; color: var(--text-primary);
     background: var(--bg-subtle); outline: none; transition: border-color 0.13s;
-    max-width: 180px;
+    max-width: 160px;
 }
 .ld-date-input:focus { border-color: #0D2472; background: #fff; }
 .ld-date-btn {
-    padding: 0.55rem 1.125rem; border-radius: 8px; border: none; cursor: pointer;
+    padding: 0.45rem 0.75rem; border-radius: 8px; border: none; cursor: pointer;
     font-family: inherit; font-size: 13px; font-weight: 700;
     background: #0D2472; color: #fff;
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    transition: all 0.13s; box-shadow: 0 1px 4px rgba(13,36,114,0.2);
-    white-space: nowrap;
+    display: inline-flex; align-items: center;
+    transition: all 0.13s;
 }
 .ld-date-btn:hover { background: #091A55; }
-.ld-today-btn {
-    padding: 0.5rem 0.875rem; border-radius: 8px; cursor: pointer;
-    font-family: inherit; font-size: 12.5px; font-weight: 700;
-    border: 1.5px solid var(--border-strong); color: var(--text-secondary); background: transparent;
-    transition: all 0.13s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;
-    white-space: nowrap;
-}
-.ld-today-btn:hover { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
 
 /* ── Session Count Strip ── */
 .ld-count-strip {
     font-size: 12.5px; font-weight: 600; color: var(--text-muted);
-    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.375rem;
+    margin-bottom: 0.875rem; display: flex; align-items: center; gap: 0.375rem;
 }
 .ld-count-strip strong { color: var(--text-primary); }
+
+/* ── Day Header ── */
+.ld-day-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 12.5px; font-weight: 800; color: #0D2472;
+    padding: 0.35rem 0 0.5rem;
+    border-bottom: 2px solid rgba(13,36,114,0.1);
+    margin: 1.25rem 0 0.75rem;
+}
+.ld-day-header.today { color: #1A9E60; border-bottom-color: rgba(26,158,96,0.22); }
+.ld-today-tag {
+    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 99px;
+    background: rgba(26,158,96,0.1); color: #1A9E60; border: 1px solid rgba(26,158,96,0.2);
+}
 
 /* ── Session Card ── */
 .ld-session-card {
     background: var(--bg-surface); border: 1px solid var(--border);
     border-radius: var(--radius-lg); margin-bottom: 1.125rem;
-    box-shadow: var(--shadow-xs); overflow: hidden;
-    transition: box-shadow 0.15s;
+    box-shadow: var(--shadow-xs); overflow: hidden; transition: box-shadow 0.15s;
 }
 .ld-session-card:hover { box-shadow: var(--shadow-md); }
 
@@ -98,7 +128,6 @@ body { background: var(--bg-base) !important; background-image: none !important;
 }
 html[data-theme="dark"] .ld-course-code {
     color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
-
 }
 .ld-course-name { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem; line-height: 1.25; }
 .ld-course-meta { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
@@ -112,19 +141,18 @@ html[data-theme="dark"] .ld-course-code {
 }
 .ld-export-btn:hover { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
 
-/* ── Stat Chips Row ── */
+/* ── Stat Chips ── */
 .ld-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.625rem; padding: 1rem 1.375rem; }
 .ld-stat-chip { text-align: center; padding: 0.625rem 0.5rem; border-radius: 10px; }
-.ld-stat-chip.enrolled  { background: rgba(13,36,114,0.06);  }
-.ld-stat-chip.present   { background: rgba(30,158,94,0.09);  }
-.ld-stat-chip.codes     { background: rgba(201,160,14,0.1); }
-.ld-stat-chip.absent    { background: rgba(192,57,43,0.08); }
-
+.ld-stat-chip.enrolled { background: rgba(13,36,114,0.06); }
+.ld-stat-chip.present  { background: rgba(30,158,94,0.09); }
+.ld-stat-chip.codes    { background: rgba(201,160,14,0.1); }
+.ld-stat-chip.absent   { background: rgba(192,57,43,0.08); }
 .ld-stat-val { font-size: 1.25rem; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1.1; margin-bottom: 2px; }
-.ld-stat-chip.enrolled  .ld-stat-val { color: #0D2472; }
-.ld-stat-chip.present   .ld-stat-val { color: #1E9E5E; }
-.ld-stat-chip.codes     .ld-stat-val { color: #C9A00E; }
-.ld-stat-chip.absent    .ld-stat-val { color: #C0392B; }
+.ld-stat-chip.enrolled .ld-stat-val { color: #0D2472; }
+.ld-stat-chip.present  .ld-stat-val { color: #1E9E5E; }
+.ld-stat-chip.codes    .ld-stat-val { color: #C9A00E; }
+.ld-stat-chip.absent   .ld-stat-val { color: #C0392B; }
 .ld-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
 
 /* ── Progress Bar ── */
@@ -136,8 +164,7 @@ html[data-theme="dark"] .ld-course-code {
 .ld-prog-fill.low    { background: linear-gradient(90deg, #C0392B, #E74C3C); }
 .ld-prog-label {
     display: flex; justify-content: space-between; align-items: center;
-    font-size: 10.5px; font-weight: 600; color: var(--text-muted);
-    margin-bottom: 0.35rem;
+    font-size: 10.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;
 }
 .ld-prog-label strong { font-weight: 700; }
 .ld-prog-label.good   strong { color: #1E9E5E; }
@@ -151,7 +178,7 @@ html[data-theme="dark"] .ld-course-code {
     font-size: 12.5px; font-weight: 700; color: #1E9E5E; margin-top: 0.875rem;
 }
 .ld-absent-toggle {
-    width: 100%; border: none; background: none; cursor: pointer; font-family: inherit;
+    width: 100%; border: none; cursor: pointer; font-family: inherit;
     display: flex; align-items: center; gap: 0.5rem;
     padding: 0.6rem 0.75rem; border-radius: 8px;
     background: rgba(192,57,43,0.07); border: 1px solid rgba(192,57,43,0.15);
@@ -161,7 +188,6 @@ html[data-theme="dark"] .ld-course-code {
 .ld-absent-toggle:hover { background: rgba(192,57,43,0.12); }
 .ld-absent-toggle .arrow { margin-left: auto; transition: transform 0.2s; }
 .ld-absent-toggle.open .arrow { transform: rotate(180deg); }
-
 .ld-absent-list {
     display: none; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem;
     padding: 0.75rem; background: var(--bg-subtle); border-radius: 8px;
@@ -170,8 +196,7 @@ html[data-theme="dark"] .ld-course-code {
 .ld-absent-list.show { display: flex; }
 .ld-absent-chip {
     padding: 0.275rem 0.75rem; border-radius: 20px; font-size: 12px; font-weight: 600;
-    background: rgba(192,57,43,0.09); color: #C0392B;
-    border: 1px solid rgba(192,57,43,0.18);
+    background: rgba(192,57,43,0.09); color: #C0392B; border: 1px solid rgba(192,57,43,0.18);
 }
 
 /* ── Empty State ── */
@@ -183,6 +208,13 @@ html[data-theme="dark"] .ld-course-code {
 .ld-empty .iconify { font-size: 52px; color: var(--border-strong); display: block; margin: 0 auto 0.875rem; }
 .ld-empty h3 { font-size: 1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.35rem; }
 .ld-empty p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+@media (max-width: 600px) {
+    .ld-stats-row { grid-template-columns: repeat(2, 1fr); }
+    .ld-week-range { order: -1; width: 100%; text-align: left; }
+    .ld-jump-form { margin-left: 0; width: 100%; }
+    .ld-date-input { flex: 1; max-width: none; }
+}
 </style>
 
 <div class="ld-wrap">
@@ -190,134 +222,153 @@ html[data-theme="dark"] .ld-course-code {
     <!-- Page Header -->
     <div class="ld-header">
         <div class="ld-header-text">
-            <h1>Daily Session View</h1>
-            <p>{{ selected_date|date:"l, F j, Y" }}{% if selected_date == today %} &mdash; <span style="color: #F2C31A; font-weight:700;">Today</span>{% endif %}</p>
+            <h1>Weekly Sessions</h1>
+            <p>{{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}{% if week_offset == 0 %} &mdash; <span style="color:#F2C31A;font-weight:700;">This Week</span>{% endif %}</p>
         </div>
         <a href="{% url 'attendance:admin_dashboard' %}" class="ld-header-link">
             <span class="iconify" data-icon="mdi:chart-bar-outline"></span> Full Analytics
         </a>
     </div>
 
-    <!-- Date Picker -->
-    <div class="ld-date-bar">
-        <div class="ld-date-label"><span class="iconify" data-icon="mdi:calendar-search-outline" style="font-size:14px;"></span> Filter Date</div>
-        <form method="get" class="ld-date-form">
-            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="ld-date-input">
-            <button type="submit" class="ld-date-btn">
-                <span class="iconify" data-icon="mdi:arrow-right"></span> Go
-            </button>
-        </form>
-        {% if selected_date != today %}
-        <a href="{% url 'attendance:lecturer_dashboard' %}" class="ld-today-btn">
-            <span class="iconify" data-icon="mdi:calendar-today"></span> Today
+    <!-- Week Navigation -->
+    <div class="ld-week-nav">
+        <a href="?week={{ week_offset|add:"-1" }}" class="ld-week-btn">
+            <span class="iconify" data-icon="mdi:chevron-left"></span> Prev
+        </a>
+        <span class="ld-week-range">{{ week_start|date:"M j" }} – {{ week_end|date:"M j" }}</span>
+        <a href="?week={{ week_offset|add:"1" }}" class="ld-week-btn">
+            Next <span class="iconify" data-icon="mdi:chevron-right"></span>
+        </a>
+        {% if week_offset != 0 %}
+        <a href="?" class="ld-week-btn ld-week-current">
+            <span class="iconify" data-icon="mdi:calendar-today"></span> This Week
         </a>
         {% endif %}
+        <form method="get" class="ld-jump-form">
+            <input type="date" name="date" class="ld-date-input" title="Jump to week">
+            <button type="submit" class="ld-date-btn" title="Go">
+                <span class="iconify" data-icon="mdi:arrow-right"></span>
+            </button>
+        </form>
     </div>
 
     <!-- Session count -->
-    {% if dashboard_data %}
+    {% if total_sessions %}
     <div class="ld-count-strip">
-        <span class="iconify" data-icon="mdi:calendar-check-outline" style="font-size:15px; color:#0D2472;"></span>
-        <strong>{{ dashboard_data|length }}</strong> session{{ dashboard_data|length|pluralize }} on this date
+        <span class="iconify" data-icon="mdi:calendar-check-outline" style="font-size:15px;color:#0D2472;"></span>
+        <strong>{{ total_sessions }}</strong> session{{ total_sessions|pluralize }} this week
     </div>
     {% endif %}
 
-    <!-- Session Cards -->
-    {% if dashboard_data %}
-        {% for item in dashboard_data %}
-        {% with absent_count=item.absent_profiles|length %}
-        <div class="ld-session-card">
+    <!-- Days loop -->
+    {% for day in days_data %}
 
-            <div class="ld-session-header">
-                <div class="ld-course-info">
-                    <div class="ld-course-code">{{ item.course.code }}</div>
-                    <div class="ld-course-name">{{ item.course.name }}</div>
-                    <div class="ld-course-meta">
-                        <span class="iconify" data-icon="mdi:layers-outline" style="font-size:13px;"></span>
-                        Level {{ item.course.level.name }}
-                        {% if item.session.topic %}
-                        <span class="ld-meta-dot"></span>
-                        <span class="iconify" data-icon="mdi:book-outline" style="font-size:13px;"></span>
-                        {{ item.session.topic }}
-                        {% endif %}
-                    </div>
-                </div>
-                <a href="{% url 'attendance:export_csv' item.session.id %}" class="ld-export-btn">
-                    <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
-                </a>
-            </div>
+    <div class="ld-day-header {% if day.is_today %}today{% endif %}">
+        <span class="iconify" data-icon="mdi:calendar-outline" style="font-size:15px;"></span>
+        {{ day.date|date:"l, F j" }}
+        {% if day.is_today %}<span class="ld-today-tag">Today</span>{% endif %}
+    </div>
 
-            <!-- Stat chips -->
-            <div class="ld-stats-row">
-                <div class="ld-stat-chip enrolled">
-                    <div class="ld-stat-val">{{ item.total_enrolled }}</div>
-                    <div class="ld-stat-lbl">Enrolled</div>
+    {% for item in day.sessions %}
+    {% with absent_count=item.absent_profiles|length %}
+    <div class="ld-session-card">
+
+        <div class="ld-session-header">
+            <div class="ld-course-info">
+                <div class="ld-course-code">{{ item.course.code }}</div>
+                <div class="ld-course-name">
+                    {{ item.course.name }}
+                    {% if item.course.code == 'KISW 106A' %}
+                    <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#DBEAFE;color:#1D4ED8;margin-left:4px;vertical-align:middle;">Monday Group</span>
+                    {% elif item.course.code == 'KISW 106B' %}
+                    <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#EDE9FE;color:#6D28D9;margin-left:4px;vertical-align:middle;">Thursday Group</span>
+                    {% endif %}
                 </div>
-                <div class="ld-stat-chip present">
-                    <div class="ld-stat-val">{{ item.submitted }}</div>
-                    <div class="ld-stat-lbl">Present</div>
-                </div>
-                <div class="ld-stat-chip codes">
-                    <div class="ld-stat-val">{{ item.generated }}</div>
-                    <div class="ld-stat-lbl">Codes</div>
-                </div>
-                <div class="ld-stat-chip absent">
-                    <div class="ld-stat-val">{{ absent_count }}</div>
-                    <div class="ld-stat-lbl">Absent</div>
+                <div class="ld-course-meta">
+                    <span class="iconify" data-icon="mdi:layers-outline" style="font-size:13px;"></span>
+                    Level {{ item.course.level.name }}
+                    <span class="ld-meta-dot"></span>
+                    <span class="iconify" data-icon="mdi:clock-outline" style="font-size:13px;"></span>
+                    {{ item.session.start_time|time:"g:i A" }} – {{ item.session.end_time|time:"g:i A" }}
+                    {% if item.session.topic %}
+                    <span class="ld-meta-dot"></span>
+                    <span class="iconify" data-icon="mdi:book-outline" style="font-size:13px;"></span>
+                    {{ item.session.topic }}
+                    {% endif %}
                 </div>
             </div>
-
-            <!-- Progress bar -->
-            <div class="ld-prog-wrap">
-                {% if item.total_enrolled > 0 %}
-                {% widthratio item.submitted item.total_enrolled 100 as pct_int %}
-                <div class="ld-prog-label {% if pct_int >= 75 %}good{% elif pct_int >= 50 %}medium{% else %}low{% endif %}">
-                    <span>Attendance rate</span>
-                    <strong>{{ pct_int }}%</strong>
-                </div>
-                <div class="ld-prog-track">
-                    <div class="ld-prog-fill {% if pct_int >= 75 %}good{% elif pct_int >= 50 %}medium{% else %}low{% endif %}"
-                         style="width: {{ pct_int }}%;"></div>
-                </div>
-                {% else %}
-                <div class="ld-prog-label">
-                    <span>No students enrolled</span>
-                </div>
-                <div class="ld-prog-track"><div class="ld-prog-fill low" style="width:0;"></div></div>
-                {% endif %}
-            </div>
-
-            <!-- Absent students -->
-            <div class="ld-absent-section">
-                {% if item.absent_profiles %}
-                <button class="ld-absent-toggle" onclick="toggleAbsent(this)">
-                    <span class="iconify" data-icon="mdi:account-remove-outline" style="font-size:16px;"></span>
-                    Absent students ({{ absent_count }})
-                    <span class="iconify arrow" data-icon="mdi:chevron-down" style="font-size:16px;"></span>
-                </button>
-                <div class="ld-absent-list">
-                    {% for profile in item.absent_profiles %}
-                    <span class="ld-absent-chip">{{ profile.user.get_full_name|default:profile.user.username }}</span>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="ld-all-present">
-                    <span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:17px;"></span>
-                    All enrolled students are present
-                </div>
-                {% endif %}
-            </div>
-
+            <a href="{% url 'attendance:export_csv' item.session.id %}" class="ld-export-btn">
+                <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+            </a>
         </div>
-        {% endwith %}
-        {% endfor %}
-    {% else %}
+
+        <div class="ld-stats-row">
+            <div class="ld-stat-chip enrolled">
+                <div class="ld-stat-val">{{ item.total_enrolled }}</div>
+                <div class="ld-stat-lbl">Enrolled</div>
+            </div>
+            <div class="ld-stat-chip present">
+                <div class="ld-stat-val">{{ item.submitted }}</div>
+                <div class="ld-stat-lbl">Present</div>
+            </div>
+            <div class="ld-stat-chip codes">
+                <div class="ld-stat-val">{{ item.generated }}</div>
+                <div class="ld-stat-lbl">Codes</div>
+            </div>
+            <div class="ld-stat-chip absent">
+                <div class="ld-stat-val">{{ absent_count }}</div>
+                <div class="ld-stat-lbl">Absent</div>
+            </div>
+        </div>
+
+        <div class="ld-prog-wrap">
+            {% if item.total_enrolled > 0 %}
+            {% widthratio item.submitted item.total_enrolled 100 as pct_int %}
+            <div class="ld-prog-label {% if pct_int >= 75 %}good{% elif pct_int >= 50 %}medium{% else %}low{% endif %}">
+                <span>Attendance rate</span>
+                <strong>{{ pct_int }}%</strong>
+            </div>
+            <div class="ld-prog-track">
+                <div class="ld-prog-fill {% if pct_int >= 75 %}good{% elif pct_int >= 50 %}medium{% else %}low{% endif %}"
+                     style="width:{{ pct_int }}%;"></div>
+            </div>
+            {% else %}
+            <div class="ld-prog-label"><span>No students enrolled yet</span></div>
+            <div class="ld-prog-track"><div class="ld-prog-fill low" style="width:0;"></div></div>
+            {% endif %}
+        </div>
+
+        <div class="ld-absent-section">
+            {% if item.absent_profiles %}
+            <button class="ld-absent-toggle" onclick="toggleAbsent(this)">
+                <span class="iconify" data-icon="mdi:account-remove-outline" style="font-size:16px;"></span>
+                Absent students ({{ absent_count }})
+                <span class="iconify arrow" data-icon="mdi:chevron-down" style="font-size:16px;"></span>
+            </button>
+            <div class="ld-absent-list">
+                {% for profile in item.absent_profiles %}
+                <span class="ld-absent-chip">{{ profile.user.get_full_name|default:profile.user.username }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="ld-all-present">
+                <span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:17px;"></span>
+                All enrolled students are present
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endwith %}
+    {% endfor %}
+
+    {% empty %}
     <div class="ld-empty">
         <span class="iconify" data-icon="mdi:calendar-blank-outline"></span>
-        <h3>No sessions on {{ selected_date|date:"F j, Y" }}</h3>
-        <p>No class sessions were scheduled for this date. Try a different date.</p>
+        <h3>No sessions this week</h3>
+        <p>No class sessions scheduled for {{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}. Use the arrows to navigate to a different week.</p>
     </div>
-    {% endif %}
+    {% endfor %}
 
 </div>
 

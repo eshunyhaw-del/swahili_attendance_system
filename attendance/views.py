@@ -3,6 +3,7 @@ import string
 import secrets
 import uuid
 import jwt
+from collections import defaultdict
 from datetime import timedelta, datetime
 
 from django.conf import settings
@@ -108,19 +109,33 @@ def send_ta_rejection_email(ta_profile):
         pass
 
 
-def generate_and_send_otp(user, purpose, expiry_minutes=5):
-    """Generate a 6-digit OTP, invalidate old ones, persist, and email it."""
+def generate_and_send_otp(user, purpose, expiry_minutes=5, request=None):
+    """Generate a 6-digit OTP, invalidate old ones, persist, and email it.
+
+    For registration and password-reset purposes also generates a magic-link
+    token (30-min expiry) embedded in the HTML email alongside the OTP.
+    """
     from django.core.cache import cache
     OTPCode.objects.filter(user=user, purpose=purpose, is_used=False).update(is_used=True)
     cache.set(f"otp_resend_{user.id}_{purpose}", True, 60)
     cache.delete(f"otp_attempts_{user.id}_{purpose}")
 
     code = f"{secrets.randbelow(1000000):06d}"
-    OTPCode.objects.create(
+
+    # Magic link: only for registration and password-reset, not login
+    magic_token_val = None
+    magic_token_expires = None
+    if purpose in (OTPCode.PURPOSE_REGISTRATION, OTPCode.PURPOSE_PASSWORD_RESET):
+        magic_token_val = uuid.uuid4()
+        magic_token_expires = timezone.now() + timedelta(minutes=30)
+
+    otp_obj = OTPCode.objects.create(
         user=user,
         code=code,
         purpose=purpose,
         expires_at=timezone.now() + timedelta(minutes=expiry_minutes),
+        magic_token=magic_token_val,
+        magic_token_expires_at=magic_token_expires,
     )
 
     purpose_labels = {
@@ -130,18 +145,51 @@ def generate_and_send_otp(user, purpose, expiry_minutes=5):
     }
     label = purpose_labels.get(purpose, 'verification')
 
+    # Build magic-link URL when applicable
+    magic_link_url = None
+    if magic_token_val:
+        if purpose == OTPCode.PURPOSE_REGISTRATION:
+            path = reverse('attendance:magic_verify_registration', args=[magic_token_val])
+        else:
+            path = reverse('attendance:magic_reset_password', args=[magic_token_val])
+        if request is not None:
+            magic_link_url = request.build_absolute_uri(path)
+        else:
+            site_url = getattr(settings, 'SITE_URL', 'https://ebenezer.pythonanywhere.com').rstrip('/')
+            magic_link_url = f"{site_url}{path}"
+
+    html_message = render_to_string('attendance/otp_email.html', {
+        'user': user,
+        'otp_code': code,
+        'expiry_minutes': expiry_minutes,
+        'magic_link_url': magic_link_url,
+        'purpose': purpose,
+        'label': label,
+    })
+
+    plain_parts = [
+        f"Hello {user.get_full_name() or user.username},",
+        "",
+        f"Your SWASA {label} code is:",
+        "",
+        f"    {code}",
+        "",
+        f"This code expires in {expiry_minutes} minutes.",
+    ]
+    if magic_link_url:
+        plain_parts += [
+            "",
+            "Or verify instantly with this link (expires in 30 minutes):",
+            magic_link_url,
+        ]
+    plain_parts += ["", "If you did not request this, please ignore this email.", "", "— SWASA Attendance System"]
+
     send_mail(
         subject='Your SWASA Verification Code',
-        message=(
-            f"Hello {user.get_full_name() or user.username},\n\n"
-            f"Your SWASA {label} code is:\n\n"
-            f"    {code}\n\n"
-            f"This code expires in {expiry_minutes} minutes.\n\n"
-            f"If you did not request this, please ignore this email.\n\n"
-            f"— SWASA Attendance System"
-        ),
+        message="\n".join(plain_parts),
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
+        html_message=html_message,
         fail_silently=False,
     )
 
@@ -232,7 +280,7 @@ def register(request):
         if form.is_valid():
             user = form.save()
             try:
-                generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
             except Exception:
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")
@@ -265,7 +313,7 @@ def register(request):
                     pass
             if unverified_user:
                 try:
-                    generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                    generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
                 except Exception:
                     pass
                 request.session['pending_reg_user_id'] = unverified_user.id
@@ -293,7 +341,7 @@ def resend_verification(request):
         unverified_user = User.objects.filter(email__iexact=email, is_active=False).first()
         if unverified_user:
             try:
-                generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
             except Exception:
                 messages.error(request, "Could not send the code. Please try again.")
                 return render(request, "attendance/resend_verification.html")
@@ -357,7 +405,7 @@ def otp_verify_registration(request):
                 messages.error(request, "Please wait 60 seconds before requesting another code.")
             else:
                 try:
-                    generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                    generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
                     messages.success(request, "A new verification code was sent.")
                 except Exception:
                     messages.error(request, "Could not resend. Please try again.")
@@ -470,7 +518,7 @@ def otp_verify_login(request):
                 messages.error(request, "Please wait 60 seconds before requesting another code.")
             else:
                 try:
-                    generate_and_send_otp(user, OTPCode.PURPOSE_LOGIN, expiry_minutes=5)
+                    generate_and_send_otp(user, OTPCode.PURPOSE_LOGIN, expiry_minutes=5, request=request)
                     messages.success(request, "A new code was sent.")
                 except Exception:
                     messages.error(request, "Could not resend. Please try again.")
@@ -541,7 +589,7 @@ def otp_password_reset_request(request):
         email = request.POST.get('email', '').strip().lower()
         try:
             user = User.objects.get(email__iexact=email, is_active=True)
-            generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5)
+            generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
             request.session['reset_pending_user_id'] = user.id
         except User.DoesNotExist:
             pass
@@ -573,7 +621,7 @@ def otp_verify_password_reset(request):
                 messages.error(request, "Please wait 60 seconds before requesting another code.")
             else:
                 try:
-                    generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5)
+                    generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
                     messages.success(request, "A new code was sent.")
                 except Exception:
                     messages.error(request, "Could not resend. Please try again.")
@@ -648,6 +696,115 @@ def otp_set_password(request):
     return render(request, 'attendance/otp_set_password.html', {'error': error})
 
 
+# ── Magic Link: Email Verification ───────────────────────────────────────────
+
+def _issue_jwt_response(user, redirect_url):
+    """Return a redirect response with fresh JWT access+refresh cookies."""
+    access_expiry  = timedelta(days=1)
+    refresh_expiry = timedelta(days=7)
+    now = datetime.utcnow()
+    access_token = jwt.encode(
+        {'user_id': user.id, 'username': user.username,
+         'exp': now + access_expiry, 'iat': now},
+        settings.JWT_SECRET_KEY, algorithm='HS256'
+    )
+    refresh_token = jwt.encode(
+        {'user_id': user.id, 'type': 'refresh',
+         'exp': now + refresh_expiry, 'iat': now},
+        settings.JWT_SECRET_KEY, algorithm='HS256'
+    )
+    response = redirect(redirect_url)
+    is_secure = not settings.DEBUG
+    response.set_cookie('access_token', access_token,
+                        max_age=int(access_expiry.total_seconds()),
+                        httponly=True, secure=is_secure, samesite='Lax')
+    response.set_cookie('refresh_token', refresh_token,
+                        max_age=int(refresh_expiry.total_seconds()),
+                        httponly=True, secure=is_secure, samesite='Lax')
+    return response
+
+
+def magic_verify_registration(request, token):
+    """One-tap email verification via magic link embedded in the OTP email."""
+    otp = OTPCode.objects.filter(
+        magic_token=token,
+        purpose=OTPCode.PURPOSE_REGISTRATION,
+    ).select_related('user').first()
+
+    if otp is None:
+        return render(request, 'attendance/magic_link_result.html', {'state': 'invalid'})
+
+    if otp.magic_token_used:
+        return render(request, 'attendance/magic_link_result.html', {'state': 'already_used'})
+
+    if otp.magic_token_expires_at and timezone.now() > otp.magic_token_expires_at:
+        return render(request, 'attendance/magic_link_result.html', {
+            'state': 'expired',
+            'purpose': 'registration',
+            'resend_url': reverse('attendance:resend_verification'),
+        })
+
+    user = otp.user
+
+    # Mark magic token and OTP both consumed
+    otp.magic_token_used = True
+    otp.is_used = True
+    otp.save(update_fields=['magic_token_used', 'is_used'])
+
+    # Activate account
+    user.is_active = True
+    user.save(update_fields=['is_active'])
+
+    # Determine TA vs student and set up profile
+    if hasattr(user, 'taprofile'):
+        try:
+            ta_prof = user.taprofile
+            ta_prof.is_approved = True
+            ta_prof.save(update_fields=['is_approved'])
+        except Exception:
+            pass
+        redirect_url = reverse('attendance:ta_dashboard')
+    else:
+        profile = getattr(user, 'userprofile', None)
+        if profile:
+            profile.email_verified = True
+            profile.save(update_fields=['email_verified'])
+        redirect_url = reverse('attendance:course_registration')
+
+    return _issue_jwt_response(user, redirect_url)
+
+
+def magic_reset_password(request, token):
+    """One-tap password-reset verification via magic link — skips OTP entry."""
+    otp = OTPCode.objects.filter(
+        magic_token=token,
+        purpose=OTPCode.PURPOSE_PASSWORD_RESET,
+    ).select_related('user').first()
+
+    if otp is None:
+        return render(request, 'attendance/magic_link_result.html', {'state': 'invalid'})
+
+    if otp.magic_token_used:
+        return render(request, 'attendance/magic_link_result.html', {'state': 'already_used'})
+
+    if otp.magic_token_expires_at and timezone.now() > otp.magic_token_expires_at:
+        return render(request, 'attendance/magic_link_result.html', {
+            'state': 'expired',
+            'purpose': 'password_reset',
+            'resend_url': reverse('attendance:otp_password_reset'),
+        })
+
+    user = otp.user
+
+    otp.magic_token_used = True
+    otp.is_used = True
+    otp.save(update_fields=['magic_token_used', 'is_used'])
+
+    # Store verified user in session — otp_set_password reads this
+    request.session['reset_verified_user_id'] = user.id
+    return redirect(reverse('attendance:otp_set_password'))
+
+
 # ── Course Registration ──────────────────────────────────────────────────────
 
 @login_required
@@ -718,8 +875,6 @@ def dashboard(request):
 
     courses = list(profile.registered_courses.filter(semester__is_active=True).select_related("semester"))
     course_data = []
-    today = timezone.now().date()
-    registration_date = request.user.date_joined.date()
 
     # Bulk-fetch all sessions for enrolled courses — 1 query
     all_sessions = list(
@@ -754,22 +909,7 @@ def dashboard(request):
         for i, session in enumerate(sessions, start=1):
             code_obj = codes_by_session.get(session.id)
             record   = records_by_session.get(session.id)
-
-            if record:
-                status = "submitted"
-                can_submit = False
-            elif session.date <= registration_date:
-                status = "na"
-                can_submit = False
-            elif session.date > today:
-                status = "upcoming"
-                can_submit = False
-            elif session.date == today:
-                status = "not_started"
-                can_submit = True
-            else:
-                status = "absent"
-                can_submit = False
+            status   = "submitted" if record else "pending"
 
             weeks.append({
                 "week_num": i,
@@ -777,32 +917,22 @@ def dashboard(request):
                 "code_obj": code_obj,
                 "record": record,
                 "status": status,
-                "can_submit": can_submit,
-                "is_future": session.date > today,
             })
 
-        # Only count sessions from registration date onward (exclude N/A and upcoming)
-        eligible_total = sum(1 for w in weeks if w['status'] not in ('na', 'upcoming'))
+        total_sessions = len(weeks)
         attended = sum(1 for w in weeks if w['status'] == 'submitted')
-        percentage = round((attended / eligible_total) * 100) if eligible_total > 0 else 0
+        percentage = round((attended / total_sessions) * 100) if total_sessions > 0 else 0
 
         course_data.append({
             "course": course,
             "weeks": weeks,
-            "total_sessions": eligible_total,
+            "total_sessions": total_sessions,
             "attended": attended,
             "percentage": percentage,
         })
 
-    has_na_sessions = any(
-        w['status'] == 'na'
-        for cd in course_data
-        for w in cd['weeks']
-    )
-
     return render(request, "attendance/dashboard.html", {
         "course_data": course_data,
-        "has_na_sessions": has_na_sessions,
     })
 
 
@@ -950,7 +1080,7 @@ def student_history(request):
     courses = list(profile.registered_courses.filter(semester__is_active=True))
     history_data = []
     today = timezone.now().date()
-    registration_date = request.user.date_joined.date()
+    date_joined = request.user.date_joined.date()
 
     # Bulk-fetch all sessions for enrolled courses — 1 query
     all_sessions = list(
@@ -975,17 +1105,18 @@ def student_history(request):
         weeks = []
 
         for i, session in enumerate(sessions, start=1):
+            is_eligible = date_joined <= session.date < today
+
             if session.id in attended_session_ids:
-                day_status = "attended"
-                attended += 1
-                eligible_total += 1
-            elif session.date <= registration_date:
-                day_status = "na"
-            elif session.date >= today:
-                day_status = "future"
-            else:
+                day_status = "present"
+                if is_eligible:
+                    attended += 1
+                    eligible_total += 1
+            elif is_eligible:
                 day_status = "absent"
                 eligible_total += 1
+            else:
+                day_status = "na"
 
             weeks.append({"week_num": i, "session": session, "status": day_status})
 
@@ -998,15 +1129,8 @@ def student_history(request):
             "percentage": percentage,
         })
 
-    has_na_sessions = any(
-        w['status'] == 'na'
-        for item in history_data
-        for w in item['weeks']
-    )
-
     return render(request, "attendance/history.html", {
         "history_data": history_data,
-        "has_na_sessions": has_na_sessions,
     })
 
 
@@ -1048,40 +1172,74 @@ def export_my_attendance_csv(request):
 @vary_on_cookie
 def lecturer_dashboard(request):
     today = timezone.now().date()
-    selected_date_str = request.GET.get("date", today.isoformat())
+
     try:
-        selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        selected_date = today
+        week_offset = int(request.GET.get("week", 0))
+    except (ValueError, TypeError):
+        week_offset = 0
 
-    sessions = ClassSession.objects.filter(date=selected_date).select_related("course", "course__level")
-    dashboard_data = []
+    # "Jump to date" finds the week that contains that date
+    jump_str = request.GET.get("date", "")
+    if jump_str:
+        try:
+            jump_date = datetime.strptime(jump_str, "%Y-%m-%d").date()
+            diff = (jump_date - today).days
+            week_offset = diff // 7
+            if diff < 0 and diff % 7 != 0:
+                week_offset -= 1
+        except ValueError:
+            pass
 
+    week_start = today - timedelta(days=today.weekday()) + timedelta(weeks=week_offset)
+    week_end = week_start + timedelta(days=6)
+
+    sessions = ClassSession.objects.filter(
+        date__gte=week_start, date__lte=week_end,
+    ).order_by("date", "start_time").select_related("course", "course__level")
+
+    flat_data = []
     for session in sessions:
         course = session.course
-        enrolled = UserProfile.objects.filter(level=course.level)
-        total_enrolled = enrolled.count()
-        generated = AttendanceCode.objects.filter(class_session=session).count()
-        submitted = AttendanceRecord.objects.filter(class_session=session).count()
-
-        submitted_user_ids = AttendanceRecord.objects.filter(
-            class_session=session
-        ).values_list("student_id", flat=True)
-        absent_profiles = enrolled.exclude(user_id__in=submitted_user_ids).select_related("user")
-
-        dashboard_data.append({
+        enrolled_qs = list(
+            UserProfile.objects.filter(
+                registered_courses=course, user__is_active=True
+            ).select_related("user")
+        )
+        submitted_ids = set(
+            AttendanceRecord.objects.filter(class_session=session).values_list("student_id", flat=True)
+        )
+        flat_data.append({
             "session": session,
             "course": course,
-            "total_enrolled": total_enrolled,
-            "generated": generated,
-            "submitted": submitted,
-            "absent_profiles": absent_profiles,
+            "total_enrolled": len(enrolled_qs),
+            "generated": AttendanceCode.objects.filter(class_session=session).count(),
+            "submitted": len(submitted_ids),
+            "absent_profiles": [p for p in enrolled_qs if p.user_id not in submitted_ids],
         })
 
+    # Group by date for the template
+    by_date = defaultdict(list)
+    for item in flat_data:
+        by_date[item["session"].date].append(item)
+
+    days_data = []
+    current = week_start
+    while current <= week_end:
+        if current in by_date:
+            days_data.append({
+                "date": current,
+                "is_today": current == today,
+                "sessions": by_date[current],
+            })
+        current += timedelta(days=1)
+
     return render(request, "attendance/lecturer_dashboard.html", {
-        "dashboard_data": dashboard_data,
-        "selected_date": selected_date,
+        "days_data": days_data,
+        "week_start": week_start,
+        "week_end": week_end,
+        "week_offset": week_offset,
         "today": today,
+        "total_sessions": len(flat_data),
     })
 
 
@@ -1092,7 +1250,9 @@ def lecturer_dashboard(request):
 def export_attendance_csv(request, session_id):
     session = get_object_or_404(ClassSession, id=session_id)
     course = session.course
-    enrolled = UserProfile.objects.filter(level=course.level).select_related("user")
+    enrolled = UserProfile.objects.filter(
+        registered_courses=course, user__is_active=True
+    ).select_related("user")
 
     submitted_map = {
         r.student_id: r
@@ -1700,7 +1860,7 @@ def ta_register(request):
         if form.is_valid():
             user = form.save()
             try:
-                generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10)
+                generate_and_send_otp(user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
             except Exception:
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")

@@ -3,6 +3,30 @@
 
 {% block content %}
 <style>
+:root {
+    --bg-base:        #F8F4EF;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F8F4EF;
+    --radius-lg:      16px;
+    --shadow-xs:      0 1px 3px rgba(13,36,114,0.07);
+    --shadow-md:      0 4px 14px rgba(13,36,114,0.10);
+    --text-primary:   #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted:     #6B7280;
+    --border:         #E8E0D8;
+    --border-strong:  #D4C8BE;
+    --gold:           #F2C31A;
+}
+html[data-theme="dark"] :root,
+html[data-theme="dark"] {
+    --bg-base:       #0F172A;
+    --bg-surface:    #1E293B;
+    --bg-subtle:     #1E293B;
+    --text-primary:  #F1F5F9;
+    --text-muted:    #94A3B8;
+    --border:        #334155;
+    --border-strong: #475569;
+}
 body { background: var(--bg-base) !important; background-image: none !important; }
 
 .alr-wrap { max-width: 760px; margin: 0 auto; padding: 0 0 3rem; }
@@ -132,7 +156,13 @@ html[data-theme="dark"] .alr-code-tag {
             <div class="alr-details">
                 <div>
                     <div class="alr-detail-lbl">Code String</div>
-                    <div class="alr-detail-val"><span class="alr-code-tag">{{ alert.code.code_string }}</span></div>
+                    <div class="alr-detail-val">
+                        {% if alert.code %}
+                        <span class="alr-code-tag">{{ alert.code.code_string }}</span>
+                        {% else %}
+                        <span class="alr-code-tag" style="opacity:0.5;">N/A</span>
+                        {% endif %}
+                    </div>
                 </div>
                 <div>
                     <div class="alr-detail-lbl">Attempted At</div>
@@ -148,13 +178,24 @@ html[data-theme="dark"] .alr-code-tag {
                 <div>
                     <div class="alr-detail-lbl">Code Owner</div>
                     <div class="alr-detail-val">
+                        {% if alert.code and alert.code.student %}
                         {{ alert.code.student.get_full_name|default:alert.code.student.username }}
                         <div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.code.student.username }}</div>
+                        {% else %}
+                        Unknown
+                        <div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">N/A</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div>
                     <div class="alr-detail-lbl">Session</div>
-                    <div class="alr-detail-val">{{ alert.code.class_session.course.code }} — {{ alert.code.class_session.date|date:"M j, Y" }}</div>
+                    <div class="alr-detail-val">
+                        {% if alert.code and alert.code.class_session %}
+                        {{ alert.code.class_session.course.code }} — {{ alert.code.class_session.date|date:"M j, Y" }}
+                        {% else %}
+                        N/A
+                        {% endif %}
+                    </div>
                 </div>
                 <div>
                     <div class="alr-detail-lbl">Reason</div>

@@ -21,16 +21,21 @@ class SemesterAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('code', 'name', 'level', 'semester')
+    list_display = ('code', 'name', 'level', 'semester', 'student_count')
     list_filter = ('level', 'semester')
     search_fields = ('code', 'name')
+
+    @admin.display(description='Students')
+    def student_count(self, obj):
+        return obj.registered_students.count()
 
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
     list_display = ('course', 'date', 'start_time', 'end_time', 'topic', 'lecturer')
-    list_filter = ('course', 'date')
-    search_fields = ('topic',)
+    list_filter = ('course__level', 'course', 'date')
+    search_fields = ('topic', 'course__code', 'course__name')
+    ordering = ('course__code', 'date')
 
 
 @admin.register(UserProfile)
@@ -39,6 +44,7 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_filter = ('level', 'email_verified')
     search_fields = ('user__username', 'student_id_number', 'student_email')
     readonly_fields = ('email_verification_token', 'verification_sent_at')
+    filter_horizontal = ('registered_courses',)
 
 
 @admin.register(TAProfile)

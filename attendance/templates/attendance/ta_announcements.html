@@ -288,7 +288,7 @@ html[data-theme="dark"] .modal-head { color: var(--text-primary); }
                 <select name="course_id" class="field-select" required>
                     <option value="">— Select a course —</option>
                     {% for course in available_courses %}
-                    <option value="{{ course.id }}">{{ course.code }} — {{ course.name }} (Level {{ course.level.name }})</option>
+                    <option value="{{ course.id }}">{% if course.code == 'KISW 106A' %}KISW 106A — Monday Group (Level {{ course.level.name }}){% elif course.code == 'KISW 106B' %}KISW 106B — Thursday Group (Level {{ course.level.name }}){% else %}{{ course.code }} — {{ course.name }} (Level {{ course.level.name }}){% endif %}</option>
                     {% empty %}
                     <option disabled>No courses available for your assigned levels</option>
                     {% endfor %}

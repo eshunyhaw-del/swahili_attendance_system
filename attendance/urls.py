@@ -18,6 +18,10 @@ urlpatterns = [
     # Email Verification (legacy link-based)
     path("verify-email/<str:token>/", views.verify_email, name="verify_email"),
 
+    # Magic-link flows (one-tap email verification)
+    path("magic/verify/<uuid:token>/", views.magic_verify_registration, name="magic_verify_registration"),
+    path("magic/reset/<uuid:token>/", views.magic_reset_password, name="magic_reset_password"),
+
     # OTP flows
     path("otp/registration/verify/", views.otp_verify_registration, name="otp_verify_registration"),
     path("otp/resend-verification/", views.resend_verification, name="resend_verification"),

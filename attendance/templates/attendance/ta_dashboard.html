@@ -689,6 +689,11 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
             <div>
                 <div class="course-name">{{ course_data.course.name }}</div>
                 <span class="course-code">{{ course_data.course.code }}</span>
+                {% if course_data.course.code == 'KISW 106A' %}
+                <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(219,234,254,0.85);color:#1D4ED8;margin-left:5px;border:1px solid rgba(29,78,216,0.25);">Monday Group</span>
+                {% elif course_data.course.code == 'KISW 106B' %}
+                <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(237,233,254,0.85);color:#6D28D9;margin-left:5px;border:1px solid rgba(109,40,217,0.25);">Thursday Group</span>
+                {% endif %}
             </div>
             <div class="course-sessions-count">
                 {{ course_data.sessions|length }} session{{ course_data.sessions|length|pluralize }}
