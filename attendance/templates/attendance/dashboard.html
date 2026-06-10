@@ -638,6 +638,19 @@
 
     #skeletonLoader { transition: opacity 0.3s ease; }
     #realContent    { display: none; opacity: 0; transition: opacity 0.3s ease; }
+
+    /* Social follow buttons */
+    .swasa-social-btn {
+        width: 38px; height: 38px;
+        border-radius: 10px;
+        background: var(--navy);
+        color: var(--gold);
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none;
+        transition: background 0.15s, color 0.15s, transform 0.15s;
+        font-size: 17px;
+    }
+    html[data-theme="dark"] .swasa-social-btn { background: rgba(27,58,156,0.5); }
 </style>
 
 <!-- ── Skeleton Loader ── -->
@@ -922,6 +935,53 @@ document.getElementById('taCodeInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') submitTaCode();
 });
 </script>
+
+<!-- Social media follow section -->
+<div class="dash-wrapper" style="padding-top:0;">
+<div style="background:var(--bg-surface);border-radius:var(--radius-lg);border:1px solid var(--border);box-shadow:var(--shadow-xs);padding:1.125rem 1.25rem;text-align:center;">
+    <p style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem;">
+        Stay connected with SWASA 🇹🇿
+    </p>
+    <div style="display:flex;justify-content:center;gap:0.6rem;flex-wrap:wrap;">
+        <a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer"
+           title="WhatsApp Community"
+           class="swasa-social-btn"
+           onmouseover="this.style.background='#25D366';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
+            <span class="iconify" data-icon="mdi:whatsapp" data-width="18"></span>
+        </a>
+        <a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer"
+           title="Instagram"
+           class="swasa-social-btn"
+           onmouseover="this.style.background='#E1306C';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
+            <span class="iconify" data-icon="mdi:instagram" data-width="18"></span>
+        </a>
+        <a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer"
+           title="Facebook"
+           class="swasa-social-btn"
+           onmouseover="this.style.background='#1877F2';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
+            <span class="iconify" data-icon="mdi:facebook" data-width="18"></span>
+        </a>
+        <a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer"
+           title="TikTok"
+           class="swasa-social-btn"
+           onmouseover="this.style.background='#010101';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
+            <span class="iconify" data-icon="simple-icons:tiktok" data-width="15"></span>
+        </a>
+        <a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer"
+           title="YouTube"
+           class="swasa-social-btn"
+           onmouseover="this.style.background='#FF0000';this.style.color='#fff';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
+            <span class="iconify" data-icon="mdi:youtube" data-width="18"></span>
+        </a>
+    </div>
+</div>
+</div>
+
 </div><!-- end #realContent -->
 
 <script>

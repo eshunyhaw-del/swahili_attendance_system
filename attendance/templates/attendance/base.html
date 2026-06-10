@@ -1121,83 +1121,143 @@
             {% if user.is_authenticated %}
 
                 {% if user.is_staff %}
-                    <!-- ── Lecturer / Staff ── -->
-                    <div class="nav-label">Portal</div>
-                    <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:chart-bar-outline"></span> Analytics Dashboard
-                    </a>
-                    <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:calendar-today-outline"></span> Daily Sessions
-                    </a>
-                    <div class="nav-label">Students</div>
-                    <a href="{% url 'attendance:admin_search' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:account-search-outline"></span> Search Students
-                    </a>
-                    <a href="{% url 'attendance:student_report' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:file-chart-outline"></span> Student Report
-                    </a>
-                    <div class="nav-label">Management</div>
-                    <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
-                    </a>
+                <!-- ── Lecturer / Staff ── -->
+                <div class="nav-label">Portal</div>
+                <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> Lecturer Dashboard
+                </a>
+                <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:bar-chart-2"></span> Analytics
+                </a>
+                <div class="nav-label">Students</div>
+                <a href="{% url 'attendance:admin_search' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:account-search-outline"></span> Search Students
+                </a>
+                <a href="{% url 'attendance:student_report' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:file-chart-outline"></span> Student Report
+                </a>
+                <div class="nav-label">Management</div>
+                <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
+                </a>
+                <!-- Community: staff sees Events only -->
+                <div class="nav-label">Community</div>
+                <a href="{% url 'attendance:community_events' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+                </a>
 
                 {% elif user.taprofile %}
-                    <!-- ── Teaching Assistant ── -->
-                    <div class="nav-label">Main Menu</div>
-                    <a href="{% url 'attendance:dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
-                    </a>
-                    <a href="{% url 'attendance:ta_history' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:history"></span> My History
-                    </a>
-                    <a href="{% url 'attendance:ta_add_levels' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:book-edit-outline"></span> Manage Courses
-                    </a>
-                    <a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
-                    </a>
-                    <a href="{% url 'attendance:ta_support' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
-                    </a>
-                    <div class="nav-label">Account</div>
-                    <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
-                    </a>
-                    <a href="{% url 'attendance:support' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
-                    </a>
-                    <a href="{% url 'attendance:ta_guide' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:book-open-variant"></span> TA Guide
-                    </a>
+                <!-- ── Teaching Assistant ── -->
+                <div class="nav-label">Portal</div>
+                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> TA Dashboard
+                </a>
+                <a href="{% url 'attendance:ta_guide' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:book-open"></span> Resources
+                </a>
+                <div class="nav-label">Menu</div>
+                <a href="{% url 'attendance:ta_history' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:history"></span> My History
+                </a>
+                <a href="{% url 'attendance:ta_add_levels' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:book-edit-outline"></span> Manage Courses
+                </a>
+                <a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
+                </a>
+                <a href="{% url 'attendance:ta_support' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
+                </a>
+                <div class="nav-label">Account</div>
+                <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
+                </a>
+                <a href="{% url 'attendance:support' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+                </a>
+                <!-- Community: TA sees Events only -->
+                <div class="nav-label">Community</div>
+                <a href="{% url 'attendance:community_events' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+                </a>
 
                 {% else %}
-                    <!-- ── Student ── -->
-                    <div class="nav-label">Main Menu</div>
-                    <a href="{% url 'attendance:dashboard' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:view-dashboard-outline"></span> Dashboard
-                    </a>
-                    <a href="{% url 'attendance:history' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:history"></span> My History
-                    </a>
-                    <a href="{% url 'attendance:notifications' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:bell-outline"></span> Notifications
-                        {% if notif_type == 'announcement' and unread_notif_count %}
-                        <span class="nav-notif-badge">{{ unread_notif_count|default:'' }}</span>
-                        {% endif %}
-                    </a>
-                    <a href="{% url 'attendance:course_registration' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
-                    </a>
-                    <a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
-                    </a>
-                    <a href="{% url 'attendance:support' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
-                    </a>
-                    <a href="{% url 'attendance:student_guide' %}" class="nav-item">
-                        <span class="iconify" data-icon="mdi:book-open-variant"></span> Student Guide
-                    </a>
+                <!-- ── Student ── -->
+                <div class="nav-label">Portal</div>
+                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> Dashboard
+                </a>
+                <a href="{% url 'attendance:student_guide' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:book-open"></span> Resources
+                </a>
+                <div class="nav-label">Menu</div>
+                <a href="{% url 'attendance:history' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:history"></span> My History
+                </a>
+                <a href="{% url 'attendance:notifications' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:bell-outline"></span> Notifications
+                    {% if notif_type == 'announcement' and unread_notif_count %}
+                    <span class="nav-notif-badge">{{ unread_notif_count|default:'' }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'attendance:course_registration' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
+                </a>
+                <a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+                </a>
+                <a href="{% url 'attendance:support' %}" class="nav-item">
+                    <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+                </a>
+                <!-- Community: students see all items -->
+                <div class="nav-label">Community</div>
+                <a href="{% url 'attendance:community_events' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+                </a>
+                <a href="{% url 'attendance:community_executives' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:users"></span> Know Your Executives
+                </a>
+                {% with profile=user.userprofile %}
+                {% if profile.level and profile.level.name == '400' %}
+                <a href="{% url 'attendance:community_alumni' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:graduation-cap"></span> Alumni
+                </a>
                 {% endif %}
+                {% endwith %}
+                <a href="{% url 'attendance:community_clubs' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:shield"></span> SWASA Clubs
+                </a>
+                <a href="{% url 'attendance:community_dues' %}" class="nav-item">
+                    <span class="iconify" data-icon="lucide:credit-card"></span> Pay Your Dues
+                </a>
+                {% endif %}
+
+                <!-- ── Quick Links (all roles) ── -->
+                <div class="nav-label">Quick Links</div>
+                <a href="https://www.ug.edu.gh/student-life" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:external-link"></span> Life at UG
+                </a>
+                <a href="https://balme.ug.edu.gh/" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:library"></span> Balme Library
+                </a>
+
+                <!-- ── Follow Us (all roles) ── -->
+                <div class="nav-label">Follow Us</div>
+                <a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:message-circle"></span> WhatsApp Community
+                </a>
+                <a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:instagram"></span> Instagram
+                </a>
+                <a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:facebook"></span> Facebook
+                </a>
+                <a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:music"></span> TikTok
+                </a>
+                <a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer" class="nav-item">
+                    <span class="iconify" data-icon="lucide:youtube"></span> YouTube
+                </a>
 
             {% endif %}
         </nav>

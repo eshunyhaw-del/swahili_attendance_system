@@ -2669,3 +2669,44 @@ def change_password(request):
             return redirect('attendance:dashboard')
 
     return render(request, 'attendance/change_password.html', {'error': error})
+
+
+# ── Community ─────────────────────────────────────────────────────────────────
+
+@login_required
+def community_events(request):
+    from .models import SWASAEvent
+    today = timezone.localdate()
+    events = list(SWASAEvent.objects.filter(is_published=True, event_type='event').order_by('event_date'))
+    news = list(SWASAEvent.objects.filter(is_published=True, event_type__in=['news', 'announcement']).order_by('-event_date'))
+    return render(request, 'attendance/community/events.html', {
+        'events': events,
+        'news': news,
+        'today': today,
+    })
+
+
+@login_required
+def community_executives(request):
+    return render(request, 'attendance/community/executives.html')
+
+
+@login_required
+def community_alumni(request):
+    if not request.user.is_staff:
+        profile = get_profile(request.user)
+        is_level_400 = profile and profile.level and profile.level.name == '400'
+        if not is_level_400:
+            messages.warning(request, 'The Alumni Network is only available to Level 400 students.')
+            return redirect(reverse('attendance:dashboard'))
+    return render(request, 'attendance/community/alumni.html')
+
+
+@login_required
+def community_clubs(request):
+    return render(request, 'attendance/community/clubs.html')
+
+
+@login_required
+def community_dues(request):
+    return render(request, 'attendance/community/dues.html')

@@ -1,0 +1,256 @@
+{% extends "attendance/base.html" %}
+{% block title %}Events &amp; News — SWASA{% endblock %}
+
+{% block content %}
+<style>
+.comm-wrap { max-width: 760px; margin: 0 auto; padding: 0 0 4rem; }
+
+.comm-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.375rem;
+    position: relative; overflow: hidden;
+}
+.comm-header::before {
+    content: ''; position: absolute; top: -40px; right: 5%;
+    width: 160px; height: 160px;
+    background: rgba(242,195,26,0.07); border-radius: 50%; pointer-events: none;
+}
+.comm-header h1 { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; z-index: 1; }
+.comm-header p  { font-size: 12.5px; color: rgba(255,255,255,0.6); font-weight: 500; margin: 0; position: relative; z-index: 1; }
+
+/* Tabs */
+.ev-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+.ev-tab {
+    padding: 0.5rem 1.25rem; border-radius: 99px;
+    font-size: 13px; font-weight: 600; cursor: pointer; border: none;
+    background: var(--bg-surface); color: var(--text-muted);
+    border: 1.5px solid var(--border); transition: all 0.15s; font-family: inherit;
+}
+.ev-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+html[data-theme="dark"] .ev-tab { background: var(--bg-subtle); }
+
+/* Event cards */
+.ev-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xs);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.ev-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.ev-card.past { opacity: 0.6; }
+
+.ev-card-head {
+    padding: 1rem 1.25rem 0.75rem;
+    display: flex; align-items: flex-start; gap: 0.75rem;
+}
+.ev-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0;
+}
+.ev-badge-event { background: rgba(242,195,26,0.15); color: #8A6A00; }
+html[data-theme="dark"] .ev-badge-event { background: rgba(242,195,26,0.15); color: var(--gold); }
+.ev-badge-news { background: rgba(13,36,114,0.1); color: var(--primary); }
+html[data-theme="dark"] .ev-badge-news { background: rgba(27,58,156,0.2); color: #7BAEE8; }
+.ev-badge-announcement { background: rgba(232,93,38,0.1); color: var(--orange); }
+
+.ev-title { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; }
+.ev-meta {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+    padding: 0 1.25rem; margin-bottom: 0.75rem;
+}
+.ev-meta-item { display: flex; align-items: center; gap: 0.3rem; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.ev-desc { padding: 0 1.25rem 1rem; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.ev-desc-short { }
+.ev-desc-full  { display: none; }
+.ev-read-more  {
+    background: none; border: none; cursor: pointer; color: var(--primary);
+    font-size: 12px; font-weight: 700; padding: 0; font-family: inherit;
+    text-decoration: underline; text-underline-offset: 2px;
+}
+html[data-theme="dark"] .ev-read-more { color: var(--gold); }
+
+.ev-countdown {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    background: rgba(30,158,94,0.12); color: var(--green);
+    margin-left: auto; white-space: nowrap;
+}
+.ev-countdown.today { background: rgba(242,195,26,0.15); color: #8A6A00; }
+html[data-theme="dark"] .ev-countdown.today { color: var(--gold); }
+.ev-countdown.past  { background: rgba(107,114,128,0.12); color: var(--text-muted); }
+
+/* Empty state */
+.ev-empty {
+    text-align: center; padding: 3.5rem 2rem;
+    background: var(--bg-surface); border-radius: var(--radius-lg);
+    border: 2px dashed var(--border); color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+}
+.ev-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; }
+
+/* Tab panels */
+.ev-panel { display: none; }
+.ev-panel.active { display: block; }
+</style>
+
+<div class="comm-wrap">
+    <div class="comm-header">
+        <h1>📢 Events &amp; News</h1>
+        <p>Stay updated with SWASA events, news, and announcements</p>
+    </div>
+
+    <div class="ev-tabs">
+        <button class="ev-tab active" onclick="switchTab('events', this)">Events</button>
+        <button class="ev-tab" onclick="switchTab('news', this)">News &amp; Announcements</button>
+    </div>
+
+    <!-- Events Panel -->
+    <div class="ev-panel active" id="panel-events">
+        {% if events %}
+            {% for ev in events %}
+            {% with days_diff=ev.event_date|timeuntil:today %}
+            <div class="ev-card {% if ev.event_date < today %}past{% endif %}">
+                <div class="ev-card-head">
+                    <div style="flex:1;min-width:0;">
+                        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+                            <span class="ev-badge ev-badge-event">Event</span>
+                            {% if ev.event_date == today %}
+                            <span class="ev-countdown today">🎉 Today!</span>
+                            {% elif ev.event_date > today %}
+                            <span class="ev-countdown">
+                                <span class="iconify" data-icon="mdi:clock-outline" data-width="11"></span>
+                                {{ ev.event_date|timeuntil }}
+                            </span>
+                            {% else %}
+                            <span class="ev-countdown past">Past event</span>
+                            {% endif %}
+                        </div>
+                        <div class="ev-title">{{ ev.title }}</div>
+                    </div>
+                </div>
+                <div class="ev-meta">
+                    <span class="ev-meta-item">
+                        <span class="iconify" data-icon="mdi:calendar-outline" data-width="13"></span>
+                        {{ ev.event_date|date:"D, j M Y" }}
+                    </span>
+                    {% if ev.event_time %}
+                    <span class="ev-meta-item">
+                        <span class="iconify" data-icon="mdi:clock-outline" data-width="13"></span>
+                        {{ ev.event_time|time:"g:i A" }}
+                    </span>
+                    {% endif %}
+                    {% if ev.venue %}
+                    <span class="ev-meta-item">
+                        <span class="iconify" data-icon="mdi:map-marker-outline" data-width="13"></span>
+                        {{ ev.venue }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="ev-desc" id="desc-{{ ev.id }}">
+                    <div class="ev-desc-short">
+                        {{ ev.description|truncatechars:150 }}
+                        {% if ev.description|length > 150 %}
+                        <button class="ev-read-more" onclick="toggleDesc({{ ev.id }})">Read more</button>
+                        {% endif %}
+                    </div>
+                    <div class="ev-desc-full">
+                        {{ ev.description }}
+                        <button class="ev-read-more" onclick="toggleDesc({{ ev.id }})">Show less</button>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        {% else %}
+            <div class="ev-empty">
+                <span class="ev-empty-icon">🎉</span>
+                No upcoming events. Check back soon!
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- News Panel -->
+    <div class="ev-panel" id="panel-news">
+        {% if news %}
+            {% for ev in news %}
+            <div class="ev-card">
+                <div class="ev-card-head">
+                    <div style="flex:1;min-width:0;">
+                        <div style="margin-bottom:0.4rem;">
+                            <span class="ev-badge {% if ev.event_type == 'news' %}ev-badge-news{% else %}ev-badge-announcement{% endif %}">
+                                {{ ev.get_event_type_display }}
+                            </span>
+                        </div>
+                        <div class="ev-title">{{ ev.title }}</div>
+                    </div>
+                </div>
+                <div class="ev-meta">
+                    <span class="ev-meta-item">
+                        <span class="iconify" data-icon="mdi:calendar-outline" data-width="13"></span>
+                        {{ ev.event_date|date:"D, j M Y" }}
+                    </span>
+                </div>
+                <div class="ev-desc" id="ndesc-{{ ev.id }}">
+                    <div class="ev-desc-short">
+                        {{ ev.description|truncatechars:150 }}
+                        {% if ev.description|length > 150 %}
+                        <button class="ev-read-more" onclick="toggleNDesc({{ ev.id }})">Read more</button>
+                        {% endif %}
+                    </div>
+                    <div class="ev-desc-full">
+                        {{ ev.description }}
+                        <button class="ev-read-more" onclick="toggleNDesc({{ ev.id }})">Show less</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="ev-empty">
+                <span class="ev-empty-icon">📰</span>
+                No news or announcements yet. Check back soon!
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function switchTab(tab, btn) {
+    document.querySelectorAll('.ev-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.ev-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function toggleDesc(id) {
+    var container = document.getElementById('desc-' + id);
+    var s = container.querySelector('.ev-desc-short');
+    var f = container.querySelector('.ev-desc-full');
+    if (f.style.display === 'block') {
+        f.style.display = 'none';
+        s.style.display = 'block';
+    } else {
+        s.style.display = 'none';
+        f.style.display = 'block';
+    }
+}
+
+function toggleNDesc(id) {
+    var container = document.getElementById('ndesc-' + id);
+    var s = container.querySelector('.ev-desc-short');
+    var f = container.querySelector('.ev-desc-full');
+    if (f.style.display === 'block') {
+        f.style.display = 'none';
+        s.style.display = 'block';
+    } else {
+        s.style.display = 'none';
+        f.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

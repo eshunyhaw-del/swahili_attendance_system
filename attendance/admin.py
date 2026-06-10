@@ -3,6 +3,7 @@ from .models import (
     Level, Semester, Course, ClassSession, UserProfile,
     TAProfile, TACode, AttendanceCode, AttendanceRecord,
     SupportTicket, CodeMisuseAlert, CulturalDate, SystemNotification,
+    SWASAEvent,
 )
 
 
@@ -138,3 +139,24 @@ class SystemNotificationAdmin(admin.ModelAdmin):
     list_filter  = ('notification_type', 'is_read')
     search_fields = ('title', 'user__username')
     readonly_fields = ('created_at', 'read_at')
+
+
+@admin.register(SWASAEvent)
+class SWASAEventAdmin(admin.ModelAdmin):
+    list_display = ('title', 'event_type', 'event_date', 'venue', 'is_published', 'created_at')
+    list_filter = ('event_type', 'event_date', 'is_published')
+    list_editable = ('is_published',)
+    search_fields = ('title', 'description', 'venue')
+    ordering = ('-event_date',)
+    readonly_fields = ('created_at',)
+    fieldsets = (
+        ('Content', {
+            'fields': ('title', 'description', 'event_type', 'image_url'),
+        }),
+        ('Date & Location', {
+            'fields': ('event_date', 'event_time', 'venue'),
+        }),
+        ('Publishing', {
+            'fields': ('is_published', 'created_by', 'created_at'),
+        }),
+    )

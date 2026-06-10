@@ -72,4 +72,11 @@ urlpatterns = [
     path("admin/pending-tas/", views.pending_tas, name="pending_tas"),
     path("export-level/<int:level_id>/", views.export_level_attendance, name="export_level"),
     path("student-report/", views.student_attendance_report, name="student_report"),
+
+    # Community
+    path("community/events/", views.community_events, name="community_events"),
+    path("community/executives/", views.community_executives, name="community_executives"),
+    path("community/alumni/", views.community_alumni, name="community_alumni"),
+    path("community/clubs/", views.community_clubs, name="community_clubs"),
+    path("community/dues/", views.community_dues, name="community_dues"),
 ]

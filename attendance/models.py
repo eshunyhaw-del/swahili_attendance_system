@@ -298,6 +298,30 @@ class SystemNotification(models.Model):
         return f"SysNotif → {self.user.username}: {self.title[:50]}"
 
 
+class SWASAEvent(models.Model):
+    EVENT_CHOICES = [
+        ('event', 'Event'),
+        ('news', 'News'),
+        ('announcement', 'Announcement'),
+    ]
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    event_date = models.DateField()
+    event_time = models.TimeField(null=True, blank=True)
+    venue = models.CharField(max_length=200, blank=True)
+    event_type = models.CharField(max_length=20, choices=EVENT_CHOICES, default='event')
+    image_url = models.URLField(blank=True)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_events')
+
+    class Meta:
+        ordering = ['-event_date']
+
+    def __str__(self):
+        return f"{self.get_event_type_display()}: {self.title} ({self.event_date})"
+
+
 class OTPCode(models.Model):
     PURPOSE_LOGIN = 'login'
     PURPOSE_PASSWORD_RESET = 'password_reset'
