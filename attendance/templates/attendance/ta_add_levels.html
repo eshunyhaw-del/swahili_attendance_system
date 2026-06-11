@@ -4,20 +4,20 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.1);
-    --green-bd:   rgba(26,158,96,0.25);
-    --red:        #DC2626;
-    --red-lt:     rgba(220,38,38,0.08);
-    --red-bd:     rgba(220,38,38,0.22);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.1);
+    --green-bd: rgba(26,158,96,0.25);
+    --red: #DC2626;
+    --red-lt: rgba(220,38,38,0.08);
+    --red-bd: rgba(220,38,38,0.22);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -29,18 +29,13 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* Header */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 100%);
     color: #fff;
     border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem;
     margin-bottom: 1.25rem;
     position: relative; overflow: hidden;
     box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px;
-    background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .back-link {
     display: inline-flex; align-items: center; gap: 0.3rem;
@@ -177,29 +172,29 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .level-name { font-size: 14px; font-weight: 700; line-height: 1.2; }
 .level-hint { font-size: 11px; font-weight: 600; margin-top: 2px; }
 
-.level-label-assigned .level-hint            { color: var(--green); }
-.level-label-assigned:hover .level-hint      { color: var(--red); }
+.level-label-assigned .level-hint { color: var(--green); }
+.level-label-assigned:hover .level-hint { color: var(--red); }
 .level-option input:not(:checked) + .level-label-assigned .level-hint { color: var(--red); }
 
-.level-label-available .level-hint           { color: var(--muted); }
-.level-label-available:hover .level-hint     { color: var(--primary); }
+.level-label-available .level-hint { color: var(--muted); }
+.level-label-available:hover .level-hint { color: var(--primary); }
 .level-option input:checked + .level-label-available .level-hint { color: var(--green); }
 
 /* Hint text for assigned vs unchecked states */
 .hint-assigned { display: block; }
-.hint-remove   { display: none; }
+.hint-remove { display: none; }
 
-.level-label-assigned:hover .hint-assigned     { display: none; }
-.level-label-assigned:hover .hint-remove       { display: block; }
+.level-label-assigned:hover .hint-assigned { display: none; }
+.level-label-assigned:hover .hint-remove { display: block; }
 .level-option input:not(:checked) + .level-label-assigned .hint-assigned { display: none; }
-.level-option input:not(:checked) + .level-label-assigned .hint-remove   { display: block; }
+.level-option input:not(:checked) + .level-label-assigned .hint-remove { display: block; }
 
-.hint-add     { display: block; }
-.hint-added   { display: none; }
+.hint-add { display: block; }
+.hint-added { display: none; }
 
-.level-label-available:hover .hint-add         { display: none; }
-.level-label-available:hover .hint-added       { display: block; }
-.level-option input:checked + .level-label-available .hint-add   { display: none; }
+.level-label-available:hover .hint-add { display: none; }
+.level-label-available:hover .hint-added { display: block; }
+.level-option input:checked + .level-label-available .hint-add { display: none; }
 .level-option input:checked + .level-label-available .hint-added { display: block; }
 
 /* Divider */
@@ -238,56 +233,56 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 <div class="wrap">
 
-    <div class="page-header">
-        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
-        </a>
-        <h1>Manage My Courses</h1>
-        <div class="page-header-sub">Add or remove the levels you teach</div>
-    </div>
+<div class="page-header">
+<a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+</a>
+<h1>Manage My Courses</h1>
+<div class="page-header-sub">Add or remove the levels you teach</div>
+</div>
 
     {% if messages %}
     {% for message in messages %}
-    <div class="alert">
-        <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+<div class="alert">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span>
         {{ message }}
-    </div>
+</div>
     {% endfor %}
     {% endif %}
 
-    <form method="post">
+<form method="post">
         {% csrf_token %}
 
         {% with assigned=all_levels|dictsort:"name" %}
 
         {# ── Currently assigned levels ── #}
         {% if assigned_ids %}
-        <div class="section-label">
-            <span class="iconify" data-icon="mdi:check-circle-outline" style="color:var(--green);"></span>
+<div class="section-label">
+<span class="iconify" data-icon="mdi:check-circle-outline" style="color:var(--green);"></span>
             Currently Teaching — uncheck to remove
-        </div>
-        <div class="level-list">
+</div>
+<div class="level-list">
             {% for level in all_levels %}
             {% if level.id in assigned_ids %}
-            <div class="level-option">
-                <input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}" checked>
-                <label class="level-label-assigned" for="lvl-{{ level.id }}">
-                    <div class="toggle-icon">
-                        <span class="iconify icon-check" data-icon="mdi:check-bold"></span>
-                        <span class="iconify icon-remove" data-icon="mdi:minus-circle-outline" style="display:none;"></span>
-                    </div>
-                    <div>
-                        <div class="level-name">Level {{ level.name }}</div>
-                        <div class="level-hint">
-                            <span class="hint-assigned">Currently teaching</span>
-                            <span class="hint-remove">Uncheck to remove</span>
-                        </div>
-                    </div>
-                </label>
-            </div>
+<div class="level-option">
+<input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}" checked>
+<label class="level-label-assigned" for="lvl-{{ level.id }}">
+<div class="toggle-icon">
+<span class="iconify icon-check" data-icon="mdi:check-bold"></span>
+<span class="iconify icon-remove" data-icon="mdi:minus-circle-outline" style="display:none;"></span>
+</div>
+<div>
+<div class="level-name">Level {{ level.name }}</div>
+<div class="level-hint">
+<span class="hint-assigned">Currently teaching</span>
+<span class="hint-remove">Uncheck to remove</span>
+</div>
+</div>
+</label>
+</div>
             {% endif %}
             {% endfor %}
-        </div>
+</div>
         {% endif %}
 
         {# ── Available levels to add ── #}
@@ -299,62 +294,62 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
         {% for level in all_levels %}{% if level.id not in assigned_ids %}
         {% if forloop.first %}
         {% if assigned_ids %}<hr class="divider">{% endif %}
-        <div class="section-label">
-            <span class="iconify" data-icon="mdi:plus-circle-outline"></span>
+<div class="section-label">
+<span class="iconify" data-icon="mdi:plus-circle-outline"></span>
             Available to Add — check to add
-        </div>
-        <div class="level-list">
+</div>
+<div class="level-list">
         {% endif %}
-            <div class="level-option">
-                <input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}">
-                <label class="level-label-available" for="lvl-{{ level.id }}">
-                    <div class="toggle-icon">
-                        <span class="iconify" data-icon="mdi:plus"></span>
-                    </div>
-                    <div>
-                        <div class="level-name">Level {{ level.name }}</div>
-                        <div class="level-hint">
-                            <span class="hint-add">Tap to add to your levels</span>
-                            <span class="hint-added">Will be added on save</span>
-                        </div>
-                    </div>
-                </label>
-            </div>
+<div class="level-option">
+<input type="checkbox" name="levels" value="{{ level.id }}" id="lvl-{{ level.id }}">
+<label class="level-label-available" for="lvl-{{ level.id }}">
+<div class="toggle-icon">
+<span class="iconify" data-icon="mdi:plus"></span>
+</div>
+<div>
+<div class="level-name">Level {{ level.name }}</div>
+<div class="level-hint">
+<span class="hint-add">Tap to add to your levels</span>
+<span class="hint-added">Will be added on save</span>
+</div>
+</div>
+</label>
+</div>
         {% if forloop.last %}</div>{% endif %}
         {% endif %}{% endfor %}
 
         {% if not all_levels %}
-        <div class="no-levels">No levels have been set up yet. Contact the administrator.</div>
+<div class="no-levels">No levels have been set up yet. Contact the administrator.</div>
         {% endif %}
 
         {% endwith %}
 
-        <button type="submit" class="btn-save">
-            <span class="iconify" data-icon="mdi:content-save-outline"></span>
+<button type="submit" class="btn-save">
+<span class="iconify" data-icon="mdi:content-save-outline"></span>
             Save Changes
-        </button>
-    </form>
+</button>
+</form>
 
 </div>
 
 <script>
 // Swap the check/minus icon on assigned cards when hovering or unchecked
 document.querySelectorAll('.level-label-assigned').forEach(label => {
-    const checkIcon  = label.querySelector('.icon-check');
+    const checkIcon = label.querySelector('.icon-check');
     const removeIcon = label.querySelector('.icon-remove');
     const input = label.previousElementSibling;
 
     function syncIcons() {
         const isChecked = input.checked;
-        checkIcon.style.display  = isChecked ? 'block' : 'none';
-        removeIcon.style.display = isChecked ? 'none'  : 'block';
+        checkIcon.style.display = isChecked ? 'block' : 'none';
+        removeIcon.style.display = isChecked ? 'none' : 'block';
     }
 
     syncIcons();
     input.addEventListener('change', syncIcons);
     label.addEventListener('mouseenter', () => {
         if (input.checked) {
-            checkIcon.style.display  = 'none';
+            checkIcon.style.display = 'none';
             removeIcon.style.display = 'block';
         }
     });
@@ -363,7 +358,7 @@ document.querySelectorAll('.level-label-assigned').forEach(label => {
 
 // Swap the plus icon on available cards when checked
 document.querySelectorAll('.level-label-available').forEach(label => {
-    const icon  = label.querySelector('.iconify');
+    const icon = label.querySelector('.iconify');
     const input = label.previousElementSibling;
 
     function syncIcon() {

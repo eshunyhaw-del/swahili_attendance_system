@@ -2,20 +2,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Sign In — SWASA Attendance</title>
-    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="{% static 'js/iconify.min.js' %}"></script>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>Sign In — SWASA Attendance</title>
+<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<style>
         :root {
-            --navy:      #0D2472;
+            --navy: #0D2472;
             --navy-dark: #091A55;
-            --gold:      #F2C31A;
+            --gold: #F2C31A;
             --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
         }
 
@@ -47,7 +47,6 @@
             max-width: 420px;
             box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.18);
         }
 
         /* ─── Navy header ─── */
@@ -58,26 +57,27 @@
             position: relative;
             overflow: hidden;
         }
-        .card-top::before {
-            content: ''; position: absolute; top: -60px; left: -60px;
-            width: 220px; height: 220px;
-            background: rgba(255,255,255,0.04); border-radius: 50%;
-        }
-        .card-top::after {
-            content: ''; position: absolute; bottom: -40px; right: -40px;
-            width: 160px; height: 160px;
-            background: rgba(242,195,26,0.07); border-radius: 50%;
-        }
 
-        .brand-icon {
-            width: 52px; height: 52px;
-            background: var(--gold);
-            border-radius: var(--r-md);
+        .auth-logo {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(242,195,26,0.5);
+            flex-shrink: 0;
+        }
+        .auth-brand {
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 0.75rem;
-            font-size: 26px; color: var(--navy-dark);
-            box-shadow: 0 4px 12px rgba(242,195,26,0.45);
-            position: relative; z-index: 1;
+            gap: 12px; margin-bottom: 0.5rem;
+        }
+        .auth-brand-text {
+            display: flex; flex-direction: column; line-height: 1.3;
+        }
+        .auth-brand-name {
+            font-size: 1.1rem; font-weight: 700; color: #FFFFFF;
+        }
+        .auth-brand-sub {
+            font-size: 11px; font-weight: 400;
+            color: rgba(255,255,255,0.75); letter-spacing: 0.2px;
         }
 
         .card-top h1 {
@@ -88,6 +88,7 @@
         .card-top-sub {
             font-size: 12px; color: rgba(255,255,255,0.6);
             font-weight: 500; position: relative; z-index: 1;
+            text-align: center;
         }
 
         /* ─── Form body ─── */
@@ -232,7 +233,7 @@
 
         .reg-link-text { flex: 1; }
         .reg-link-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
-        .reg-link-sub   { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; }
+        .reg-link-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; }
 
         .reg-link-chevron { color: rgba(255,255,255,0.35); font-size: 18px; flex-shrink: 0; }
 
@@ -242,111 +243,114 @@
             font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.7;
         }
         .card-foot a { color: rgba(255,255,255,0.35); text-decoration: none; }
-    </style>
+</style>
 </head>
 <body>
 
 <div class="card">
 
-    <!-- Navy header -->
-    <div class="card-top">
-        <div class="brand-icon">
-            <span class="iconify" data-icon="mdi:fingerprint"></span>
-        </div>
-        <h1>SWASA</h1>
-        <div class="card-top-sub">Sign in to access your portal</div>
-    </div>
+<!-- Navy header -->
+<div class="card-top">
+<div class="auth-brand">
+<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA Logo" class="auth-logo"/>
+<div class="auth-brand-text">
+<span class="auth-brand-name">SWASA Attendance</span>
+<span class="auth-brand-sub">University of Ghana</span>
+</div>
+</div>
+<div class="card-top-sub">Sign in to access your portal</div>
+</div>
 
-    <!-- Form body -->
-    <div class="card-body">
+<!-- Form body -->
+<div class="card-body">
 
         {% if login_error %}
-        <div class="error-banner">
-            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+<div class="error-banner">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
             Invalid email or password. Please check and try again.
-        </div>
+</div>
         {% endif %}
 
-        <form method="post" autocomplete="on">
+<form method="post" autocomplete="on">
             {% csrf_token %}
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
-            <div class="field">
-                <label class="field-label" for="id_email">Email Address</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:email-outline"></span>
-                    <input type="email" name="email" id="id_email"
-                           class="field-input" placeholder="your@email.com"
+<div class="field">
+<label class="field-label" for="id_email">Email Address</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:email-outline"></span>
+<input type="email" name="email" id="id_email"
+                           class="field-input" placeholder="example@gmail.com"
                            required autocomplete="email">
-                </div>
-            </div>
+</div>
+</div>
 
-            <div class="field">
-                <label class="field-label" for="id_password">Password</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
-                    <input type="password" name="password" id="id_password"
+<div class="field">
+<label class="field-label" for="id_password">Password</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
+<input type="password" name="password" id="id_password"
                            class="field-input" placeholder="Your password"
                            required autocomplete="current-password">
-                    <button type="button" class="pw-toggle" onclick="togglePw()" aria-label="Show/hide password">
-                        <span class="iconify" id="pwIcon" data-icon="mdi:eye-outline"></span>
-                    </button>
-                </div>
-            </div>
+<button type="button" class="pw-toggle" onclick="togglePw()" aria-label="Show/hide password">
+<span class="iconify" id="pwIcon" data-icon="mdi:eye-outline"></span>
+</button>
+</div>
+</div>
 
-            <div class="util-row">
-                <label class="check-label">
-                    <input type="checkbox" name="remember_me">
+<div class="util-row">
+<label class="check-label">
+<input type="checkbox" name="remember_me">
                     Keep me signed in
-                </label>
-                <a href="{% url 'attendance:otp_password_reset' %}" class="forgot-link">Forgot password?</a>
-            </div>
+</label>
+<a href="{% url 'attendance:otp_password_reset' %}" class="forgot-link">Forgot password?</a>
+</div>
 
-            <div class="kiswahili-cta">Ingia Sasa</div>
-            <button type="submit" class="btn-signin">
+{% comment %} <div class="kiswahili-cta">Ingia Sasa</div> {% endcomment %}
+<button type="submit" class="btn-signin">
                 Sign In
-                <span class="iconify" data-icon="mdi:arrow-right" style="font-size:18px;"></span>
-            </button>
-        </form>
+<span class="iconify" data-icon="mdi:arrow-right" style="font-size:18px;"></span>
+</button>
+</form>
 
-        <div class="divider"><span>New here?</span></div>
+<div class="divider"><span>New here?</span></div>
 
-        <a href="{% url 'attendance:register' %}" class="reg-link">
-            <div class="reg-link-icon">
-                <span class="iconify" data-icon="mdi:school-outline"></span>
-            </div>
-            <div class="reg-link-text">
-                <div class="reg-link-title">Jisajili — Register as Student</div>
-                <div class="reg-link-sub">Create your student portal account</div>
-            </div>
-            <span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
-        </a>
+<a href="{% url 'attendance:register' %}" class="reg-link">
+<div class="reg-link-icon">
+<span class="iconify" data-icon="mdi:school-outline"></span>
+</div>
+<div class="reg-link-text">
+<div class="reg-link-title">Register as Student</div>
+{% comment %} <div class="reg-link-sub">Create your student portal account</div> {% endcomment %}
+</div>
+<span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
+</a>
 
-        <a href="{% url 'attendance:ta_register' %}" class="reg-link">
-            <div class="reg-link-icon">
-                <span class="iconify" data-icon="mdi:account-tie-outline"></span>
-            </div>
-            <div class="reg-link-text">
-                <div class="reg-link-title">Jisajili — Register as TA</div>
-                <div class="reg-link-sub">Create your Teaching Assistant account</div>
-            </div>
-            <span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
-        </a>
+<a href="{% url 'attendance:ta_register' %}" class="reg-link">
+<div class="reg-link-icon">
+<span class="iconify" data-icon="mdi:account-tie-outline"></span>
+</div>
+<div class="reg-link-text">
+<div class="reg-link-title">Register as TA</div>
+{% comment %} <div class="reg-link-sub">Create your Teaching Assistant account</div> {% endcomment %}
+</div>
+<span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
+</a>
 
-    </div>
+</div>
 
-    <div class="card-foot">
-        SWASA Attendance · University of Ghana<br>
-        Department of African and Asian Languages<br>
-        <a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener">Developed by Cradle Premier Network</a>
-    </div>
+<div class="card-foot">
+        {% comment %} SWASA Attendance · University of Ghana<br>
+        Department of African and Asian Languages<br> {% endcomment %}
+<a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener">Developed by Cradle Premier Network</a>
+</div>
 
 </div>
 
 <script>
 function togglePw() {
     const input = document.getElementById('id_password');
-    const icon  = document.getElementById('pwIcon');
+    const icon = document.getElementById('pwIcon');
     if (input.type === 'password') {
         input.type = 'text';
         icon.setAttribute('data-icon', 'mdi:eye-off-outline');

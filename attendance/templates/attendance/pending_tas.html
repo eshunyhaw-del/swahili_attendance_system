@@ -15,17 +15,12 @@ body { background: var(--bg-base) !important; background-image: none !important;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
     position: relative; overflow: hidden;
 }
-.pta-page-header::after {
-    content: ''; position: absolute; top: -40px; right: 8%;
-    width: 140px; height: 140px; border-radius: 50%;
-    background: rgba(242,195,26,0.07); pointer-events: none;
-}
 .pta-page-header h1 { font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem; position: relative; z-index: 1; }
-.pta-page-header p  { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
+.pta-page-header p { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
 .pta-header-count { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(242,195,26,0.18); color: #F2C31A; border: 1px solid rgba(242,195,26,0.28); position: relative; z-index: 1; white-space: nowrap; }
 
 .pta-card {
-    background: var(--bg-surface); border: 1px solid var(--border);
+    background: var(--bg-surface);
     border-radius: var(--radius-lg); padding: 1.5rem;
     margin-bottom: 1.125rem; box-shadow: var(--shadow-xs);
     border-left: 4px solid #0D2472;
@@ -40,7 +35,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
     display: flex; align-items: center; justify-content: center;
     font-size: 19px; font-weight: 800; flex-shrink: 0; border: 1px solid rgba(13,36,114,0.12);
 }
-.pta-name  { font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
+.pta-name { font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
 .pta-email { font-size: 12px; color: var(--text-muted); }
 
 .pta-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1.25rem; margin-bottom: 1.25rem; }
@@ -89,84 +84,84 @@ html[data-theme="dark"] .pta-lvl-chip {
 
 .pta-empty {
     text-align: center; padding: 3.5rem 1rem;
-    background: var(--bg-surface); border: 1px solid var(--border);
+    background: var(--bg-surface);
     border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);
 }
 .pta-empty .iconify { font-size: 52px; color: #1E9E5E; display: block; margin: 0 auto 0.875rem; }
 .pta-empty h3 { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; }
-.pta-empty p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+.pta-empty p { font-size: 13px; color: var(--text-muted); margin: 0; }
 </style>
 
 <div class="pta-wrap">
 
-    <div class="pta-page-header">
-        <div>
-            <h1>Pending TA Approvals</h1>
-            <p>Review and approve teaching assistant applications</p>
-        </div>
+<div class="pta-page-header">
+<div>
+<h1>Pending TA Approvals</h1>
+<p>Review and approve teaching assistant applications</p>
+</div>
         {% if pending_tas %}
-        <span class="pta-header-count">{{ pending_tas|length }} pending</span>
+<span class="pta-header-count">{{ pending_tas|length }} pending</span>
         {% endif %}
-    </div>
+</div>
 
     {% for ta in pending_tas %}
-    <div class="pta-card">
+<div class="pta-card">
 
-        <div class="pta-card-top">
-            <div class="pta-avatar">{{ ta.user.get_full_name|first|upper|default:ta.user.username|first|upper }}</div>
-            <div>
-                <div class="pta-name">{{ ta.user.get_full_name|default:ta.user.username }}</div>
-                <div class="pta-email">{{ ta.user.email }}</div>
-            </div>
-        </div>
+<div class="pta-card-top">
+<div class="pta-avatar">{{ ta.user.get_full_name|first|upper|default:ta.user.username|first|upper }}</div>
+<div>
+<div class="pta-name">{{ ta.user.get_full_name|default:ta.user.username }}</div>
+<div class="pta-email">{{ ta.user.email }}</div>
+</div>
+</div>
 
-        <div class="pta-details">
-            <div>
-                <div class="pta-detail-lbl">Username</div>
-                <div class="pta-detail-val">{{ ta.user.username }}</div>
-            </div>
-            <div>
-                <div class="pta-detail-lbl">Phone</div>
-                <div class="pta-detail-val">{{ ta.phone_number|default:"—" }}</div>
-            </div>
-            <div style="grid-column: 1 / -1;">
-                <div class="pta-detail-lbl">Requested Levels</div>
-                <div class="pta-detail-val" style="margin-top:4px;">
+<div class="pta-details">
+<div>
+<div class="pta-detail-lbl">Username</div>
+<div class="pta-detail-val">{{ ta.user.username }}</div>
+</div>
+<div>
+<div class="pta-detail-lbl">Phone</div>
+<div class="pta-detail-val">{{ ta.phone_number|default:"—" }}</div>
+</div>
+<div style="grid-column: 1 / -1;">
+<div class="pta-detail-lbl">Requested Levels</div>
+<div class="pta-detail-val" style="margin-top:4px;">
                     {% for level in ta.assigned_levels.all %}
-                    <span class="pta-lvl-chip">Level {{ level.name }}</span>
+<span class="pta-lvl-chip">Level {{ level.name }}</span>
                     {% empty %}
-                    <span style="color:var(--text-muted); font-style:italic;">None specified</span>
+<span style="color:var(--text-muted); font-style:italic;">None specified</span>
                     {% endfor %}
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
 
-        <form method="post">
+<form method="post">
             {% csrf_token %}
-            <input type="hidden" name="ta_profile_id" value="{{ ta.id }}">
-            <div class="pta-actions">
-                <div class="pta-notes-group">
-                    <label class="pta-notes-lbl">Notes (optional)</label>
-                    <textarea name="approval_notes" rows="2" class="pta-notes" placeholder="Add a note for this decision…"></textarea>
-                </div>
-                <div class="pta-btn-group">
-                    <button type="submit" name="action" value="reject" class="pta-btn-reject">
-                        <span class="iconify" data-icon="mdi:close"></span> Reject
-                    </button>
-                    <button type="submit" name="action" value="approve" class="pta-btn-approve">
-                        <span class="iconify" data-icon="mdi:check"></span> Approve
-                    </button>
-                </div>
-            </div>
-        </form>
+<input type="hidden" name="ta_profile_id" value="{{ ta.id }}">
+<div class="pta-actions">
+<div class="pta-notes-group">
+<label class="pta-notes-lbl">Notes (optional)</label>
+<textarea name="approval_notes" rows="2" class="pta-notes" placeholder="Add a note for this decision…"></textarea>
+</div>
+<div class="pta-btn-group">
+<button type="submit" name="action" value="reject" class="pta-btn-reject">
+<span class="iconify" data-icon="mdi:close"></span> Reject
+</button>
+<button type="submit" name="action" value="approve" class="pta-btn-approve">
+<span class="iconify" data-icon="mdi:check"></span> Approve
+</button>
+</div>
+</div>
+</form>
 
-    </div>
+</div>
     {% empty %}
-    <div class="pta-empty">
-        <span class="iconify" data-icon="mdi:check-circle-outline"></span>
-        <h3>No Pending Approvals</h3>
-        <p>All TA applications have been processed. Check back later.</p>
-    </div>
+<div class="pta-empty">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span>
+<h3>No Pending Approvals</h3>
+<p>All TA applications have been processed. Check back later.</p>
+</div>
     {% endfor %}
 
 </div>

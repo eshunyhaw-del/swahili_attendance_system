@@ -1,45 +1,45 @@
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;color:#333;max-width:600px;margin:0 auto;padding:24px;">
-    <h2 style="color:#0D2472;">SWASA Attendance System</h2>
-    <p>Dear {{ ticket.assigned_ta.get_full_name|default:ticket.assigned_ta.username }},</p>
-    <p>
+<h2 style="color:#0D2472;">SWASA Attendance System</h2>
+<p>Dear {{ ticket.assigned_ta.get_full_name|default:ticket.assigned_ta.username }},</p>
+<p>
         A student in your assigned level has submitted a new support ticket and needs your help.
-    </p>
+</p>
 
-    <table style="width:100%;border-collapse:collapse;margin:16px 0;background:#f7f8fc;border-radius:8px;overflow:hidden;">
-        <tr>
-            <td style="padding:10px 14px;font-weight:700;color:#0D2472;width:120px;border-bottom:1px solid #e0e4f0;">Student</td>
-            <td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">{{ ticket.student.get_full_name|default:ticket.student.username }}</td>
-        </tr>
+<table style="width:100%;border-collapse:collapse;margin:16px 0;background:#f7f8fc;border-radius:8px;overflow:hidden;">
+<tr>
+<td style="padding:10px 14px;font-weight:700;color:#0D2472;width:120px;border-bottom:1px solid #e0e4f0;">Student</td>
+<td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">{{ ticket.student.get_full_name|default:ticket.student.username }}</td>
+</tr>
         {% with level=ticket.student.userprofile.level %}
         {% if level %}
-        <tr>
-            <td style="padding:10px 14px;font-weight:700;color:#0D2472;border-bottom:1px solid #e0e4f0;">Level</td>
-            <td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">Level {{ level.name }}</td>
-        </tr>
+<tr>
+<td style="padding:10px 14px;font-weight:700;color:#0D2472;border-bottom:1px solid #e0e4f0;">Level</td>
+<td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">Level {{ level.name }}</td>
+</tr>
         {% endif %}
         {% endwith %}
-        <tr>
-            <td style="padding:10px 14px;font-weight:700;color:#0D2472;border-bottom:1px solid #e0e4f0;">Subject</td>
-            <td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">{{ ticket.subject }}</td>
-        </tr>
-        <tr>
-            <td style="padding:10px 14px;font-weight:700;color:#0D2472;vertical-align:top;">Message</td>
-            <td style="padding:10px 14px;">{{ ticket.message }}</td>
-        </tr>
-    </table>
+<tr>
+<td style="padding:10px 14px;font-weight:700;color:#0D2472;border-bottom:1px solid #e0e4f0;">Subject</td>
+<td style="padding:10px 14px;border-bottom:1px solid #e0e4f0;">{{ ticket.subject }}</td>
+</tr>
+<tr>
+<td style="padding:10px 14px;font-weight:700;color:#0D2472;vertical-align:top;">Message</td>
+<td style="padding:10px 14px;">{{ ticket.message }}</td>
+</tr>
+</table>
 
-    <p>
-        <a href="/ta/support/"
+<p>
+<a href="/ta/support/"
            style="display:inline-block;background:#0D2472;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:700;">
             View &amp; Respond
-        </a>
-    </p>
+</a>
+</p>
 
-    <p style="margin-top:32px;color:#666;font-size:0.9em;">
+<p style="margin-top:32px;color:#666;font-size:0.9em;">
         This is an automated message from the SWASA Attendance System.
         Please do not reply to this email.
-    </p>
+</p>
 </body>
 </html>

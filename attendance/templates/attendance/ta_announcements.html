@@ -4,19 +4,19 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.10);
-    --green-bd:   rgba(26,158,96,0.25);
-    --red:        #DC2626;
-    --red-lt:     rgba(220,38,38,0.08);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.10);
+    --green-bd: rgba(26,158,96,0.25);
+    --red: #DC2626;
+    --red-lt: rgba(220,38,38,0.08);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -28,15 +28,10 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: linear-gradient(135deg, #0D2472 0%, #1E3A5F 100%);
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px;
-    background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .back-link {
     display: inline-flex; align-items: center; gap: 0.3rem;
@@ -51,7 +46,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .compose-card {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     margin-bottom: 1.5rem;
     overflow: hidden;
@@ -154,7 +148,6 @@ html[data-theme="dark"] .preview-strip .iconify { color: var(--gold); opacity: 0
 
 .announcement-card {
     background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--r-lg);
     margin-bottom: 0.75rem;
     box-shadow: var(--sh-sm);
@@ -168,7 +161,7 @@ html[data-theme="dark"] .preview-strip .iconify { color: var(--gold); opacity: 0
     gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;
 }
 .ann-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.ann-meta  { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+.ann-meta { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
 .ann-message {
     font-size: 13px; color: var(--muted); line-height: 1.6;
     white-space: pre-wrap; word-break: break-word; padding: 0 1.25rem 0.75rem;
@@ -266,152 +259,152 @@ html[data-theme="dark"] .modal-head { color: var(--text-primary); }
 
 <div class="wrap">
 
-    <div class="page-header">
-        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
-        </a>
-        <h1>Send Announcement</h1>
-        <div class="page-header-sub">Notify students registered in a specific course</div>
-    </div>
+<div class="page-header">
+<a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+</a>
+<h1>Send Announcement</h1>
+<div class="page-header-sub">Notify students registered in a specific course</div>
+</div>
 
-    <!-- Compose form -->
-    <div class="compose-card">
-        <div class="compose-card-header">
-            <span class="iconify" data-icon="mdi:pencil-outline"></span>
+<!-- Compose form -->
+<div class="compose-card">
+<div class="compose-card-header">
+<span class="iconify" data-icon="mdi:pencil-outline"></span>
             Compose Announcement
-        </div>
-        <form method="post" class="compose-body">
+</div>
+<form method="post" class="compose-body">
             {% csrf_token %}
 
-            <div>
-                <label class="field-label">Target Course</label>
-                <select name="course_id" class="field-select" required>
-                    <option value="">— Select a course —</option>
+<div>
+<label class="field-label">Target Course</label>
+<select name="course_id" class="field-select" required>
+<option value="">— Select a course —</option>
                     {% for course in available_courses %}
-                    <option value="{{ course.id }}">{% if course.code == 'KISW 106A' %}KISW 106A — Monday Group (Level {{ course.level.name }}){% elif course.code == 'KISW 106B' %}KISW 106B — Thursday Group (Level {{ course.level.name }}){% else %}{{ course.code }} — {{ course.name }} (Level {{ course.level.name }}){% endif %}</option>
+<option value="{{ course.id }}">{% if course.code == 'KISW 106A' %}KISW 106A — Monday Group (Level {{ course.level.name }}){% elif course.code == 'KISW 106B' %}KISW 106B — Thursday Group (Level {{ course.level.name }}){% else %}{{ course.code }} — {{ course.name }} (Level {{ course.level.name }}){% endif %}</option>
                     {% empty %}
-                    <option disabled>No courses available for your assigned levels</option>
+<option disabled>No courses available for your assigned levels</option>
                     {% endfor %}
-                </select>
-                <div class="course-hint">
-                    <span class="iconify" data-icon="mdi:information-outline" data-width="13"></span>
+</select>
+<div class="course-hint">
+<span class="iconify" data-icon="mdi:information-outline" data-width="13"></span>
                     Only students registered for this course will receive the notification.
-                </div>
-            </div>
+</div>
+</div>
 
-            <div>
-                <label class="field-label">Subject / Title</label>
-                <input type="text" name="title" class="field-input"
+<div>
+<label class="field-label">Subject / Title</label>
+<input type="text" name="title" class="field-input"
                        placeholder="e.g. Assignment reminder, Class reschedule…"
                        maxlength="200" required>
-            </div>
+</div>
 
-            <div>
-                <label class="field-label">Message</label>
-                <textarea name="message" class="field-textarea"
+<div>
+<label class="field-label">Message</label>
+<textarea name="message" class="field-textarea"
                           placeholder="Write your announcement here…"
                           id="msgBody" oninput="updateCharCount(this)"></textarea>
-                <div class="char-count" id="charCount">0 characters</div>
-            </div>
+<div class="char-count" id="charCount">0 characters</div>
+</div>
 
-            <div class="preview-strip">
-                <span class="iconify" data-icon="mdi:bell-ring-outline"></span>
+<div class="preview-strip">
+<span class="iconify" data-icon="mdi:bell-ring-outline"></span>
                 Students will see this in their notification bell and on their Notifications page.
-            </div>
+</div>
 
-            <button type="submit" class="btn-send">
-                <span class="iconify" data-icon="mdi:send"></span>
+<button type="submit" class="btn-send">
+<span class="iconify" data-icon="mdi:send"></span>
                 Send Announcement
-            </button>
-        </form>
-    </div>
+</button>
+</form>
+</div>
 
-    <!-- History -->
-    <div class="history-label">
-        <span class="iconify" data-icon="mdi:history"></span>
+<!-- History -->
+<div class="history-label">
+<span class="iconify" data-icon="mdi:history"></span>
         Previously Sent
-    </div>
+</div>
 
     {% if past %}
         {% for ann in past %}
-        <div class="announcement-card">
-            <div class="ann-top">
-                <div class="ann-header-row">
-                    <div class="ann-title">{{ ann.title }}</div>
-                    <div class="ann-meta">{{ ann.sent_at|date:"N j, Y · g:i A" }}</div>
-                </div>
-            </div>
-            <div class="ann-message">{{ ann.message }}</div>
-            <div class="ann-footer">
-                <div class="ann-badges">
-                    <span class="ann-badge">
-                        <span class="iconify" data-icon="mdi:account-group-outline"></span>
+<div class="announcement-card">
+<div class="ann-top">
+<div class="ann-header-row">
+<div class="ann-title">{{ ann.title }}</div>
+<div class="ann-meta">{{ ann.sent_at|date:"N j, Y · g:i A" }}</div>
+</div>
+</div>
+<div class="ann-message">{{ ann.message }}</div>
+<div class="ann-footer">
+<div class="ann-badges">
+<span class="ann-badge">
+<span class="iconify" data-icon="mdi:account-group-outline"></span>
                         {{ ann.recipient_count }} recipient{{ ann.recipient_count|pluralize }}
-                    </span>
+</span>
                     {% if ann.course %}
-                    <span class="ann-course-badge">{{ ann.course.code }}</span>
+<span class="ann-course-badge">{{ ann.course.code }}</span>
                     {% else %}
                     {% for level in ann.target_levels.all %}
-                    <span class="ann-course-badge">Level {{ level.name }}</span>
+<span class="ann-course-badge">Level {{ level.name }}</span>
                     {% endfor %}
                     {% endif %}
-                </div>
-                <div class="ann-actions">
-                    <button class="btn-ann-edit"
+</div>
+<div class="ann-actions">
+<button class="btn-ann-edit"
                             onclick="openEditModal({{ ann.id }}, this)"
                             data-title="{{ ann.title|escapejs }}"
                             data-message="{{ ann.message|escapejs }}"
                             data-id="{{ ann.id }}">
-                        <span class="iconify" data-icon="mdi:pencil-outline"></span> Edit
-                    </button>
-                    <form method="post" action="{% url 'attendance:ta_delete_announcement' ann.id %}"
+<span class="iconify" data-icon="mdi:pencil-outline"></span> Edit
+</button>
+<form method="post" action="{% url 'attendance:ta_delete_announcement' ann.id %}"
                           style="display:inline;"
                           onsubmit="return confirm('Delete this announcement and all student notifications?');">
                         {% csrf_token %}
-                        <button type="submit" class="btn-ann-del">
-                            <span class="iconify" data-icon="mdi:trash-can-outline"></span> Delete
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<button type="submit" class="btn-ann-del">
+<span class="iconify" data-icon="mdi:trash-can-outline"></span> Delete
+</button>
+</form>
+</div>
+</div>
+</div>
         {% endfor %}
     {% else %}
-    <div class="empty-hist">
-        <strong>No announcements sent yet</strong>
+<div class="empty-hist">
+<strong>No announcements sent yet</strong>
         Use the form above to send your first announcement.
-    </div>
+</div>
     {% endif %}
 
 </div>
 
 <!-- Edit modal -->
 <div class="modal-overlay" id="editModal">
-    <div class="modal-box">
-        <div class="modal-head">
-            <span>Edit Announcement</span>
-            <button class="modal-close" onclick="closeEditModal()">
-                <span class="iconify" data-icon="mdi:close"></span>
-            </button>
-        </div>
-        <form method="post" id="editForm" action="">
+<div class="modal-box">
+<div class="modal-head">
+<span>Edit Announcement</span>
+<button class="modal-close" onclick="closeEditModal()">
+<span class="iconify" data-icon="mdi:close"></span>
+</button>
+</div>
+<form method="post" id="editForm" action="">
             {% csrf_token %}
-            <div class="modal-body">
-                <div>
-                    <label class="field-label">Title</label>
-                    <input type="text" name="title" id="editTitle" class="field-input" maxlength="200" required>
-                </div>
-                <div>
-                    <label class="field-label">Message</label>
-                    <textarea name="message" id="editMessage" class="field-textarea" required></textarea>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="btn-modal-save">Save Changes</button>
-            </div>
-        </form>
-    </div>
+<div class="modal-body">
+<div>
+<label class="field-label">Title</label>
+<input type="text" name="title" id="editTitle" class="field-input" maxlength="200" required>
+</div>
+<div>
+<label class="field-label">Message</label>
+<textarea name="message" id="editMessage" class="field-textarea" required></textarea>
+</div>
+</div>
+<div class="modal-actions">
+<button type="button" class="btn-modal-cancel" onclick="closeEditModal()">Cancel</button>
+<button type="submit" class="btn-modal-save">Save Changes</button>
+</div>
+</form>
+</div>
 </div>
 
 <script>
@@ -423,11 +416,11 @@ function updateCharCount(el) {
 }
 
 function openEditModal(id, btn) {
-    const title   = btn.dataset.title;
+    const title = btn.dataset.title;
     const message = btn.dataset.message;
-    document.getElementById('editTitle').value   = title;
+    document.getElementById('editTitle').value = title;
     document.getElementById('editMessage').value = message;
-    document.getElementById('editForm').action   = '/ta/announcements/' + id + '/edit/';
+    document.getElementById('editForm').action = '/ta/announcements/' + id + '/edit/';
     document.getElementById('editModal').classList.add('open');
 }
 

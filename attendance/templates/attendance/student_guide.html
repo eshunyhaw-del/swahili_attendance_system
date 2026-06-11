@@ -4,19 +4,19 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.10);
-    --amber:      #B8920C;
-    --amber-lt:   rgba(184,146,12,0.10);
-    --red:        #C0392B;
-    --red-lt:     rgba(192,57,43,0.09);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.10);
+    --amber: #B8920C;
+    --amber-lt: rgba(184,146,12,0.10);
+    --red: #C0392B;
+    --red-lt: rgba(192,57,43,0.09);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -28,14 +28,10 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Page header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 100%);
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
 .page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
@@ -43,8 +39,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 /* ─── Quick ref bar ─── */
 .quick-ref {
     background: var(--surface); border-radius: var(--r-lg);
-    border: 1px solid var(--border); border-left: 4px solid var(--primary);
-    box-shadow: var(--sh-sm); padding: 1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04); padding: 1rem 1.25rem;
     margin-bottom: 1.25rem;
 }
 .quick-ref-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
@@ -57,7 +52,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .guide-section {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     margin-bottom: 0.875rem;
     overflow: hidden;
@@ -95,7 +89,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 }
 .step-icon.green { background: var(--green-lt); color: var(--green); }
 .step-icon.amber { background: var(--amber-lt); color: var(--amber); }
-.step-icon.red   { background: var(--red-lt);   color: var(--red); }
+.step-icon.red { background: var(--red-lt); color: var(--red); }
 .step-text { font-size: 13.5px; line-height: 1.6; padding-top: 0.4rem; }
 .step-text strong { color: var(--primary); }
 
@@ -132,7 +126,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 /* ─── Key dates ─── */
 .dates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.625rem; margin-top: 1rem; }
 .date-card {
-    background: var(--bg); border-radius: var(--r-sm); border: 1px solid var(--border);
+    background: var(--bg); border-radius: var(--r-sm);
     padding: 0.75rem 1rem;
 }
 .date-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 3px; }
@@ -142,22 +136,18 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.625rem; }
 .tip-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 13px; color: #4A5568; line-height: 1.5; }
 .tip-check { width: 18px; height: 18px; background: var(--green-lt); border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-.tip-check::after { content: '✓'; font-size: 10px; color: var(--green); font-weight: 800; }
+.tip-check::after { content: ''; font-size: 10px; color: var(--green); font-weight: 800; }
 
 /* ─── Dictionary Widget ─── */
 .dict-card {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
-    border-top: 4px solid #F2C31A;
-    box-shadow: var(--sh-md);
+    box-shadow: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04);
     margin-bottom: 1.5rem;
     overflow: hidden;
 }
 html[data-theme="dark"] .dict-card {
     background: var(--bg-card, #1E2A3B);
-    border-color: var(--border, #2E3D50);
-    border-top-color: #F2C31A;
 }
 .dict-header {
     padding: 1.25rem 1.5rem 1rem;
@@ -237,10 +227,10 @@ html[data-theme="dark"] .dict-input:focus { border-color: #F2C31A; box-shadow: 0
 .dict-input.empty-hint::placeholder { color: #C0392B; }
 @keyframes dict-shake {
     0%, 100% { transform: translateX(0); }
-    20%       { transform: translateX(-5px); }
-    40%       { transform: translateX(5px); }
-    60%       { transform: translateX(-4px); }
-    80%       { transform: translateX(4px); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
 }
 .dict-btn {
     padding: 0 1.375rem; border-radius: 12px;
@@ -313,32 +303,32 @@ html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
 {% if is_student %}
 <div class="dict-card" id="dictWidget">
 
-    <div class="dict-header">
-        <div class="dict-emoji">📖</div>
-        <div class="dict-header-text">
-            <div class="dict-title">Kamusi ya Kiswahili</div>
-            <div class="dict-subtitle">MobiTUKI — English ↔ Swahili Dictionary</div>
-            <div class="dict-badges">
-                <span class="dict-badge-gold">✦ 16,000+ entries</span>
-                <span class="dict-powered">Powered by TUKI — University of Dar es Salaam</span>
-            </div>
-        </div>
-    </div>
+<div class="dict-header">
+<div class="dict-emoji"></div>
+<div class="dict-header-text">
+<div class="dict-title">Kamusi ya Kiswahili</div>
+<div class="dict-subtitle">MobiTUKI — English Swahili Dictionary</div>
+<div class="dict-badges">
+<span class="dict-badge-gold"> 16,000+ entries</span>
+<span class="dict-powered">Powered by TUKI — University of Dar es Salaam</span>
+</div>
+</div>
+</div>
 
-    <div class="dict-body">
+<div class="dict-body">
 
-        <div class="dict-toggle-row">
-            <button class="dict-toggle active" id="toggleEN" onclick="setMode('en')">
-                <span>🇬🇧</span> English → Swahili
-            </button>
-            <button class="dict-toggle inactive" id="toggleSW" onclick="setMode('sw')">
-                <span>🇹🇿</span> Swahili → English
-            </button>
-        </div>
+<div class="dict-toggle-row">
+<button class="dict-toggle active" id="toggleEN" onclick="setMode('en')">
+<span>🇬🇧</span> English → Swahili
+</button>
+<button class="dict-toggle inactive" id="toggleSW" onclick="setMode('sw')">
+<span>🇹🇿</span> Swahili → English
+</button>
+</div>
 
-        <div class="dict-search-row">
-            <div class="dict-input-wrap">
-                <input
+<div class="dict-search-row">
+<div class="dict-input-wrap">
+<input
                     type="text"
                     class="dict-input"
                     id="dictInput"
@@ -347,311 +337,311 @@ html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
                     autocorrect="off"
                     spellcheck="false"
                 >
-            </div>
-            <button class="dict-btn" id="dictSearchBtn" onclick="doSearch()">
-                <span class="iconify" data-icon="mdi:magnify" data-width="16"></span>
+</div>
+<button class="dict-btn" id="dictSearchBtn" onclick="doSearch()">
+<span class="iconify" data-icon="mdi:magnify" data-width="16"></span>
                 Tafuta
-            </button>
-        </div>
+</button>
+</div>
 
-        <div class="dict-chips-section">
-            <div class="dict-chips-label">Popular words</div>
-            <div class="dict-chips-row" id="chipsRow1">
-                <button class="dict-chip" onclick="chipSearch('love')">love</button>
-                <button class="dict-chip" onclick="chipSearch('peace')">peace</button>
-                <button class="dict-chip" onclick="chipSearch('education')">education</button>
-                <button class="dict-chip" onclick="chipSearch('family')">family</button>
-                <button class="dict-chip" onclick="chipSearch('freedom')">freedom</button>
-            </div>
-            <div class="dict-chips-row" id="chipsRow2">
-                <button class="dict-chip" onclick="chipSearch('university')">university</button>
-                <button class="dict-chip" onclick="chipSearch('language')">language</button>
-                <button class="dict-chip" onclick="chipSearch('culture')">culture</button>
-                <button class="dict-chip" onclick="chipSearch('literature')">literature</button>
-                <button class="dict-chip" onclick="chipSearch('history')">history</button>
-            </div>
-        </div>
+<div class="dict-chips-section">
+<div class="dict-chips-label">Popular words</div>
+<div class="dict-chips-row" id="chipsRow1">
+<button class="dict-chip" onclick="chipSearch('love')">love</button>
+<button class="dict-chip" onclick="chipSearch('peace')">peace</button>
+<button class="dict-chip" onclick="chipSearch('education')">education</button>
+<button class="dict-chip" onclick="chipSearch('family')">family</button>
+<button class="dict-chip" onclick="chipSearch('freedom')">freedom</button>
+</div>
+<div class="dict-chips-row" id="chipsRow2">
+<button class="dict-chip" onclick="chipSearch('university')">university</button>
+<button class="dict-chip" onclick="chipSearch('language')">language</button>
+<button class="dict-chip" onclick="chipSearch('culture')">culture</button>
+<button class="dict-chip" onclick="chipSearch('literature')">literature</button>
+<button class="dict-chip" onclick="chipSearch('history')">history</button>
+</div>
+</div>
 
-        <button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">
-            <span class="iconify" data-icon="mdi:lightbulb-outline" data-width="14"></span>
+<button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">
+<span class="iconify" data-icon="mdi:lightbulb-outline" data-width="14"></span>
             Tips for searching
-            <span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span>
-        </button>
-        <div class="dict-tips-body" id="dictTipsBody">
-            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Try searching root words (e.g. <strong>run</strong> instead of <strong>running</strong>).</span></div>
-            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use <strong>English → Swahili</strong> when you need help translating an English word.</span></div>
-            <div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use <strong>Swahili → English</strong> to understand the meaning of a Kiswahili word.</span></div>
-        </div>
+<span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span>
+</button>
+<div class="dict-tips-body" id="dictTipsBody">
+<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Try searching root words (e.g.<strong>run</strong> instead of<strong>running</strong>).</span></div>
+<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use<strong>English → Swahili</strong> when you need help translating an English word.</span></div>
+<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use<strong>Swahili → English</strong> to understand the meaning of a Kiswahili word.</span></div>
+</div>
 
-    </div>
+</div>
 </div>
 {% endif %}
 
-    <div class="page-header">
-        <h1>Student Quick Guide</h1>
-        <div class="page-header-sub">Everything you need to track your attendance with SWASA</div>
-    </div>
+<div class="page-header">
+<h1>Student Quick Guide</h1>
+<div class="page-header-sub">Everything you need to track your attendance with SWASA</div>
+</div>
 
-    <!-- Quick ref -->
-    <div class="quick-ref">
-        <div class="quick-ref-title">
-            <span class="iconify" data-icon="mdi:pin-outline" style="font-size:14px;"></span>
+<!-- Quick ref -->
+<div class="quick-ref">
+<div class="quick-ref-title">
+<span class="iconify" data-icon="mdi:pin-outline" style="font-size:14px;"></span>
             Quick Look
-        </div>
-        <div class="quick-ref-grid">
-            <div class="quick-ref-item">Website: <strong>swasa-attendance.onrender.com</strong></div>
-            <div class="quick-ref-item">Login with: <span class="mono">Email address</span> + your password</div>
-            <div class="quick-ref-item">Password: the one you chose when you registered — not your Student ID</div>
-        </div>
-    </div>
+</div>
+<div class="quick-ref-grid">
+<div class="quick-ref-item">Website:<strong>swasa-attendance.onrender.com</strong></div>
+<div class="quick-ref-item">Login with:<span class="mono">Email address</span> + your password</div>
+<div class="quick-ref-item">Password: the one you chose when you registered — not your Student ID</div>
+</div>
+</div>
 
-    <!-- 1. Set up account -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="true">
-            <div class="section-num">1</div>
-            <div class="section-title">Set Up Your Account</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body open">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:account-plus-outline"></span></div>
-                    <div class="step-text">Go to the <strong>registration page</strong> and fill in your <strong>Full Name</strong>, <strong>Student ID</strong>, <strong>Level</strong>, <strong>Email address</strong>, and a <strong>Password</strong> of your choice.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:numeric-6-box-outline"></span></div>
-                    <div class="step-text">A <strong>6-digit verification code</strong> is sent to the email you provided. Enter that code on the next page to activate your account.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-                    <div class="step-text">Once verified, you are <strong>automatically logged in</strong> and taken straight to the course registration page — no extra steps needed.</div>
-                </div>
-            </div>
-            <div class="info-box">
-                <span class="iconify" data-icon="mdi:information-outline"></span>
-                Use any valid email address you have access to. Check your <strong>spam folder</strong> if you don't see the verification code within a minute.
-            </div>
-        </div>
-    </div>
+<!-- 1. Set up account -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="true">
+<div class="section-num">1</div>
+<div class="section-title">Set Up Your Account</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body open">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:account-plus-outline"></span></div>
+<div class="step-text">Go to the<strong>registration page</strong> and fill in your<strong>Full Name</strong>,<strong>Student ID</strong>,<strong>Level</strong>,<strong>Email address</strong>, and a<strong>Password</strong> of your choice.</div>
+</div>
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:numeric-6-box-outline"></span></div>
+<div class="step-text">A<strong>6-digit verification code</strong> is sent to the email you provided. Enter that code on the next page to activate your account.</div>
+</div>
+<div class="step">
+<div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+<div class="step-text">Once verified, you are<strong>automatically logged in</strong> and taken straight to the course registration page — no extra steps needed.</div>
+</div>
+</div>
+<div class="info-box">
+<span class="iconify" data-icon="mdi:information-outline"></span>
+                Use any valid email address you have access to. Check your<strong>spam folder</strong> if you don't see the verification code within a minute.
+</div>
+</div>
+</div>
 
-    <!-- 2. Log in -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">2</div>
-            <div class="section-title">Log In</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
-                    <div class="step-text">On the login page enter your <strong>email address</strong> — the same one you registered with.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div>
-                    <div class="step-text">Enter the <strong>password you chose</strong> when you registered. This is not your Student ID — it is the password you set during sign-up.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div>
-                    <div class="step-text">If you forget your password, click <strong>Forgot Password</strong> on the login page. A reset code will be sent to your email.</div>
-                </div>
-            </div>
-            <div class="tip-box">
-                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+<!-- 2. Log in -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">2</div>
+<div class="section-title">Log In</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
+<div class="step-text">On the login page enter your<strong>email address</strong> — the same one you registered with.</div>
+</div>
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div>
+<div class="step-text">Enter the<strong>password you chose</strong> when you registered. This is not your Student ID — it is the password you set during sign-up.</div>
+</div>
+<div class="step">
+<div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div>
+<div class="step-text">If you forget your password, click<strong>Forgot Password</strong> on the login page. A reset code will be sent to your email.</div>
+</div>
+</div>
+<div class="tip-box">
+<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
                 Never share your password with anyone. Your Student ID is only used for identification — it is not your password.
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
-    <!-- 3. Register courses -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">3</div>
-            <div class="section-title">Register Your Courses</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div>
-                    <div class="step-text">Click <strong>Register Courses</strong> in the sidebar. You will see all courses available for your level and semester.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon green"><span class="iconify" data-icon="mdi:checkbox-marked-outline"></span></div>
-                    <div class="step-text"><strong>Check every course you are taking</strong> this semester, then click Register. You only need to do this once per semester.</div>
-                </div>
-            </div>
-            <div class="tip-box">
-                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+<!-- 3. Register courses -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">3</div>
+<div class="section-title">Register Your Courses</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div>
+<div class="step-text">Click<strong>Register Courses</strong> in the sidebar. You will see all courses available for your level and semester.</div>
+</div>
+<div class="step">
+<div class="step-icon green"><span class="iconify" data-icon="mdi:checkbox-marked-outline"></span></div>
+<div class="step-text"><strong>Check every course you are taking</strong> this semester, then click Register. You only need to do this once per semester.</div>
+</div>
+</div>
+<div class="tip-box">
+<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
                 Register early — the course list may be locked after the registration deadline.
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
-    <!-- 4. Receive TA code -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">4</div>
-            <div class="section-title">Receive Your TA Code in Class</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div>
-                    <div class="step-text">During each class session, your <strong>Teaching Assistant</strong> will generate a unique 2–5 digit code and hand it to you in person.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon red"><span class="iconify" data-icon="mdi:shield-alert-outline"></span></div>
-                    <div class="step-text">Each code is <strong>unique to you</strong> and this specific session. It cannot be shared or used more than once.</div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- 4. Receive TA code -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">4</div>
+<div class="section-title">Receive Your TA Code in Class</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div>
+<div class="step-text">During each class session, your<strong>Teaching Assistant</strong> will generate a unique 2–5 digit code and hand it to you in person.</div>
+</div>
+<div class="step">
+<div class="step-icon red"><span class="iconify" data-icon="mdi:shield-alert-outline"></span></div>
+<div class="step-text">Each code is<strong>unique to you</strong> and this specific session. It cannot be shared or used more than once.</div>
+</div>
+</div>
+</div>
+</div>
 
-    <!-- 5. Submit attendance -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">5</div>
-            <div class="section-title">Submit Your Attendance Code</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
-                    <div class="step-text">Go to your <strong>Dashboard</strong>. Find the course and locate the current week in the session list.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon green"><span class="iconify" data-icon="mdi:keyboard-outline"></span></div>
-                    <div class="step-text">Click <strong>Submit Code</strong>, type the code your TA gave you, then tap <em>Submit Attendance</em>.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-                    <div class="step-text">The week row will immediately update to a green <strong>"Submitted"</strong> badge — no page reload needed.</div>
-                </div>
-            </div>
-            <div class="tip-box">
-                <span class="iconify" data-icon="mdi:lightbulb-outline"></span>
+<!-- 5. Submit attendance -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">5</div>
+<div class="section-title">Submit Your Attendance Code</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
+<div class="step-text">Go to your<strong>Dashboard</strong>. Find the course and locate the current week in the session list.</div>
+</div>
+<div class="step">
+<div class="step-icon green"><span class="iconify" data-icon="mdi:keyboard-outline"></span></div>
+<div class="step-text">Click<strong>Submit Code</strong>, type the code your TA gave you, then tap<em>Submit Attendance</em>.</div>
+</div>
+<div class="step">
+<div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+<div class="step-text">The week row will immediately update to a green<strong>"Submitted"</strong> badge — no page reload needed.</div>
+</div>
+</div>
+<div class="tip-box">
+<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
                 Submit as soon as your TA hands you the code — codes expire after the session ends.
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
-    <!-- 6. Track progress -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">6</div>
-            <div class="section-title">Track Your Attendance Progress</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div>
-                    <div class="step-text">Your <strong>Dashboard</strong> shows each course with an attendance progress bar and a score (e.g., <em>5 / 8</em>).</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
-                    <div class="step-text">Click <strong>My History</strong> in the sidebar for a full week-by-week breakdown with colour-coded status badges:</div>
-                </div>
-            </div>
-            <div style="margin-top:0.875rem;display:flex;flex-direction:column;gap:0.4rem;">
-                <div class="status-row"><div class="status-dot" style="background:#1A9E60;"></div><span><strong>Attended</strong> — code submitted for this session</span></div>
-                <div class="status-row"><div class="status-dot" style="background:#C0392B;"></div><span><strong>Absent</strong> — no code submitted</span></div>
-                <div class="status-row"><div class="status-dot" style="background:#8896AB;"></div><span><strong>Upcoming</strong> — session has not happened yet</span></div>
-            </div>
-        </div>
-    </div>
+<!-- 6. Track progress -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">6</div>
+<div class="section-title">Track Your Attendance Progress</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div>
+<div class="step-text">Your<strong>Dashboard</strong> shows each course with an attendance progress bar and a score (e.g.,<em>5 / 8</em>).</div>
+</div>
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
+<div class="step-text">Click<strong>My History</strong> in the sidebar for a full week-by-week breakdown with colour-coded status badges:</div>
+</div>
+</div>
+<div style="margin-top:0.875rem;display:flex;flex-direction:column;gap:0.4rem;">
+<div class="status-row"><div class="status-dot" style="background:#1A9E60;"></div><span><strong>Attended</strong> — code submitted for this session</span></div>
+<div class="status-row"><div class="status-dot" style="background:#C0392B;"></div><span><strong>Absent</strong> — no code submitted</span></div>
+<div class="status-row"><div class="status-dot" style="background:#8896AB;"></div><span><strong>Upcoming</strong> — session has not happened yet</span></div>
+</div>
+</div>
+</div>
 
-    <!-- 7. Export & support -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num">7</div>
-            <div class="section-title">Export Records &amp; Get Support</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="step-list">
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:download-outline"></span></div>
-                    <div class="step-text">Click <strong>Export CSV</strong> in the sidebar to download your full attendance record as a spreadsheet for personal reference.</div>
-                </div>
-                <div class="step">
-                    <div class="step-icon"><span class="iconify" data-icon="mdi:lifebuoy"></span></div>
-                    <div class="step-text">If you have a problem, click <strong>Support</strong> in the sidebar to submit a help ticket. The admin team responds within 24–48 hours.</div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- 7. Export & support -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num">7</div>
+<div class="section-title">Export Records &amp; Get Support</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="step-list">
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:download-outline"></span></div>
+<div class="step-text">Click<strong>Export CSV</strong> in the sidebar to download your full attendance record as a spreadsheet for personal reference.</div>
+</div>
+<div class="step">
+<div class="step-icon"><span class="iconify" data-icon="mdi:lifebuoy"></span></div>
+<div class="step-text">If you have a problem, click<strong>Support</strong> in the sidebar to submit a help ticket. The admin team responds within 24–48 hours.</div>
+</div>
+</div>
+</div>
+</div>
 
-    <!-- Quick reference table -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num" style="background:var(--green);">
-                <span class="iconify" data-icon="mdi:table" style="font-size:13px;"></span>
-            </div>
-            <div class="section-title">Quick Reference Table</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body" style="padding:0;">
-            <table class="ref-table">
-                <thead>
-                    <tr><th>Action</th><th>How</th><th>Where</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Create account</td><td>Register with Student ID + UG email</td><td>Register page</td></tr>
-                    <tr><td>Log in</td><td>Email address / password</td><td>Login page</td></tr>
-                    <tr><td>Register courses</td><td>Check courses → Register</td><td>Sidebar → Register Courses</td></tr>
-                    <tr><td>Submit attendance</td><td>Click Submit Code → enter TA code</td><td>Dashboard</td></tr>
-                    <tr><td>View history</td><td>Open My History</td><td>Sidebar → My History</td></tr>
-                    <tr><td>Download records</td><td>Export CSV</td><td>Sidebar → Export CSV</td></tr>
-                    <tr><td>Get help</td><td>Submit a support ticket</td><td>Sidebar → Support</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- Quick reference table -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num" style="background:var(--green);">
+<span class="iconify" data-icon="mdi:table" style="font-size:13px;"></span>
+</div>
+<div class="section-title">Quick Reference Table</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body" style="padding:0;">
+<table class="ref-table">
+<thead>
+<tr><th>Action</th><th>How</th><th>Where</th></tr>
+</thead>
+<tbody>
+<tr><td>Create account</td><td>Register with Student ID + UG email</td><td>Register page</td></tr>
+<tr><td>Log in</td><td>Email address / password</td><td>Login page</td></tr>
+<tr><td>Register courses</td><td>Check courses → Register</td><td>Sidebar → Register Courses</td></tr>
+<tr><td>Submit attendance</td><td>Click Submit Code → enter TA code</td><td>Dashboard</td></tr>
+<tr><td>View history</td><td>Open My History</td><td>Sidebar → My History</td></tr>
+<tr><td>Download records</td><td>Export CSV</td><td>Sidebar → Export CSV</td></tr>
+<tr><td>Get help</td><td>Submit a support ticket</td><td>Sidebar → Support</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 
-    <!-- Student tips -->
-    <div class="guide-section">
-        <div class="section-head" onclick="toggle(this)" aria-expanded="false">
-            <div class="section-num" style="background:#B8920C;">
-                <span class="iconify" data-icon="mdi:lightbulb-outline" style="font-size:13px;"></span>
-            </div>
-            <div class="section-title">Student Pro Tips</div>
-            <span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-        </div>
-        <div class="section-body">
-            <div class="tips-grid">
-                <div class="tip-item"><div class="tip-check"></div><span>Save the website to your phone's home screen for quick access.</span></div>
-                <div class="tip-item"><div class="tip-check"></div><span>Submit your code right away — don't wait until after class.</span></div>
-                <div class="tip-item"><div class="tip-check"></div><span>Check your history weekly to catch any missed sessions early.</span></div>
-                <div class="tip-item"><div class="tip-check"></div><span>Use a strong, unique password — not something easy to guess. Never share it.</span></div>
-                <div class="tip-item"><div class="tip-check"></div><span>Export your CSV at the end of semester for your personal records.</span></div>
-            </div>
+<!-- Student tips -->
+<div class="guide-section">
+<div class="section-head" onclick="toggle(this)" aria-expanded="false">
+<div class="section-num" style="background:#B8920C;">
+<span class="iconify" data-icon="mdi:lightbulb-outline" style="font-size:13px;"></span>
+</div>
+<div class="section-title">Student Pro Tips</div>
+<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+</div>
+<div class="section-body">
+<div class="tips-grid">
+<div class="tip-item"><div class="tip-check"></div><span>Save the website to your phone's home screen for quick access.</span></div>
+<div class="tip-item"><div class="tip-check"></div><span>Submit your code right away — don't wait until after class.</span></div>
+<div class="tip-item"><div class="tip-check"></div><span>Check your history weekly to catch any missed sessions early.</span></div>
+<div class="tip-item"><div class="tip-check"></div><span>Use a strong, unique password — not something easy to guess. Never share it.</span></div>
+<div class="tip-item"><div class="tip-check"></div><span>Export your CSV at the end of semester for your personal records.</span></div>
+</div>
 
-            <div style="margin-top:1.25rem;">
-                <div class="dates-grid">
-                    <div class="date-card">
-                        <div class="date-lbl">Semester Begins</div>
-                        <div class="date-val">June 1, 2026</div>
-                    </div>
-                    <div class="date-card">
-                        <div class="date-lbl">Semester Ends</div>
-                        <div class="date-val">October 31, 2026</div>
-                    </div>
-                    <div class="date-card">
-                        <div class="date-lbl">Registration Closes</div>
-                        <div class="date-val">End of Week 2</div>
-                    </div>
-                    <div class="date-card">
-                        <div class="date-lbl">Final Submission</div>
-                        <div class="date-val">End of Semester</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div style="margin-top:1.25rem;">
+<div class="dates-grid">
+<div class="date-card">
+<div class="date-lbl">Semester Begins</div>
+<div class="date-val">June 1, 2026</div>
+</div>
+<div class="date-card">
+<div class="date-lbl">Semester Ends</div>
+<div class="date-val">October 31, 2026</div>
+</div>
+<div class="date-card">
+<div class="date-lbl">Registration Closes</div>
+<div class="date-val">End of Week 2</div>
+</div>
+<div class="date-card">
+<div class="date-lbl">Final Submission</div>
+<div class="date-val">End of Semester</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 </div>
 
@@ -693,7 +683,7 @@ function buildUrl(term) {
 
 function doSearch() {
     var input = document.getElementById('dictInput');
-    var term  = input.value.trim();
+    var term = input.value.trim();
 
     if (!term) {
         input.classList.remove('shake', 'empty-hint');
@@ -723,7 +713,7 @@ function chipSearch(word) {
 }
 
 function toggleTips() {
-    var btn  = document.getElementById('tipToggle');
+    var btn = document.getElementById('tipToggle');
     var body = document.getElementById('dictTipsBody');
     var open = body.classList.toggle('open');
     btn.setAttribute('aria-expanded', open);

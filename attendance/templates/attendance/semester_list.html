@@ -2,54 +2,54 @@
 {% block title %}Manage Semesters{% endblock %}
 
 {% block content %}
-<h1>📅 Semester Management</h1>
+<h1> Semester Management</h1>
 
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
     {% endfor %}
 {% endif %}
 
 <table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Year</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
+<thead>
+<tr>
+<th>Name</th>
+<th>Year</th>
+<th>Start Date</th>
+<th>End Date</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
         {% for semester in semesters %}
-        <tr>
-            <td>{{ semester.name }}</td>
-            <td>{{ semester.year }}</td>
-            <td>{{ semester.start_date }}</td>
-            <td>{{ semester.end_date }}</td>
-            <td>
+<tr>
+<td>{{ semester.name }}</td>
+<td>{{ semester.year }}</td>
+<td>{{ semester.start_date }}</td>
+<td>{{ semester.end_date }}</td>
+<td>
                 {% if semester.is_active %}
-                    <span style="color: green;">✓ Active</span>
+<span style="color: green;"> Active</span>
                 {% elif semester.is_archived %}
-                    <span style="color: gray;">📦 Archived</span>
+<span style="color: gray;"> Archived</span>
                 {% else %}
-                    <span style="color: orange;">⏸ Inactive</span>
+<span style="color: orange;"> Inactive</span>
                 {% endif %}
-            </td>
-            <td>
+</td>
+<td>
                 {% if not semester.is_active and not semester.is_archived %}
-                    <a href="{% url 'attendance:activate_semester' semester.id %}" 
+<a href="{% url 'attendance:activate_semester' semester.id %}" 
                        onclick="return confirm('Activate this semester?')">Activate</a> |
                 {% endif %}
                 {% if not semester.is_archived %}
-                    <a href="{% url 'attendance:archive_semester' semester.id %}" 
+<a href="{% url 'attendance:archive_semester' semester.id %}" 
                        onclick="return confirm('Archive this semester? It will be hidden from students.')">Archive</a>
                 {% endif %}
-            </td>
-        </tr>
+</td>
+</tr>
         {% endfor %}
-    </tbody>
+</tbody>
 </table>
 
 <p><strong>Note:</strong> Archived semesters are hidden from students but records are kept for reports.</p>

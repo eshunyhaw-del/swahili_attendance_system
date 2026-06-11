@@ -4,14 +4,14 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
+    --green: #1A9E60;
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -23,14 +23,12 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Page header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
-    color: #fff; border-radius: var(--r-xl);
+    background: #EDE4D8;
+    color: var(--text);
+    border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
+    position: relative; overflow: hidden;
+    box-shadow: var(--sh-sm);
 }
 .page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
 .page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
@@ -53,7 +51,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .card {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     overflow: hidden;
 }
@@ -169,80 +166,80 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 <div class="wrap">
 
-    <div class="page-header">
-        <h1>Register Courses</h1>
-        <div class="page-header-sub">Select all the courses you are taking this semester</div>
-    </div>
+<div class="page-header">
+<h1>Register Courses</h1>
+<div class="page-header-sub">Select all the courses you are taking this semester</div>
+</div>
 
-    <div class="context-bar">
-        <div class="ctx-chip">
-            <span class="iconify" data-icon="mdi:school-outline"></span>
+<div class="context-bar">
+<div class="ctx-chip">
+<span class="iconify" data-icon="mdi:school-outline"></span>
             Level {{ level.name }}
-        </div>
-        <div class="ctx-chip">
-            <span class="iconify" data-icon="mdi:calendar-outline"></span>
+</div>
+<div class="ctx-chip">
+<span class="iconify" data-icon="mdi:calendar-outline"></span>
             {{ semester.name }} {{ semester.year }}
-        </div>
-    </div>
+</div>
+</div>
 
-    <div class="card">
-        <div class="card-head">
-            <span class="iconify" data-icon="mdi:book-open-variant"></span>
+<div class="card">
+<div class="card-head">
+<span class="iconify" data-icon="mdi:book-open-variant"></span>
             Available Courses
-        </div>
-        <div class="card-body">
-            <form method="post" id="regForm">
+</div>
+<div class="card-body">
+<form method="post" id="regForm">
                 {% csrf_token %}
 
                 {% if form.courses.errors %}
-                <div class="form-error">
-                    <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
-                    <span>{{ form.courses.errors|join:" " }}</span>
-                </div>
+<div class="form-error">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+<span>{{ form.courses.errors|join:" " }}</span>
+</div>
                 {% endif %}
 
-                <div class="selection-hint" id="selectionHint">
-                    <span id="selCount">0</span> course{{ '' }} selected
-                </div>
+<div class="selection-hint" id="selectionHint">
+<span id="selCount">0</span> course{{ '' }} selected
+</div>
 
-                <div class="course-list">
+<div class="course-list">
                     {% for checkbox in form.courses %}
-                    <label class="course-label">
+<label class="course-label">
                         {{ checkbox.tag }}
-                        <div class="custom-check"></div>
-                        <div class="course-label-text">
-                            <div class="course-label-name">{{ checkbox.choice_label }}</div>
+<div class="custom-check"></div>
+<div class="course-label-text">
+<div class="course-label-name">{{ checkbox.choice_label }}</div>
                             {% if 'KISW 106A' in checkbox.choice_label %}
-                            <span class="group-badge monday">Monday Group — 3:30–5:20 PM</span>
+<span class="group-badge monday">Monday Group — 3:30–5:20 PM</span>
                             {% elif 'KISW 106B' in checkbox.choice_label %}
-                            <span class="group-badge thursday">Thursday Group — 1:30–3:30 PM</span>
+<span class="group-badge thursday">Thursday Group — 1:30–3:30 PM</span>
                             {% endif %}
-                        </div>
-                    </label>
+</div>
+</label>
                     {% empty %}
-                    <div class="empty">
-                        <span class="iconify" data-icon="mdi:book-cancel-outline" style="font-size:2rem;color:var(--muted);display:block;margin-bottom:0.5rem;"></span>
-                        <p>No courses available for registration right now.</p>
-                    </div>
+<div class="empty">
+<span class="iconify" data-icon="mdi:book-cancel-outline" style="font-size:2rem;color:var(--muted);display:block;margin-bottom:0.5rem;"></span>
+<p>No courses available for registration right now.</p>
+</div>
                     {% endfor %}
-                </div>
+</div>
 
                 {% if form.courses %}
-                <button type="submit" class="btn-register" id="submitBtn">
-                    <span class="iconify" data-icon="mdi:check-bold"></span>
+<button type="submit" class="btn-register" id="submitBtn">
+<span class="iconify" data-icon="mdi:check-bold"></span>
                     Register Selected Courses
-                </button>
+</button>
                 {% endif %}
-            </form>
-        </div>
-    </div>
+</form>
+</div>
+</div>
 
 </div>
 
 <script>
 (function () {
     const hint = document.getElementById('selCount');
-    const btn  = document.getElementById('submitBtn');
+    const btn = document.getElementById('submitBtn');
 
     function updateCount() {
         const n = document.querySelectorAll('.course-label input:checked').length;

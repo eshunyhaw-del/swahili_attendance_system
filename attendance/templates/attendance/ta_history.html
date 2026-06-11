@@ -4,20 +4,20 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.1);
-    --amber:      #B8920C;
-    --amber-lt:   rgba(242,195,26,0.13);
-    --blue:       #2563EB;
-    --blue-lt:    rgba(37,99,235,0.09);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.1);
+    --amber: #B8920C;
+    --amber-lt: rgba(242,195,26,0.13);
+    --blue: #2563EB;
+    --blue-lt: rgba(37,99,235,0.09);
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -37,11 +37,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     position: relative;
     overflow: hidden;
     box-shadow: var(--sh-md);
-}
-.hist-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 200px; height: 200px;
-    background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .hist-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
 .hist-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
@@ -66,7 +61,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     background: var(--surface);
     border-radius: var(--r-lg);
     padding: 1rem 1.1rem;
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     display: flex; align-items: center; gap: 0.75rem;
 }
@@ -83,7 +77,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .course-block {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     margin-bottom: 1.5rem;
     overflow: hidden;
@@ -136,7 +129,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 .cell-week { font-weight: 700; color: var(--primary); }
 .cell-date { color: var(--muted); font-size: 12px; }
-.cell-num  { font-weight: 700; }
+.cell-num { font-weight: 700; }
 
 /* Coverage bar */
 .coverage-wrap { display: flex; align-items: center; gap: 0.5rem; min-width: 110px; }
@@ -157,10 +150,10 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     padding: 3px 9px; border-radius: 9999px;
     font-size: 11px; font-weight: 700;
 }
-.badge-used    { background: var(--green-lt); color: var(--green); }
-.badge-given   { background: var(--blue-lt);  color: var(--blue); }
+.badge-used { background: var(--green-lt); color: var(--green); }
+.badge-given { background: var(--blue-lt); color: var(--blue); }
 .badge-pending { background: var(--amber-lt); color: var(--amber); }
-.badge-none    { background: #F8F4EF; color: var(--muted); border: 1px solid var(--border); }
+.badge-none { background: #F8F4EF; color: var(--muted); border: 1px solid var(--border); }
 
 /* Empty state */
 .empty-state {
@@ -169,7 +162,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     border: 2px dashed var(--border);
 }
 .empty-state h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
-.empty-state p  { font-size: 13px; color: var(--muted); }
+.empty-state p { font-size: 13px; color: var(--muted); }
 
 @media (max-width: 640px) {
     .stats-row { grid-template-columns: 1fr 1fr; }
@@ -181,152 +174,152 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 <div class="hist-wrap">
 
-    <div class="hist-header">
-        <a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
-        </a>
-        <h1>Code Generation History</h1>
-        <div class="hist-header-sub">A record of all attendance codes you have generated</div>
-    </div>
+<div class="hist-header">
+<a href="{% url 'attendance:ta_dashboard' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back to Dashboard
+</a>
+<h1>Code Generation History</h1>
+<div class="hist-header-sub">A record of all attendance codes you have generated</div>
+</div>
 
-    <!-- Summary stats -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
-                <span class="iconify" data-icon="mdi:calendar-check-outline"></span>
-            </div>
-            <div>
-                <div class="stat-value">{{ total_sessions }}</div>
-                <div class="stat-label">Sessions</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
-                <span class="iconify" data-icon="mdi:barcode-scan"></span>
-            </div>
-            <div>
-                <div class="stat-value">{{ total_generated }}</div>
-                <div class="stat-label">Codes Generated</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:var(--green-lt);color:var(--green);">
-                <span class="iconify" data-icon="mdi:check-circle-outline"></span>
-            </div>
-            <div>
-                <div class="stat-value">{{ total_used }}</div>
-                <div class="stat-label">Codes Used</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:var(--blue-lt);color:var(--blue);">
-                <span class="iconify" data-icon="mdi:percent"></span>
-            </div>
-            <div>
-                <div class="stat-value">{{ overall_coverage }}%</div>
-                <div class="stat-label">Overall Usage</div>
-            </div>
-        </div>
-    </div>
+<!-- Summary stats -->
+<div class="stats-row">
+<div class="stat-card">
+<div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
+<span class="iconify" data-icon="mdi:calendar-check-outline"></span>
+</div>
+<div>
+<div class="stat-value">{{ total_sessions }}</div>
+<div class="stat-label">Sessions</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
+<span class="iconify" data-icon="mdi:barcode-scan"></span>
+</div>
+<div>
+<div class="stat-value">{{ total_generated }}</div>
+<div class="stat-label">Codes Generated</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:var(--green-lt);color:var(--green);">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span>
+</div>
+<div>
+<div class="stat-value">{{ total_used }}</div>
+<div class="stat-label">Codes Used</div>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon" style="background:var(--blue-lt);color:var(--blue);">
+<span class="iconify" data-icon="mdi:percent"></span>
+</div>
+<div>
+<div class="stat-value">{{ overall_coverage }}%</div>
+<div class="stat-label">Overall Usage</div>
+</div>
+</div>
+</div>
 
     {% if courses_history %}
         {% for course_id, data in courses_history.items %}
-        <div class="course-block">
-            <div class="course-block-header">
-                <div class="course-icon">
-                    <span class="iconify" data-icon="mdi:book-open-variant"></span>
-                </div>
-                <div>
-                    <div class="course-name">{{ data.course.name }}</div>
-                    <span class="course-code-pill">{{ data.course.code }}</span>
-                </div>
-            </div>
+<div class="course-block">
+<div class="course-block-header">
+<div class="course-icon">
+<span class="iconify" data-icon="mdi:book-open-variant"></span>
+</div>
+<div>
+<div class="course-name">{{ data.course.name }}</div>
+<span class="course-code-pill">{{ data.course.code }}</span>
+</div>
+</div>
 
-            <div class="table-scroll">
-                <table class="hist-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Date</th>
-                            <th>Enrolled</th>
-                            <th>Generated</th>
-                            <th>Given Out</th>
-                            <th>Used</th>
-                            <th>Pending</th>
-                            <th>Usage Rate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+<div class="table-scroll">
+<table class="hist-table">
+<thead>
+<tr>
+<th>Session</th>
+<th>Date</th>
+<th>Enrolled</th>
+<th>Generated</th>
+<th>Given Out</th>
+<th>Used</th>
+<th>Pending</th>
+<th>Usage Rate</th>
+</tr>
+</thead>
+<tbody>
                         {% for entry in data.sessions %}
-                        <tr>
-                            <td class="cell-week">Week {{ entry.week_num }}</td>
-                            <td>
-                                <div style="font-weight:600;">{{ entry.session.date|date:"N j, Y" }}</div>
-                                <div class="cell-date">{{ entry.session.start_time|time:"g:i A" }} – {{ entry.session.end_time|time:"g:i A" }}</div>
-                            </td>
-                            <td class="cell-num">{{ entry.enrolled }}</td>
-                            <td class="cell-num">
+<tr>
+<td class="cell-week">Week {{ entry.week_num }}</td>
+<td>
+<div style="font-weight:600;">{{ entry.session.date|date:"N j, Y" }}</div>
+<div class="cell-date">{{ entry.session.start_time|time:"g:i A" }} – {{ entry.session.end_time|time:"g:i A" }}</div>
+</td>
+<td class="cell-num">{{ entry.enrolled }}</td>
+<td class="cell-num">
                                 {% if entry.generated %}
-                                    <span style="font-weight:700;">{{ entry.generated }}</span>
+<span style="font-weight:700;">{{ entry.generated }}</span>
                                 {% else %}
-                                    <span style="color:var(--muted);">—</span>
+<span style="color:var(--muted);">—</span>
                                 {% endif %}
-                            </td>
-                            <td>
+</td>
+<td>
                                 {% if entry.given %}
-                                    <span class="badge badge-given">
-                                        <span class="iconify" data-icon="mdi:send-check"></span>
+<span class="badge badge-given">
+<span class="iconify" data-icon="mdi:send-check"></span>
                                         {{ entry.given }}
-                                    </span>
+</span>
                                 {% else %}
-                                    <span class="badge badge-none">—</span>
+<span class="badge badge-none">—</span>
                                 {% endif %}
-                            </td>
-                            <td>
+</td>
+<td>
                                 {% if entry.used %}
-                                    <span class="badge badge-used">
-                                        <span class="iconify" data-icon="mdi:check-bold"></span>
+<span class="badge badge-used">
+<span class="iconify" data-icon="mdi:check-bold"></span>
                                         {{ entry.used }}
-                                    </span>
+</span>
                                 {% else %}
-                                    <span class="badge badge-none">—</span>
+<span class="badge badge-none">—</span>
                                 {% endif %}
-                            </td>
-                            <td>
+</td>
+<td>
                                 {% if entry.pending %}
-                                    <span class="badge badge-pending">
-                                        <span class="iconify" data-icon="mdi:clock-outline"></span>
+<span class="badge badge-pending">
+<span class="iconify" data-icon="mdi:clock-outline"></span>
                                         {{ entry.pending }}
-                                    </span>
+</span>
                                 {% else %}
-                                    <span class="badge badge-none">—</span>
+<span class="badge badge-none">—</span>
                                 {% endif %}
-                            </td>
-                            <td>
+</td>
+<td>
                                 {% if entry.generated %}
-                                <div class="coverage-wrap">
-                                    <div class="coverage-bar">
-                                        <div class="coverage-fill" style="width:{{ entry.coverage }}%;{% if entry.coverage < 40 %}background:#B8920C;{% elif entry.coverage < 80 %}background:#2563EB;{% endif %}"></div>
-                                    </div>
-                                    <span class="coverage-pct">{{ entry.coverage }}%</span>
-                                </div>
+<div class="coverage-wrap">
+<div class="coverage-bar">
+<div class="coverage-fill" style="width:{{ entry.coverage }}%;{% if entry.coverage < 40 %}background:#B8920C;{% elif entry.coverage < 80 %}background:#2563EB;{% endif %}"></div>
+</div>
+<span class="coverage-pct">{{ entry.coverage }}%</span>
+</div>
                                 {% else %}
-                                <span style="color:var(--muted);font-size:12px;">No codes</span>
+<span style="color:var(--muted);font-size:12px;">No codes</span>
                                 {% endif %}
-                            </td>
-                        </tr>
+</td>
+</tr>
                         {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+</tbody>
+</table>
+</div>
+</div>
         {% endfor %}
     {% else %}
-    <div class="empty-state">
-        <span class="iconify" style="font-size:2.75rem;color:var(--muted);display:block;margin-bottom:0.875rem;" data-icon="mdi:history"></span>
-        <h3>No history yet</h3>
-        <p>You haven't generated any attendance codes yet.<br>Head to the dashboard to get started.</p>
-    </div>
+<div class="empty-state">
+<span class="iconify" style="font-size:2.75rem;color:var(--muted);display:block;margin-bottom:0.875rem;" data-icon="mdi:history"></span>
+<h3>No history yet</h3>
+<p>You haven't generated any attendance codes yet.<br>Head to the dashboard to get started.</p>
+</div>
     {% endif %}
 
 </div>

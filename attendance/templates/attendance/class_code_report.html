@@ -4,15 +4,15 @@
 <h2>Class Code Report</h2>
 
 <form method="get">
-    <label><strong>Select Class Session:</strong></label>
-    <select name="session" onchange="this.form.submit()">
-        <option value="">-- Choose Class --</option>
+<label><strong>Select Class Session:</strong></label>
+<select name="session" onchange="this.form.submit()">
+<option value="">-- Choose Class --</option>
         {% for s in sessions %}
-        <option value="{{ s.id }}" {% if selected_session.id == s.id %}selected{% endif %}>
+<option value="{{ s.id }}" {% if selected_session.id == s.id %}selected{% endif %}>
             {{ s.course.code }} - {{ s.topic }} ({{ s.date }})
-        </option>
+</option>
         {% endfor %}
-    </select>
+</select>
 </form>
 
 {% if selected_session %}
@@ -22,51 +22,51 @@
 <p><strong>Level:</strong> {{ selected_session.course.level }}</p>
 
 <table>
-    <tr>
-        <th>Student Name</th>
-        <th>Code Generated</th>
-        <th>Code String</th>
-        <th>Code Status</th>
-        <th>Attendance</th>
-    </tr>
+<tr>
+<th>Student Name</th>
+<th>Code Generated</th>
+<th>Code String</th>
+<th>Code Status</th>
+<th>Attendance</th>
+</tr>
     {% for item in students_data %}
-    <tr>
-        <td>{{ item.student.username }}</td>
-        <td>{% if item.code %}Yes{% else %}No{% endif %}</td>
-        <td>
+<tr>
+<td>{{ item.student.username }}</td>
+<td>{% if item.code %}Yes{% else %}No{% endif %}</td>
+<td>
             {% if item.code %}
-                <strong>{{ item.code.code_string }}</strong>
-                <br><small>Valid until: {{ item.code.expires_at }}</small>
+<strong>{{ item.code.code_string }}</strong>
+<br><small>Valid until: {{ item.code.expires_at }}</small>
             {% else %}
                 -
             {% endif %}
-        </td>
-        <td>
+</td>
+<td>
             {% if item.code %}
                 {% if item.code.is_used %}
-                    <span style="color: green;">Used</span>
+<span style="color: green;">Used</span>
                 {% elif item.code.is_expired %}
-                    <span style="color: red;">Expired</span>
+<span style="color: red;">Expired</span>
                 {% else %}
-                    <span style="color: orange;">Active</span>
+<span style="color: orange;">Active</span>
                 {% endif %}
             {% else %}
                 -
             {% endif %}
-        </td>
-        <td>
+</td>
+<td>
             {% if item.record %}
-                <span style="color: green;"><strong>✓ Present</strong></span>
-                <br><small>{{ item.record.submitted_at }}</small>
+<span style="color: green;"><strong> Present</strong></span>
+<br><small>{{ item.record.submitted_at }}</small>
             {% else %}
-                <span style="color: red;">Absent</span>
+<span style="color: red;">Absent</span>
             {% endif %}
-        </td>
-    </tr>
+</td>
+</tr>
     {% empty %}
-    <tr>
-        <td colspan="5">No students found for this level.</td>
-    </tr>
+<tr>
+<td colspan="5">No students found for this level.</td>
+</tr>
     {% endfor %}
 </table>
 {% endif %}

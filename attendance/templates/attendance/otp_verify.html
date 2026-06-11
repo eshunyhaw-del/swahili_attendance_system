@@ -2,28 +2,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>
         {% if purpose == 'login' %}Verify Login
         {% elif purpose == 'registration' %}Verify Email
         {% else %}Verify Code
         {% endif %} — SWASA Attendance
-    </title>
-    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500;600&display=swap" rel="stylesheet">
-    <script src="{% static 'js/iconify.min.js' %}"></script>
-    <style>
+</title>
+<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<style>
         :root {
-            --navy:      #0D2472;
+            --navy: #0D2472;
             --navy-dark: #091A55;
-            --gold:      #F2C31A;
-            --green:     #1A9E60;
+            --gold: #F2C31A;
+            --green: #1A9E60;
             --r-sm: 8px; --r-md: 12px; --r-xl: 24px;
         }
 
@@ -51,7 +51,6 @@
             width: 100%; max-width: 420px;
             box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.18);
             position: relative;
         }
 
@@ -88,7 +87,7 @@
         }
         @keyframes drawStroke { 100% { stroke-dashoffset: 0; } }
         .success-title { font-size: 1.3rem; font-weight: 800; color: #4ade80; letter-spacing: -0.02em; }
-        .success-sub   { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
+        .success-sub { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; }
 
         /* ─── Navy header ─── */
         .card-top {
@@ -97,25 +96,26 @@
             text-align: center;
             position: relative; overflow: hidden;
         }
-        .card-top::before {
-            content: ''; position: absolute; top: -60px; left: -60px;
-            width: 200px; height: 200px;
-            background: rgba(255,255,255,0.04); border-radius: 50%;
+        .auth-logo {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(242,195,26,0.5);
+            flex-shrink: 0;
         }
-        .card-top::after {
-            content: ''; position: absolute; bottom: -40px; right: -40px;
-            width: 150px; height: 150px;
-            background: rgba(242,195,26,0.07); border-radius: 50%;
-        }
-        .brand-icon {
-            width: 54px; height: 54px;
-            background: var(--gold);
-            border-radius: var(--r-md);
+        .auth-brand {
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 0.75rem;
-            font-size: 27px; color: var(--navy-dark);
-            box-shadow: 0 4px 12px rgba(242,195,26,0.45);
-            position: relative; z-index: 1;
+            gap: 12px; margin-bottom: 0.5rem;
+        }
+        .auth-brand-text {
+            display: flex; flex-direction: column; line-height: 1.3;
+        }
+        .auth-brand-name {
+            font-size: 1.1rem; font-weight: 700; color: #FFFFFF;
+        }
+        .auth-brand-sub {
+            font-size: 11px; font-weight: 400;
+            color: rgba(255,255,255,0.75); letter-spacing: 0.2px;
         }
         .card-top h1 {
             font-size: 1.15rem; font-weight: 800;
@@ -165,24 +165,24 @@
         .otp-box {
             width: clamp(42px, 12vw, 52px);
             height: clamp(50px, 14vw, 62px);
-            border: 2px solid rgba(255,255,255,0.28);
+            border: 1px solid rgba(255,255,255,0.20);
             border-radius: var(--r-sm);
             font-size: clamp(1.35rem, 4.5vw, 1.65rem);
             font-weight: 700;
             text-align: center;
             color: #fff;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.12);
             transition: border-color 0.13s, box-shadow 0.13s, background 0.13s;
             outline: none;
             caret-color: #fff;
             font-family: 'DM Mono', monospace;
         }
         .otp-box:focus {
-            border-color: rgba(255,255,255,0.65);
-            background: rgba(255,255,255,0.2);
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.50);
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
         }
-        .otp-box.filled { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); }
+        .otp-box.filled { border: 1px solid rgba(255,255,255,0.60); background: rgba(255,255,255,0.20); }
         .otp-box.error-shake {
             border-color: #e74c3c;
             background: rgba(192,57,43,0.2);
@@ -190,19 +190,26 @@
         }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            20%       { transform: translateX(-5px); }
-            40%       { transform: translateX(5px); }
-            60%       { transform: translateX(-3px); }
-            80%       { transform: translateX(3px); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
         }
 
-        .expiry-row {
-            display: flex; align-items: center; justify-content: center; gap: 0.35rem;
-            font-size: 11.5px; color: rgba(255,255,255,0.5); font-weight: 500;
-            margin-bottom: 1.25rem; text-align: center;
+        .otp-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.55);
+            margin-top: 8px;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            text-align: center;
         }
-        .expiry-row .iconify { font-size: 13px; }
-        .expiry-row strong { color: rgba(255,255,255,0.85); margin: 0 2px; }
+        .otp-meta strong { color: rgba(255,255,255,0.80); font-weight: 600; }
+        .otp-meta-dot { opacity: 0.4; }
 
         .btn-verify {
             width: 100%; padding: 0.75rem;
@@ -265,16 +272,15 @@
         .welcome-banner .banner-close:hover { color: #fff; }
 
         .iphone-tip {
-            background: rgba(242,195,26,0.13);
-            border: 1px solid rgba(242,195,26,0.4);
-            border-left: 3px solid #F2C31A;
-            border-radius: var(--r-sm);
-            padding: 0.6rem 0.875rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 10px 14px;
             display: flex; align-items: flex-start; gap: 0.5rem;
-            font-size: 12.5px; color: rgba(255,255,255,0.9);
+            font-size: 12px; color: rgba(255,255,255,0.85);
             margin-bottom: 1rem; line-height: 1.45;
         }
-        .iphone-tip .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; color: #F2C31A; }
+        .iphone-tip .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
         .iphone-tip .tip-close {
             margin-left: auto; background: none; border: none;
             color: rgba(255,255,255,0.4); cursor: pointer;
@@ -282,136 +288,140 @@
             flex-shrink: 0;
         }
         .iphone-tip .tip-close:hover { color: #fff; }
-    </style>
+</style>
 </head>
 <body>
 
 <div class="card">
 
     {% if success %}
-    <div class="success-overlay">
-        <div class="checkmark-wrap">
-            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle class="checkmark-circle" cx="26" cy="26" r="25"/>
-                <path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-            </svg>
-        </div>
-        <p class="success-title">Verified!</p>
-        <p class="success-sub">Redirecting you now&hellip;</p>
-    </div>
-    <script>['swasa_otp_email','swasa_otp_flow','swasa_otp_timestamp'].forEach(function(k){sessionStorage.removeItem(k);});setTimeout(function(){window.location.href="{{ redirect_url }}";},1600);</script>
+<div class="success-overlay">
+<div class="checkmark-wrap">
+<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+<circle class="checkmark-circle" cx="26" cy="26" r="25"/>
+<path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+</svg>
+</div>
+<p class="success-title">Verified!</p>
+<p class="success-sub">Redirecting you now&hellip;</p>
+</div>
+<script>['swasa_otp_email','swasa_otp_flow','swasa_otp_timestamp'].forEach(function(k){sessionStorage.removeItem(k);});setTimeout(function(){window.location.href="{{ redirect_url }}";},1600);</script>
     {% endif %}
 
-    <div class="card-top">
-        <div class="brand-icon">
-            <span class="iconify" data-icon="mdi:shield-key-outline"></span>
-        </div>
-        <h1>
+<div class="card-top">
+<div class="auth-brand">
+<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA Logo" class="auth-logo"/>
+<div class="auth-brand-text">
+<span class="auth-brand-name">SWASA Attendance</span>
+<span class="auth-brand-sub">University of Ghana</span>
+</div>
+</div>
+<h1>
             {% if purpose == 'login' %}Two-Factor Verification
             {% elif purpose == 'registration' %}Verify Your Email
             {% else %}Enter Verification Code
             {% endif %}
-        </h1>
-        <div class="email-pill">
-            <span class="iconify" data-icon="mdi:email-outline"></span>
+</h1>
+<div class="email-pill">
+<span class="iconify" data-icon="mdi:email-outline"></span>
             {{ email }}
-        </div>
-    </div>
+</div>
+</div>
 
-    <div class="card-body">
+<div class="card-body">
 
         {% if purpose == 'registration' or purpose == 'password_reset' %}
-        <div id="iphoneTip" class="iphone-tip">
-            <span class="iconify" data-icon="mdi:cellphone-check"></span>
-            <span>📱 <strong>On iPhone?</strong> Check your email for a one-tap verification button — no code typing needed!</span>
-            <button type="button" class="tip-close" onclick="this.closest('.iphone-tip').style.display='none';" aria-label="Dismiss">&times;</button>
-        </div>
+<div id="iphoneTip" class="iphone-tip">
+<span class="iconify" data-icon="mdi:cellphone-check"></span>
+<span><strong>On iPhone?</strong> Check your email for a one-tap verification button — no code typing needed!</span>
+<button type="button" class="tip-close" onclick="this.closest('.iphone-tip').style.display='none';" aria-label="Dismiss">&times;</button>
+</div>
         {% endif %}
 
-        <div id="welcomeBanner" style="display:none;" class="welcome-banner">
-            <span class="iconify" data-icon="mdi:information-outline" style="font-size:16px;flex-shrink:0;"></span>
-            <span id="welcomeBannerText"></span>
-            <button type="button" class="banner-close" onclick="document.getElementById('welcomeBanner').style.display='none';" aria-label="Dismiss">&times;</button>
-        </div>
+<div id="welcomeBanner" style="display:none;" class="welcome-banner">
+<span class="iconify" data-icon="mdi:information-outline" style="font-size:16px;flex-shrink:0;"></span>
+<span id="welcomeBannerText"></span>
+<button type="button" class="banner-close" onclick="document.getElementById('welcomeBanner').style.display='none';" aria-label="Dismiss">&times;</button>
+</div>
 
         {% for message in messages %}
-        <div class="{% if message.tags == 'success' %}success-banner{% else %}error-banner{% endif %}">
-            <span class="iconify" data-icon="mdi:{% if message.tags == 'success' %}check-circle-outline{% else %}alert-circle-outline{% endif %}"></span>
+<div class="{% if message.tags == 'success' %}success-banner{% else %}error-banner{% endif %}">
+<span class="iconify" data-icon="mdi:{% if message.tags == 'success' %}check-circle-outline{% else %}alert-circle-outline{% endif %}"></span>
             {{ message }}
-        </div>
+</div>
         {% endfor %}
 
         {% if error %}
-        <div class="error-banner">
-            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+<div class="error-banner">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
             {{ error }}
-        </div>
+</div>
         {% endif %}
 
-        <form method="post" id="otpForm">
+<form method="post" id="otpForm">
             {% csrf_token %}
 
-            <span class="otp-label">Enter 6-digit code</span>
+<span class="otp-label">Enter 6-digit code</span>
 
-            <div class="otp-boxes" id="otpBoxes">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-                <input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
-            </div>
-            <input type="hidden" name="otp_code" id="otpCombined">
+<div class="otp-boxes" id="otpBoxes">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<input type="text" class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+</div>
+<input type="hidden" name="otp_code" id="otpCombined">
 
-            <div class="expiry-row">
-                <span class="iconify" data-icon="mdi:clock-outline"></span>
-                Code expires in <strong>{{ expiry_minutes }} min{{ expiry_minutes|pluralize }}</strong>
-                &nbsp;·&nbsp; Check spam if you don't see it
-            </div>
+<div class="otp-meta">
+    <span>⏱ Expires in <strong>{{ expiry_minutes }} min{{ expiry_minutes|pluralize }}</strong></span>
+    <span class="otp-meta-dot">·</span>
+    <span>Check your spam folder if not received</span>
+</div>
 
-            <button type="submit" class="btn-verify" id="verifyBtn">
-                <span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:18px;"></span>
+<button type="submit" class="btn-verify" id="verifyBtn">
+<span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:18px;"></span>
                 Verify Code
-            </button>
-        </form>
+</button>
+</form>
 
-        <form method="post" id="resendForm">
+<form method="post" id="resendForm">
             {% csrf_token %}
-            <input type="hidden" name="action" value="resend">
-            <button type="submit" class="btn-resend" id="resendBtn" disabled>
-                <span class="iconify" data-icon="mdi:email-sync-outline" style="font-size:16px;"></span>
-                <span id="resendText">Resend Code (60s)</span>
-            </button>
-        </form>
+<input type="hidden" name="action" value="resend">
+<button type="submit" class="btn-resend" id="resendBtn" disabled>
+<span class="iconify" data-icon="mdi:email-sync-outline" style="font-size:16px;"></span>
+<span id="resendText">Resend Code (60s)</span>
+</button>
+</form>
 
         {% if purpose == 'login' %}
-        <a href="{% url 'login' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to sign in
-        </a>
+<a href="{% url 'login' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back to sign in
+</a>
         {% elif purpose == 'registration' %}
-        <a href="{% if reg_type == 'ta' %}{% url 'attendance:ta_register' %}{% else %}{% url 'attendance:register' %}{% endif %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back to registration
-        </a>
+<a href="{% if reg_type == 'ta' %}{% url 'attendance:ta_register' %}{% else %}{% url 'attendance:register' %}{% endif %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back to registration
+</a>
         {% else %}
-        <a href="{% url 'password_reset' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span> Back
-        </a>
+<a href="{% url 'password_reset' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span> Back
+</a>
         {% endif %}
 
-    </div>
+</div>
 
-    <div class="card-foot">
+<div class="card-foot">
         SWASA Attendance · University of Ghana<br>
         Department of African and Asian Languages
-    </div>
+</div>
 
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    var boxes    = Array.from(document.querySelectorAll('.otp-box'));
+    var boxes = Array.from(document.querySelectorAll('.otp-box'));
     var combined = document.getElementById('otpCombined');
-    var form     = document.getElementById('otpForm');
+    var form = document.getElementById('otpForm');
 
     function updateCombined() {
         combined.value = boxes.map(function (b) { return b.value; }).join('');
@@ -438,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             this.value = val ? val[0] : '';
             this.classList.toggle('filled', !!this.value);
-            if (this.value && idx < boxes.length - 1) boxes[idx + 1].focus();
+            if (this.value && idx< boxes.length - 1) boxes[idx + 1].focus();
             updateCombined();
             tryAutoSubmit();
         });
@@ -450,8 +460,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     boxes[idx - 1].focus();
                     updateCombined();
                 }
-            } else if (e.key === 'ArrowLeft'  && idx > 0) { boxes[idx - 1].focus(); }
-              else if (e.key === 'ArrowRight' && idx < boxes.length - 1) { boxes[idx + 1].focus(); }
+            } else if (e.key === 'ArrowLeft' && idx > 0) { boxes[idx - 1].focus(); }
+              else if (e.key === 'ArrowRight' && idx< boxes.length - 1) { boxes[idx + 1].focus(); }
         });
         box.addEventListener('paste', function (e) {
             e.preventDefault();
@@ -474,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var first = boxes.find(function (b) { return !b.value; });
     if (first) first.focus();
 
-    var cooldown  = 60;
+    var cooldown = 60;
     var resendBtn = document.getElementById('resendBtn');
     var resendTxt = document.getElementById('resendText');
     (function tick() {
@@ -489,36 +499,36 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     // ── SessionStorage: Safari tab restoration ────────────────────────────
-    var pageEmail   = '{{ email|escapejs }}';
+    var pageEmail = '{{ email|escapejs }}';
     var pagePurpose = '{{ purpose|escapejs }}';
-    var flowKey     = pagePurpose === 'registration' ? 'register'
+    var flowKey = pagePurpose === 'registration' ? 'register'
                     : pagePurpose === 'login' ? 'login' : 'password-reset';
-    var TEN_MIN     = 600000;
-    var wb          = document.getElementById('welcomeBanner');
-    var wbText      = document.getElementById('welcomeBannerText');
+    var TEN_MIN = 600000;
+    var wb = document.getElementById('welcomeBanner');
+    var wbText = document.getElementById('welcomeBannerText');
     var storedEmail = sessionStorage.getItem('swasa_otp_email');
-    var storedTs    = parseInt(sessionStorage.getItem('swasa_otp_timestamp') || '0', 10);
+    var storedTs = parseInt(sessionStorage.getItem('swasa_otp_timestamp') || '0', 10);
 
     if (storedEmail) {
-        if (Date.now() - storedTs < TEN_MIN) {
+        if (Date.now() - storedTs< TEN_MIN) {
             wbText.textContent = 'Welcome back! Enter the OTP code sent to ' + storedEmail;
-            wb.style.display   = 'flex';
+            wb.style.display = 'flex';
         } else {
             ['swasa_otp_email', 'swasa_otp_flow', 'swasa_otp_timestamp'].forEach(function (k) { sessionStorage.removeItem(k); });
             wbText.textContent = 'Your OTP has expired. Please request a new one.';
-            wb.style.display   = 'flex';
+            wb.style.display = 'flex';
             if (resendBtn) {
-                resendBtn.disabled             = false;
-                resendBtn.style.borderColor    = 'rgba(242,195,26,0.6)';
-                resendBtn.style.color          = 'var(--gold)';
-                resendTxt.textContent          = 'Resend Code';
+                resendBtn.disabled = false;
+                resendBtn.style.borderColor = 'rgba(242,195,26,0.6)';
+                resendBtn.style.color = 'var(--gold)';
+                resendTxt.textContent = 'Resend Code';
             }
         }
     }
 
     if (pageEmail) {
-        sessionStorage.setItem('swasa_otp_email',     pageEmail);
-        sessionStorage.setItem('swasa_otp_flow',      flowKey);
+        sessionStorage.setItem('swasa_otp_email', pageEmail);
+        sessionStorage.setItem('swasa_otp_flow', flowKey);
         sessionStorage.setItem('swasa_otp_timestamp', String(Date.now()));
     }
 });

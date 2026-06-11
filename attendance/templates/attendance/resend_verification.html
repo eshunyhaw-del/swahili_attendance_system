@@ -2,22 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>Resend Verification — SWASA Attendance</title>
-    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <script src="{% static 'js/iconify.min.js' %}"></script>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Resend Verification — SWASA Attendance</title>
+<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<style>
         :root {
-            --navy:      #0D2472;
+            --navy: #0D2472;
             --navy-dark: #091A55;
-            --gold:      #F2C31A;
+            --gold: #F2C31A;
             --r-sm: 8px; --r-md: 12px; --r-xl: 24px;
         }
 
@@ -45,7 +45,6 @@
             width: 100%; max-width: 420px;
             box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.18);
         }
 
         .card-top {
@@ -53,16 +52,6 @@
             padding: 1.75rem 2rem 1.6rem;
             text-align: center;
             position: relative; overflow: hidden;
-        }
-        .card-top::before {
-            content: ''; position: absolute; top: -60px; left: -60px;
-            width: 200px; height: 200px;
-            background: rgba(255,255,255,0.04); border-radius: 50%;
-        }
-        .card-top::after {
-            content: ''; position: absolute; bottom: -40px; right: -40px;
-            width: 150px; height: 150px;
-            background: rgba(242,195,26,0.07); border-radius: 50%;
         }
 
         .brand-icon {
@@ -106,8 +95,8 @@
 
         .field { margin-bottom: 1.1rem; }
         .field-label { display: block; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 0.35rem; }
-        .field-wrap  { position: relative; }
-        .field-icon  {
+        .field-wrap { position: relative; }
+        .field-icon {
             position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
             color: rgba(255,255,255,0.45); font-size: 18px; pointer-events: none;
         }
@@ -153,57 +142,57 @@
             text-align: center; padding: 0 1.75rem 1.25rem;
             font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.7;
         }
-    </style>
+</style>
 </head>
 <body>
 
 <div class="card">
-    <div class="card-top">
-        <div class="brand-icon">
-            <span class="iconify" data-icon="mdi:email-sync-outline"></span>
-        </div>
-        <h1>Resend Verification Code</h1>
-        <div class="card-top-sub">Enter your email to receive a new 6-digit code</div>
-    </div>
+<div class="card-top">
+<div class="brand-icon">
+<span class="iconify" data-icon="mdi:email-sync-outline"></span>
+</div>
+<h1>Resend Verification Code</h1>
+<div class="card-top-sub">Enter your email to receive a new 6-digit code</div>
+</div>
 
-    <div class="card-body">
+<div class="card-body">
 
         {% for message in messages %}
-        <div class="{% if message.tags == 'success' %}success-banner{% else %}error-banner{% endif %}">
-            <span class="iconify" data-icon="mdi:{% if message.tags == 'success' %}check-circle-outline{% else %}alert-circle-outline{% endif %}"></span>
+<div class="{% if message.tags == 'success' %}success-banner{% else %}error-banner{% endif %}">
+<span class="iconify" data-icon="mdi:{% if message.tags == 'success' %}check-circle-outline{% else %}alert-circle-outline{% endif %}"></span>
             {{ message }}
-        </div>
+</div>
         {% endfor %}
 
-        <form method="post">
+<form method="post">
             {% csrf_token %}
-            <div class="field">
-                <label class="field-label" for="email">Email Address</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:email-outline"></span>
-                    <input type="email" id="email" name="email"
+<div class="field">
+<label class="field-label" for="email">Email Address</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:email-outline"></span>
+<input type="email" id="email" name="email"
                            class="field-input" placeholder="your@email.com"
                            required autocomplete="email">
-                </div>
-                <div class="field-hint">Enter the email you used when you first registered.</div>
-            </div>
+</div>
+<div class="field-hint">Enter the email you used when you first registered.</div>
+</div>
 
-            <button type="submit" class="btn-send">
-                <span class="iconify" data-icon="mdi:email-sync-outline" style="font-size:18px;"></span>
+<button type="submit" class="btn-send">
+<span class="iconify" data-icon="mdi:email-sync-outline" style="font-size:18px;"></span>
                 Send Verification Code
-            </button>
-        </form>
+</button>
+</form>
 
-        <a href="{% url 'attendance:register' %}" class="back-link">
-            <span class="iconify" data-icon="mdi:arrow-left"></span>
+<a href="{% url 'attendance:register' %}" class="back-link">
+<span class="iconify" data-icon="mdi:arrow-left"></span>
             Back to registration
-        </a>
-    </div>
+</a>
+</div>
 
-    <div class="card-foot">
+<div class="card-foot">
         SWASA Attendance · University of Ghana<br>
         Department of African and Asian Languages
-    </div>
+</div>
 </div>
 
 </body>

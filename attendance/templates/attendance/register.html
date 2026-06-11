@@ -2,20 +2,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Create Account — SWASA Attendance</title>
-    <script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="{% static 'js/iconify.min.js' %}"></script>
-    <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>Create Account — SWASA Attendance</title>
+<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<style>
         :root {
-            --navy:      #0D2472;
+            --navy: #0D2472;
             --navy-dark: #091A55;
-            --gold:      #F2C31A;
+            --gold: #F2C31A;
             --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
         }
 
@@ -43,7 +43,6 @@
             width: 100%; max-width: 460px;
             box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.18);
         }
 
         .card-top {
@@ -52,25 +51,26 @@
             text-align: center;
             position: relative; overflow: hidden;
         }
-        .card-top::before {
-            content: ''; position: absolute; top: -60px; left: -60px;
-            width: 220px; height: 220px;
-            background: rgba(255,255,255,0.04); border-radius: 50%;
-        }
-        .card-top::after {
-            content: ''; position: absolute; bottom: -40px; right: -40px;
-            width: 160px; height: 160px;
-            background: rgba(242,195,26,0.07); border-radius: 50%;
-        }
-        .brand-icon {
+        .auth-logo {
             width: 56px; height: 56px;
-            background: var(--gold);
-            border-radius: var(--r-md);
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(242,195,26,0.5);
+            flex-shrink: 0;
+        }
+        .auth-brand {
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 0.875rem;
-            font-size: 26px; color: var(--navy-dark);
-            box-shadow: 0 4px 12px rgba(242,195,26,0.45);
-            position: relative; z-index: 1;
+            gap: 12px; margin-bottom: 0.5rem;
+        }
+        .auth-brand-text {
+            display: flex; flex-direction: column; line-height: 1.3;
+        }
+        .auth-brand-name {
+            font-size: 1.1rem; font-weight: 700; color: #FFFFFF;
+        }
+        .auth-brand-sub {
+            font-size: 11px; font-weight: 400;
+            color: rgba(255,255,255,0.75); letter-spacing: 0.2px;
         }
         .card-top h1 {
             font-size: 1.3rem; font-weight: 800;
@@ -119,7 +119,7 @@
 
         .field { margin-bottom: 1rem; }
         .field-label { display: block; font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,0.85); margin-bottom: 0.4rem; }
-        .field-hint  { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
+        .field-hint { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
         .field-error { font-size: 11.5px; color: #ff9999; font-weight: 600; margin-top: 0.3rem; list-style: none; }
 
         .field-wrap { position: relative; }
@@ -191,159 +191,163 @@
             text-align: center; padding: 0 2rem 1.5rem;
             font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.7;
         }
-    </style>
+</style>
 </head>
 <body>
 
 <div class="card">
 
-    <div class="card-top">
-        <div class="brand-icon">
-            <span class="iconify" data-icon="mdi:account-plus-outline"></span>
-        </div>
-        <h1>Create Your Account</h1>
-        <div class="card-top-sub">SWASA Attendance · Student Registration</div>
+<div class="card-top">
+<div class="auth-brand">
+<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA Logo" class="auth-logo"/>
+<div class="auth-brand-text">
+<span class="auth-brand-name">SWASA Attendance</span>
+<span class="auth-brand-sub">University of Ghana</span>
+</div>
+</div>
+<h1>Create Your Account</h1>
+<div class="card-top-sub">SWASA Attendance · Student Registration</div>
 
-        <div class="steps">
-            <div class="step-item active">
-                <div class="step-dot">1</div>
+<div class="steps">
+<div class="step-item active">
+<div class="step-dot">1</div>
                 Your details
-            </div>
-            <div class="step-line"></div>
-            <div class="step-item">
-                <div class="step-dot">2</div>
+</div>
+<div class="step-line"></div>
+<div class="step-item">
+<div class="step-dot">2</div>
                 Verify email
-            </div>
-            <div class="step-line"></div>
-            <div class="step-item">
-                <div class="step-dot">3</div>
+</div>
+<div class="step-line"></div>
+<div class="step-item">
+<div class="step-dot">3</div>
                 Done
-            </div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
 
-    <div class="card-body">
+<div class="card-body">
 
         {% if messages %}
         {% for message in messages %}
-        <div class="error-banner">
-            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+<div class="error-banner">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
             {{ message }}
-        </div>
+</div>
         {% endfor %}
         {% endif %}
 
         {% if form.non_field_errors %}
-        <div class="error-banner">
-            <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+<div class="error-banner">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
             {{ form.non_field_errors|join:" " }}
-        </div>
+</div>
         {% endif %}
 
-        <form method="post" autocomplete="off" id="regForm" novalidate>
+<form method="post" autocomplete="off" id="regForm" novalidate>
             {% csrf_token %}
 
-            <div class="field-row">
-                <div class="field">
-                    <label class="field-label" for="id_full_name">Full Name</label>
-                    <div class="field-wrap">
-                        <span class="iconify field-icon" data-icon="mdi:account-outline"></span>
+<div class="field-row">
+<div class="field">
+<label class="field-label" for="id_full_name">Full Name</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:account-outline"></span>
                         {{ form.full_name }}
-                    </div>
+</div>
                     {% if form.full_name.errors %}
-                    <ul class="field-error">{% for e in form.full_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.full_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                     {% endif %}
-                </div>
+</div>
 
-                <div class="field">
-                    <label class="field-label" for="id_student_id">Student ID</label>
-                    <div class="field-wrap">
-                        <span class="iconify field-icon" data-icon="mdi:card-account-details-outline"></span>
+<div class="field">
+<label class="field-label" for="id_student_id">Student ID</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:card-account-details-outline"></span>
                         {{ form.student_id }}
-                    </div>
+</div>
                     {% if form.student_id.errors %}
-                    <ul class="field-error">{% for e in form.student_id.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.student_id.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                     {% endif %}
-                </div>
-            </div>
+</div>
+</div>
 
-            <div class="field">
-                <label class="field-label" for="id_level">Academic Level</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:school-outline"></span>
+<div class="field">
+<label class="field-label" for="id_level">Academic Level</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:school-outline"></span>
                     {{ form.level }}
-                </div>
+</div>
                 {% if form.level.errors %}
-                <ul class="field-error">{% for e in form.level.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.level.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                 {% endif %}
-            </div>
+</div>
 
-            <div class="field">
-                <label class="field-label" for="id_email">Email Address</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:email-outline"></span>
+<div class="field">
+<label class="field-label" for="id_email">Email Address</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:email-outline"></span>
                     {{ form.email }}
-                </div>
-                <div class="field-hint">A 6-digit verification code will be sent here after you register.</div>
+</div>
+{% comment %} <div class="field-hint">A 6-digit verification code will be sent here after you register.</div> {% endcomment %}
                 {% if form.email.errors %}
-                <ul class="field-error">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                 {% endif %}
-            </div>
+</div>
 
-            <hr class="section-divider">
+<hr class="section-divider">
 
-            <div class="field">
-                <label class="field-label" for="id_password">Password</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
+<div class="field">
+<label class="field-label" for="id_password">Password</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
                     {{ form.password }}
-                    <button type="button" class="pw-toggle" onclick="togglePw('id_password', this)">
-                        <span class="iconify" data-icon="mdi:eye-outline"></span>
-                    </button>
-                </div>
-                <div class="field-hint">At least 8 characters. Cannot match your Student ID.</div>
+<button type="button" class="pw-toggle" onclick="togglePw('id_password', this)">
+<span class="iconify" data-icon="mdi:eye-outline"></span>
+</button>
+</div>
+<div class="field-hint">At least 8 characters. Cannot match your Student ID.</div>
                 {% if form.password.errors %}
-                <ul class="field-error">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                 {% endif %}
-            </div>
+</div>
 
-            <div class="field">
-                <label class="field-label" for="id_password2">Confirm Password</label>
-                <div class="field-wrap">
-                    <span class="iconify field-icon" data-icon="mdi:lock-check-outline"></span>
+<div class="field">
+<label class="field-label" for="id_password2">Confirm Password</label>
+<div class="field-wrap">
+<span class="iconify field-icon" data-icon="mdi:lock-check-outline"></span>
                     {{ form.password2 }}
-                    <button type="button" class="pw-toggle" onclick="togglePw('id_password2', this)">
-                        <span class="iconify" data-icon="mdi:eye-outline"></span>
-                    </button>
-                </div>
+<button type="button" class="pw-toggle" onclick="togglePw('id_password2', this)">
+<span class="iconify" data-icon="mdi:eye-outline"></span>
+</button>
+</div>
                 {% if form.password2.errors %}
-                <ul class="field-error">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+<ul class="field-error">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
                 {% endif %}
-            </div>
+</div>
 
-            <button type="submit" class="btn-register">
-                <span class="iconify" data-icon="mdi:arrow-right-circle-outline" style="font-size:18px;"></span>
+<button type="submit" class="btn-register">
+<span class="iconify" data-icon="mdi:arrow-right-circle-outline" style="font-size:18px;"></span>
                 Create Account
-            </button>
+</button>
 
-            <div class="otp-note">
-                <span class="iconify" data-icon="mdi:numeric-6-box-outline"></span>
+{% comment %} <div class="otp-note">
+<span class="iconify" data-icon="mdi:numeric-6-box-outline"></span>
                 After submitting, we'll email you a 6-digit code to verify your account. Check your inbox — it arrives within a minute.
-            </div>
+</div> {% endcomment %}
 
-            <div class="login-row">
-                Already have an account? <a href="{% url 'login' %}">Sign in</a>
-            </div>
-            <div class="login-row" style="margin-top:0.5rem;">
-                Registered but never verified? <a href="{% url 'attendance:resend_verification' %}">Resend your code</a>
-            </div>
-        </form>
-    </div>
+<div class="login-row">
+                Already have an account?<a href="{% url 'login' %}">Sign in</a>
+</div>
+<div class="login-row" style="margin-top:0.5rem;">
+                Registered but never verified?<a href="{% url 'attendance:resend_verification' %}">Resend your code</a>
+</div>
+</form>
+</div>
 
-    <div class="card-foot">
+{% comment %} <div class="card-foot">
         SWASA Attendance · University of Ghana<br>
         Department of African and Asian Languages
-    </div>
+</div> {% endcomment %}
 
 </div>
 

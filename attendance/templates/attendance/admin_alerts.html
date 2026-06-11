@@ -4,27 +4,27 @@
 {% block content %}
 <style>
 :root {
-    --bg-base:        #F8F4EF;
-    --bg-surface:     #FFFFFF;
-    --bg-subtle:      #F8F4EF;
-    --radius-lg:      16px;
-    --shadow-xs:      0 1px 3px rgba(13,36,114,0.07);
-    --shadow-md:      0 4px 14px rgba(13,36,114,0.10);
-    --text-primary:   #1A1A2E;
+    --bg-base: #F8F4EF;
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F8F4EF;
+    --radius-lg: 16px;
+    --shadow-xs: 0 1px 3px rgba(13,36,114,0.07);
+    --shadow-md: 0 4px 14px rgba(13,36,114,0.10);
+    --text-primary: #1A1A2E;
     --text-secondary: #6B7280;
-    --text-muted:     #6B7280;
-    --border:         #E8E0D8;
-    --border-strong:  #D4C8BE;
-    --gold:           #F2C31A;
+    --text-muted: #6B7280;
+    --border: #E8E0D8;
+    --border-strong: #D4C8BE;
+    --gold: #F2C31A;
 }
 html[data-theme="dark"] :root,
 html[data-theme="dark"] {
-    --bg-base:       #0F172A;
-    --bg-surface:    #1E293B;
-    --bg-subtle:     #1E293B;
-    --text-primary:  #F1F5F9;
-    --text-muted:    #94A3B8;
-    --border:        #334155;
+    --bg-base: #0F172A;
+    --bg-surface: #1E293B;
+    --bg-subtle: #1E293B;
+    --text-primary: #F1F5F9;
+    --text-muted: #94A3B8;
+    --border: #334155;
     --border-strong: #475569;
 }
 body { background: var(--bg-base) !important; background-image: none !important; }
@@ -39,18 +39,13 @@ body { background: var(--bg-base) !important; background-image: none !important;
     display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
     position: relative; overflow: hidden;
 }
-.alr-page-header::after {
-    content: ''; position: absolute; top: -40px; right: 8%;
-    width: 140px; height: 140px; border-radius: 50%;
-    background: rgba(231,76,60,0.07); pointer-events: none;
-}
 .alr-page-header h1 { font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem; position: relative; z-index: 1; }
-.alr-page-header p  { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
+.alr-page-header p { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
 .alr-header-count { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(231,76,60,0.2); color: #ff8f8f; border: 1px solid rgba(231,76,60,0.3); position: relative; z-index: 1; white-space: nowrap; }
 
 /* ── Alert Card ── */
 .alr-card {
-    background: var(--bg-surface); border: 1px solid var(--border);
+    background: var(--bg-surface);
     border-radius: var(--radius-lg); padding: 1.375rem 1.5rem;
     margin-bottom: 1rem; box-shadow: var(--shadow-xs);
     border-left: 4px solid var(--border);
@@ -58,7 +53,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
 }
 .alr-card:hover { box-shadow: var(--shadow-md); }
 .alr-card.unresolved { border-left-color: #e74c3c; }
-.alr-card.resolved   { border-left-color: #1E9E5E; opacity: 0.85; }
+.alr-card.resolved { border-left-color: #1E9E5E; opacity: 0.85; }
 
 .alr-card-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -71,7 +66,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
     font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
     display: inline-flex; align-items: center; gap: 0.3rem;
 }
-.alr-badge.active   { background: rgba(231,76,60,0.1); color: #C0392B; border: 1px solid rgba(231,76,60,0.2); }
+.alr-badge.active { background: rgba(231,76,60,0.1); color: #C0392B; border: 1px solid rgba(231,76,60,0.2); }
 .alr-badge.resolved { background: rgba(30,158,94,0.1); color: #1E9E5E; border: 1px solid rgba(30,158,94,0.2); }
 
 .alr-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem 1rem; margin-bottom: 1.125rem; }
@@ -111,119 +106,119 @@ html[data-theme="dark"] .alr-code-tag {
 /* ── Empty ── */
 .alr-empty {
     text-align: center; padding: 3.5rem 1rem;
-    background: var(--bg-surface); border: 1px solid var(--border);
+    background: var(--bg-surface);
     border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);
 }
 .alr-empty .iconify { font-size: 52px; color: #1E9E5E; display: block; margin: 0 auto 0.875rem; }
 .alr-empty h3 { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; }
-.alr-empty p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+.alr-empty p { font-size: 13px; color: var(--text-muted); margin: 0; }
 </style>
 
 <div class="alr-wrap">
 
-    <div class="alr-page-header">
-        <div>
-            <h1>Security Alerts</h1>
-            <p>Monitor and resolve unauthorised code-sharing attempts</p>
-        </div>
+<div class="alr-page-header">
+<div>
+<h1>Security Alerts</h1>
+<p>Monitor and resolve unauthorised code-sharing attempts</p>
+</div>
         {% if alerts %}
         {% with unresolved=alerts|length %}
-        <span class="alr-header-count">{{ unresolved }} alert{{ unresolved|pluralize }}</span>
+<span class="alr-header-count">{{ unresolved }} alert{{ unresolved|pluralize }}</span>
         {% endwith %}
         {% endif %}
-    </div>
+</div>
 
     {% if alerts %}
         {% for alert in alerts %}
-        <div class="alr-card {% if alert.is_resolved %}resolved{% else %}unresolved{% endif %}">
+<div class="alr-card {% if alert.is_resolved %}resolved{% else %}unresolved{% endif %}">
 
-            <div class="alr-card-header">
-                <div class="alr-card-title">
-                    <span class="iconify" data-icon="mdi:alert-decagram"></span>
+<div class="alr-card-header">
+<div class="alr-card-title">
+<span class="iconify" data-icon="mdi:alert-decagram"></span>
                     Code Misuse Detected
-                </div>
+</div>
                 {% if alert.is_resolved %}
-                <span class="alr-badge resolved">
-                    <span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:12px;"></span> Resolved
-                </span>
+<span class="alr-badge resolved">
+<span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:12px;"></span> Resolved
+</span>
                 {% else %}
-                <span class="alr-badge active">
-                    <span class="iconify" data-icon="mdi:alert-circle-outline" style="font-size:12px;"></span> Active
-                </span>
+<span class="alr-badge active">
+<span class="iconify" data-icon="mdi:alert-circle-outline" style="font-size:12px;"></span> Active
+</span>
                 {% endif %}
-            </div>
+</div>
 
-            <div class="alr-details">
-                <div>
-                    <div class="alr-detail-lbl">Code String</div>
-                    <div class="alr-detail-val">
+<div class="alr-details">
+<div>
+<div class="alr-detail-lbl">Code String</div>
+<div class="alr-detail-val">
                         {% if alert.code %}
-                        <span class="alr-code-tag">{{ alert.code.code_string }}</span>
+<span class="alr-code-tag">{{ alert.code.code_string }}</span>
                         {% else %}
-                        <span class="alr-code-tag" style="opacity:0.5;">N/A</span>
+<span class="alr-code-tag" style="opacity:0.5;">N/A</span>
                         {% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="alr-detail-lbl">Attempted At</div>
-                    <div class="alr-detail-val">{{ alert.attempted_at|date:"M j, Y — g:i a" }}</div>
-                </div>
-                <div>
-                    <div class="alr-detail-lbl">Attempted By</div>
-                    <div class="alr-detail-val">
+</div>
+</div>
+<div>
+<div class="alr-detail-lbl">Attempted At</div>
+<div class="alr-detail-val">{{ alert.attempted_at|date:"M j, Y — g:i a" }}</div>
+</div>
+<div>
+<div class="alr-detail-lbl">Attempted By</div>
+<div class="alr-detail-val">
                         {{ alert.attempted_by.get_full_name|default:alert.attempted_by.username }}
-                        <div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.attempted_by.username }}</div>
-                    </div>
-                </div>
-                <div>
-                    <div class="alr-detail-lbl">Code Owner</div>
-                    <div class="alr-detail-val">
+<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.attempted_by.username }}</div>
+</div>
+</div>
+<div>
+<div class="alr-detail-lbl">Code Owner</div>
+<div class="alr-detail-val">
                         {% if alert.code and alert.code.student %}
                         {{ alert.code.student.get_full_name|default:alert.code.student.username }}
-                        <div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.code.student.username }}</div>
+<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.code.student.username }}</div>
                         {% else %}
                         Unknown
-                        <div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">N/A</div>
+<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">N/A</div>
                         {% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="alr-detail-lbl">Session</div>
-                    <div class="alr-detail-val">
+</div>
+</div>
+<div>
+<div class="alr-detail-lbl">Session</div>
+<div class="alr-detail-val">
                         {% if alert.code and alert.code.class_session %}
                         {{ alert.code.class_session.course.code }} — {{ alert.code.class_session.date|date:"M j, Y" }}
                         {% else %}
                         N/A
                         {% endif %}
-                    </div>
-                </div>
-                <div>
-                    <div class="alr-detail-lbl">Reason</div>
-                    <div class="alr-detail-val alr-reason-box">{{ alert.reason }}</div>
-                </div>
-            </div>
+</div>
+</div>
+<div>
+<div class="alr-detail-lbl">Reason</div>
+<div class="alr-detail-val alr-reason-box">{{ alert.reason }}</div>
+</div>
+</div>
 
             {% if not alert.is_resolved %}
-            <div class="alr-card-footer">
-                <form method="post">
+<div class="alr-card-footer">
+<form method="post">
                     {% csrf_token %}
-                    <input type="hidden" name="alert_id" value="{{ alert.id }}">
-                    <button type="submit" class="alr-resolve-btn">
-                        <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+<input type="hidden" name="alert_id" value="{{ alert.id }}">
+<button type="submit" class="alr-resolve-btn">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span>
                         Mark as Resolved
-                    </button>
-                </form>
-            </div>
+</button>
+</form>
+</div>
             {% endif %}
 
-        </div>
+</div>
         {% endfor %}
     {% else %}
-    <div class="alr-empty">
-        <span class="iconify" data-icon="mdi:shield-check-outline"></span>
-        <h3>No Security Alerts</h3>
-        <p>All students are using their own attendance codes correctly.</p>
-    </div>
+<div class="alr-empty">
+<span class="iconify" data-icon="mdi:shield-check-outline"></span>
+<h3>No Security Alerts</h3>
+<p>All students are using their own attendance codes correctly.</p>
+</div>
     {% endif %}
 
 </div>

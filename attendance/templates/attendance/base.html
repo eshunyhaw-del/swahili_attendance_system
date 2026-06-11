@@ -1,93 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>SWASA Attendance System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>SWASA Attendance System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     {% load static %}
-    <script src="{% static 'js/iconify.min.js' %}"></script>
-    <style>
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<style>
         :root {
             /* ── Design tokens ── */
-            --primary:        #0D2472;
-            --primary-hover:  #091A55;
-            --primary-light:  rgba(13, 36, 114, 0.08);
-            --gold:           #F2C31A;
-            --gold-hover:     #D4A900;
-            --orange:         #E85D26;
-            --orange-light:   rgba(232, 93, 38, 0.1);
+            --primary: #0D2472;
+            --primary-hover: #091A55;
+            --primary-light: rgba(13, 36, 114, 0.08);
+            --gold: #F2C31A;
+            --gold-hover: #D4A900;
+            --orange: #E85D26;
+            --orange-light: rgba(232, 93, 38, 0.1);
 
-            --bg-main:        #F8F4EF;
-            --bg-card:        #FFFFFF;
-            --text-main:      #1A1A2E;
-            --text-muted:     #6B7280;
-            --text-hint:      #9CA3AF;
-            --border:         #E8E0D8;
-            --shadow:         0 4px 20px rgba(13, 36, 114, 0.08);
-            --radius-lg:      16px;
-            --radius-sm:      8px;
+            --bg-main: #F8F4EF;
+            --bg-card: #FFFFFF;
+            --text-main: #1A1A2E;
+            --text-muted: #6B7280;
+            --text-hint: #9CA3AF;
+            --border: #E8E0D8;
+            --shadow: 0 4px 20px rgba(13, 36, 114, 0.08);
+            --radius-lg: 16px;
+            --radius-sm: 8px;
 
             /* ── Legacy aliases ── */
-            --navy:           var(--primary);
-            --navy-light:     #1B3A9C;
-            --navy-dark:      var(--primary-hover);
-            --gold-dark:      var(--gold-hover);
-            --teal:           #00A896;
-            --red:            #C0392B;
-            --green:          #1E9E5E;
-            --blue:           #4A90D9;
-            --bg-base:        var(--bg-main);
-            --bg-surface:     var(--bg-card);
-            --bg-subtle:      #EDE4D8;
-            --bg-overlay:     rgba(13, 36, 114, 0.04);
-            --text-primary:   var(--text-main);
+            --navy: var(--primary);
+            --navy-light: #1B3A9C;
+            --navy-dark: var(--primary-hover);
+            --gold-dark: var(--gold-hover);
+            --teal: #00A896;
+            --red: #C0392B;
+            --green: #1E9E5E;
+            --blue: #4A90D9;
+            --bg-base: var(--bg-main);
+            --bg-surface: var(--bg-card);
+            --bg-subtle: #EDE4D8;
+            --bg-overlay: rgba(13, 36, 114, 0.04);
+            --text-primary: var(--text-main);
             --text-secondary: #4A5568;
-            --text-inverse:   #FFFFFF;
-            --border-strong:  #C8D0E0;
-            --sidebar-width:  260px;
-            --topbar-height:  60px;
-            --shadow-xs:      0 1px 2px rgba(13, 36, 114, 0.06);
-            --shadow-sm:      0 1px 4px rgba(13, 36, 114, 0.08);
-            --shadow-md:      var(--shadow);
-            --shadow-lg:      0 8px 32px rgba(13, 36, 114, 0.14);
-            --radius-md:      12px;
-            --radius-xl:      20px;
+            --text-inverse: #FFFFFF;
+            --border-strong: #C8D0E0;
+            --sidebar-width: 260px;
+            --topbar-height: 60px;
+            --shadow-xs: 0 1px 2px rgba(13, 36, 114, 0.06);
+            --shadow-sm: 0 1px 4px rgba(13, 36, 114, 0.08);
+            --shadow-md: var(--shadow);
+            --shadow-lg: 0 8px 32px rgba(13, 36, 114, 0.14);
+            --shadow-card: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04);
+            --shadow-card-hover: 0 4px 16px rgba(13,36,114,0.10), 0 2px 6px rgba(13,36,114,0.06);
+            --shadow-modal: 0 8px 32px rgba(13,36,114,0.14), 0 2px 8px rgba(13,36,114,0.08);
+            --shadow-stat: 0 2px 6px rgba(13,36,114,0.07);
+            --radius-md: 12px;
+            --radius-xl: 20px;
         }
 
         html[data-theme="dark"] {
-            --primary:        #1B3A9C;
-            --primary-hover:  #0D2472;
-            --primary-light:  rgba(27, 58, 156, 0.15);
-            --orange:         #F07040;
-            --orange-light:   rgba(240, 112, 64, 0.15);
-            --bg-main:        #0F1923;
-            --bg-card:        #1E2A3B;
-            --text-main:      #E8EDF5;
-            --text-muted:     #8896AB;
-            --text-hint:      #4A5568;
-            --border:         #2E3D50;
-            --shadow:         0 4px 20px rgba(0, 0, 0, 0.3);
+            --primary: #1B3A9C;
+            --primary-hover: #0D2472;
+            --primary-light: rgba(27, 58, 156, 0.15);
+            --orange: #F07040;
+            --orange-light: rgba(240, 112, 64, 0.15);
+            --bg-main: #0F1923;
+            --bg-card: #1E2A3B;
+            --text-main: #E8EDF5;
+            --text-muted: #8896AB;
+            --text-hint: #4A5568;
+            --border: #2E3D50;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 
             /* Legacy aliases */
-            --bg-base:        #0F1923;
-            --bg-surface:     #1E2A3B;
-            --bg-subtle:      #162131;
-            --bg-overlay:     rgba(255,255,255,0.04);
-            --text-primary:   #E8EDF5;
+            --bg-base: #0F1923;
+            --bg-surface: #1E2A3B;
+            --bg-subtle: #162131;
+            --bg-overlay: rgba(255,255,255,0.04);
+            --text-primary: #E8EDF5;
             --text-secondary: #C4CDD8;
-            --border-strong:  #3A4E66;
-            --shadow-xs:      0 1px 3px rgba(0,0,0,0.5);
-            --shadow-sm:      0 1px 5px rgba(0,0,0,0.6);
-            --shadow-md:      0 4px 18px rgba(0,0,0,0.7);
-            --shadow-lg:      0 8px 32px rgba(0,0,0,0.8);
-            --surface:        #1E2A3B;
-            --bg:             #0F1923;
-            --text:           #E8EDF5;
-            --muted:          #8896AB;
+            --border-strong: #3A4E66;
+            --shadow-xs: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-sm: 0 1px 5px rgba(0,0,0,0.6);
+            --shadow-md: 0 4px 18px rgba(0,0,0,0.7);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.8);
+            --shadow-card: 0 2px 8px rgba(0,0,0,0.20), 0 1px 3px rgba(0,0,0,0.14);
+            --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.18);
+            --shadow-modal: 0 8px 32px rgba(0,0,0,0.36), 0 2px 8px rgba(0,0,0,0.22);
+            --shadow-stat: 0 2px 6px rgba(0,0,0,0.18);
+            --surface: #1E2A3B;
+            --bg: #0F1923;
+            --text: #E8EDF5;
+            --muted: #8896AB;
         }
 
         *, *::before, *::after {
@@ -149,34 +157,36 @@
             text-decoration: none;
         }
 
-        .logo-icon {
+        .sidebar-logo {
             width: 38px;
             height: 38px;
-            background: var(--gold);
-            border-radius: var(--radius-sm);
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid rgba(242,195,26,0.4);
+        }
+        .sidebar-brand {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: var(--navy-dark);
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.03em;
-            flex-shrink: 0;
+            gap: 10px;
+            padding: 0;
         }
-
-        .logo-text {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--gold);
+        .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
             line-height: 1.2;
         }
-
-        .logo-text span {
-            color: rgba(255,255,255,0.6);
-            display: block;
-            font-size: 11px;
+        .sidebar-brand-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-brand-sub {
+            font-size: 10px;
             font-weight: 500;
-            letter-spacing: 0.06em;
+            color: var(--gold);
+            letter-spacing: 0.3px;
             text-transform: uppercase;
         }
 
@@ -309,6 +319,10 @@
 
         @media (min-width: 480px) { .page-title { display: block; } }
 
+        @media (max-width: 768px) {
+            .topbar-brand-sub { display: none; }
+        }
+
         .user-menu {
             display: flex;
             align-items: center;
@@ -380,10 +394,10 @@
         }
 
         /* Dark mode: alert text must be light, not the dark colours designed for white bg */
-        html[data-theme="dark"] .alert-info    { background: rgba(74,144,217,0.14);  color: #7EC8F5; border-left-color: #4A90D9; }
-        html[data-theme="dark"] .alert-success { background: rgba(30,158,94,0.14);   color: #5DD6A5; border-left-color: #1E9E5E; }
-        html[data-theme="dark"] .alert-error   { background: rgba(192,57,43,0.14);   color: #F08888; border-left-color: #C0392B; }
-        html[data-theme="dark"] .alert-warning { background: rgba(242,195,26,0.14);  color: #F2C31A; border-left-color: #C9A00E; }
+        html[data-theme="dark"] .alert-info { background: rgba(74,144,217,0.14); color: #7EC8F5; border-left-color: #4A90D9; }
+        html[data-theme="dark"] .alert-success { background: rgba(30,158,94,0.14); color: #5DD6A5; border-left-color: #1E9E5E; }
+        html[data-theme="dark"] .alert-error { background: rgba(192,57,43,0.14); color: #F08888; border-left-color: #C0392B; }
+        html[data-theme="dark"] .alert-warning { background: rgba(242,195,26,0.14); color: #F2C31A; border-left-color: #C9A00E; }
 
         /* Dark mode: navy brand colour as text is invisible on dark surfaces — use gold */
         html[data-theme="dark"] .badge-navy {
@@ -406,7 +420,7 @@
         html[data-theme="dark"] .pta-avatar { color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2); }
         html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; background: rgba(100,160,230,0.12); }
         html[data-theme="dark"] .ad-level-chip,
-        html[data-theme="dark"] .ad-num          { color: var(--text-primary); }
+        html[data-theme="dark"] .ad-num { color: var(--text-primary); }
         html[data-theme="dark"] .ld-stat-chip.enrolled .ld-stat-val { color: #7BAEE8; }
         html[data-theme="dark"] .ld-stat-chip.enrolled { background: rgba(100,160,230,0.1); }
 
@@ -519,7 +533,7 @@
 
         .theme-dark-icon { display: none; }
         html[data-theme="dark"] .theme-light-icon { display: none; }
-        html[data-theme="dark"] .theme-dark-icon  { display: flex; align-items: center; justify-content: center; }
+        html[data-theme="dark"] .theme-dark-icon { display: flex; align-items: center; justify-content: center; }
 
         /* ─── CONTAINER ─── */
         .container {
@@ -535,14 +549,13 @@
         .card {
             background: var(--bg-surface);
             border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
             overflow: hidden;
             margin-bottom: 1.25rem;
-            box-shadow: var(--shadow-xs);
+            box-shadow: var(--shadow-card);
             transition: box-shadow 0.2s ease;
         }
 
-        .card:hover { box-shadow: var(--shadow-sm); }
+        .card:hover { box-shadow: var(--shadow-card-hover); }
 
         .card-header {
             padding: 1rem 1.25rem;
@@ -576,21 +589,20 @@
             background: var(--bg-surface);
             border-radius: var(--radius-lg);
             padding: 1.25rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-xs);
-            border-left-width: 4px;
+            border-left: 4px solid transparent;
+            box-shadow: var(--shadow-stat);
             transition: box-shadow 0.2s, transform 0.2s;
         }
 
         .stat-card:hover {
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-card-hover);
             transform: translateY(-2px);
         }
 
-        .stat-card.total   { border-left-color: var(--navy); }
+        .stat-card.total { border-left-color: var(--navy); }
         .stat-card.present { border-left-color: var(--green); }
-        .stat-card.absent  { border-left-color: var(--red); }
-        .stat-card.late    { border-left-color: var(--gold); }
+        .stat-card.absent { border-left-color: var(--red); }
+        .stat-card.late { border-left-color: var(--gold); }
 
         .stat-icon {
             width: 32px;
@@ -603,10 +615,10 @@
             font-size: 17px;
         }
 
-        .stat-card.total   .stat-icon { background: rgba(13,36,114,0.08); color: var(--navy); }
-        .stat-card.present .stat-icon { background: rgba(30,158,94,0.1);  color: var(--green); }
-        .stat-card.absent  .stat-icon { background: rgba(192,57,43,0.1);  color: var(--red); }
-        .stat-card.late    .stat-icon { background: rgba(242,195,26,0.15); color: var(--gold-dark); }
+        .stat-card.total .stat-icon { background: rgba(13,36,114,0.08); color: var(--navy); }
+        .stat-card.present .stat-icon { background: rgba(30,158,94,0.1); color: var(--green); }
+        .stat-card.absent .stat-icon { background: rgba(192,57,43,0.1); color: var(--red); }
+        .stat-card.late .stat-icon { background: rgba(242,195,26,0.15); color: var(--gold-dark); }
 
         .stat-title {
             font-size: 10px;
@@ -764,11 +776,11 @@
             white-space: nowrap;
         }
 
-        .badge-present { background: rgba(30,158,94,0.12);  color: var(--green); }
-        .badge-absent  { background: rgba(192,57,43,0.10);  color: var(--red); }
-        .badge-late    { background: rgba(201,160,14,0.12); color: var(--gold-dark); }
+        .badge-present { background: rgba(30,158,94,0.12); color: var(--green); }
+        .badge-absent { background: rgba(192,57,43,0.10); color: var(--red); }
+        .badge-late { background: rgba(201,160,14,0.12); color: var(--gold-dark); }
         .badge-pending { background: rgba(74,144,217,0.12); color: var(--blue); }
-        .badge-navy    { background: rgba(13,36,114,0.1);   color: var(--navy); }
+        .badge-navy { background: rgba(13,36,114,0.1); color: var(--navy); }
 
         /* ─── ALERTS ─── */
         .alert {
@@ -782,10 +794,10 @@
             gap: 0.6rem;
         }
 
-        .alert-info    { background: rgba(74,144,217,0.08);  color: #1B4F9C; border-left-color: var(--blue); }
-        .alert-success { background: rgba(30,158,94,0.08);   color: #14532D; border-left-color: var(--green); }
-        .alert-error   { background: rgba(192,57,43,0.08);   color: #7F1D1D; border-left-color: var(--red); }
-        .alert-warning { background: rgba(242,195,26,0.10);  color: #713F12; border-left-color: var(--gold); }
+        .alert-info { background: rgba(74,144,217,0.08); color: #1B4F9C; border-left-color: var(--blue); }
+        .alert-success { background: rgba(30,158,94,0.08); color: #14532D; border-left-color: var(--green); }
+        .alert-error { background: rgba(192,57,43,0.08); color: #7F1D1D; border-left-color: var(--red); }
+        .alert-warning { background: rgba(242,195,26,0.10); color: #713F12; border-left-color: var(--gold); }
 
         /* ─── WEEK GRID ─── */
         .week-grid {
@@ -801,13 +813,11 @@
             border-radius: var(--radius-md);
             padding: 0.875rem;
             text-align: center;
-            border: 1px solid var(--border);
-            transition: box-shadow 0.15s, border-color 0.15s;
+            transition: box-shadow 0.15s;
         }
 
         .week-card:hover {
-            border-color: var(--navy);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-card-hover);
         }
 
         /* ─── DESKTOP SIDEBAR ─── */
@@ -827,19 +837,19 @@
 
         @media (min-width: 768px) {
             .desktop-only { display: flex; }
-            .mobile-only  { display: none; }
+            .mobile-only { display: none; }
         }
 
-        .text-muted   { color: var(--text-muted); }
-        .text-sm      { font-size: 12px; }
-        .font-mono    { font-family: 'DM Mono', monospace; }
-        .flex         { display: flex; }
+        .text-muted { color: var(--text-muted); }
+        .text-sm { font-size: 12px; }
+        .font-mono { font-family: 'DM Mono', monospace; }
+        .flex { display: flex; }
         .items-center { align-items: center; }
-        .gap-2        { gap: 0.5rem; }
-        .gap-3        { gap: 0.75rem; }
-        .mt-1         { margin-top: 0.25rem; }
-        .mt-4         { margin-top: 1rem; }
-        .mb-4         { margin-bottom: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-4 { margin-bottom: 1rem; }
 
         /* ─── NOTIFICATION BELL ─── */
         .notif-wrapper { position: relative; }
@@ -864,9 +874,8 @@
             right: 0;
             width: 340px;
             background: var(--bg-surface);
-            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-modal);
             z-index: 9999;
             overflow: hidden;
         }
@@ -898,7 +907,7 @@
         .notif-item:last-child { border-bottom: none; }
         .notif-item:hover { background: var(--bg-subtle); }
         .notif-item.ann-unread { border-left-color: #F2C31A; }
-        .notif-item.ann-read   { opacity: 0.7; }
+        .notif-item.ann-read { opacity: 0.7; }
         .notif-link {
             flex: 1; min-width: 0;
             text-decoration: none; color: inherit;
@@ -957,8 +966,8 @@
 
         /* ─── CULTURAL DATE BANNER ─── */
         @keyframes cultural-glow {
-            0%   { background-position: -200% 0; }
-            100% { background-position:  200% 0; }
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
         .cultural-date-banner {
             background: linear-gradient(135deg, #0A1E72 0%, #0D2472 45%, #112A8A 100%);
@@ -983,14 +992,6 @@
             background: linear-gradient(90deg, transparent 0%, rgba(242,195,26,0.09) 50%, transparent 100%);
             background-size: 200% 100%;
             animation: cultural-glow 3.5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .cultural-date-banner::after {
-            content: '';
-            position: absolute; top: -50px; right: -30px;
-            width: 140px; height: 140px;
-            background: rgba(242,195,26,0.07);
-            border-radius: 50%;
             pointer-events: none;
         }
         .cultural-emoji-wrap {
@@ -1059,15 +1060,6 @@
             overflow: hidden;
             box-shadow: var(--shadow-sm);
         }
-        .swahili-greeting-banner::before {
-            content: '';
-            position: absolute; top: -40px; right: -30px;
-            width: 130px; height: 130px;
-            background: rgba(242,195,26,0.06);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
         .swahili-greeting-banner::after {
             content: '';
             position: absolute; inset: 0;
@@ -1087,336 +1079,348 @@
         }
         .swahili-banner-text { position: relative; z-index: 1; min-width: 0; }
         .swahili-greeting-line { font-size: 22px; font-weight: 600; color: #fff; line-height: 1.3; }
-        .swahili-greeting-kw  { color: var(--gold); font-weight: 700; }
-        .swahili-proverb-line { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 0.25rem; line-height: 1.5; font-style: italic; }
+        .swahili-greeting-kw { color: var(--gold); font-weight: 700; }
         .swahili-inline-proverb { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 0.3rem; line-height: 1.45; font-style: italic; }
         @media (max-width: 480px) {
             .swahili-greeting-banner { padding: 0.875rem 1rem; }
             .swahili-greeting-line { font-size: 18px; }
         }
-    </style>
+        .phrase-widget { display: flex; flex-direction: column; gap: 2px; margin-top: 0.3rem; }
+        .phrase-category { font-size: 10px; font-weight: 500; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; }
+        .phrase-swahili { font-size: 15px; font-weight: 600; color: #FFFFFF; font-style: italic; }
+        .phrase-english { font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.75); }
+        .phrase-response { font-size: 11px; font-weight: 400; color: var(--gold); margin-top: 2px; opacity: 0.9; }
+</style>
     {% block extra_head %}{% endblock %}
-    <script>
+<script>
         (function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
-    </script>
+</script>
 </head>
 <body>
 
 <div class="app">
 
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <a href="{% url 'attendance:dashboard' %}" class="logo">
-                <div class="logo-icon">SW</div>
-                <div class="logo-text">
-                    SWASA
-                    <span>Attendance</span>
-                </div>
-            </a>
-        </div>
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-header">
+<a href="{% url 'attendance:dashboard' %}" class="logo">
+<div class="sidebar-brand">
+<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA Logo" class="sidebar-logo"/>
+<div class="sidebar-brand-text">
+<span class="sidebar-brand-name">SWASA</span>
+<span class="sidebar-brand-sub">Attendance</span>
+</div>
+</div>
+</a>
+</div>
 
-        <nav class="sidebar-nav">
+<nav class="sidebar-nav">
             {% if user.is_authenticated %}
 
                 {% if user.is_staff %}
-                <!-- ── Lecturer / Staff ── -->
-                <div class="nav-label">Portal</div>
-                <a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> Lecturer Dashboard
-                </a>
-                <a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:bar-chart-2"></span> Analytics
-                </a>
-                <div class="nav-label">Students</div>
-                <a href="{% url 'attendance:admin_search' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:account-search-outline"></span> Search Students
-                </a>
-                <a href="{% url 'attendance:student_report' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:file-chart-outline"></span> Student Report
-                </a>
-                <div class="nav-label">Management</div>
-                <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
-                </a>
-                <!-- Community: staff sees Events only -->
-                <div class="nav-label">Community</div>
-                <a href="{% url 'attendance:community_events' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
-                </a>
+<!-- ── Lecturer / Staff ── -->
+<div class="nav-label">Portal</div>
+<a href="{% url 'attendance:lecturer_dashboard' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:layout-dashboard"></span> Lecturer Dashboard
+</a>
+<a href="{% url 'attendance:admin_dashboard' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:bar-chart-2"></span> Analytics
+</a>
+<div class="nav-label">Students</div>
+<a href="{% url 'attendance:admin_search' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:account-search-outline"></span> Search Students
+</a>
+<a href="{% url 'attendance:student_report' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:file-chart-outline"></span> Student Report
+</a>
+<div class="nav-label">Management</div>
+<a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
+</a>
+<!-- Community: staff sees Events only -->
+<div class="nav-label">Community</div>
+<a href="{% url 'attendance:community_events' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+</a>
 
                 {% elif user.taprofile %}
-                <!-- ── Teaching Assistant ── -->
-                <div class="nav-label">Portal</div>
-                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> TA Dashboard
-                </a>
-                <a href="{% url 'attendance:ta_guide' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:book-open"></span> Resources
-                </a>
-                <div class="nav-label">Menu</div>
-                <a href="{% url 'attendance:ta_history' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:history"></span> My History
-                </a>
-                <a href="{% url 'attendance:ta_add_levels' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:book-edit-outline"></span> Manage Courses
-                </a>
-                <a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
-                </a>
-                <a href="{% url 'attendance:ta_support' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
-                </a>
-                <div class="nav-label">Account</div>
-                <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
-                </a>
-                <a href="{% url 'attendance:support' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
-                </a>
-                <!-- Community: TA sees Events only -->
-                <div class="nav-label">Community</div>
-                <a href="{% url 'attendance:community_events' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
-                </a>
+<!-- ── Teaching Assistant ── -->
+<div class="nav-label">Portal</div>
+<a href="{% url 'attendance:dashboard' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:layout-dashboard"></span> TA Dashboard
+</a>
+<a href="{% url 'attendance:ta_guide' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:book-open"></span> Resources
+</a>
+<div class="nav-label">Menu</div>
+<a href="{% url 'attendance:ta_history' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:history"></span> My History
+</a>
+<a href="{% url 'attendance:ta_add_levels' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:book-edit-outline"></span> Manage Courses
+</a>
+<a href="{% url 'attendance:ta_announcements' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:bullhorn-outline"></span> Announcements
+</a>
+<a href="{% url 'attendance:ta_support' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
+</a>
+<div class="nav-label">Account</div>
+<a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
+</a>
+<a href="{% url 'attendance:support' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+</a>
+<!-- Community: TA sees Events only -->
+<div class="nav-label">Community</div>
+<a href="{% url 'attendance:community_events' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+</a>
 
                 {% else %}
-                <!-- ── Student ── -->
-                <div class="nav-label">Portal</div>
-                <a href="{% url 'attendance:dashboard' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:layout-dashboard"></span> Dashboard
-                </a>
-                <a href="{% url 'attendance:student_guide' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:book-open"></span> Resources
-                </a>
-                <div class="nav-label">Menu</div>
-                <a href="{% url 'attendance:history' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:history"></span> My History
-                </a>
-                <a href="{% url 'attendance:notifications' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:bell-outline"></span> Notifications
+<!-- ── Student ── -->
+<div class="nav-label">Portal</div>
+<a href="{% url 'attendance:dashboard' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:layout-dashboard"></span> Dashboard
+</a>
+<a href="{% url 'attendance:student_guide' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:book-open"></span> Resources
+</a>
+<div class="nav-label">Menu</div>
+<a href="{% url 'attendance:history' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:history"></span> My History
+</a>
+<a href="{% url 'attendance:notifications' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:bell-outline"></span> Notifications
                     {% if notif_type == 'announcement' and unread_notif_count %}
-                    <span class="nav-notif-badge">{{ unread_notif_count|default:'' }}</span>
+<span class="nav-notif-badge">{{ unread_notif_count|default:'' }}</span>
                     {% endif %}
-                </a>
-                <a href="{% url 'attendance:course_registration' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
-                </a>
-                <a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
-                </a>
-                <a href="{% url 'attendance:support' %}" class="nav-item">
-                    <span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
-                </a>
-                <!-- Community: students see all items -->
-                <div class="nav-label">Community</div>
-                <a href="{% url 'attendance:community_events' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
-                </a>
-                <a href="{% url 'attendance:community_executives' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:users"></span> Know Your Executives
-                </a>
+</a>
+<a href="{% url 'attendance:course_registration' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:book-plus-outline"></span> Register Courses
+</a>
+<a href="{% url 'attendance:export_my_csv' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+</a>
+<a href="{% url 'attendance:support' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:help-circle-outline"></span> Support
+</a>
+<!-- Community: students see all items -->
+<div class="nav-label">Community</div>
+<a href="{% url 'attendance:community_events' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:calendar"></span> Events &amp; News
+</a>
+<a href="{% url 'attendance:community_executives' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:users"></span> Know Your Executives
+</a>
                 {% with profile=user.userprofile %}
                 {% if profile.level and profile.level.name == '400' %}
-                <a href="{% url 'attendance:community_alumni' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:graduation-cap"></span> Alumni
-                </a>
+<a href="{% url 'attendance:community_alumni' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:graduation-cap"></span> Alumni
+</a>
                 {% endif %}
                 {% endwith %}
-                <a href="{% url 'attendance:community_clubs' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:shield"></span> SWASA Clubs
-                </a>
-                <a href="{% url 'attendance:community_dues' %}" class="nav-item">
-                    <span class="iconify" data-icon="lucide:credit-card"></span> Pay Your Dues
-                </a>
+<a href="{% url 'attendance:community_clubs' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:shield"></span> SWASA Clubs
+</a>
+<a href="{% url 'attendance:community_dues' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:credit-card"></span> Pay Your Dues
+</a>
                 {% endif %}
 
-                <!-- ── Quick Links (all roles) ── -->
-                <div class="nav-label">Quick Links</div>
-                <a href="https://www.ug.edu.gh/student-life" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:external-link"></span> Life at UG
-                </a>
-                <a href="https://balme.ug.edu.gh/" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:library"></span> Balme Library
-                </a>
+<!-- ── Quick Links (all roles) ── -->
+<div class="nav-label">Quick Links</div>
+<a href="https://www.ug.edu.gh/student-life" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:external-link"></span> Life at UG
+</a>
+<a href="https://balme.ug.edu.gh/" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:library"></span> Balme Library
+</a>
 
-                <!-- ── Follow Us (all roles) ── -->
-                <div class="nav-label">Follow Us</div>
-                <a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:message-circle"></span> WhatsApp Community
-                </a>
-                <a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:instagram"></span> Instagram
-                </a>
-                <a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:facebook"></span> Facebook
-                </a>
-                <a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:music"></span> TikTok
-                </a>
-                <a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer" class="nav-item">
-                    <span class="iconify" data-icon="lucide:youtube"></span> YouTube
-                </a>
+<!-- ── Follow Us (all roles) ── -->
+<div class="nav-label">Follow Us</div>
+<a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:message-circle"></span> WhatsApp Community
+</a>
+<a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:instagram"></span> Instagram
+</a>
+<a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:facebook"></span> Facebook
+</a>
+<a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:music"></span> TikTok
+</a>
+<a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer" class="nav-item">
+<span class="iconify" data-icon="lucide:youtube"></span> YouTube
+</a>
 
             {% endif %}
-        </nav>
+</nav>
 
-        <div class="sidebar-footer">
+<div class="sidebar-footer">
             University of Ghana · SWASA<br>
-            <a href="https://www.instagram.com/cradlepremiernetwork/" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.2);text-decoration:none;">Developed by Cradle Premier Network</a>
-        </div>
-    </aside>
+<a href="https://www.instagram.com/cradlepremiernetwork/" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.2);text-decoration:none;">Developed by Cradle Premier Network</a>
+</div>
+</aside>
 
-    <div class="main-content">
+<div class="main-content">
 
-        <div class="top-bar">
-            <div class="top-bar-left">
-                <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
-                    <span class="iconify" data-icon="mdi:menu" data-width="22" data-height="22"></span>
-                </button>
-                <span class="page-title">SWASA Attendance</span>
-            </div>
+<div class="top-bar">
+<div class="top-bar-left">
+<button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+<span class="iconify" data-icon="mdi:menu" data-width="22" data-height="22"></span>
+</button>
+<div class="page-title" style="display:flex;align-items:center;gap:8px;">
+<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA" style="width:28px;height:28px;border-radius:50%;object-fit:cover;"/>
+<div style="display:flex;flex-direction:column;line-height:1.2;">
+<span style="font-weight:600;font-size:14px;">SWASA</span>
+<span class="topbar-brand-sub" style="font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;">Attendance</span>
+</div>
+</div>
+</div>
 
-            <div class="user-menu">
+<div class="user-menu">
                 {% if user.is_authenticated %}
-                <div class="notif-wrapper" id="notifWrapper">
-                    <button class="icon-btn notif-trigger" id="notifTrigger" aria-label="Notifications" title="Notifications">
-                        <span class="iconify" data-icon="mdi:bell-outline" data-width="18" data-height="18"></span>
+<div class="notif-wrapper" id="notifWrapper">
+<button class="icon-btn notif-trigger" id="notifTrigger" aria-label="Notifications" title="Notifications">
+<span class="iconify" data-icon="mdi:bell-outline" data-width="18" data-height="18"></span>
                         {% if unread_notif_count %}
-                        <span class="notif-badge" id="notifBadge">{% if unread_notif_count > 9 %}9+{% else %}{{ unread_notif_count }}{% endif %}</span>
+<span class="notif-badge" id="notifBadge">{% if unread_notif_count > 9 %}9+{% else %}{{ unread_notif_count }}{% endif %}</span>
                         {% endif %}
-                    </button>
-                    <div class="notif-panel" id="notifPanel">
-                        <div class="notif-panel-head">
-                            <span class="notif-panel-title">Notifications</span>
+</button>
+<div class="notif-panel" id="notifPanel">
+<div class="notif-panel-head">
+<span class="notif-panel-title">Notifications</span>
                             {% if unread_notif_count %}
-                            <button class="notif-mark-all" id="markAllBtn" onclick="markAllRead()">Mark all read</button>
+<button class="notif-mark-all" id="markAllBtn" onclick="markAllRead()">Mark all read</button>
                             {% endif %}
-                        </div>
-                        <div class="notif-list" id="notifList">
+</div>
+<div class="notif-list" id="notifList">
                             {% if sys_notifications or ann_notifications or generic_notifications %}
 
                                 {% for notif in sys_notifications %}
-                                <div class="notif-item sys-notif" id="sysnotif-{{ notif.id }}">
-                                    <span class="notif-sys-emoji">{{ notif.emoji }}</span>
-                                    <div class="notif-link">
-                                        <div class="notif-ann-title">{{ notif.title }}</div>
-                                        <div class="notif-msg">{{ notif.message|truncatechars:90 }}</div>
-                                        <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
-                                    </div>
-                                    <button class="notif-dismiss" onclick="markSysRead({{ notif.id }})" title="Dismiss">
-                                        <span class="iconify" data-icon="mdi:close" data-width="12"></span>
-                                    </button>
-                                </div>
+<div class="notif-item sys-notif" id="sysnotif-{{ notif.id }}">
+<span class="notif-sys-emoji">{{ notif.emoji }}</span>
+<div class="notif-link">
+<div class="notif-ann-title">{{ notif.title }}</div>
+<div class="notif-msg">{{ notif.message|truncatechars:90 }}</div>
+<div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+</div>
+<button class="notif-dismiss" onclick="markSysRead({{ notif.id }})" title="Dismiss">
+<span class="iconify" data-icon="mdi:close" data-width="12"></span>
+</button>
+</div>
                                 {% endfor %}
 
                                 {% if notif_type == 'announcement' %}
                                     {% for notif in ann_notifications %}
-                                    <div class="notif-item ann-unread" id="snotif-{{ notif.id }}">
-                                        <a href="{% url 'attendance:notifications' %}" class="notif-link" onclick="markAnnRead({{ notif.id }})">
+<div class="notif-item ann-unread" id="snotif-{{ notif.id }}">
+<a href="{% url 'attendance:notifications' %}" class="notif-link" onclick="markAnnRead({{ notif.id }})">
                                             {% if notif.announcement.course %}
-                                            <div class="notif-course-chip">{{ notif.announcement.course.code }}</div>
+<div class="notif-course-chip">{{ notif.announcement.course.code }}</div>
                                             {% endif %}
-                                            <div class="notif-ann-title">{{ notif.announcement.title }}</div>
-                                            <div class="notif-msg">{{ notif.announcement.message|truncatechars:90 }}</div>
-                                            <div class="notif-time">{{ notif.announcement.sent_at|timesince }} ago</div>
-                                        </a>
-                                    </div>
+<div class="notif-ann-title">{{ notif.announcement.title }}</div>
+<div class="notif-msg">{{ notif.announcement.message|truncatechars:90 }}</div>
+<div class="notif-time">{{ notif.announcement.sent_at|timesince }} ago</div>
+</a>
+</div>
                                     {% endfor %}
                                 {% else %}
                                     {% for notif in generic_notifications %}
-                                    <div class="notif-item" id="notif-{{ notif.id }}">
-                                        <a href="{{ notif.link|default:'#' }}" class="notif-link" onclick="markRead({{ notif.id }}, null, '{{ notif.link }}')">
-                                            <div class="notif-msg">{{ notif.message }}</div>
-                                            <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
-                                        </a>
-                                        <button class="notif-dismiss" onclick="markRead({{ notif.id }}, null, '')" title="Dismiss">
-                                            <span class="iconify" data-icon="mdi:close" data-width="12"></span>
-                                        </button>
-                                    </div>
+<div class="notif-item" id="notif-{{ notif.id }}">
+<a href="{{ notif.link|default:'#' }}" class="notif-link" onclick="markRead({{ notif.id }}, null, '{{ notif.link }}')">
+<div class="notif-msg">{{ notif.message }}</div>
+<div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+</a>
+<button class="notif-dismiss" onclick="markRead({{ notif.id }}, null, '')" title="Dismiss">
+<span class="iconify" data-icon="mdi:close" data-width="12"></span>
+</button>
+</div>
                                     {% endfor %}
                                 {% endif %}
 
                             {% else %}
-                                <div class="notif-empty" id="notifEmpty">
-                                    <span class="iconify" data-icon="mdi:bell-check-outline"></span>
-                                    <p>No new notifications</p>
-                                </div>
+<div class="notif-empty" id="notifEmpty">
+<span class="iconify" data-icon="mdi:bell-check-outline"></span>
+<p>No new notifications</p>
+</div>
                             {% endif %}
-                        </div>
+</div>
                         {% if notif_type == 'announcement' %}
-                        <div class="notif-panel-footer">
-                            <a href="{% url 'attendance:notifications' %}" class="notif-view-all">View all notifications</a>
-                        </div>
+<div class="notif-panel-footer">
+<a href="{% url 'attendance:notifications' %}" class="notif-view-all">View all notifications</a>
+</div>
                         {% endif %}
-                    </div>
-                </div>
+</div>
+</div>
                 {% endif %}
-                <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
-                    <span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
-                    <span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
-                </button>
+<button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+<span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
+<span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
+</button>
                 {% if user.is_authenticated %}
-                    <div class="user-info">
-                        <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
-                        <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
-                    </div>
-                    <div class="user-avatar">{{ user.username|first|upper }}</div>
-                    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+<div class="user-info">
+<span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+<span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
+</div>
+<div class="user-avatar">{{ user.username|first|upper }}</div>
+<form method="post" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
-                        <button type="submit" class="icon-btn danger" aria-label="Logout">
-                            <span class="iconify" data-icon="mdi:logout" data-width="18" data-height="18"></span>
-                        </button>
-                    </form>
+<button type="submit" class="icon-btn danger" aria-label="Logout">
+<span class="iconify" data-icon="mdi:logout" data-width="18" data-height="18"></span>
+</button>
+</form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+<a href="{% url 'login' %}" class="btn btn-primary">Login</a>
                 {% endif %}
-            </div>
-        </div>
+</div>
+</div>
 
-        <div class="container">
+<div class="container">
             {% if messages %}
                 {% for message in messages %}
-                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
-                    <span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
+<div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
+<span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
                     {{ message }}
-                </div>
+</div>
                 {% endfor %}
             {% endif %}
 
             {% if today_cultural_dates %}
             {% with cd=today_cultural_dates.0 %}
-            <div class="cultural-date-banner" id="culturalDateBanner" style="display:none;">
-                <div class="cultural-emoji-wrap">{{ cd.emoji }}</div>
-                <div class="cultural-content">
-                    <div class="cultural-name">{{ cd.name }}</div>
-                    <div class="cultural-msg">{{ cd.description }}</div>
-                </div>
-                <button class="cultural-dismiss" onclick="dismissCulturalBanner()" title="Dismiss">
-                    <span class="iconify" data-icon="mdi:close" data-width="14"></span>
-                </button>
-            </div>
+<div class="cultural-date-banner" id="culturalDateBanner" style="display:none;">
+<div class="cultural-emoji-wrap">{{ cd.emoji }}</div>
+<div class="cultural-content">
+<div class="cultural-name">{{ cd.name }}</div>
+<div class="cultural-msg">{{ cd.description }}</div>
+</div>
+<button class="cultural-dismiss" onclick="dismissCulturalBanner()" title="Dismiss">
+<span class="iconify" data-icon="mdi:close" data-width="14"></span>
+</button>
+</div>
             {% endwith %}
             {% endif %}
 
             {% block greeting %}
-            {% if user.is_authenticated %}
-            <div class="swahili-greeting-banner">
-                <div class="swahili-banner-text">
-                    <div class="swahili-greeting-line">
-                        <span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!
-                    </div>
-                    <div class="swahili-proverb-line" data-swahili-proverb></div>
-                </div>
-            </div>
+            {% if user.is_authenticated and not user.is_staff %}
+<div class="swahili-greeting-banner">
+<div class="swahili-banner-text">
+<div class="swahili-greeting-line">
+<span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!
+</div>
+<div data-phrase-widget></div>
+</div>
+</div>
             {% endif %}
             {% endblock %}
 
             {% block content %}{% endblock %}
-        </div>
+</div>
 
-    </div>
+</div>
 </div>
 
 <script>
@@ -1443,7 +1447,7 @@
 
     (function () {
         var trigger = document.getElementById('notifTrigger');
-        var panel   = document.getElementById('notifPanel');
+        var panel = document.getElementById('notifPanel');
         if (!trigger || !panel) return;
 
         trigger.addEventListener('click', function (e) {
@@ -1563,7 +1567,7 @@
 
     function updateBadgeCount(count) {
         var badge = document.getElementById('notifBadge');
-        if (count <= 0) {
+        if (count<= 0) {
             if (badge) badge.remove();
         } else {
             if (badge) {
@@ -1577,7 +1581,7 @@
         if (!badge) return;
         var cur = parseInt(badge.textContent, 10) || 0;
         updateBadgeCount(cur - (by || 1));
-        if ((cur - (by || 1)) <= 0) {
+        if ((cur - (by || 1))<= 0) {
             var list = document.getElementById('notifList');
             if (list && !list.querySelector('.notif-item:not(.ann-read)')) {
                 list.innerHTML = '<div class="notif-empty"><span class="iconify" data-icon="mdi:bell-check-outline"></span><p>No new notifications</p></div>';
@@ -1592,64 +1596,108 @@
         localStorage.setItem('swasa_theme', next);
     }
 
-    /* ── Swahili Greeting ── */
+    /* ── Swahili Greeting & Phrase of the Hour ── */
     (function () {
-        var GREETINGS = [
-            [5,  12, 'Habari za asubuhi'],
-            [12, 16, 'Habari za mchana'],
-            [16, 19, 'Habari za jioni'],
-            [19, 24, 'Habari za usiku'],
-            [0,  5,  'Habari za usiku']
-        ];
-        var PROVERBS = [
-            ['Adui mpende',                                                              'Love your enemy.'],
-            ['Akipenda chongo huita kengeza',                                            'Love is blind.'],
-            ['Haina tabibu ndwele ya mapenzi',                                           'The disease of love has no cure.'],
-            ['Hakukuwa kupendana, bila kuheshimiana',                                    'There has never been mutual love without mutual respect.'],
-            ['Hamu haiji bila kupenda',                                                  'Longing does not come without loving.'],
-            ['Heri kufa macho kuliko moyo',                                              'Better to be blind than to be despairing.'],
-            ['Heri moyo mkubwa kuliko akili kubwa',                                      'A big heart is better than a big brain.'],
-            ['Heshima ni moyo',                                                          'Respect is of the heart.'],
-            ['Johari bora ni mapenzi kuliko maisha yetu',                                'Love is a more precious jewel than life.'],
-            ['Kidole chako kibaya si kikate',                                            'Do not abandon family.'],
-            ['Kipendacho moyo ni dawa',                                                  'What the heart desires is like medicine.'],
-            ['Kofi la mahaba haliumizi',                                                 'A slap of love does not hurt.'],
-            ['Kupendana kulishana',                                                      'Loving one another is feeding one another.'],
-            ['Kupenda sana ni ugonjwa usiotibika',                                       'Being deeply in love is a sickness that cannot be cured.'],
-            ['Mapenzi hayana macho, wala hayana maarifa',                                'Love has neither eyes nor understanding.'],
-            ['Mapenzi ni kikohozi, hayawezi kufichika',                                  'Love is like a cough, it cannot be hidden.'],
-            ['Mapenzi yakifa yazike na usiweke maua juu ya kaburi',                      'If love dies, bury it and do not put flowers on the grave.'],
-            ['Moyo hauna subira',                                                        'The heart has no patience.'],
-            ['Moyo hujua uchungu wa nafsi yake',                                         'The heart knows its own pain.'],
-            ['Moyo ni kilindi',                                                          'The heart is deep.'],
-            ['Moyo safi silaha ya kutosha',                                              'A pure heart is weapon enough.'],
-            ['Moyo wa kupenda hauna mithali',                                            'A loving heart has no equal.'],
-            ['Mpende nduguyo',                                                           'Love your brother.'],
-            ['Mpenzi hana kinyongo',                                                     'A lover has no grudge.'],
-            ['Penzi la kujitolea ndilo penzi la daima',                                  'Love of self-renouncing is an eternal love.'],
-            ['Penzi ni maua maji hutilia',                                               'Love is like a flower, it must be watered.'],
-            ['Radhi ni ushindi',                                                         'Forgiving is victory.'],
-            ['Toa upendo mwingi kuliko unaopokea',                                       'Give more love than you receive.'],
-            ['Ukipenda damu upende na usaha',                                            'If you love someone in health, love them also in sickness.'],
-            ['Undugu wapita urafiki',                                                    'Brotherhood is greater than friendship.']
+        function getSwahiliGreeting() {
+            var h = new Date().getHours();
+            if (h >= 5 && h < 12) return 'Habari za asubuhi';
+            if (h >= 12 && h < 16) return 'Habari za mchana';
+            if (h >= 16 && h < 19) return 'Habari za jioni';
+            return 'Habari za usiku';
+        }
+        var swahiliPhrases = [
+            { category: "Greetings", english: "How are you?", swahili: "Hujambo?", response_english: "I'm fine", response_swahili: "Sijambo" },
+            { category: "Greetings", english: "How are you? (plural)", swahili: "Hamjambo?", response_english: "We are fine", response_swahili: "Hatujambo" },
+            { category: "Greetings", english: "What's your news?", swahili: "Habari?", response_english: "Fine / Peaceful", response_swahili: "Nzuri / Salama" },
+            { category: "Greetings", english: "What's up?", swahili: "Mambo? / Vipi?", response_english: "Cool / Fine", response_swahili: "Poa / Nzuri" },
+            { category: "Greetings", english: "Greeting an elder", swahili: "Shikamoo", response_english: "Response from elder", response_swahili: "Marahaba" },
+            { category: "Greetings", english: "Nice to meet you", swahili: "Ninafuraha kukutana nawe", response_english: "", response_swahili: "" },
+            { category: "Greetings", english: "Goodbye", swahili: "Kwaheri", response_english: "", response_swahili: "" },
+            { category: "Greetings", english: "Sleep well", swahili: "Lala salama", response_english: "", response_swahili: "" },
+            { category: "Greetings", english: "Good night", swahili: "Usiku mwema", response_english: "", response_swahili: "" },
+            { category: "Greetings", english: "Have a safe trip", swahili: "Safari njema!", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "Thank you", swahili: "Asante", response_english: "You're welcome", response_swahili: "Karibu" },
+            { category: "Courtesies", english: "Thank you very much", swahili: "Asante sana", response_english: "You're welcome", response_swahili: "Karibu sana" },
+            { category: "Courtesies", english: "Please", swahili: "Tafadhali", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "Excuse me / Sorry", swahili: "Samahani", response_english: "No worries", response_swahili: "Hakuna matata" },
+            { category: "Courtesies", english: "No problem", swahili: "Hamna shida", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "I understand", swahili: "Naelewa", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "I don't understand", swahili: "Sielewi", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "Could you repeat?", swahili: "Sema tena", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "A little bit", swahili: "Kidogo", response_english: "", response_swahili: "" },
+            { category: "Courtesies", english: "Slowly", swahili: "Pole pole", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "What?", swahili: "Nini?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "Where?", swahili: "Wapi?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "When?", swahili: "Lini?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "Who?", swahili: "Nani?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "Why?", swahili: "Kwa nini?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "How many?", swahili: "Ngapi?", response_english: "", response_swahili: "" },
+            { category: "Questions", english: "What's your name?", swahili: "Unaitwa nani?", response_english: "My name is...", response_swahili: "Ninaitwa..." },
+            { category: "Questions", english: "Where are you from?", swahili: "Unatoka wapi?", response_english: "I come from...", response_swahili: "Ninatoka..." },
+            { category: "Questions", english: "Do you speak English?", swahili: "Unaongea Kiingereza?", response_english: "A little bit", response_swahili: "Kidogo" },
+            { category: "Questions", english: "Do you understand?", swahili: "Unaelewa?", response_english: "I understand", response_swahili: "Naelewa" },
+            { category: "Time & Date", english: "Today", swahili: "Leo", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Tomorrow", swahili: "Kesho", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Yesterday", swahili: "Jana", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Now", swahili: "Sasa", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Soon", swahili: "Sasa hivi", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Monday", swahili: "Jumatatu", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Tuesday", swahili: "Jumanne", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Wednesday", swahili: "Jumatano", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Thursday", swahili: "Alhamisi", response_english: "", response_swahili: "" },
+            { category: "Time & Date", english: "Friday", swahili: "Ijumaa", response_english: "", response_swahili: "" },
+            { category: "People", english: "Friend", swahili: "Rafiki", response_english: "", response_swahili: "" },
+            { category: "People", english: "Sister", swahili: "Dada", response_english: "", response_swahili: "" },
+            { category: "People", english: "Brother", swahili: "Kaka", response_english: "", response_swahili: "" },
+            { category: "People", english: "Mother", swahili: "Mama", response_english: "", response_swahili: "" },
+            { category: "People", english: "Father", swahili: "Baba", response_english: "", response_swahili: "" },
+            { category: "People", english: "Teacher / Mister", swahili: "Bwana", response_english: "", response_swahili: "" },
+            { category: "People", english: "Child", swahili: "Mtoto", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "Food", swahili: "Chakula", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "Water", swahili: "Maji", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "Tea", swahili: "Chai", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "I'm hungry", swahili: "Nahisi njaa", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "The food is very good", swahili: "Chakula kiko kitamu sana", response_english: "", response_swahili: "" },
+            { category: "Food & Drinks", english: "I'm full", swahili: "Nimechiba", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "Where is...?", swahili: "...iko wapi?", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "Straight forward", swahili: "Moja kwa moja", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "To the right", swahili: "Kwa kulia", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "To the left", swahili: "Kwa kushoto", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "Nearby", swahili: "Karibu", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "Far", swahili: "Mbali", response_english: "", response_swahili: "" },
+            { category: "Directions", english: "Here", swahili: "Hapa", response_english: "", response_swahili: "" },
+            { category: "Emergencies", english: "Help!", swahili: "Msaada!", response_english: "", response_swahili: "" },
+            { category: "Emergencies", english: "I am lost", swahili: "Nimepotea", response_english: "", response_swahili: "" },
+            { category: "Emergencies", english: "Please help me", swahili: "Naomba msaada", response_english: "", response_swahili: "" },
+            { category: "Emergencies", english: "Danger!", swahili: "Hatari!", response_english: "", response_swahili: "" },
+            { category: "Emergencies", english: "Stop!", swahili: "Acha!", response_english: "", response_swahili: "" }
         ];
 
-        function updateSwahiliGreeting() {
-            var h = new Date().getHours();
-            var kw = 'Habari za usiku';
-            for (var i = 0; i < GREETINGS.length; i++) {
-                if (h >= GREETINGS[i][0] && h < GREETINGS[i][1]) { kw = GREETINGS[i][2]; break; }
+        function buildPhraseWidget(phrase) {
+            var hasResponse = phrase.response_swahili && phrase.response_swahili.length > 0;
+            var html = '<div class="phrase-widget">'
+                + '<div class="phrase-category">&#x1F4AC; ' + phrase.category + ' &middot; Phrase of the Hour</div>'
+                + '<div class="phrase-swahili">' + phrase.swahili + '</div>'
+                + '<div class="phrase-english">' + phrase.english + '</div>';
+            if (hasResponse) {
+                html += '<div class="phrase-response">&#x21A9; ' + phrase.response_swahili + ' &mdash; ' + phrase.response_english + '</div>';
             }
-            var prov = PROVERBS[(new Date().getDate() - 1) % 30];
+            html += '</div>';
+            return html;
+        }
+
+        function updateSwahiliGreeting() {
+            var kw = getSwahiliGreeting();
+            var index = Math.floor(Date.now() / (1000 * 60 * 60)) % swahiliPhrases.length;
+            var phrase = swahiliPhrases[index];
             document.querySelectorAll('[data-swahili-kw]').forEach(function (el) { el.textContent = kw; });
-            document.querySelectorAll('[data-swahili-proverb]').forEach(function (el) {
-                el.textContent = '”' + prov[0] + '” — ' + prov[1];
+            document.querySelectorAll('[data-phrase-widget]').forEach(function (el) {
+                el.innerHTML = buildPhraseWidget(phrase);
             });
-            document.querySelectorAll('[data-swahili-proverb-kw]').forEach(function (el) { el.textContent = prov[0]; });
-            document.querySelectorAll('[data-swahili-proverb-en]').forEach(function (el) { el.textContent = prov[1]; });
         }
 
         document.addEventListener('DOMContentLoaded', updateSwahiliGreeting);
+        updateSwahiliGreeting();
         setInterval(updateSwahiliGreeting, 60000);
     })();
 </script>

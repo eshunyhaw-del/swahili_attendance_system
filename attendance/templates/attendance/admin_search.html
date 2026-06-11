@@ -119,7 +119,6 @@
         background: var(--panel-bg);
         padding: 1.5rem;
         border-radius: 20px;
-        border: 1px solid var(--border-color);
         box-shadow: var(--panel-shadow);
         margin-bottom: 2rem;
     }
@@ -219,7 +218,6 @@
     .data-card {
         background: var(--panel-bg);
         border-radius: 20px;
-        border: 1px solid var(--border-color);
         box-shadow: var(--panel-shadow);
         overflow: hidden;
     }
@@ -355,105 +353,105 @@
 </style>
 
 <div class="page-wrapper">
-    <div class="page-header">
-        <h1>
-            <span class="iconify" data-icon="mdi:account-search-outline"></span>
+<div class="page-header">
+<h1>
+<span class="iconify" data-icon="mdi:account-search-outline"></span>
             Search Students
-        </h1>
-    </div>
+</h1>
+</div>
 
-    <div class="search-card">
-        <form method="get" class="search-form">
-            <div class="input-wrapper">
-                <span class="iconify" data-icon="mdi:magnify"></span>
-                <input type="text" name="q" placeholder="Search by name, username, or student ID..." 
+<div class="search-card">
+<form method="get" class="search-form">
+<div class="input-wrapper">
+<span class="iconify" data-icon="mdi:magnify"></span>
+<input type="text" name="q" placeholder="Search by name, username, or student ID..." 
                        value="{{ search_query }}" class="form-control">
-            </div>
+</div>
             
-            <select name="level" class="form-control form-select">
-                <option value="">All Levels</option>
+<select name="level" class="form-control form-select">
+<option value="">All Levels</option>
                 {% for level in levels %}
-                    <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+<option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
                         Level {{ level.name }}
-                    </option>
+</option>
                 {% endfor %}
-            </select>
+</select>
             
-            <button type="submit" class="btn btn-primary">Search</button>
-        </form>
-    </div>
+<button type="submit" class="btn btn-primary">Search</button>
+</form>
+</div>
 
     {% if students %}
-    <div class="data-card">
-        <div class="data-actions-bar">
-            <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-outline">
-                <span class="iconify" data-icon="mdi:file-delimited-outline" style="font-size: 1.2rem;"></span> 
+<div class="data-card">
+<div class="data-actions-bar">
+<a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-outline">
+<span class="iconify" data-icon="mdi:file-delimited-outline" style="font-size: 1.2rem;"></span> 
                 Export All (CSV)
-            </a>
+</a>
             {% if selected_level %}
-                <a href="{% url 'attendance:export_level' selected_level %}" class="btn btn-outline">
-                    <span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span>
+<a href="{% url 'attendance:export_level' selected_level %}" class="btn btn-outline">
+<span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span>
                     Export Level (CSV)
-                </a>
+</a>
             {% endif %}
-        </div>
+</div>
         
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student ID</th>
-                        <th>Name</th>
-                        <th>Level</th>
-                        <th>Sessions</th>
-                        <th>Attended</th>
-                        <th>Percentage</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+<div class="table-responsive">
+<table>
+<thead>
+<tr>
+<th>Student ID</th>
+<th>Name</th>
+<th>Level</th>
+<th>Sessions</th>
+<th>Attended</th>
+<th>Percentage</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
                     {% for student in students %}
-                    <tr>
-                        <td style="color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px;">
+<tr>
+<td style="color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px;">
                             {{ student.profile.student_id_number|default:"-" }}
-                        </td>
-                        <td style="font-weight: 700;">
+</td>
+<td style="font-weight: 700;">
                             {{ student.profile.user.get_full_name|default:student.profile.user.username }}
-                        </td>
-                        <td>
-                            <span style="background: var(--dash-bg); padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+</td>
+<td>
+<span style="background: var(--dash-bg); padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color);">
                                 {{ student.profile.level.name }}
-                            </span>
-                        </td>
-                        <td>{{ student.total_sessions }}</td>
-                        <td>{{ student.total_attended }}</td>
-                        <td>
-                            <span class="pct-badge {% if student.percentage < 60 %}pct-danger{% else %}pct-good{% endif %}">
+</span>
+</td>
+<td>{{ student.total_sessions }}</td>
+<td>{{ student.total_attended }}</td>
+<td>
+<span class="pct-badge {% if student.percentage < 60 %}pct-danger{% else %}pct-good{% endif %}">
                                 {{ student.percentage }}%
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-group">
-                                <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="action-icon" title="Export CSV">
-                                    <span class="iconify" data-icon="mdi:file-delimited" style="font-size: 1.2rem; color: #059669;"></span>
-                                </a>
-                                <a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="action-text">
+</span>
+</td>
+<td>
+<div class="action-group">
+<a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="action-icon" title="Export CSV">
+<span class="iconify" data-icon="mdi:file-delimited" style="font-size: 1.2rem; color: #059669;"></span>
+</a>
+<a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="action-text">
                                     Details
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+</a>
+</div>
+</td>
+</tr>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+</tbody>
+</table>
+</div>
+</div>
     {% else %}
-    <div class="blank-state">
-        <span class="iconify" data-icon="mdi:account-search-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
-        <h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
-        <p style="color: var(--text-muted); font-weight: 500; margin: 0;">Try adjusting your search query or level filter.</p>
-    </div>
+<div class="blank-state">
+<span class="iconify" data-icon="mdi:account-search-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
+<h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
+<p style="color: var(--text-muted); font-weight: 500; margin: 0;">Try adjusting your search query or level filter.</p>
+</div>
     {% endif %}
 </div>
 {% endblock %}

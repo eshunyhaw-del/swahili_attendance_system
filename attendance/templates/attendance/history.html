@@ -4,19 +4,19 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.10);
-    --amber:      #B8920C;
-    --amber-lt:   rgba(184,146,12,0.10);
-    --red:        #C0392B;
-    --red-lt:     rgba(192,57,43,0.09);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.10);
+    --amber: #B8920C;
+    --amber-lt: rgba(184,146,12,0.10);
+    --red: #C0392B;
+    --red-lt: rgba(192,57,43,0.09);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -28,14 +28,10 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Page header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -60px; right: -50px;
-    width: 200px; height: 200px; background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
 .page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
@@ -50,7 +46,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .stat-card {
     background: var(--surface);
     border-radius: var(--r-lg);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     padding: 0.875rem 1rem;
     text-align: center;
@@ -59,14 +54,13 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .stat-lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 2px; }
 .stat-val.green { color: var(--green); }
 .stat-val.amber { color: var(--amber); }
-.stat-val.red   { color: var(--red); }
-.stat-val.navy  { color: var(--primary); }
+.stat-val.red { color: var(--red); }
+.stat-val.navy { color: var(--primary); }
 
 /* ─── Course card ─── */
 .course-card {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     margin-bottom: 1rem;
     overflow: hidden;
@@ -103,12 +97,12 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .progress-fill {
     height: 100%; border-radius: 99px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
 }
-.progress-fill.good   { background: linear-gradient(90deg, #1A9E60 0%, #2ECC71 100%); }
+.progress-fill.good { background: linear-gradient(90deg, #1A9E60 0%, #2ECC71 100%); }
 .progress-fill.medium { background: linear-gradient(90deg, #B8920C 0%, #F2C31A 100%); }
-.progress-fill.low    { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
+.progress-fill.low { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
 
 .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
-.progress-pct  { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.progress-pct { font-size: 11.5px; font-weight: 700; color: var(--muted); }
 
 /* ─── Week list ─── */
 .week-list { border-top: 1px solid var(--border); }
@@ -131,7 +125,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     flex-shrink: 0;
 }
 .week-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.week-date  { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+.week-date { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 1px; }
 
 .badge {
     font-size: 11px; font-weight: 700;
@@ -139,9 +133,9 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     display: inline-flex; align-items: center; gap: 0.3rem;
     white-space: nowrap;
 }
-.badge-present  { background: #DCFCE7; color: #166534; }
-.badge-absent   { background: #FEE2E2; color: #991B1B; }
-.badge-na       { background: #F3F4F6; color: #6B7280; }
+.badge-present { background: #DCFCE7; color: #166534; }
+.badge-absent { background: #FEE2E2; color: #991B1B; }
+.badge-na { background: #F3F4F6; color: #6B7280; }
 
 /* ─── Empty state ─── */
 .empty {
@@ -161,91 +155,91 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 <div class="wrap">
 
-    <div class="page-header">
-        <h1>Attendance History</h1>
-        <div class="page-header-sub">Your full attendance record across all courses</div>
-    </div>
+<div class="page-header">
+<h1>Attendance History</h1>
+<div class="page-header-sub">Your full attendance record across all courses</div>
+</div>
 
-    <!-- Summary stats -->
+<!-- Summary stats -->
     {% if history_data %}
     {% with total_sessions=0 total_attended=0 total_absent=0 %}
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-val navy">
+<div class="stats-row">
+<div class="stat-card">
+<div class="stat-val navy">
                 {% with ns=0 %}{% for item in history_data %}{% with ns=ns|add:item.total %}{% endwith %}{% endfor %}
                 {{ history_data|length }}{% endwith %}
-            </div>
-            <div class="stat-lbl">Courses</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val navy" id="stat-total">—</div>
-            <div class="stat-lbl">Sessions</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val green" id="stat-attended">—</div>
-            <div class="stat-lbl">Attended</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-val red" id="stat-absent">—</div>
-            <div class="stat-lbl">Absent</div>
-        </div>
-    </div>
+</div>
+<div class="stat-lbl">Courses</div>
+</div>
+<div class="stat-card">
+<div class="stat-val navy" id="stat-total">—</div>
+<div class="stat-lbl">Sessions</div>
+</div>
+<div class="stat-card">
+<div class="stat-val green" id="stat-attended">—</div>
+<div class="stat-lbl">Attended</div>
+</div>
+<div class="stat-card">
+<div class="stat-val red" id="stat-absent">—</div>
+<div class="stat-lbl">Absent</div>
+</div>
+</div>
     {% endwith %}
     {% endif %}
 
-    <!-- Course cards -->
+<!-- Course cards -->
     {% for item in history_data %}
-    <div class="course-card">
-        <div class="course-head">
-            <div class="course-top">
-                <div>
-                    <div class="course-code-chip">{{ item.course.code }}</div>
-                    <div class="course-name">{{ item.course.name }}</div>
-                </div>
-                <div class="course-score">{{ item.attended }} / {{ item.total }}</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}"
+<div class="course-card">
+<div class="course-head">
+<div class="course-top">
+<div>
+<div class="course-code-chip">{{ item.course.code }}</div>
+<div class="course-name">{{ item.course.name }}</div>
+</div>
+<div class="course-score">{{ item.attended }} / {{ item.total }}</div>
+</div>
+<div class="progress-bar">
+<div class="progress-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}"
                      style="width:{{ item.percentage }}%;"></div>
-            </div>
-            <div class="progress-meta">
-                <span class="progress-pct" style="color:{% if item.percentage >= 75 %}var(--green){% elif item.percentage >= 50 %}var(--amber){% else %}var(--red){% endif %};">
+</div>
+<div class="progress-meta">
+<span class="progress-pct" style="color:{% if item.percentage >= 75 %}var(--green){% elif item.percentage >= 50 %}var(--amber){% else %}var(--red){% endif %};">
                     {{ item.percentage|floatformat:0 }}% attendance
-                </span>
-                <span class="progress-pct">{{ item.total }} session{{ item.total|pluralize }}</span>
-            </div>
-        </div>
+</span>
+<span class="progress-pct">{{ item.total }} session{{ item.total|pluralize }}</span>
+</div>
+</div>
 
-        <div class="week-list">
+<div class="week-list">
             {% for week in item.weeks %}
-            <div class="week-row" id="hist-row-{{ week.session.id }}">
-                <div class="week-left">
-                    <div class="week-num-badge">{{ week.week_num }}</div>
-                    <div>
-                        <div class="week-title">Week {{ week.week_num }}</div>
-                        <div class="week-date">{{ week.session.date|date:"l, d M Y" }}</div>
-                    </div>
-                </div>
+<div class="week-row" id="hist-row-{{ week.session.id }}">
+<div class="week-left">
+<div class="week-num-badge">{{ week.week_num }}</div>
+<div>
+<div class="week-title">Week {{ week.week_num }}</div>
+<div class="week-date">{{ week.session.date|date:"l, d M Y" }}</div>
+</div>
+</div>
                 {% if week.status == 'present' %}
-                    <span class="badge badge-present">
-                        <span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Present
-                    </span>
+<span class="badge badge-present">
+<span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Present
+</span>
                 {% elif week.status == 'absent' %}
-                    <span class="badge badge-absent">
-                        <span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
-                    </span>
+<span class="badge badge-absent">
+<span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
+</span>
                 {% else %}
-                    <span class="badge badge-na">N/A</span>
+<span class="badge badge-na">N/A</span>
                 {% endif %}
-            </div>
+</div>
             {% endfor %}
-        </div>
-    </div>
+</div>
+</div>
     {% empty %}
-    <div class="empty">
-        <span class="iconify" data-icon="mdi:history"></span>
-        <p>No attendance history yet.</p>
-    </div>
+<div class="empty">
+<span class="iconify" data-icon="mdi:history"></span>
+<p>No attendance history yet.</p>
+</div>
     {% endfor %}
 
 </div>

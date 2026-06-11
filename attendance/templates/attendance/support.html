@@ -4,21 +4,21 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
+    --surface: #FFFFFF;
     --bg: #F8F4EF;
     --text: #1A1A2E;
     --muted: #6B7280;
     --border: #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.10);
-    --amber:      #B8920C;
-    --amber-lt:   rgba(184,146,12,0.10);
-    --red:        #C0392B;
-    --red-lt:     rgba(192,57,43,0.09);
-    --blue:       #2563EB;
-    --blue-lt:    rgba(37,99,235,0.09);
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.10);
+    --amber: #B8920C;
+    --amber-lt: rgba(184,146,12,0.10);
+    --red: #C0392B;
+    --red-lt: rgba(192,57,43,0.09);
+    --blue: #2563EB;
+    --blue-lt: rgba(37,99,235,0.09);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -30,14 +30,10 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Page header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: linear-gradient(135deg, #0D2472 0%, #1E3A5F 100%);
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
 .page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
@@ -46,7 +42,6 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .card {
     background: var(--surface);
     border-radius: var(--r-xl);
-    border: 1px solid var(--border);
     box-shadow: var(--sh-sm);
     margin-bottom: 1.125rem;
     overflow: hidden;
@@ -107,9 +102,9 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     padding: 3px 9px; border-radius: 99px;
     white-space: nowrap; margin-bottom: 0.5rem;
 }
-.status-open     { background: var(--amber-lt); color: var(--amber); }
+.status-open { background: var(--amber-lt); color: var(--amber); }
 .status-resolved { background: var(--green-lt); color: var(--green); }
-.status-replied  { background: var(--blue-lt);  color: var(--blue); }
+.status-replied { background: var(--blue-lt); color: var(--blue); }
 
 .ticket-msg { font-size: 13px; color: #4A5568; line-height: 1.6; }
 
@@ -132,77 +127,77 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 <div class="wrap">
 
-    <div class="page-header">
-        <h1>Support Center</h1>
-        <div class="page-header-sub">Need help? Submit a ticket and we'll get back to you within 24–48 hours</div>
-    </div>
+<div class="page-header">
+<h1>Support Center</h1>
+<div class="page-header-sub">Need help? Submit a ticket and we'll get back to you within 24–48 hours</div>
+</div>
 
-    <!-- New ticket form -->
-    <div class="card">
-        <div class="card-head">
-            <span class="iconify" data-icon="mdi:ticket-outline"></span>
+<!-- New ticket form -->
+<div class="card">
+<div class="card-head">
+<span class="iconify" data-icon="mdi:ticket-outline"></span>
             New Ticket
-        </div>
-        <div class="card-body">
-            <form method="post">
+</div>
+<div class="card-body">
+<form method="post">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label class="form-label">Subject</label>
-                    <input type="text" name="subject" class="form-input"
+<div class="form-group">
+<label class="form-label">Subject</label>
+<input type="text" name="subject" class="form-input"
                            placeholder="Brief description of your issue"
                            value="{{ form.subject.value|default:'' }}" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Message</label>
-                    <textarea name="message" class="form-textarea"
+</div>
+<div class="form-group">
+<label class="form-label">Message</label>
+<textarea name="message" class="form-textarea"
                               placeholder="Describe your issue in detail…" required>{{ form.message.value|default:'' }}</textarea>
-                </div>
-                <button type="submit" class="btn-submit">
-                    <span class="iconify" data-icon="mdi:send-outline"></span>
+</div>
+<button type="submit" class="btn-submit">
+<span class="iconify" data-icon="mdi:send-outline"></span>
                     Submit Ticket
-                </button>
-            </form>
-        </div>
-    </div>
+</button>
+</form>
+</div>
+</div>
 
-    <!-- Ticket history -->
-    <div class="card">
-        <div class="card-head">
-            <span class="iconify" data-icon="mdi:history"></span>
+<!-- Ticket history -->
+<div class="card">
+<div class="card-head">
+<span class="iconify" data-icon="mdi:history"></span>
             My Tickets
-        </div>
-        <div class="ticket-list">
+</div>
+<div class="ticket-list">
             {% for ticket in tickets %}
-            <div class="ticket-item">
-                <div class="ticket-top">
-                    <div class="ticket-subject">{{ ticket.subject }}</div>
-                    <div class="ticket-date">{{ ticket.created_at|date:"d M Y" }}</div>
-                </div>
-                <span class="status-badge
+<div class="ticket-item">
+<div class="ticket-top">
+<div class="ticket-subject">{{ ticket.subject }}</div>
+<div class="ticket-date">{{ ticket.created_at|date:"d M Y" }}</div>
+</div>
+<span class="status-badge
                     {% if ticket.status == 'open' %}status-open
                     {% elif ticket.status == 'resolved' %}status-resolved
                     {% else %}status-replied{% endif %}">
-                    <span class="iconify"
+<span class="iconify"
                         data-icon="{% if ticket.status == 'open' %}mdi:clock-outline{% elif ticket.status == 'resolved' %}mdi:check-circle{% else %}mdi:reply{% endif %}"
                         style="font-size:12px;"></span>
                     {{ ticket.get_status_display }}
-                </span>
-                <div class="ticket-msg">{{ ticket.message }}</div>
+</span>
+<div class="ticket-msg">{{ ticket.message }}</div>
                 {% if ticket.admin_response %}
-                <div class="admin-reply">
-                    <strong>Response</strong>
+<div class="admin-reply">
+<strong>Response</strong>
                     {{ ticket.admin_response }}
-                </div>
+</div>
                 {% endif %}
-            </div>
+</div>
             {% empty %}
-            <div class="empty-tickets">
-                <span class="iconify" data-icon="mdi:ticket-outline"></span>
-                <p>No tickets submitted yet.</p>
-            </div>
+<div class="empty-tickets">
+<span class="iconify" data-icon="mdi:ticket-outline"></span>
+<p>No tickets submitted yet.</p>
+</div>
             {% endfor %}
-        </div>
-    </div>
+</div>
+</div>
 
 </div>
 {% endblock %}

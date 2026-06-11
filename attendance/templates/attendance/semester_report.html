@@ -8,7 +8,6 @@
         border-radius: var(--radius-lg);
         padding: 1rem;
         margin-bottom: 1.5rem;
-        border: 1px solid var(--border);
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
@@ -23,7 +22,6 @@
         border-radius: var(--radius-lg);
         padding: 1rem;
         margin-bottom: 1rem;
-        border: 1px solid var(--border);
         transition: var(--transition);
     }
     .student-card:hover {
@@ -79,101 +77,101 @@
 
 {% block content %}
 <div class="page-header">
-    <h1>Student Attendance Reports</h1>
-    <p>View and export individual student attendance records</p>
+<h1>Student Attendance Reports</h1>
+<p>View and export individual student attendance records</p>
 </div>
 
 <div class="filters">
-    <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
-        <div class="filter-group">
-            <label class="form-label">Level</label>
-            <select name="level" class="form-control" onchange="this.form.submit()">
-                <option value="">All Levels</option>
+<form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+<div class="filter-group">
+<label class="form-label">Level</label>
+<select name="level" class="form-control" onchange="this.form.submit()">
+<option value="">All Levels</option>
                 {% for level in levels %}
-                <option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
+<option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
                     Level {{ level.name }}
-                </option>
+</option>
                 {% endfor %}
-            </select>
-        </div>
-        <div class="filter-group">
-            <label class="form-label">Search</label>
-            <input type="text" name="search" class="form-control" placeholder="Name or Student ID..." value="{{ search_query|default:'' }}">
-        </div>
-        <div class="filter-group">
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </div>
-    </form>
+</select>
+</div>
+<div class="filter-group">
+<label class="form-label">Search</label>
+<input type="text" name="search" class="form-control" placeholder="Name or Student ID..." value="{{ search_query|default:'' }}">
+</div>
+<div class="filter-group">
+<button type="submit" class="btn btn-primary">Filter</button>
+</div>
+</form>
 </div>
 
 {% if students %}
     {% for student in students %}
-    <div class="student-card">
-        <div class="student-header">
-            <div>
-                <div class="student-name">{{ student.profile.user.get_full_name|default:student.profile.user.username }}</div>
-                <div class="student-meta">
+<div class="student-card">
+<div class="student-header">
+<div>
+<div class="student-name">{{ student.profile.user.get_full_name|default:student.profile.user.username }}</div>
+<div class="student-meta">
                     ID: {{ student.profile.student_id_number|default:"-" }} | Level {{ student.profile.level.name }}
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">
+</div>
+</div>
+<div style="text-align: right;">
+<div style="font-size: 1.25rem; font-weight: 700; color: var(--color-primary);">
                     {{ student.attendance_percentage }}%
-                </div>
-                <div class="export-buttons">
-                    <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="btn btn-outline btn-sm">
-                        <span class="iconify" data-icon="mdi:download" data-width="14" data-height="14"></span>
+</div>
+<div class="export-buttons">
+<a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="btn btn-outline btn-sm">
+<span class="iconify" data-icon="mdi:download" data-width="14" data-height="14"></span>
                         CSV
-                    </a>
-                </div>
-            </div>
-        </div>
+</a>
+</div>
+</div>
+</div>
         
-        <div class="progress-bar-custom" style="margin: 0.5rem 0;">
-            <div class="progress-fill {% if student.attendance_percentage >= 75 %}high{% elif student.attendance_percentage >= 50 %}medium{% else %}low{% endif %}" 
+<div class="progress-bar-custom" style="margin: 0.5rem 0;">
+<div class="progress-fill {% if student.attendance_percentage >= 75 %}high{% elif student.attendance_percentage >= 50 %}medium{% else %}low{% endif %}" 
                  style="width: {{ student.attendance_percentage }}%"></div>
-        </div>
+</div>
         
         {% if student.alerts %}
-        <div style="margin: 0.5rem 0;">
+<div style="margin: 0.5rem 0;">
             {% for alert in student.alerts %}
-            <span class="alert-warning-badge">
-                <span class="iconify" data-icon="mdi:alert" data-width="12" data-height="12"></span>
+<span class="alert-warning-badge">
+<span class="iconify" data-icon="mdi:alert" data-width="12" data-height="12"></span>
                 Low attendance in {{ alert.course }}: {{ alert.percentage }}%
-            </span>
+</span>
             {% endfor %}
-        </div>
+</div>
         {% endif %}
         
-        <details class="course-breakdown">
-            <summary style="cursor: pointer; color: var(--color-text-secondary); font-size: 0.813rem;">
-                <span class="iconify" data-icon="mdi:chevron-right" data-width="14" data-height="14"></span>
+<details class="course-breakdown">
+<summary style="cursor: pointer; color: var(--color-text-secondary); font-size: 0.813rem;">
+<span class="iconify" data-icon="mdi:chevron-right" data-width="14" data-height="14"></span>
                 Course Breakdown
-            </summary>
+</summary>
             {% for code, data in student.course_attendance.items %}
-            <div class="course-row">
-                <div><strong>{{ code }}</strong> - {{ data.name }}</div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="font-size: 0.75rem;">{{ data.attended }}/{{ data.total }}</span>
-                    <div class="course-progress-small">
-                        <div style="width: {{ data.percentage }}%; height: 100%; background: var(--color-primary); border-radius: 2px;"></div>
-                    </div>
-                    <span style="font-size: 0.75rem; {% if data.percentage < 75 %}color: var(--color-error);{% endif %}">
+<div class="course-row">
+<div><strong>{{ code }}</strong> - {{ data.name }}</div>
+<div style="display: flex; align-items: center; gap: 0.5rem;">
+<span style="font-size: 0.75rem;">{{ data.attended }}/{{ data.total }}</span>
+<div class="course-progress-small">
+<div style="width: {{ data.percentage }}%; height: 100%; background: var(--color-primary); border-radius: 2px;"></div>
+</div>
+<span style="font-size: 0.75rem; {% if data.percentage < 75 %}color: var(--color-error);{% endif %}">
                         {{ data.percentage }}%
-                    </span>
-                </div>
-            </div>
+</span>
+</div>
+</div>
             {% endfor %}
-        </details>
-    </div>
+</details>
+</div>
     {% endfor %}
 {% else %}
-    <div class="card">
-        <div class="card-body" style="text-align: center; padding: 3rem;">
-            <span class="iconify" data-icon="mdi:account-search" data-width="48" data-height="48" style="color: var(--color-text-muted);"></span>
-            <h3 style="margin-top: 1rem;">No Students Found</h3>
-            <p style="color: var(--color-text-muted);">Try adjusting your search or filter criteria</p>
-        </div>
-    </div>
+<div class="card">
+<div class="card-body" style="text-align: center; padding: 3rem;">
+<span class="iconify" data-icon="mdi:account-search" data-width="48" data-height="48" style="color: var(--color-text-muted);"></span>
+<h3 style="margin-top: 1rem;">No Students Found</h3>
+<p style="color: var(--color-text-muted);">Try adjusting your search or filter criteria</p>
+</div>
+</div>
 {% endif %}
 {% endblock %}

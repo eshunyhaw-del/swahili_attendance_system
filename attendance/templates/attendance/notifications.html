@@ -4,15 +4,15 @@
 {% block content %}
 <style>
 :root {
-    --primary:    #0D2472;
+    --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
-    --surface:    #FFFFFF;
-    --bg:         #F8F4EF;
-    --text:       #1A1A2E;
-    --muted:      #6B7280;
-    --border:     #E8E0D8;
-    --green:      #1A9E60;
-    --green-lt:   rgba(26,158,96,0.10);
+    --surface: #FFFFFF;
+    --bg: #F8F4EF;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E8E0D8;
+    --green: #1A9E60;
+    --green-lt: rgba(26,158,96,0.10);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
@@ -24,16 +24,11 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 /* ─── Header ─── */
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    background: var(--primary);
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
     display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
-}
-.page-header::before {
-    content: ''; position: absolute; top: -50px; right: -40px;
-    width: 180px; height: 180px;
-    background: rgba(255,255,255,0.04); border-radius: 50%;
 }
 .page-header-info { position: relative; z-index: 1; }
 .page-header h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
@@ -80,7 +75,6 @@ html[data-theme="dark"] .filter-chip.active {
 .notif-card {
     background: var(--surface);
     border-radius: var(--r-lg);
-    border: 1px solid var(--border);
     border-left: 4px solid transparent;
     box-shadow: var(--sh-sm);
     margin-bottom: 0.75rem;
@@ -89,7 +83,7 @@ html[data-theme="dark"] .filter-chip.active {
 }
 .notif-card:hover { box-shadow: var(--sh-md); }
 .notif-card.unread { border-left-color: #F2C31A; }
-.notif-card.read   { opacity: 0.75; }
+.notif-card.read { opacity: 0.75; }
 
 .notif-card-head {
     display: flex; align-items: flex-start; justify-content: space-between;
@@ -170,73 +164,73 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
 
 <div class="wrap">
 
-    <div class="page-header">
-        <div class="page-header-info">
-            <h1>Notifications</h1>
-            <div class="page-header-sub">Announcements from your Teaching Assistants</div>
-        </div>
+<div class="page-header">
+<div class="page-header-info">
+<h1>Notifications</h1>
+<div class="page-header-sub">Announcements from your Teaching Assistants</div>
+</div>
         {% if notifs %}
-        <button class="btn-mark-all-header" onclick="markAllReadPage()">
-            <span class="iconify" data-icon="mdi:check-all"></span>
+<button class="btn-mark-all-header" onclick="markAllReadPage()">
+<span class="iconify" data-icon="mdi:check-all"></span>
             Mark all as read
-        </button>
+</button>
         {% endif %}
-    </div>
+</div>
 
-    <!-- Course filter -->
+<!-- Course filter -->
     {% if registered_courses %}
-    <div class="filter-bar">
-        <span class="filter-bar-label">Filter:</span>
-        <a href="{% url 'attendance:notifications' %}" class="filter-chip {% if not course_filter %}active{% endif %}">
+<div class="filter-bar">
+<span class="filter-bar-label">Filter:</span>
+<a href="{% url 'attendance:notifications' %}" class="filter-chip {% if not course_filter %}active{% endif %}">
             All
-        </a>
+</a>
         {% for course in registered_courses %}
-        <a href="{% url 'attendance:notifications' %}?course={{ course.id }}"
+<a href="{% url 'attendance:notifications' %}?course={{ course.id }}"
            class="filter-chip {% if course_filter == course.id|stringformat:'s' %}active{% endif %}">
             {{ course.code }}
-        </a>
+</a>
         {% endfor %}
-    </div>
+</div>
     {% endif %}
 
-    <!-- Notification list -->
+<!-- Notification list -->
     {% for notif in notifs %}
-    <div class="notif-card {% if not notif.is_read %}unread{% else %}read{% endif %}" id="ncard-{{ notif.id }}">
-        <div class="notif-card-head">
-            <div class="notif-card-meta">
+<div class="notif-card {% if not notif.is_read %}unread{% else %}read{% endif %}" id="ncard-{{ notif.id }}">
+<div class="notif-card-head">
+<div class="notif-card-meta">
                 {% if not notif.is_read %}<div class="unread-dot"></div>{% endif %}
                 {% if notif.announcement.course %}
-                <span class="course-chip">
-                    <span class="iconify" data-icon="mdi:book-outline" data-width="10"></span>
+<span class="course-chip">
+<span class="iconify" data-icon="mdi:book-outline" data-width="10"></span>
                     {{ notif.announcement.course.code }}
-                </span>
+</span>
                 {% endif %}
-            </div>
-            <div class="notif-card-time">{{ notif.announcement.sent_at|date:"N j, Y · g:i A" }}</div>
-        </div>
-        <div class="notif-card-title">{{ notif.announcement.title }}</div>
-        <div class="notif-card-body">{{ notif.announcement.message }}</div>
-        <div class="notif-card-footer">
-            <div class="notif-sender">
-                <span class="iconify" data-icon="mdi:account-outline"></span>
+</div>
+<div class="notif-card-time">{{ notif.announcement.sent_at|date:"N j, Y · g:i A" }}</div>
+</div>
+<div class="notif-card-title">{{ notif.announcement.title }}</div>
+<div class="notif-card-body">{{ notif.announcement.message }}</div>
+<div class="notif-card-footer">
+<div class="notif-sender">
+<span class="iconify" data-icon="mdi:account-outline"></span>
                 From {{ notif.announcement.ta.get_full_name|default:notif.announcement.ta.username }}
-            </div>
+</div>
             {% if not notif.is_read %}
-            <button class="btn-mark-read" onclick="markOneRead({{ notif.id }})">
-                <span class="iconify" data-icon="mdi:check"></span> Mark as read
-            </button>
+<button class="btn-mark-read" onclick="markOneRead({{ notif.id }})">
+<span class="iconify" data-icon="mdi:check"></span> Mark as read
+</button>
             {% else %}
-            <span class="read-label">
-                <span class="iconify" data-icon="mdi:check-circle-outline"></span> Read
-            </span>
+<span class="read-label">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span> Read
+</span>
             {% endif %}
-        </div>
-    </div>
+</div>
+</div>
     {% empty %}
-    <div class="empty-state">
-        <span class="iconify" data-icon="mdi:bell-check-outline"></span>
-        <p>No notifications{% if course_filter %} for this course{% endif %}.</p>
-    </div>
+<div class="empty-state">
+<span class="iconify" data-icon="mdi:bell-check-outline"></span>
+<p>No notifications{% if course_filter %} for this course{% endif %}.</p>
+</div>
     {% endfor %}
 
 </div>
