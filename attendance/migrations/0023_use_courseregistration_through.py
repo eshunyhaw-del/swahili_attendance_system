@@ -8,30 +8,15 @@
 #                already lives in attendance_courseregistration (copied in 0022
 #                and verified), so dropping this table loses nothing.
 #
-# The reverse recreates the old junction table (empty); 0022's reverse then
-# repopulates it from CourseRegistration. DDL below is copied verbatim from the
-# live SQLite schema so the recreated table matches the original exactly.
+# The database half is expressed as a plain RemoveField (NOT raw SQL). Inside
+# SeparateDatabaseAndState.database_operations it runs against the pre-0023
+# state, where registered_courses is still a plain M2M — so schema_editor emits
+# the correct DROP TABLE for the auto junction table on EVERY backend (SQLite
+# locally, MySQL in production). Its auto-reverse (add_field) recreates that
+# junction table just as portably; 0022's reverse then repopulates it. This
+# replaces the earlier hand-written SQLite-only DDL, which failed on MySQL.
 
 from django.db import migrations, models
-
-
-DROP_OLD_JUNCTION = 'DROP TABLE "attendance_userprofile_registered_courses";'
-
-RECREATE_OLD_JUNCTION = [
-    'CREATE TABLE "attendance_userprofile_registered_courses" '
-    '("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, '
-    '"userprofile_id" bigint NOT NULL REFERENCES "attendance_userprofile" ("id") DEFERRABLE INITIALLY DEFERRED, '
-    '"course_id" bigint NOT NULL REFERENCES "attendance_course" ("id") DEFERRABLE INITIALLY DEFERRED);',
-
-    'CREATE UNIQUE INDEX "attendance_userprofile_registered_courses_userprofile_id_course_id_c00c14f5_uniq" '
-    'ON "attendance_userprofile_registered_courses" ("userprofile_id", "course_id");',
-
-    'CREATE INDEX "attendance_userprofile_registered_courses_userprofile_id_c811e48d" '
-    'ON "attendance_userprofile_registered_courses" ("userprofile_id");',
-
-    'CREATE INDEX "attendance_userprofile_registered_courses_course_id_b514132c" '
-    'ON "attendance_userprofile_registered_courses" ("course_id");',
-]
 
 
 class Migration(migrations.Migration):
@@ -55,9 +40,12 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[
-                migrations.RunSQL(
-                    sql=DROP_OLD_JUNCTION,
-                    reverse_sql=RECREATE_OLD_JUNCTION,
+                # Forward: drop the orphaned auto junction table.
+                # Reverse: RemoveField's auto-reverse re-creates it (empty),
+                # both rendered per-backend by the schema editor.
+                migrations.RemoveField(
+                    model_name='userprofile',
+                    name='registered_courses',
                 ),
             ],
         ),
