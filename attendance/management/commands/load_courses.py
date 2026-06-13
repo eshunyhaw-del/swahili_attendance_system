@@ -5,7 +5,7 @@ from django.db import transaction
 
 from attendance.models import (
     Course, Level, Semester, ClassSession,
-    UserProfile, TAProfile,
+    UserProfile, TAProfile, CourseRegistration,
 )
 
 
@@ -82,13 +82,16 @@ class Command(BaseCommand):
             return
         w(hdr(f'\nLecturer: {lecturer.username} (id={lecturer.id})'))
 
-        # ── 1. Clear M2M course registrations (students) ─────────────────────
+        # ── 1. Clear course registrations (students) ─────────────────────────
+        # registered_courses now routes through the CourseRegistration through
+        # model, so we delete through rows directly instead of using the M2M
+        # manager's .clear(). This is a full re-seed reset, so a hard delete is
+        # the intended behaviour here.
         w(hdr('\n[1/6] Clearing student course registrations...'))
-        for profile in UserProfile.objects.prefetch_related('registered_courses'):
-            count = profile.registered_courses.count()
-            if count:
-                profile.registered_courses.clear()
-                w(f'     Cleared {count} course(s) for {profile.user.username}')
+        for profile in UserProfile.objects.all():
+            deleted, _ = CourseRegistration.objects.filter(user_profile=profile).delete()
+            if deleted:
+                w(f'     Cleared {deleted} course registration(s) for {profile.user.username}')
 
         # Also clear TA assigned_courses
         for ta in TAProfile.objects.prefetch_related('assigned_courses'):
