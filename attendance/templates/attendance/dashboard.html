@@ -755,6 +755,27 @@
 </div>
 </div>
                 {% endfor %}
+
+<div class="course-footer" style="padding:0.85rem 0 0.25rem;border-top:1px solid var(--border,#E8E0D8);margin-top:0.5rem;">
+                    {% if course.can_deregister %}
+<form method="post" action="{% url 'attendance:student_deregister_course' %}"
+                          onsubmit="return confirm('Deregister from {{ course.course.code }}? You can re-register later from the course registration page.');"
+                          style="margin:0;">
+                        {% csrf_token %}
+<input type="hidden" name="course_id" value="{{ course.course.id }}">
+<button type="submit" class="action-link"
+                                style="color:#B91C1C;background:none;border:none;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:0.35rem;padding:0;">
+<span class="iconify" data-icon="mdi:book-remove-outline" data-width="14"></span>
+                            Deregister from this course
+</button>
+</form>
+                    {% else %}
+<span style="font-size:12px;color:var(--muted,#6B7280);display:inline-flex;align-items:center;gap:0.35rem;">
+<span class="iconify" data-icon="mdi:lock-outline" data-width="13"></span>
+                        Can't deregister — attendance already recorded. Contact your TA to drop this course.
+</span>
+                    {% endif %}
+</div>
 </div>
 </details>
         {% endfor %}

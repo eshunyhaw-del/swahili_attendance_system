@@ -3,8 +3,16 @@ from .models import (
     Level, Semester, Course, ClassSession, UserProfile,
     TAProfile, TACode, AttendanceCode, AttendanceRecord,
     SupportTicket, CodeMisuseAlert, CulturalDate, SystemNotification,
-    SWASAEvent,
+    SWASAEvent, CourseRegistration,
 )
+
+
+class CourseRegistrationInline(admin.TabularInline):
+    model = CourseRegistration
+    extra = 0
+    autocomplete_fields = ('course',)
+    readonly_fields = ('registered_at', 'deregistered_at', 'deregistered_by')
+    fields = ('course', 'is_active', 'registered_at', 'deregistered_at', 'deregistered_by')
 
 
 @admin.register(Level)
@@ -28,7 +36,7 @@ class CourseAdmin(admin.ModelAdmin):
 
     @admin.display(description='Students')
     def student_count(self, obj):
-        return obj.registered_students.count()
+        return obj.course_registrations.filter(is_active=True).count()
 
 
 @admin.register(ClassSession)
@@ -45,7 +53,16 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_filter = ('level', 'email_verified')
     search_fields = ('user__username', 'student_id_number', 'student_email')
     readonly_fields = ('email_verification_token', 'verification_sent_at')
-    filter_horizontal = ('registered_courses',)
+    inlines = (CourseRegistrationInline,)
+
+
+@admin.register(CourseRegistration)
+class CourseRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('user_profile', 'course', 'is_active', 'registered_at', 'deregistered_at', 'deregistered_by')
+    list_filter = ('is_active', 'course__level', 'course')
+    search_fields = ('user_profile__user__username', 'user_profile__student_id_number', 'course__code', 'course__name')
+    readonly_fields = ('registered_at',)
+    autocomplete_fields = ('user_profile', 'course', 'deregistered_by')
 
 
 @admin.register(TAProfile)

@@ -449,6 +449,28 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
     border-color: var(--primary);
 }
 
+.btn-deregister {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.38rem 0.5rem;
+    margin-left: 0.35rem;
+    background: transparent;
+    color: #B91C1C;
+    border: 1.5px solid #F1C4C4;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+}
+
+.btn-deregister:hover {
+    background: #B91C1C;
+    color: #fff;
+    border-color: #B91C1C;
+}
+
 /* ─── Loading ─── */
 .loading-state {
     padding: 2.5rem;
@@ -929,6 +951,33 @@ async function generateAllCodes(sessionId) {
     );
 }
 
+async function deregisterStudent(profileId, courseId, fullName, sessionId) {
+    showConfirmModal(
+        `Deregister ${fullName} from this course? They will stop receiving codes. You can reactivate them later.`,
+        'Deregister Student',
+        async () => {
+            try {
+                const res = await fetch("{% url 'attendance:staff_deregister_course' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: `profile_id=${profileId}&course_id=${courseId}`
+                });
+                const data = await res.json();
+                if (res.ok && data.ok !== false) {
+                    showToast(data.message || 'Student deregistered.');
+                    loadStudents(sessionId);
+                } else {
+                    showErrorModal(data.error || data.message || 'Failed to deregister student.');
+                }
+            } catch { showErrorModal('Network error. Please try again.'); }
+        }
+    );
+}
+
 async function markDistributed(codeId, sessionId) {
     showConfirmModal(
         'Mark this code as given to the student?',
@@ -1045,6 +1094,14 @@ async function loadStudents(sessionId) {
                     btn.onclick = () => generateCode(sessionId, student.username);
                     actionCell.appendChild(btn);
                 }
+
+                // Drop override — TA can deregister any student from this course.
+                const drop = document.createElement('button');
+                drop.className = 'btn-deregister';
+                drop.title = 'Deregister this student from the course';
+                drop.innerHTML = '<span class="iconify" data-icon="mdi:account-remove-outline"></span>';
+                drop.onclick = () => deregisterStudent(student.id, data.course_id, student.full_name, sessionId);
+                actionCell.appendChild(drop);
             });
         }
 

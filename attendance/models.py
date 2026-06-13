@@ -65,7 +65,7 @@ class UserProfile(models.Model):
     level = models.ForeignKey(Level, on_delete=models.SET_NULL, null=True, blank=True)
     student_id_number = models.CharField(max_length=50, unique=True, blank=True, null=True)
     student_email = models.EmailField(blank=True, null=True)
-    registered_courses = models.ManyToManyField(Course, blank=True, related_name='registered_students')
+    registered_courses = models.ManyToManyField(Course, blank=True, related_name='registered_students', through='CourseRegistration')
     
     # Email Verification Fields
     email_verified = models.BooleanField(default=False)
@@ -76,6 +76,36 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Level {self.level}"
+
+
+class CourseRegistration(models.Model):
+    """Explicit through-model for UserProfile.registered_courses.
+
+    Each row is one student's registration in one course. Deregistration is a
+    soft state change (is_active=False) — rows are NEVER deleted, so the full
+    history of who dropped a course and when is preserved for auditing.
+    """
+    user_profile = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, related_name='course_registrations'
+    )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name='course_registrations'
+    )
+    is_active = models.BooleanField(default=True)
+    registered_at = models.DateTimeField(auto_now_add=True)
+    deregistered_at = models.DateTimeField(null=True, blank=True)
+    deregistered_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='deregistrations',
+        help_text="User (student, TA, or admin) who performed the deregistration",
+    )
+
+    class Meta:
+        unique_together = ('user_profile', 'course')
+
+    def __str__(self):
+        state = "active" if self.is_active else "inactive"
+        return f"{self.user_profile.user.username} → {self.course.code} ({state})"
 
 
 class TAProfile(models.Model):

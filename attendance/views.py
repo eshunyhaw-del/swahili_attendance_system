@@ -19,7 +19,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Count, Q, Max
+from django.db.models import Count, Q, Max, Prefetch
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import send_mail
@@ -31,7 +31,7 @@ from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
     TAProfile, TACode, OTPCode, TAnnouncement, Notification, StudentNotification,
-    CulturalDate, SystemNotification,
+    CulturalDate, SystemNotification, CourseRegistration,
 )
 
 
@@ -48,6 +48,89 @@ def get_profile(user):
         return user.userprofile
     except UserProfile.DoesNotExist:
         return None
+
+
+# ── Course registration helpers (soft deregister) ─────────────────────────────
+
+def active_courses(profile):
+    """Course queryset for a profile's CURRENT (active) registrations.
+
+    Use this anywhere "currently enrolled" is meant. Plain
+    ``profile.registered_courses`` now returns inactive (deregistered) rows too,
+    because the through model — not the M2M — holds the is_active flag.
+    """
+    return Course.objects.filter(
+        course_registrations__user_profile=profile,
+        course_registrations__is_active=True,
+    )
+
+
+def inactive_registration_profile_ids(course):
+    """Profile ids with an explicit INACTIVE registration for this course.
+
+    Used by code-distribution to exclude dropped students while still showing
+    unregistered-but-attending students (level-minus-deregistered).
+    """
+    return set(
+        CourseRegistration.objects
+        .filter(course=course, is_active=False)
+        .values_list('user_profile_id', flat=True)
+    )
+
+
+def student_has_attendance(user, course):
+    """True if the student has any attendance record for any session of course."""
+    return AttendanceRecord.objects.filter(
+        student=user, class_session__course=course
+    ).exists()
+
+
+def register_or_reactivate(profile, course):
+    """Create a registration, or flip an inactive one back to active.
+
+    Returns one of: 'created', 'reactivated', 'existing'.
+    """
+    reg, created = CourseRegistration.objects.get_or_create(
+        user_profile=profile, course=course, defaults={'is_active': True},
+    )
+    if created:
+        return 'created'
+    if not reg.is_active:
+        reg.is_active = True
+        reg.deregistered_at = None
+        reg.deregistered_by = None
+        reg.save(update_fields=['is_active', 'deregistered_at', 'deregistered_by'])
+        return 'reactivated'
+    return 'existing'
+
+
+def _registration_audit_cells(reg):
+    """Return (status_label, dropped_on_label) for a CourseRegistration row.
+
+    Used by admin audit CSV exports to mark dropped registrations.
+    """
+    if reg.is_active:
+        return 'Active', '-'
+    when = reg.deregistered_at.strftime('%Y-%m-%d %H:%M') if reg.deregistered_at else '-'
+    who = reg.deregistered_by.username if reg.deregistered_by else 'unknown'
+    return 'Dropped', f'{when} by {who}'
+
+
+def soft_deregister(profile, course, by_user):
+    """Mark a registration inactive (audited). Never deletes the row.
+
+    Returns the CourseRegistration if one was active, else None.
+    """
+    reg = CourseRegistration.objects.filter(
+        user_profile=profile, course=course, is_active=True
+    ).first()
+    if not reg:
+        return None
+    reg.is_active = False
+    reg.deregistered_at = timezone.now()
+    reg.deregistered_by = by_user
+    reg.save(update_fields=['is_active', 'deregistered_at', 'deregistered_by'])
+    return reg
 
 
 def send_verification_email(user, token, request):
@@ -821,15 +904,15 @@ def course_registration(request):
         form = CourseRegistrationForm(request.POST, level=profile.level, semester=active_semester)
         if form.is_valid():
             selected_courses = form.cleaned_data['courses']
-            current_ids = set(profile.registered_courses.values_list('id', flat=True))
 
             already_registered = []
             newly_added = []
             for course in selected_courses:
-                if course.id in current_ids:
+                # Create new, or flip a previously-dropped registration back on.
+                result = register_or_reactivate(profile, course)
+                if result == 'existing':
                     already_registered.append(str(course))
-                else:
-                    profile.registered_courses.add(course)
+                else:  # 'created' or 'reactivated'
                     newly_added.append(str(course))
 
             if newly_added:
@@ -841,7 +924,7 @@ def course_registration(request):
 
             return redirect('attendance:dashboard')
     else:
-        already_registered_ids = list(profile.registered_courses.values_list('id', flat=True))
+        already_registered_ids = list(active_courses(profile).values_list('id', flat=True))
         form = CourseRegistrationForm(
             level=profile.level, semester=active_semester,
             initial={'courses': already_registered_ids}
@@ -853,6 +936,127 @@ def course_registration(request):
         'semester': active_semester,
     }
     return render(request, 'attendance/course_registration.html', context)
+
+
+# ── Deregister / Reactivate ───────────────────────────────────────────────────
+
+@login_required
+@require_POST
+def student_deregister_course(request):
+    """A student drops one of their OWN courses.
+
+    Allowed ONLY when the student has zero attendance records for the course.
+    Soft delete — the registration row is kept, just marked inactive.
+    """
+    profile = get_profile(request.user)
+    if not profile:
+        return redirect('login')
+
+    course = get_object_or_404(Course, id=request.POST.get('course_id'))
+
+    # Must currently be actively registered.
+    if not active_courses(profile).filter(id=course.id).exists():
+        messages.error(request, "You are not registered for that course.")
+        return redirect('attendance:dashboard')
+
+    # The attendance gate — students cannot drop a course they've attended.
+    if student_has_attendance(request.user, course):
+        messages.error(
+            request,
+            f"You can't deregister from {course.code} because you already have "
+            f"attendance recorded. Please contact your TA if you need to drop it.",
+        )
+        return redirect('attendance:dashboard')
+
+    soft_deregister(profile, course, by_user=request.user)
+    messages.success(request, f"You have been deregistered from {course.code}.")
+    return redirect('attendance:dashboard')
+
+
+def _staff_registration_target(request):
+    """Resolve and authorize a TA/admin registration action.
+
+    Returns (profile, course, error_response) — error_response is a ready
+    HttpResponse (JSON for XHR, redirect otherwise) when the actor is not
+    allowed, else None. Also stashes a 'redirect_to' url name on the request.
+    """
+    actor = request.user
+    is_ta = hasattr(actor, 'taprofile')
+    is_admin = actor.is_staff
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
+    def fail(msg, url, status=403):
+        if is_ajax:
+            return None, None, JsonResponse({'error': msg}, status=status)
+        messages.error(request, msg)
+        return None, None, redirect(url)
+
+    if not (is_ta or is_admin):
+        return fail("You are not authorized to do that.", 'attendance:dashboard')
+
+    profile = get_object_or_404(UserProfile, id=request.POST.get('profile_id'))
+    course = get_object_or_404(Course, id=request.POST.get('course_id'))
+
+    # An approved TA (who isn't also admin) may only act within assigned levels.
+    if is_ta and not is_admin:
+        ta_profile = actor.taprofile
+        if not ta_profile.is_approved:
+            return fail("Your TA account is pending approval.", 'attendance:ta_dashboard')
+        if profile.level_id not in ta_profile.assigned_levels.values_list('id', flat=True):
+            return fail("You are not authorized for that student's level.", 'attendance:ta_dashboard')
+
+    request._dereg_redirect = 'attendance:ta_dashboard' if is_ta and not is_admin else 'attendance:admin_search'
+    request._dereg_is_ajax = is_ajax
+    return profile, course, None
+
+
+@login_required
+@require_POST
+def staff_deregister_course(request):
+    """A TA or admin deregisters ANY student from a course (the drop override).
+
+    No attendance gate. The acting user is recorded for auditing.
+    """
+    profile, course, error = _staff_registration_target(request)
+    if error:
+        return error
+
+    reg = soft_deregister(profile, course, by_user=request.user)
+    name = profile.user.get_full_name() or profile.user.username
+    if reg is None:
+        msg = f"{profile.user.username} was not actively registered for {course.code}."
+        if request._dereg_is_ajax:
+            return JsonResponse({'ok': False, 'message': msg})
+        messages.warning(request, msg)
+    else:
+        msg = f"Deregistered {name} from {course.code}."
+        if request._dereg_is_ajax:
+            return JsonResponse({'ok': True, 'message': msg})
+        messages.success(request, msg)
+    return redirect(request._dereg_redirect)
+
+
+@login_required
+@require_POST
+def staff_reactivate_course(request):
+    """A TA or admin reactivates a previously dropped registration."""
+    profile, course, error = _staff_registration_target(request)
+    if error:
+        return error
+
+    result = register_or_reactivate(profile, course)
+    name = profile.user.get_full_name() or profile.user.username
+    if result == 'existing':
+        msg = f"{profile.user.username} is already registered for {course.code}."
+        if request._dereg_is_ajax:
+            return JsonResponse({'ok': True, 'message': msg})
+        messages.info(request, msg)
+    else:
+        msg = f"Reactivated {name}'s registration for {course.code}."
+        if request._dereg_is_ajax:
+            return JsonResponse({'ok': True, 'message': msg})
+        messages.success(request, msg)
+    return redirect(request._dereg_redirect)
 
 
 # ── Student Dashboard ─────────────────────────────────────────────────────────
@@ -870,10 +1074,10 @@ def dashboard(request):
     if not profile:
         return redirect("login")
 
-    if not profile.registered_courses.exists():
+    if not active_courses(profile).exists():
         return redirect("attendance:course_registration")
 
-    courses = list(profile.registered_courses.filter(semester__is_active=True).select_related("semester"))
+    courses = list(active_courses(profile).filter(semester__is_active=True).select_related("semester"))
     course_data = []
 
     # Bulk-fetch all sessions for enrolled courses — 1 query
@@ -929,6 +1133,10 @@ def dashboard(request):
             "total_sessions": total_sessions,
             "attended": attended,
             "percentage": percentage,
+            # Student may self-drop only with zero attendance for the course.
+            # `attended` counts records across all sessions of this course, so
+            # attended == 0 is exactly the "no attendance" rule.
+            "can_deregister": attended == 0,
         })
 
     return render(request, "attendance/dashboard.html", {
@@ -1077,7 +1285,7 @@ def student_history(request):
     if not profile:
         return redirect("login")
 
-    courses = list(profile.registered_courses.filter(semester__is_active=True))
+    courses = list(active_courses(profile).filter(semester__is_active=True))
     history_data = []
     today = timezone.now().date()
     date_joined = request.user.date_joined.date()
@@ -1143,8 +1351,8 @@ def export_my_attendance_csv(request):
         return redirect('login')
     
     semesters = Semester.objects.filter(is_archived=False)
-    courses = profile.registered_courses.filter(semester__in=semesters)
-    
+    courses = active_courses(profile).filter(semester__in=semesters)
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="attendance_{request.user.username}_{timezone.now().date()}.csv"'
     
@@ -1202,7 +1410,9 @@ def lecturer_dashboard(request):
         course = session.course
         enrolled_qs = list(
             UserProfile.objects.filter(
-                registered_courses=course, user__is_active=True
+                course_registrations__course=course,
+                course_registrations__is_active=True,
+                user__is_active=True,
             ).select_related("user")
         )
         submitted_ids = set(
@@ -1251,7 +1461,9 @@ def export_attendance_csv(request, session_id):
     session = get_object_or_404(ClassSession, id=session_id)
     course = session.course
     enrolled = UserProfile.objects.filter(
-        registered_courses=course, user__is_active=True
+        course_registrations__course=course,
+        course_registrations__is_active=True,
+        user__is_active=True,
     ).select_related("user")
 
     submitted_map = {
@@ -1346,9 +1558,15 @@ def admin_dashboard(request):
 
     # ── At-risk students (<75% attendance, bulk queries) ──────────────────────
     all_profiles = list(
-        UserProfile.objects.select_related('level', 'user').prefetch_related('registered_courses')
+        UserProfile.objects.select_related('level', 'user').prefetch_related(
+            Prefetch(
+                'course_registrations',
+                queryset=CourseRegistration.objects.filter(is_active=True),
+                to_attr='active_regs',
+            )
+        )
     )
-    all_course_ids = {c.id for p in all_profiles for c in p.registered_courses.all()}
+    all_course_ids = {reg.course_id for p in all_profiles for reg in p.active_regs}
     sessions_by_course = {
         row['course_id']: row['count']
         for row in ClassSession.objects
@@ -1367,7 +1585,7 @@ def admin_dashboard(request):
 
     at_risk_list = []
     for profile in all_profiles:
-        possible = sum(sessions_by_course.get(c.id, 0) for c in profile.registered_courses.all())
+        possible = sum(sessions_by_course.get(reg.course_id, 0) for reg in profile.active_regs)
         attended = attended_by_student.get(profile.user_id, 0)
         if possible > 0:
             pct = (attended / possible) * 100
@@ -1541,7 +1759,7 @@ def student_attendance_report(request):
             Q(student_id_number__icontains=search_query)
         )
 
-    students = list(students.prefetch_related('registered_courses'))
+    students = list(students)
     student_ids = [p.user_id for p in students]
     level_ids = list({p.level_id for p in students if p.level_id})
 
@@ -1720,15 +1938,23 @@ def admin_export_student_csv(request, student_id):
     student_user = student_profile.user
     
     semesters = Semester.objects.filter(is_archived=False)
-    courses = student_profile.registered_courses.filter(semester__in=semesters)
-    
+    # Audit export: include dropped (inactive) registrations too, marked with status.
+    registrations = (
+        CourseRegistration.objects
+        .filter(user_profile=student_profile, course__semester__in=semesters)
+        .select_related('course', 'deregistered_by')
+        .order_by('course__code')
+    )
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="attendance_{student_user.username}_{timezone.now().date()}.csv"'
-    
+
     writer = csv.writer(response)
-    writer.writerow(['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Week', 'Date', 'Topic', 'Status', 'Submitted At'])
-    
-    for course in courses:
+    writer.writerow(['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Week', 'Date', 'Topic', 'Status', 'Submitted At', 'Registration', 'Dropped On'])
+
+    for reg in registrations:
+        course = reg.course
+        reg_status, dropped_on = _registration_audit_cells(reg)
         sessions = ClassSession.objects.filter(course=course).order_by('date')
         for i, session in enumerate(sessions, start=1):
             record = AttendanceRecord.objects.filter(student=student_user, class_session=session).first()
@@ -1738,9 +1964,10 @@ def admin_export_student_csv(request, student_id):
                 student_profile.student_id_number or '-',
                 student_user.get_full_name() or student_user.username,
                 student_profile.level.name,
-                course.code, course.name, i, session.date, session.topic, status, submitted_at
+                course.code, course.name, i, session.date, session.topic, status, submitted_at,
+                reg_status, dropped_on,
             ])
-    
+
     return response
 
 
@@ -1762,11 +1989,19 @@ def admin_export_all_students_csv(request, level_id=None):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     
     writer = csv.writer(response)
-    writer.writerow(['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Week', 'Date', 'Topic', 'Status', 'Submitted At'])
-    
+    writer.writerow(['Student ID', 'Student Name', 'Level', 'Course Code', 'Course Name', 'Week', 'Date', 'Topic', 'Status', 'Submitted At', 'Registration', 'Dropped On'])
+
     for profile in students:
-        courses = profile.registered_courses.filter(semester__in=semesters)
-        for course in courses:
+        # Audit export: include dropped (inactive) registrations too, marked.
+        registrations = (
+            profile.course_registrations
+            .filter(course__semester__in=semesters)
+            .select_related('course', 'deregistered_by')
+            .order_by('course__code')
+        )
+        for reg in registrations:
+            course = reg.course
+            reg_status, dropped_on = _registration_audit_cells(reg)
             sessions = ClassSession.objects.filter(course=course).order_by('date')
             for i, session in enumerate(sessions, start=1):
                 record = AttendanceRecord.objects.filter(student=profile.user, class_session=session).first()
@@ -1776,9 +2011,10 @@ def admin_export_all_students_csv(request, level_id=None):
                     profile.student_id_number or '-',
                     profile.user.get_full_name() or profile.user.username,
                     profile.level.name,
-                    course.code, course.name, i, session.date, session.topic, status, submitted_at
+                    course.code, course.name, i, session.date, session.topic, status, submitted_at,
+                    reg_status, dropped_on,
                 ])
-    
+
     return response
 
 
@@ -1823,11 +2059,11 @@ def admin_search_students(request):
     for row in attended_counts:
         attended_map[(row['student_id'], row['class_session__course_id'])] = row['count']
 
-    students = students.prefetch_related('registered_courses')
+    students = list(students)
 
     student_data = []
     for profile in students:
-        courses = profile.registered_courses.filter(semester__in=active_semesters)
+        courses = active_courses(profile).filter(semester__in=active_semesters)
         total_sessions = sum(sessions_by_course.get(c.id, 0) for c in courses)
         total_attended = sum(attended_map.get((profile.user_id, c.id), 0) for c in courses)
         percentage = (total_attended / total_sessions * 100) if total_sessions > 0 else 0
@@ -1907,13 +2143,14 @@ def ta_history(request):
     )
     stats_by_session = {s['class_session_id']: s for s in stats_qs}
 
-    # Student counts per course (one query)
+    # Student counts per course (one query) — active registrations only
     from django.db.models import Count as _Count
     course_ids = list({s.course_id for s in sessions})
     student_counts = {
-        row['registered_courses']: row['cnt']
-        for row in UserProfile.objects.filter(registered_courses__in=course_ids)
-        .values('registered_courses')
+        row['course']: row['cnt']
+        for row in CourseRegistration.objects
+        .filter(course__in=course_ids, is_active=True)
+        .values('course')
         .annotate(cnt=_Count('id'))
     }
 
@@ -2011,11 +2248,12 @@ def ta_dashboard(request):
 
     courses_in_levels = Course.objects.filter(level__in=assigned_levels, semester__is_active=True)
 
-    # Single aggregation query instead of one query per course
+    # Single aggregation query instead of one query per course — active only
     course_student_counts = {
-        row['registered_courses']: row['cnt']
-        for row in UserProfile.objects.filter(registered_courses__in=courses_in_levels)
-        .values('registered_courses')
+        row['course']: row['cnt']
+        for row in CourseRegistration.objects
+        .filter(course__in=courses_in_levels, is_active=True)
+        .values('course')
         .annotate(cnt=Count('id'))
     }
 
@@ -2088,7 +2326,16 @@ def ta_generate_code(request):
             return JsonResponse({"error": f"You are not authorized for Level {student_profile.level.name}"}, status=403)
     except TAProfile.DoesNotExist:
         return JsonResponse({"error": "TA profile not found"}, status=403)
-    
+
+    # Deregistered students are excluded from code distribution (level-minus-deregistered).
+    if CourseRegistration.objects.filter(
+        user_profile=student_profile, course=session.course, is_active=False
+    ).exists():
+        return JsonResponse(
+            {"error": f"{student.username} has been deregistered from {session.course.code}."},
+            status=400,
+        )
+
     # Check if code already exists for this student/session
     existing = TACode.objects.filter(student=student, class_session=session).first()
     if existing:
@@ -2142,9 +2389,16 @@ def ta_generate_all_codes(request):
     if session.course.level not in ta_profile.assigned_levels.all():
         return JsonResponse({"error": "You are not authorized for this session's level."}, status=403)
 
-    # Get all students for this session's course level
-    students = UserProfile.objects.filter(level=session.course.level).select_related('user')
-    
+    # All students at the session's level, minus anyone explicitly deregistered
+    # from this course (level-minus-deregistered).
+    dropped_ids = inactive_registration_profile_ids(session.course)
+    students = (
+        UserProfile.objects
+        .filter(level=session.course.level)
+        .exclude(id__in=dropped_ids)
+        .select_related('user')
+    )
+
     generated_count = 0
     skipped_count = 0
     
@@ -2262,10 +2516,17 @@ def ta_get_students_ajax(request):
     status_filter = request.GET.get('status', 'all')
     
     session = get_object_or_404(ClassSession, id=session_id)
-    
-    # Get all students for this course level
-    students = UserProfile.objects.filter(level=session.course.level).select_related('user')
-    
+
+    # All students at this course level, minus anyone explicitly deregistered
+    # from this course (level-minus-deregistered).
+    dropped_ids = inactive_registration_profile_ids(session.course)
+    students = (
+        UserProfile.objects
+        .filter(level=session.course.level)
+        .exclude(id__in=dropped_ids)
+        .select_related('user')
+    )
+
     # Apply search filter
     if search:
         students = students.filter(
@@ -2332,6 +2593,7 @@ def ta_get_students_ajax(request):
         'total_pages': paginator.num_pages,
         'has_next': page_obj.has_next(),
         'has_previous': page_obj.has_previous(),
+        'course_id': session.course_id,
     })
 
 
@@ -2382,7 +2644,10 @@ def ta_export_session_csv(request, session_id):
 
     students = (
         UserProfile.objects
-        .filter(registered_courses=session.course)
+        .filter(
+            course_registrations__course=session.course,
+            course_registrations__is_active=True,
+        )
         .select_related('user')
         .order_by('user__first_name', 'user__last_name')
     )
@@ -2490,7 +2755,11 @@ def ta_announcements(request):
 
             students = (
                 UserProfile.objects
-                .filter(registered_courses=course, user__is_active=True)
+                .filter(
+                    course_registrations__course=course,
+                    course_registrations__is_active=True,
+                    user__is_active=True,
+                )
                 .select_related('user')
             )
 
@@ -2568,7 +2837,7 @@ def notifications_page(request):
     profile = get_profile(request.user)
     if profile:
         registered_courses = list(
-            profile.registered_courses.filter(semester__is_active=True).order_by('code')
+            active_courses(profile).filter(semester__is_active=True).order_by('code')
         )
 
     return render(request, 'attendance/notifications.html', {
