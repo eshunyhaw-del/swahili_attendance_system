@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -22,14 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-_secret_key = config('DJANGO_SECRET_KEY', default='')
-if not _secret_key:
-    _fallback = 'django-insecure-dt-mxq$5f#jm2)m-b7_0ufmx-nw#e)*)po7eo^x@z!k-^+=nb='
-    import sys
-    if 'manage.py' not in sys.argv[0] and not any(a in sys.argv for a in ['runserver', 'test']):
+SECRET_KEY = config('DJANGO_SECRET_KEY', default='')
+if not SECRET_KEY:
+    # No key in environment. Allow local dev commands with a throwaway key,
+    # but never let production run without a real one.
+    _is_dev_command = any(a in sys.argv for a in ['runserver', 'test', 'shell', 'migrate', 'makemigrations'])
+    if _is_dev_command:
+        import secrets
+        SECRET_KEY = secrets.token_urlsafe(50)  # ephemeral, regenerated each run
+    else:
         raise RuntimeError("DJANGO_SECRET_KEY environment variable is not set.")
-    _secret_key = _fallback
-SECRET_KEY = _secret_key
 
 DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 
