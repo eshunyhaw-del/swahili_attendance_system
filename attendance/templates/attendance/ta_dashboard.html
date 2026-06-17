@@ -592,15 +592,15 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 /* ─── Toast ─── */
 .toast-msg {
     position: fixed; top: 72px; right: 1.25rem;
-    padding: 0.65rem 1rem;
+    padding: 0.75rem 1.25rem;
     border-radius: var(--r-md);
     z-index: 3000;
-    animation: toastAnim 2.6s ease forwards;
+    animation: toastAnim 6s ease forwards;
     background: rgba(26,158,96,0.1);
     color: var(--green);
     border: 1px solid rgba(26,158,96,0.22);
     box-shadow: var(--sh-md);
-    font-weight: 700; font-size: 12.5px;
+    font-weight: 700; font-size: 14px;
     display: flex; align-items: center; gap: 0.4rem;
     max-width: 260px;
 }
@@ -612,8 +612,8 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
 @keyframes toastAnim {
     0% { opacity: 0; transform: translateY(-10px); }
-    10% { opacity: 1; transform: translateY(0); }
-    82% { opacity: 1; }
+    8% { opacity: 1; transform: translateY(0); }
+    88% { opacity: 1; }
     100% { opacity: 0; transform: translateY(-10px); }
 }
 
@@ -887,12 +887,12 @@ function closeErrorModal() {
     document.getElementById('errorModal').style.display = 'none';
 }
 
-function showToast(message) {
+function showToast(message, duration = 6000) {
     const t = document.createElement('div');
     t.className = 'toast-msg';
     t.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span>' + message;
     document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2600);
+    setTimeout(() => t.remove(), duration);
 }
 
 document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirmModal);
@@ -913,8 +913,9 @@ async function generateCode(sessionId, studentUsername) {
             body: `session_id=${sessionId}&student_username=${encodeURIComponent(studentUsername)}`
         });
         if (res.ok) {
-            loadStudents(sessionId);
             const d = await res.json();
+            loadStudents(sessionId);
+            showToast(`Code for ${d.student}: ${d.code}`);
             if (!d.existing) {
                 const genEl = document.getElementById('stat-codes-generated');
                 if (genEl) genEl.textContent = parseInt(genEl.textContent || '0') + 1;
