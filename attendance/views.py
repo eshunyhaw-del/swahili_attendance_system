@@ -19,6 +19,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db import transaction
 from django.db.models import Count, Q, Max, Prefetch
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -2477,31 +2478,36 @@ def student_submit_ta_code(request):
     if ta_code.is_used:
         return JsonResponse({"error": "This code has already been used."}, status=400)
     
-    # Mark code as used
-    ta_code.is_used = True
-    ta_code.used_at = timezone.now()
-    ta_code.save()
-    
-    # Also mark as distributed automatically when submitted
-    if not ta_code.is_distributed:
-        ta_code.is_distributed = True
-        ta_code.distributed_at = timezone.now()
+    # Record attendance and mark the code used atomically. The code must be
+    # marked used ONLY after the records are written — otherwise a failure here
+    # would "burn" the code (is_used=True) while leaving no AttendanceRecord,
+    # permanently locking the student out via the is_used guard above.
+    now = timezone.now()
+    # TACode.code is only unique per session (unique_together = ['code',
+    # 'class_session']), but AttendanceCode.code_string is globally unique.
+    # Scope the string with the session id so the same numeric code reused
+    # across weeks doesn't collide and raise an IntegrityError on submit.
+    with transaction.atomic():
+        dummy_code = AttendanceCode.objects.create(
+            student=request.user,
+            class_session=session,
+            code_string=f"TA-{session.id}-{ta_code.code}",
+        )
+
+        AttendanceRecord.objects.create(
+            student=request.user,
+            class_session=session,
+            code=dummy_code,
+            submitted_at=now,
+        )
+
+        ta_code.is_used = True
+        ta_code.used_at = now
+        if not ta_code.is_distributed:
+            ta_code.is_distributed = True
+            ta_code.distributed_at = now
         ta_code.save()
-    
-    # Create attendance record
-    dummy_code = AttendanceCode.objects.create(
-        student=request.user,
-        class_session=session,
-        code_string=f"TA-{ta_code.code}",
-    )
-    
-    AttendanceRecord.objects.create(
-        student=request.user,
-        class_session=session,
-        code=dummy_code,
-        submitted_at=timezone.now()
-    )
-    
+
     return JsonResponse({"success": True, "message": "Attendance submitted successfully!"})
 
 
@@ -2536,11 +2542,10 @@ def ta_get_students_ajax(request):
             Q(student_id_number__icontains=search)
         )
     
-    # Get existing codes for this session for THIS TA only
+    # Get existing codes for this session (visible to all TAs)
     existing_codes = {}
     ta_codes = TACode.objects.filter(
         class_session=session,
-        ta=request.user
     ).select_related('student')
     
     for code in ta_codes:
