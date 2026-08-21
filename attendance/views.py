@@ -2817,8 +2817,18 @@ def notifications_page(request):
             active_courses(profile).filter(semester__is_active=True).order_by('code')
         )
 
+    # System notifications (events, cultural dates) — previously these only
+    # appeared in the bell and were invisible on this "view all" page. Hide them
+    # when a course filter is active (that filter only applies to announcements).
+    sys_notifs = []
+    if not course_filter:
+        sys_notifs = list(
+            SystemNotification.objects.filter(user=request.user).order_by('-created_at')[:50]
+        )
+
     return render(request, 'attendance/notifications.html', {
         'notifs':             notifs,
+        'sys_notifs':         sys_notifs,
         'registered_courses': registered_courses,
         'course_filter':      course_filter,
     })

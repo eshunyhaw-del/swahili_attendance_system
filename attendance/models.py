@@ -313,10 +313,17 @@ class SystemNotification(models.Model):
     title    = models.CharField(max_length=200)
     message  = models.TextField()
     emoji    = models.CharField(max_length=10, default='🌍')
+    link     = models.CharField(max_length=200, blank=True, default='')
     is_read  = models.BooleanField(default=False)
     read_at  = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=TYPE_SYSTEM)
+    # When this notification was generated from an event, link back to it so the
+    # event admin can keep the notification in sync on edit / unpublish.
+    event = models.ForeignKey(
+        'SWASAEvent', null=True, blank=True, on_delete=models.CASCADE,
+        related_name='notifications',
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -342,6 +349,10 @@ class SWASAEvent(models.Model):
     event_type = models.CharField(max_length=20, choices=EVENT_CHOICES, default='event')
     image_url = models.URLField(blank=True)
     is_published = models.BooleanField(default=True)
+    # Which student levels this event targets. Empty = everyone (all active
+    # users). When set, only students in these levels (plus staff and TAs
+    # assigned to them) are notified.
+    target_levels = models.ManyToManyField(Level, blank=True, related_name='events')
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_events')
 
