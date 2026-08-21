@@ -160,6 +160,13 @@ if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=0)
     }
+    # On MySQL, enforce strict mode so invalid/oversized values are rejected
+    # rather than silently truncated. Guarded to MySQL only — other engines
+    # (SQLite in dev, Postgres) don't accept this OPTION.
+    if 'mysql' in DATABASES['default'].get('ENGINE', ''):
+        DATABASES['default'].setdefault('OPTIONS', {})['init_command'] = (
+            "SET sql_mode='STRICT_TRANS_TABLES'"
+        )
 else:
     DATABASES = {
         'default': {
