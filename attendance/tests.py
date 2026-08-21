@@ -90,6 +90,42 @@ class TAGetStudentsAjaxAuthTests(TestCase):
         self.assertEqual(resp.status_code, 200)
 
 
+class TACodeLengthTests(TestCase):
+    """Medium #2: TA-generated codes are a fixed 6 digits (not the old 2–5)."""
+
+    def setUp(self):
+        cache.clear()
+        self.level, _ = Level.objects.get_or_create(name='100')
+        semester = _make_semester()
+        self.course = Course.objects.create(
+            code='TEST 998', name='Intro', level=self.level, semester=semester,
+        )
+        lecturer = User.objects.create_user('lect2', password='x')
+        self.session = ClassSession.objects.create(
+            course=self.course, date=timezone.now().date(),
+            topic='W1', lecturer=lecturer,
+        )
+        self.student = User.objects.create_user('stud2', password='x')
+        UserProfile.objects.create(
+            user=self.student, level=self.level, student_id_number='20000002',
+            must_change_password=False,
+        )
+        self.ta_user = User.objects.create_user('ta_ok2', password='x')
+        ta = TAProfile.objects.create(user=self.ta_user, is_approved=True)
+        ta.assigned_levels.add(self.level)
+
+    def test_generated_code_is_six_digits(self):
+        self.client.force_login(self.ta_user)
+        resp = self.client.post(reverse('attendance:ta_generate_code'), {
+            'session_id': self.session.id,
+            'student_username': self.student.username,
+        })
+        self.assertEqual(resp.status_code, 200)
+        code = resp.json()['code']
+        self.assertEqual(len(code), 6)
+        self.assertTrue(code.isdigit())
+
+
 class TASelfApprovalTests(TestCase):
     """C-2: verifying an email must never flip a TA to approved."""
 

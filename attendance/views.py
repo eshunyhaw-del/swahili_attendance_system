@@ -2290,13 +2290,13 @@ def ta_generate_code(request):
                 "existing": True
             })
     
-    # Generate unique 2-5 digit code
+    # Generate a unique 6-digit code (1,000,000 space per session — no practical
+    # guessing/collision risk, unlike the old 2–5 digit codes).
     while True:
-        code_length = secrets.choice([2, 3, 4, 5])
-        code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
+        code = f"{secrets.randbelow(1000000):06d}"
         if not TACode.objects.filter(code=code, class_session=session).exists():
             break
-    
+
     ta_code = TACode.objects.create(
         code=code,
         student=student,
@@ -2351,13 +2351,12 @@ def ta_generate_all_codes(request):
                 skipped_count += 1
             continue
 
-        # Generate unique code
+        # Generate a unique 6-digit code (see ta_generate_code).
         while True:
-            code_length = secrets.choice([2, 3, 4, 5])
-            code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
+            code = f"{secrets.randbelow(1000000):06d}"
             if not TACode.objects.filter(code=code, class_session=session).exists():
                 break
-        
+
         TACode.objects.create(
             code=code,
             student=student_profile.user,

@@ -36,14 +36,22 @@ if not SECRET_KEY:
 
 DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 
-# ALLOWED_HOSTS - configured via .env in production
-_extra_hosts = config('ALLOWED_HOSTS', default='', cast=Csv())
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.ngrok-free.dev',
-    '.pythonanywhere.com',
-] + list(_extra_hosts)
+# ALLOWED_HOSTS
+#
+# In development we allow the local + tunneling conveniences. In production we
+# only trust what's explicitly configured via the ALLOWED_HOSTS env var (comma
+# separated), so the app isn't reachable under the whole shared .pythonanywhere
+# .com / .ngrok space. If nothing is configured we fall back to
+# .pythonanywhere.com so a missing var doesn't 400 everything — but you SHOULD
+# pin your exact host in .env for production.
+_extra_hosts = list(config('ALLOWED_HOSTS', default='', cast=Csv()))
+
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev', '.pythonanywhere.com'] + _extra_hosts
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1'] + _extra_hosts
+    if not _extra_hosts:
+        ALLOWED_HOSTS.append('.pythonanywhere.com')
 
 
 # Application definition
@@ -231,13 +239,27 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'attendance:dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-# CSRF Settings - Updated for ngrok support
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.pythonanywhere.com',
-    'http://*.pythonanywhere.com',
-    'https://*.ngrok-free.dev',    # Added for ngrok
-    'http://*.ngrok-free.dev',     # Added for ngrok
-]
+# CSRF trusted origins.
+#
+# Dev keeps the http+https tunnel wildcards for convenience. Production trusts
+# HTTPS only, derived from the configured hosts (or an explicit
+# CSRF_TRUSTED_ORIGINS env var) — no plaintext-http origins, no ngrok.
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.pythonanywhere.com',
+        'http://*.pythonanywhere.com',
+        'https://*.ngrok-free.dev',
+        'http://*.ngrok-free.dev',
+    ]
+else:
+    _csrf_env = list(config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv()))
+    if _csrf_env:
+        CSRF_TRUSTED_ORIGINS = _csrf_env
+    else:
+        CSRF_TRUSTED_ORIGINS = [
+            (f"https://*{h}" if h.startswith('.') else f"https://{h}")
+            for h in (_extra_hosts or ['.pythonanywhere.com'])
+        ]
 
 # Cookie / transport security.
 #
