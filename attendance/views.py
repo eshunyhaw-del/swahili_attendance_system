@@ -1808,13 +1808,25 @@ def ta_support_tickets(request):
         link=reverse('attendance:ta_support'),
     ).update(is_read=True)
 
+    # A TA handles every ticket from students in the levels they're assigned to —
+    # not only tickets pre-assigned to them. This closes the "orphaned ticket"
+    # gap: a ticket created when no TA was approved for the level had
+    # assigned_ta=None and was invisible to (and unanswerable by) every TA.
+    level_ids = list(ta_profile.assigned_levels.values_list('id', flat=True))
+
     if request.method == 'POST':
         ticket_id = request.POST.get('ticket_id')
         response_text = request.POST.get('response')
         status = request.POST.get('status')
-        ticket = get_object_or_404(SupportTicket, id=ticket_id, assigned_ta=request.user)
+        ticket = get_object_or_404(
+            SupportTicket, id=ticket_id,
+            student__userprofile__level_id__in=level_ids,
+        )
         ticket.admin_response = response_text
         ticket.status = status
+        # Claim an unassigned ticket so it's attributed to whoever answered.
+        if ticket.assigned_ta_id is None:
+            ticket.assigned_ta = request.user
         ticket.save()
         ta_name = request.user.get_full_name() or request.user.username
         create_notification(
@@ -1825,7 +1837,12 @@ def ta_support_tickets(request):
         messages.success(request, f"Response sent to {ticket.student.username}")
         return redirect('attendance:ta_support')
 
-    tickets = SupportTicket.objects.filter(assigned_ta=request.user).order_by('-created_at').select_related('student')
+    tickets = (
+        SupportTicket.objects
+        .filter(student__userprofile__level_id__in=level_ids)
+        .order_by('-created_at')
+        .select_related('student')
+    )
     paginator = Paginator(tickets, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 

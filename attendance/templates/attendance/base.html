@@ -880,6 +880,19 @@
             overflow: hidden;
         }
         .notif-panel.open { display: block; }
+        /* On phones a fixed 340px panel anchored to the right overflows the
+           screen edge and gets clipped. Pin it to both edges so it's always
+           fully visible. */
+        @media (max-width: 480px) {
+            .notif-panel {
+                position: fixed;
+                top: calc(var(--topbar-height) + 6px);
+                left: 10px;
+                right: 10px;
+                width: auto;
+            }
+            .notif-list { max-height: 65vh; }
+        }
         .notif-panel-head {
             display: flex; align-items: center; justify-content: space-between;
             padding: 0.875rem 1rem 0.75rem;

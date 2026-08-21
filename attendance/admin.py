@@ -231,7 +231,15 @@ class SWASAEventAdmin(admin.ModelAdmin):
     list_editable = ('is_published',)
     search_fields = ('title', 'description', 'venue')
     ordering = ('-event_date',)
-    readonly_fields = ('created_at',)
+    # created_by is auto-set to the current admin in save_model, so it must be
+    # read-only here — otherwise it's a required dropdown and leaving it blank
+    # silently blocks the save ("This field is required").
+    readonly_fields = ('created_at', 'created_by')
+
+    def save_model(self, request, obj, form, change):
+        if obj.created_by_id is None:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
     fieldsets = (
         ('Content', {
             'fields': ('title', 'description', 'event_type', 'image_url'),
