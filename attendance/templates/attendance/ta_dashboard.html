@@ -148,59 +148,43 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 }
 
 /* ─── Week tabs ─── */
-.week-tabs-bar {
-    background: #F4F6FC;
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1.25rem 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-.week-tabs-bar::-webkit-scrollbar { display: none; }
+/* ─── Session accordion (collapsible per session) ─── */
+.session-accordion { border-top: 1px solid var(--border); }
+.session-accordion:first-of-type { border-top: none; }
 
-.week-tabs {
+.session-head {
+    width: 100%;
     display: flex;
-    gap: 4px;
-    min-width: max-content;
-    padding-bottom: 0.75rem;
-}
-
-.week-tab {
-    padding: 0.45rem 0.875rem;
-    border-radius: var(--r-sm);
-    border: 1.5px solid transparent;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
     background: transparent;
+    border: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    transition: all 0.13s;
-    text-align: center;
-    min-width: 68px;
-    line-height: 1.25;
+    text-align: left;
+    transition: background 0.13s;
 }
+.session-head:hover { background: rgba(13,36,114,0.03); }
+.session-accordion.open > .session-head { background: #F4F6FC; }
+html[data-theme="dark"] .session-accordion.open > .session-head { background: rgba(255,255,255,0.03); }
 
-.week-tab:hover:not(.active) {
-    background: var(--surface);
-    border-color: var(--border);
-    color: var(--text);
+.session-head-left { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; flex-wrap: wrap; }
+.session-week { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.session-head-date { font-size: 12px; font-weight: 500; color: var(--muted); }
+.session-head-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+.session-count {
+    font-size: 11px; font-weight: 700; color: var(--primary);
+    background: rgba(13,36,114,0.07); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
 }
+html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,178,255,0.12); }
+.session-chevron { font-size: 20px; color: var(--muted); transition: transform 0.2s; }
+.session-accordion.open > .session-head .session-chevron { transform: rotate(180deg); }
 
-.week-tab.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(13,36,114,0.28);
-}
-
-.wk-num { display: block; font-size: 12px; font-weight: 700; }
-.wk-date { display: block; font-size: 10px; font-weight: 500; margin-top: 1px; opacity: 0.72; }
-.week-tab.active .wk-date { opacity: 0.82; }
-
-/* ─── Session panel ─── */
-.session-panel { display: none; }
-.session-panel.active { display: block; }
+/* Body is hidden until the session is opened. */
+.session-body { display: none; }
+.session-accordion.open > .session-body { display: block; }
 
 /* ─── Session info bar ─── */
 .session-info-bar {
@@ -738,24 +722,25 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 </div>
 </div>
 
-<!-- Week tab bar -->
-<div class="week-tabs-bar">
-<div class="week-tabs">
-                {% for session in course_data.sessions %}
-<button class="week-tab {% if forloop.first %}active{% endif %}"
-                        onclick="switchWeek(event, {{ course_id }}, {{ session.id }})">
-<span class="wk-num">Week {{ forloop.counter }}</span>
-<span class="wk-date">{{ session.date|date:"M j" }}</span>
-</button>
-                {% endfor %}
-</div>
-</div>
-
-<!-- Session panels -->
+<!-- Sessions (collapsible accordion) — collapsed by default; tap a week to open -->
         {% for session in course_data.sessions %}
-<div class="session-panel {% if forloop.first %}active{% endif %}"
+<div class="session-accordion"
              id="session-{{ course_id }}-{{ session.id }}"
              data-session-id="{{ session.id }}">
+
+<!-- Tap this header to hide/show the students for this session -->
+<button type="button" class="session-head" onclick="toggleSession(this, {{ session.id }})">
+<div class="session-head-left">
+<span class="session-week">Week {{ forloop.counter }}</span>
+<span class="session-head-date">{{ session.date|date:"D, M j" }}</span>
+</div>
+<div class="session-head-right">
+<span class="session-count">{{ session.student_count }} student{{ session.student_count|pluralize }}</span>
+<span class="iconify session-chevron" data-icon="mdi:chevron-down"></span>
+</div>
+</button>
+
+<div class="session-body">
 
 <!-- Info bar + Generate All -->
 <div class="session-info-bar">
@@ -827,7 +812,8 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 </div>
 </div>
 
-</div>
+</div><!-- /.session-body -->
+</div><!-- /.session-accordion -->
         {% endfor %}
 
 </div>
@@ -1020,6 +1006,23 @@ async function markDistributed(codeId, sessionId) {
 // ── Pagination state ──
 let sessionStates = {};
 let debounceTimers = {};
+const loadedSessions = new Set();  // sessions whose students have been fetched
+
+// Collapse / expand a session's student list. Students are lazy-loaded the
+// first time a session is opened, so opening the page (or a course) is fast even
+// with many sessions.
+function toggleSession(head, sessionId) {
+    const acc = head.closest('.session-accordion');
+    const opening = !acc.classList.contains('open');
+    acc.classList.toggle('open');
+    if (opening && !loadedSessions.has(String(sessionId))) {
+        loadedSessions.add(String(sessionId));
+        if (!sessionStates[sessionId]) {
+            sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+        }
+        loadStudents(sessionId);
+    }
+}
 
 function debouncedLoadStudents(sessionId) {
     clearTimeout(debounceTimers[sessionId]);
@@ -1163,29 +1166,14 @@ function changePage(sessionId, delta) {
     loadStudents(sessionId);
 }
 
-function switchWeek(event, courseId, sessionId) {
-    // Hide all panels for this course
-    document.querySelectorAll(`[id^="session-${courseId}-"]`).forEach(el => el.classList.remove('active'));
-    document.getElementById(`session-${courseId}-${sessionId}`).classList.add('active');
-
-    // Update tab highlight (handle click on child span)
-    const clickedTab = event.target.closest('.week-tab');
-    if (clickedTab) {
-        clickedTab.closest('.week-tabs').querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
-        clickedTab.classList.add('active');
-    }
-
-    if (!sessionStates[sessionId]) {
-        sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
-    }
-    loadStudents(sessionId);
-}
 
 // Auto-load the first visible session of every course on page load
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.session-panel.active').forEach(panel => {
-        const sessionId = panel.dataset.sessionId;
+    // Load students for whichever sessions start expanded (the first of each course).
+    document.querySelectorAll('.session-accordion.open').forEach(acc => {
+        const sessionId = acc.dataset.sessionId;
         if (sessionId) {
+            loadedSessions.add(String(sessionId));
             sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
             loadStudents(sessionId);
         }
