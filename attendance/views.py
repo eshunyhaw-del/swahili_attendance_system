@@ -327,7 +327,7 @@ def token_login_view(request):
             )
 
             response = redirect(next_url)
-            is_secure = not settings.DEBUG
+            is_secure = settings.JWT_COOKIE_SECURE
             response.set_cookie('access_token', access_token,
                                 max_age=int(access_expiry.total_seconds()),
                                 httponly=True, secure=is_secure, samesite='Lax')
@@ -518,23 +518,23 @@ def otp_verify_registration(request):
             user.is_active = True
             user.save()
 
-            if reg_type == 'ta':
-                try:
-                    ta_prof = user.taprofile
-                    ta_prof.is_approved = True
-                    ta_prof.save()
-                except Exception:
-                    pass
-                redirect_url = reverse('attendance:ta_dashboard')
-            else:
-                profile = getattr(user, 'userprofile', None)
-                if profile:
-                    profile.email_verified = True
-                    profile.save()
-                redirect_url = reverse('attendance:course_registration')
-
             request.session.pop('pending_reg_user_id', None)
             request.session.pop('pending_reg_type', None)
+
+            if reg_type == 'ta':
+                # Email verification proves the address — it does NOT grant the
+                # TA role. TA accounts stay is_approved=False until an admin
+                # approves them via the pending-TAs page. Do not issue a login
+                # token here; show a "pending approval" result instead.
+                return render(request, 'attendance/magic_link_result.html', {
+                    'state': 'ta_pending',
+                })
+
+            profile = getattr(user, 'userprofile', None)
+            if profile:
+                profile.email_verified = True
+                profile.save()
+            redirect_url = reverse('attendance:course_registration')
 
             # Issue JWT so user is immediately logged in after redirect
             access_expiry = timedelta(days=1)
@@ -560,7 +560,7 @@ def otp_verify_registration(request):
                 'redirect_url': redirect_url,
             }
             resp = render(request, 'attendance/otp_verify.html', context)
-            is_secure = not settings.DEBUG
+            is_secure = settings.JWT_COOKIE_SECURE
             resp.set_cookie('access_token', access_token,
                             max_age=int(access_expiry.total_seconds()),
                             httponly=True, secure=is_secure, samesite='Lax')
@@ -649,7 +649,7 @@ def otp_verify_login(request):
             )
 
             response = redirect(next_url)
-            is_secure = not settings.DEBUG
+            is_secure = settings.JWT_COOKIE_SECURE
             response.set_cookie('access_token', access_token,
                                 max_age=int(access_expiry.total_seconds()),
                                 httponly=True, secure=is_secure, samesite='Lax')
@@ -798,7 +798,7 @@ def _issue_jwt_response(user, redirect_url):
         settings.JWT_SECRET_KEY, algorithm='HS256'
     )
     response = redirect(redirect_url)
-    is_secure = not settings.DEBUG
+    is_secure = settings.JWT_COOKIE_SECURE
     response.set_cookie('access_token', access_token,
                         max_age=int(access_expiry.total_seconds()),
                         httponly=True, secure=is_secure, samesite='Lax')
@@ -835,25 +835,24 @@ def magic_verify_registration(request, token):
     otp.is_used = True
     otp.save(update_fields=['magic_token_used', 'is_used'])
 
-    # Activate account
+    # Activate account (email confirmed) — but verifying an email never grants
+    # the TA role. A TA account stays is_approved=False until an admin approves
+    # it. Only students are auto-logged-in here.
     user.is_active = True
     user.save(update_fields=['is_active'])
 
-    # Determine TA vs student and set up profile
     if hasattr(user, 'taprofile'):
-        try:
-            ta_prof = user.taprofile
-            ta_prof.is_approved = True
-            ta_prof.save(update_fields=['is_approved'])
-        except Exception:
-            pass
-        redirect_url = reverse('attendance:ta_dashboard')
-    else:
-        profile = getattr(user, 'userprofile', None)
-        if profile:
-            profile.email_verified = True
-            profile.save(update_fields=['email_verified'])
-        redirect_url = reverse('attendance:course_registration')
+        # Do NOT set is_approved and do NOT issue a login token. Show a
+        # "pending approval" page instead.
+        return render(request, 'attendance/magic_link_result.html', {
+            'state': 'ta_pending',
+        })
+
+    profile = getattr(user, 'userprofile', None)
+    if profile:
+        profile.email_verified = True
+        profile.save(update_fields=['email_verified'])
+    redirect_url = reverse('attendance:course_registration')
 
     return _issue_jwt_response(user, redirect_url)
 
@@ -2515,13 +2514,28 @@ def student_submit_ta_code(request):
 
 @login_required
 def ta_get_students_ajax(request):
-    """AJAX endpoint to get paginated students for a session"""
+    """AJAX endpoint to get paginated students for a session.
+
+    Restricted to approved TAs assigned to the session's level (and admins).
+    This endpoint returns student PII and live TA codes, so it must never be
+    reachable by students or unapproved/other-level TAs.
+    """
     session_id = request.GET.get('session_id')
     page = request.GET.get('page', 1)
     search = request.GET.get('search', '')
     status_filter = request.GET.get('status', 'all')
-    
+
     session = get_object_or_404(ClassSession, id=session_id)
+
+    # Authorization: admins pass; TAs must be approved AND assigned to the
+    # session's level. Everyone else (students, unapproved/other-level TAs) is
+    # denied before any roster or code data is assembled.
+    if not request.user.is_staff:
+        ta_profile = getattr(request.user, 'taprofile', None)
+        if ta_profile is None or not ta_profile.is_approved:
+            return JsonResponse({'error': 'Not authorized.'}, status=403)
+        if session.course.level_id not in ta_profile.assigned_levels.values_list('id', flat=True):
+            return JsonResponse({'error': 'You are not authorized for this session\'s level.'}, status=403)
 
     # All students at this course level, minus anyone explicitly deregistered
     # from this course (level-minus-deregistered).

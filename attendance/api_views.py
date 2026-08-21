@@ -1,7 +1,7 @@
-import random
-import string
+import secrets
 
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import status
@@ -20,9 +20,40 @@ from .models import OTPCode
 
 _OTP_SENT_MSG = "If that email is registered, an OTP has been sent."
 
+# Account-level brute-force lock: after this many bad guesses for a given
+# (user, purpose), all outstanding OTPs are invalidated so the attacker must
+# trigger a fresh send. This is keyed to the account, so it holds even if the
+# attacker rotates source IPs (which per-IP throttling alone would not stop).
+_MAX_OTP_ATTEMPTS = 5
+_OTP_ATTEMPT_TTL = 300  # seconds
+
+
+def _attempts_key(user, purpose):
+    return f"api_otp_attempts_{user.id}_{purpose}"
+
+
+def _register_failed_attempt(user, purpose):
+    """Count a failed OTP guess. When the cap is hit, burn outstanding OTPs.
+
+    Returns True if the account is now locked (caller should tell the user to
+    request a new code), else False.
+    """
+    key = _attempts_key(user, purpose)
+    attempts = cache.get(key, 0) + 1
+    if attempts >= _MAX_OTP_ATTEMPTS:
+        OTPCode.objects.filter(user=user, purpose=purpose, is_used=False).update(is_used=True)
+        cache.delete(key)
+        return True
+    cache.set(key, attempts, _OTP_ATTEMPT_TTL)
+    return False
+
+
+def _clear_failed_attempts(user, purpose):
+    cache.delete(_attempts_key(user, purpose))
+
 
 def _generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
+    return f"{secrets.randbelow(1000000):06d}"
 
 
 def _invalidate_previous_otps(user, purpose):
@@ -65,6 +96,7 @@ class LoginRequestView(APIView):
     """POST /api/auth/login/ — send a 6-digit OTP to the user's email."""
 
     permission_classes = [AllowAny]
+    throttle_scope = 'otp_request'
 
     def post(self, request):
         serializer = LoginRequestSerializer(data=request.data)
@@ -92,6 +124,7 @@ class VerifyOTPView(APIView):
     """POST /api/auth/verify-otp/ — verify OTP and return JWT tokens."""
 
     permission_classes = [AllowAny]
+    throttle_scope = 'otp_verify'
 
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -119,13 +152,16 @@ class VerifyOTPView(APIView):
         )
 
         if not otp_obj or otp_obj.is_expired():
-            return Response(
-                {"detail": "Invalid or expired OTP."},
-                status=status.HTTP_400_BAD_REQUEST,
+            locked = _register_failed_attempt(user, OTPCode.PURPOSE_LOGIN)
+            detail = (
+                "Too many failed attempts. Please request a new code."
+                if locked else "Invalid or expired OTP."
             )
+            return Response({"detail": detail}, status=status.HTTP_400_BAD_REQUEST)
 
         otp_obj.is_used = True
         otp_obj.save(update_fields=['is_used'])
+        _clear_failed_attempts(user, OTPCode.PURPOSE_LOGIN)
 
         refresh = RefreshToken.for_user(user)
         return Response(
@@ -147,6 +183,7 @@ class PasswordResetRequestView(APIView):
     """POST /api/auth/password-reset/ — send a password-reset OTP."""
 
     permission_classes = [AllowAny]
+    throttle_scope = 'otp_request'
 
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
@@ -174,6 +211,7 @@ class PasswordResetConfirmView(APIView):
     """POST /api/auth/password-reset/confirm/ — verify OTP and set new password."""
 
     permission_classes = [AllowAny]
+    throttle_scope = 'otp_verify'
 
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -202,13 +240,16 @@ class PasswordResetConfirmView(APIView):
         )
 
         if not otp_obj or otp_obj.is_expired():
-            return Response(
-                {"detail": "Invalid or expired OTP."},
-                status=status.HTTP_400_BAD_REQUEST,
+            locked = _register_failed_attempt(user, OTPCode.PURPOSE_PASSWORD_RESET)
+            detail = (
+                "Too many failed attempts. Please request a new code."
+                if locked else "Invalid or expired OTP."
             )
+            return Response({"detail": detail}, status=status.HTTP_400_BAD_REQUEST)
 
         otp_obj.is_used = True
         otp_obj.save(update_fields=['is_used'])
+        _clear_failed_attempts(user, OTPCode.PURPOSE_PASSWORD_RESET)
 
         user.set_password(new_password)
         user.save(update_fields=['password'])

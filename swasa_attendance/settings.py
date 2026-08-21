@@ -97,6 +97,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Rate limiting. The unauthenticated OTP endpoints are the main brute-force
+    # surface, so they get their own tighter scopes (applied per-view).
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/hour',
+        'user': '1000/hour',
+        'otp_request': '10/hour',   # requesting an OTP be emailed
+        'otp_verify': '15/hour',    # submitting an OTP guess
+    },
 }
 
 ROOT_URLCONF = 'swasa_attendance.urls'
@@ -226,9 +239,33 @@ CSRF_TRUSTED_ORIGINS = [
     'http://*.ngrok-free.dev',     # Added for ngrok
 ]
 
-# Cookie settings — driven by environment so production HTTPS gets True automatically
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
+# Cookie / transport security.
+#
+# These default to `not DEBUG`, but are ALSO independently overridable via the
+# SECURE_COOKIES env var so a production box can force secure cookies on even if
+# DEBUG were ever misconfigured. The whole transport posture no longer hinges on
+# a single flag. In production set SECURE_COOKIES=True explicitly.
+SECURE_COOKIES = config('SECURE_COOKIES', default=not DEBUG, cast=bool)
+
+CSRF_COOKIE_SECURE = SECURE_COOKIES
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+# Read by the custom JWT-cookie login views to set the `secure` flag on the
+# access/refresh cookies (keeps them aligned with the session/CSRF cookies).
+JWT_COOKIE_SECURE = SECURE_COOKIES
+
+# Fail fast on an insecure production configuration: if DEBUG is off, refuse to
+# boot a real server with insecure cookies. Dev commands are exempt so local
+# work over plain HTTP still runs.
+if not DEBUG and not SECURE_COOKIES:
+    _is_dev_command = any(
+        a in sys.argv
+        for a in ['runserver', 'test', 'shell', 'migrate', 'makemigrations', 'collectstatic', 'check']
+    )
+    if not _is_dev_command:
+        raise RuntimeError(
+            "Insecure configuration: DEBUG=False but SECURE_COOKIES=False. "
+            "Set SECURE_COOKIES=True (or DJANGO_DEBUG=True for local dev)."
+        )
 
 # ========== EMAIL CONFIGURATION ==========
 # Credentials are read from .env via python-decouple.

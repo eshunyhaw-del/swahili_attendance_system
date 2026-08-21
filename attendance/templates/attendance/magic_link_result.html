@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
         {% if state == 'verified' %}Account Verified
+        {% elif state == 'ta_pending' %}Pending Approval
         {% elif state == 'already_used' %}Already Verified
         {% elif state == 'expired' %}Link Expired
         {% else %}Invalid Link
@@ -74,6 +75,13 @@
 <h1>Account Verified!</h1>
 <p>Redirecting you now&hellip;</p>
 
+        {% elif state == 'ta_pending' %}
+<div class="icon-wrap gold">
+<span class="iconify" data-icon="mdi:account-clock-outline"></span>
+</div>
+<h1>Email Verified</h1>
+<p>Your TA account is pending approval</p>
+
         {% elif state == 'already_used' %}
 <div class="icon-wrap gold">
 <span class="iconify" data-icon="mdi:check-decagram-outline"></span>
@@ -98,7 +106,14 @@
 </div>
 
 <div class="card-body">
-        {% if state == 'already_used' %}
+        {% if state == 'ta_pending' %}
+<p>Thanks — your email address is confirmed. An admin will review your TA application and approve your account. You'll be able to log in once it's approved.</p>
+<a href="{% url 'login' %}" class="btn btn-primary">
+<span class="iconify" data-icon="mdi:login"></span>
+            Go to Login
+</a>
+
+        {% elif state == 'already_used' %}
 <p>Your account is already active. Log in to continue.</p>
 <a href="{% url 'login' %}" class="btn btn-primary">
 <span class="iconify" data-icon="mdi:login"></span>
