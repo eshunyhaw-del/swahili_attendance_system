@@ -240,6 +240,32 @@ class SWASAEventAdmin(admin.ModelAdmin):
         if obj.created_by_id is None:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+        # Push the event into everyone's notification bell when it's published —
+        # on creation, or when is_published is switched on. Without this an event
+        # only ever appears on the community page and no one is alerted.
+        newly_published = obj.is_published and (not change or 'is_published' in form.changed_data)
+        if newly_published:
+            self._broadcast_event(request, obj)
+
+    def _broadcast_event(self, request, event):
+        from django.contrib.auth.models import User
+        emoji = {'event': '📅', 'news': '📰', 'announcement': '📢'}.get(event.event_type, '📢')
+        label = event.get_event_type_display()
+        title = f"{label}: {event.title}"[:200]
+        message = event.description if len(event.description) <= 240 else event.description[:237] + '…'
+        recipients = User.objects.filter(is_active=True).only('id')
+        SystemNotification.objects.bulk_create(
+            [
+                SystemNotification(
+                    user=u, title=title, message=message, emoji=emoji,
+                    notification_type=SystemNotification.TYPE_SYSTEM,
+                )
+                for u in recipients
+            ],
+            batch_size=500,
+        )
+        self.message_user(request, f'Notified {recipients.count()} users about this {label.lower()}.')
     fieldsets = (
         ('Content', {
             'fields': ('title', 'description', 'event_type', 'image_url'),
