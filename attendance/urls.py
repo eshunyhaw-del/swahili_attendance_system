@@ -34,8 +34,6 @@ urlpatterns = [
     path("otp/password-reset/set-password/", views.otp_set_password, name="otp_set_password"),
     
     # AJAX endpoints
-    path("generate-code/", views.generate_code, name="generate_code"),
-    path("submit-attendance/", views.submit_attendance, name="submit_attendance"),
     path("submit-ta-code/", views.student_submit_ta_code, name="student_submit_ta_code"),
     path("ta/get-students-ajax/", views.ta_get_students_ajax, name="ta_get_students_ajax"),
     

@@ -124,6 +124,28 @@ class TASelfApprovalTests(TestCase):
         self.assertNotIn("access_token", resp.cookies)
 
 
+class LoginRateLimitTests(TestCase):
+    """H-4: repeated failed logins for the same email get rate-limited."""
+
+    def setUp(self):
+        cache.clear()
+        self.url = reverse('login')
+
+    def test_repeated_failures_are_throttled(self):
+        # 5 wrong attempts for one email are allowed (each returns the generic
+        # invalid-credentials page); the 6th is blocked with a throttle message.
+        for _ in range(5):
+            resp = self.client.post(self.url, {
+                'email': 'nobody@example.com', 'password': 'wrong',
+            })
+            self.assertNotContains(resp, 'Too many failed sign-in attempts', status_code=200)
+
+        resp = self.client.post(self.url, {
+            'email': 'nobody@example.com', 'password': 'wrong',
+        })
+        self.assertContains(resp, 'Too many failed sign-in attempts', status_code=200)
+
+
 class APIOTPBruteForceTests(TestCase):
     """C-3: the API OTP verify endpoint must lock the account after repeated
     bad guesses instead of allowing unlimited attempts."""

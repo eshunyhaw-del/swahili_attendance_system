@@ -51,6 +51,47 @@ def get_profile(user):
         return None
 
 
+# ── Rate limiting (cache-based, no extra dependency) ──────────────────────────
+#
+# A simple fixed-window counter keyed in the cache. Used to blunt password
+# brute force / spraying on login and email-send abuse on the OTP-request and
+# registration endpoints. NOTE: the default cache is LocMemCache (per-process),
+# so under multiple workers these limits are per-worker — good enough as a
+# speed bump, but move to a shared cache (Redis/DB) for authoritative limits.
+
+def _client_ip(request):
+    """Best-effort client IP. Uses the first X-Forwarded-For hop behind a proxy
+    (PythonAnywhere), else REMOTE_ADDR."""
+    xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '') or 'unknown'
+
+
+def _rate_is_over(bucket, identifier, limit):
+    """True if this (bucket, identifier) has already reached `limit` hits in the
+    current window. Read-only — does not count a hit."""
+    from django.core.cache import cache
+    return cache.get(f"rl_{bucket}_{identifier}", 0) >= limit
+
+
+def _rate_hit(bucket, identifier, window):
+    """Record one hit for (bucket, identifier), starting/keeping a `window`-second
+    fixed window."""
+    from django.core.cache import cache
+    key = f"rl_{bucket}_{identifier}"
+    if not cache.add(key, 1, window):   # key already exists → increment
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, window)
+
+
+def _rate_clear(bucket, identifier):
+    from django.core.cache import cache
+    cache.delete(f"rl_{bucket}_{identifier}")
+
+
 # ── Course registration helpers (soft deregister) ─────────────────────────────
 
 def active_courses(profile):
@@ -316,6 +357,17 @@ def token_login_view(request):
         password = request.POST.get('password', '').strip()
         remember_me = request.POST.get('remember_me')
 
+        # Rate limit failed logins to blunt brute force / password spraying:
+        # per source IP (10 fails / 15 min) and per targeted email (5 / 15 min).
+        ip = _client_ip(request)
+        _RL_WINDOW = 900
+        if _rate_is_over('login_ip', ip, 10) or (email and _rate_is_over('login_email', email, 5)):
+            return render(request, 'attendance/login.html', {
+                'login_error': True,
+                'login_error_message': 'Too many failed sign-in attempts. Please wait a few minutes and try again.',
+                'next': request.POST.get('next', ''),
+            })
+
         # Look up user by email, then authenticate with their username
         user = None
         try:
@@ -325,6 +377,10 @@ def token_login_view(request):
             pass
 
         if user is not None and user.is_active:
+            # Successful login — clear this identity's failure counters.
+            _rate_clear('login_ip', ip)
+            if email:
+                _rate_clear('login_email', email)
             next_url = request.POST.get('next', '').strip()
             if not next_url or not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
                 if user.is_staff:
@@ -359,6 +415,11 @@ def token_login_view(request):
                                 httponly=True, secure=is_secure, samesite='Lax')
             return response
 
+        # Failed attempt — count it against both the IP and the email.
+        _rate_hit('login_ip', ip, _RL_WINDOW)
+        if email:
+            _rate_hit('login_email', email, _RL_WINDOW)
+
         return render(request, 'attendance/login.html', {
             'login_error': True,
             'next': request.POST.get('next', ''),
@@ -383,6 +444,12 @@ def register(request):
         return redirect("attendance:dashboard")
 
     if request.method == "POST":
+        # Throttle registration email sends per IP (account-creation / mail abuse).
+        ip = _client_ip(request)
+        if _rate_is_over('register_ip', ip, 5):
+            messages.error(request, "Too many sign-up attempts from this device. Please wait a few minutes and try again.")
+            return render(request, "attendance/register.html", {"form": StudentRegistrationForm()})
+
         form = StudentRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -392,6 +459,7 @@ def register(request):
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")
                 return render(request, "attendance/register.html", {"form": form})
+            _rate_hit('register_ip', ip, 900)
             request.session['pending_reg_user_id'] = user.id
             request.session['pending_reg_type'] = 'student'
             return redirect("attendance:otp_verify_registration")
@@ -423,6 +491,7 @@ def register(request):
                     generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
                 except Exception:
                     pass
+                _rate_hit('register_ip', ip, 900)
                 request.session['pending_reg_user_id'] = unverified_user.id
                 request.session['pending_reg_type'] = 'student'
                 messages.success(
@@ -694,12 +763,18 @@ def otp_verify_login(request):
 def otp_password_reset_request(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-        try:
-            user = User.objects.get(email__iexact=email, is_active=True)
-            generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
-            request.session['reset_pending_user_id'] = user.id
-        except User.DoesNotExist:
-            pass
+        # Throttle reset-email sends per IP to prevent mailbox flooding / SMTP
+        # quota abuse. Over the limit we still redirect (no email enumeration)
+        # but skip the send.
+        ip = _client_ip(request)
+        if not _rate_is_over('pwreset_ip', ip, 5):
+            try:
+                user = User.objects.get(email__iexact=email, is_active=True)
+                generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
+                request.session['reset_pending_user_id'] = user.id
+            except User.DoesNotExist:
+                pass
+            _rate_hit('pwreset_ip', ip, 900)
         # Always redirect — don't reveal whether the email exists
         return redirect(reverse('attendance:otp_verify_password_reset'))
 
@@ -1165,85 +1240,6 @@ def dashboard(request):
     return render(request, "attendance/dashboard.html", {
         "course_data": course_data,
     })
-
-
-# ── AJAX: Generate Code ───────────────────────────────────────────────────────
-
-@login_required
-@require_POST
-def generate_code(request):
-    session_id = request.POST.get("session_id")
-    session = get_object_or_404(ClassSession, id=session_id)
-
-    if AttendanceRecord.objects.filter(student=request.user, class_session=session).exists():
-        return JsonResponse({"error": "Attendance already submitted for this session."}, status=400)
-
-    existing = AttendanceCode.objects.filter(student=request.user, class_session=session).first()
-    if existing:
-        existing.delete()
-
-    code_obj = AttendanceCode.objects.create(
-        student=request.user,
-        class_session=session,
-    )
-
-    return JsonResponse({
-        "code": code_obj.code_string,
-        "expires_at": code_obj.expires_at.isoformat(),
-        "already_existed": False,
-    })
-
-
-# ── AJAX: Submit Attendance ───────────────────────────────────────────────────
-
-@login_required
-@require_POST
-def submit_attendance(request):
-    session_id = request.POST.get("session_id")
-    entered_code = request.POST.get("code", "").strip().upper()
-    
-    session = get_object_or_404(ClassSession, id=session_id)
-
-    if AttendanceRecord.objects.filter(student=request.user, class_session=session).exists():
-        return JsonResponse({"error": "Attendance already submitted."}, status=400)
-
-    try:
-        code_obj = AttendanceCode.objects.get(code_string=entered_code)
-    except AttendanceCode.DoesNotExist:
-        return JsonResponse({"error": "Invalid code. Please generate your own code first."}, status=400)
-
-    if code_obj.class_session != session:
-        CodeMisuseAlert.objects.create(
-            code=code_obj,
-            attempted_by=request.user,
-            reason=f"Student {request.user.username} submitted code for session {code_obj.class_session_id} against session {session.id}"
-        )
-        return JsonResponse({"error": "This code is not valid for this session."}, status=400)
-
-    if code_obj.student != request.user:
-        CodeMisuseAlert.objects.create(
-            code=code_obj,
-            attempted_by=request.user,
-            reason=f"Student {request.user.username} tried to use code belonging to {code_obj.student.username}"
-        )
-        return JsonResponse({"error": "This code belongs to another student. You must generate your own code."}, status=400)
-
-    can_use, message = code_obj.can_use()
-    if not can_use:
-        return JsonResponse({"error": message}, status=400)
-
-    ip_address = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")).split(",")[0].strip()
-    AttendanceRecord.objects.create(
-        student=request.user,
-        class_session=session,
-        code=code_obj,
-        ip_address=ip_address or None,
-        user_agent=request.META.get("HTTP_USER_AGENT", ""),
-    )
-    code_obj.used_at = timezone.now()
-    code_obj.save()
-
-    return JsonResponse({"success": True})
 
 
 # ── Support Ticket ───────────────────────────────────────────────────────────
@@ -2115,6 +2111,12 @@ def ta_register(request):
         return redirect("attendance:dashboard")
 
     if request.method == "POST":
+        # Throttle registration email sends per IP (account-creation / mail abuse).
+        ip = _client_ip(request)
+        if _rate_is_over('register_ip', ip, 5):
+            messages.error(request, "Too many sign-up attempts from this device. Please wait a few minutes and try again.")
+            return render(request, "attendance/ta_register.html", {"form": TARegistrationForm()})
+
         form = TARegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -2124,6 +2126,7 @@ def ta_register(request):
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")
                 return render(request, "attendance/ta_register.html", {"form": form})
+            _rate_hit('register_ip', ip, 900)
             request.session['pending_reg_user_id'] = user.id
             request.session['pending_reg_type'] = 'ta'
             return redirect("attendance:otp_verify_registration")
