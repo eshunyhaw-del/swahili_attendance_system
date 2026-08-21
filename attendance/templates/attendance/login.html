@@ -267,7 +267,7 @@
         {% if login_error %}
 <div class="error-banner">
 <span class="iconify" data-icon="mdi:alert-circle-outline"></span>
-            Invalid email or password. Please check and try again.
+            {{ login_error_message|default:"Invalid email or password. Please check and try again." }}
 </div>
         {% endif %}
 

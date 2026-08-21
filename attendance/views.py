@@ -2,7 +2,6 @@ import csv
 import string
 import secrets
 import uuid
-import jwt
 from collections import defaultdict
 from datetime import timedelta, datetime
 
@@ -28,6 +27,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from .forms import StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm, TARegistrationForm
+from .tokens import set_auth_cookies
 from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
@@ -49,6 +49,47 @@ def get_profile(user):
         return user.userprofile
     except UserProfile.DoesNotExist:
         return None
+
+
+# ── Rate limiting (cache-based, no extra dependency) ──────────────────────────
+#
+# A simple fixed-window counter keyed in the cache. Used to blunt password
+# brute force / spraying on login and email-send abuse on the OTP-request and
+# registration endpoints. NOTE: the default cache is LocMemCache (per-process),
+# so under multiple workers these limits are per-worker — good enough as a
+# speed bump, but move to a shared cache (Redis/DB) for authoritative limits.
+
+def _client_ip(request):
+    """Best-effort client IP. Uses the first X-Forwarded-For hop behind a proxy
+    (PythonAnywhere), else REMOTE_ADDR."""
+    xff = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '') or 'unknown'
+
+
+def _rate_is_over(bucket, identifier, limit):
+    """True if this (bucket, identifier) has already reached `limit` hits in the
+    current window. Read-only — does not count a hit."""
+    from django.core.cache import cache
+    return cache.get(f"rl_{bucket}_{identifier}", 0) >= limit
+
+
+def _rate_hit(bucket, identifier, window):
+    """Record one hit for (bucket, identifier), starting/keeping a `window`-second
+    fixed window."""
+    from django.core.cache import cache
+    key = f"rl_{bucket}_{identifier}"
+    if not cache.add(key, 1, window):   # key already exists → increment
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, window)
+
+
+def _rate_clear(bucket, identifier):
+    from django.core.cache import cache
+    cache.delete(f"rl_{bucket}_{identifier}")
 
 
 # ── Course registration helpers (soft deregister) ─────────────────────────────
@@ -157,12 +198,34 @@ def create_notification(recipient, message, link=''):
     Notification.objects.create(recipient=recipient, message=message, link=link)
 
 
-def send_ta_approval_email(ta_profile):
+def _absolute_url(path, request=None):
+    """Turn a reverse()'d path into an absolute URL for use inside emails.
+
+    Emails have no base URL, so a bare path like ``/ta/dashboard/`` renders as
+    ``http:///ta/dashboard/`` (empty host) in mail clients. Use the request host
+    when we have one (correct locally AND in production); otherwise fall back to
+    the configured SITE_URL.
+    """
+    if request is not None:
+        return request.build_absolute_uri(path)
+    site_url = getattr(settings, 'SITE_URL', 'https://ebenezer.pythonanywhere.com').rstrip('/')
+    return f"{site_url}{path}"
+
+
+def send_ta_approval_email(ta_profile, request=None):
+    """Email a TA that their account was approved. Returns True on success.
+
+    Never raises — a mail failure must not roll back the approval itself — but
+    the boolean lets callers (e.g. the admin) tell the approver whether the
+    notification actually went out.
+    """
+    if not ta_profile.user.email:
+        return False
     try:
         html_message = render_to_string('attendance/ta_approval_email.html', {
             'ta_profile': ta_profile,
-            'login_url': reverse('login'),
-            'dashboard_url': reverse('attendance:ta_dashboard'),
+            'login_url': _absolute_url(reverse('login'), request),
+            'dashboard_url': _absolute_url(reverse('attendance:ta_dashboard'), request),
         })
         send_mail(
             subject='Your TA Account Approved - SWASA Attendance',
@@ -170,10 +233,11 @@ def send_ta_approval_email(ta_profile):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[ta_profile.user.email],
             html_message=html_message,
-            fail_silently=True,
+            fail_silently=False,
         )
+        return True
     except Exception:
-        pass
+        return False
 
 
 def send_ta_rejection_email(ta_profile):
@@ -293,6 +357,17 @@ def token_login_view(request):
         password = request.POST.get('password', '').strip()
         remember_me = request.POST.get('remember_me')
 
+        # Rate limit failed logins to blunt brute force / password spraying:
+        # per source IP (10 fails / 15 min) and per targeted email (5 / 15 min).
+        ip = _client_ip(request)
+        _RL_WINDOW = 900
+        if _rate_is_over('login_ip', ip, 10) or (email and _rate_is_over('login_email', email, 5)):
+            return render(request, 'attendance/login.html', {
+                'login_error': True,
+                'login_error_message': 'Too many failed sign-in attempts. Please wait a few minutes and try again.',
+                'next': request.POST.get('next', ''),
+            })
+
         # Look up user by email, then authenticate with their username
         user = None
         try:
@@ -302,6 +377,10 @@ def token_login_view(request):
             pass
 
         if user is not None and user.is_active:
+            # Successful login — clear this identity's failure counters.
+            _rate_clear('login_ip', ip)
+            if email:
+                _rate_clear('login_email', email)
             next_url = request.POST.get('next', '').strip()
             if not next_url or not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
                 if user.is_staff:
@@ -311,30 +390,13 @@ def token_login_view(request):
                 else:
                     next_url = reverse('attendance:dashboard')
 
-            access_expiry = timedelta(days=30 if remember_me else 1)
-            refresh_expiry = timedelta(days=60 if remember_me else 7)
-            now = datetime.utcnow()
-
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-
             response = redirect(next_url)
-            is_secure = not settings.DEBUG
-            response.set_cookie('access_token', access_token,
-                                max_age=int(access_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            response.set_cookie('refresh_token', refresh_token,
-                                max_age=int(refresh_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            return response
+            return set_auth_cookies(response, user, remember_me=bool(remember_me))
+
+        # Failed attempt — count it against both the IP and the email.
+        _rate_hit('login_ip', ip, _RL_WINDOW)
+        if email:
+            _rate_hit('login_email', email, _RL_WINDOW)
 
         return render(request, 'attendance/login.html', {
             'login_error': True,
@@ -360,6 +422,12 @@ def register(request):
         return redirect("attendance:dashboard")
 
     if request.method == "POST":
+        # Throttle registration email sends per IP (account-creation / mail abuse).
+        ip = _client_ip(request)
+        if _rate_is_over('register_ip', ip, 5):
+            messages.error(request, "Too many sign-up attempts from this device. Please wait a few minutes and try again.")
+            return render(request, "attendance/register.html", {"form": StudentRegistrationForm()})
+
         form = StudentRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -369,6 +437,7 @@ def register(request):
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")
                 return render(request, "attendance/register.html", {"form": form})
+            _rate_hit('register_ip', ip, 900)
             request.session['pending_reg_user_id'] = user.id
             request.session['pending_reg_type'] = 'student'
             return redirect("attendance:otp_verify_registration")
@@ -400,6 +469,7 @@ def register(request):
                     generate_and_send_otp(unverified_user, OTPCode.PURPOSE_REGISTRATION, expiry_minutes=10, request=request)
                 except Exception:
                     pass
+                _rate_hit('register_ip', ip, 900)
                 request.session['pending_reg_user_id'] = unverified_user.id
                 request.session['pending_reg_type'] = 'student'
                 messages.success(
@@ -518,39 +588,25 @@ def otp_verify_registration(request):
             user.is_active = True
             user.save()
 
-            if reg_type == 'ta':
-                try:
-                    ta_prof = user.taprofile
-                    ta_prof.is_approved = True
-                    ta_prof.save()
-                except Exception:
-                    pass
-                redirect_url = reverse('attendance:ta_dashboard')
-            else:
-                profile = getattr(user, 'userprofile', None)
-                if profile:
-                    profile.email_verified = True
-                    profile.save()
-                redirect_url = reverse('attendance:course_registration')
-
             request.session.pop('pending_reg_user_id', None)
             request.session.pop('pending_reg_type', None)
 
-            # Issue JWT so user is immediately logged in after redirect
-            access_expiry = timedelta(days=1)
-            refresh_expiry = timedelta(days=7)
-            now = datetime.utcnow()
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
+            if reg_type == 'ta':
+                # Email verification proves the address — it does NOT grant the
+                # TA role. TA accounts stay is_approved=False until an admin
+                # approves them via the pending-TAs page. Do not issue a login
+                # token here; show a "pending approval" result instead.
+                return render(request, 'attendance/magic_link_result.html', {
+                    'state': 'ta_pending',
+                })
 
+            profile = getattr(user, 'userprofile', None)
+            if profile:
+                profile.email_verified = True
+                profile.save()
+            redirect_url = reverse('attendance:course_registration')
+
+            # Log the user in immediately after verification.
             context = {
                 'email': user.email,
                 'purpose': 'registration',
@@ -560,14 +616,7 @@ def otp_verify_registration(request):
                 'redirect_url': redirect_url,
             }
             resp = render(request, 'attendance/otp_verify.html', context)
-            is_secure = not settings.DEBUG
-            resp.set_cookie('access_token', access_token,
-                            max_age=int(access_expiry.total_seconds()),
-                            httponly=True, secure=is_secure, samesite='Lax')
-            resp.set_cookie('refresh_token', refresh_token,
-                            max_age=int(refresh_expiry.total_seconds()),
-                            httponly=True, secure=is_secure, samesite='Lax')
-            return resp
+            return set_auth_cookies(resp, user)
 
     return render(request, 'attendance/otp_verify.html', {
         'email': user.email,
@@ -633,30 +682,8 @@ def otp_verify_login(request):
             remember_me = request.session.pop('login_remember_me', False)
             request.session.pop('login_pending_user_id', None)
 
-            access_expiry = timedelta(days=30 if remember_me else 1)
-            refresh_expiry = timedelta(days=60 if remember_me else 7)
-            now = datetime.utcnow()
-
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-
             response = redirect(next_url)
-            is_secure = not settings.DEBUG
-            response.set_cookie('access_token', access_token,
-                                max_age=int(access_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            response.set_cookie('refresh_token', refresh_token,
-                                max_age=int(refresh_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            return response
+            return set_auth_cookies(response, user, remember_me=bool(remember_me))
 
     return render(request, 'attendance/otp_verify.html', {
         'email': user.email,
@@ -671,12 +698,18 @@ def otp_verify_login(request):
 def otp_password_reset_request(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-        try:
-            user = User.objects.get(email__iexact=email, is_active=True)
-            generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
-            request.session['reset_pending_user_id'] = user.id
-        except User.DoesNotExist:
-            pass
+        # Throttle reset-email sends per IP to prevent mailbox flooding / SMTP
+        # quota abuse. Over the limit we still redirect (no email enumeration)
+        # but skip the send.
+        ip = _client_ip(request)
+        if not _rate_is_over('pwreset_ip', ip, 5):
+            try:
+                user = User.objects.get(email__iexact=email, is_active=True)
+                generate_and_send_otp(user, OTPCode.PURPOSE_PASSWORD_RESET, expiry_minutes=5, request=request)
+                request.session['reset_pending_user_id'] = user.id
+            except User.DoesNotExist:
+                pass
+            _rate_hit('pwreset_ip', ip, 900)
         # Always redirect — don't reveal whether the email exists
         return redirect(reverse('attendance:otp_verify_password_reset'))
 
@@ -784,28 +817,8 @@ def otp_set_password(request):
 
 def _issue_jwt_response(user, redirect_url):
     """Return a redirect response with fresh JWT access+refresh cookies."""
-    access_expiry  = timedelta(days=1)
-    refresh_expiry = timedelta(days=7)
-    now = datetime.utcnow()
-    access_token = jwt.encode(
-        {'user_id': user.id, 'username': user.username,
-         'exp': now + access_expiry, 'iat': now},
-        settings.JWT_SECRET_KEY, algorithm='HS256'
-    )
-    refresh_token = jwt.encode(
-        {'user_id': user.id, 'type': 'refresh',
-         'exp': now + refresh_expiry, 'iat': now},
-        settings.JWT_SECRET_KEY, algorithm='HS256'
-    )
     response = redirect(redirect_url)
-    is_secure = not settings.DEBUG
-    response.set_cookie('access_token', access_token,
-                        max_age=int(access_expiry.total_seconds()),
-                        httponly=True, secure=is_secure, samesite='Lax')
-    response.set_cookie('refresh_token', refresh_token,
-                        max_age=int(refresh_expiry.total_seconds()),
-                        httponly=True, secure=is_secure, samesite='Lax')
-    return response
+    return set_auth_cookies(response, user)
 
 
 def magic_verify_registration(request, token):
@@ -835,25 +848,24 @@ def magic_verify_registration(request, token):
     otp.is_used = True
     otp.save(update_fields=['magic_token_used', 'is_used'])
 
-    # Activate account
+    # Activate account (email confirmed) — but verifying an email never grants
+    # the TA role. A TA account stays is_approved=False until an admin approves
+    # it. Only students are auto-logged-in here.
     user.is_active = True
     user.save(update_fields=['is_active'])
 
-    # Determine TA vs student and set up profile
     if hasattr(user, 'taprofile'):
-        try:
-            ta_prof = user.taprofile
-            ta_prof.is_approved = True
-            ta_prof.save(update_fields=['is_approved'])
-        except Exception:
-            pass
-        redirect_url = reverse('attendance:ta_dashboard')
-    else:
-        profile = getattr(user, 'userprofile', None)
-        if profile:
-            profile.email_verified = True
-            profile.save(update_fields=['email_verified'])
-        redirect_url = reverse('attendance:course_registration')
+        # Do NOT set is_approved and do NOT issue a login token. Show a
+        # "pending approval" page instead.
+        return render(request, 'attendance/magic_link_result.html', {
+            'state': 'ta_pending',
+        })
+
+    profile = getattr(user, 'userprofile', None)
+    if profile:
+        profile.email_verified = True
+        profile.save(update_fields=['email_verified'])
+    redirect_url = reverse('attendance:course_registration')
 
     return _issue_jwt_response(user, redirect_url)
 
@@ -1143,85 +1155,6 @@ def dashboard(request):
     return render(request, "attendance/dashboard.html", {
         "course_data": course_data,
     })
-
-
-# ── AJAX: Generate Code ───────────────────────────────────────────────────────
-
-@login_required
-@require_POST
-def generate_code(request):
-    session_id = request.POST.get("session_id")
-    session = get_object_or_404(ClassSession, id=session_id)
-
-    if AttendanceRecord.objects.filter(student=request.user, class_session=session).exists():
-        return JsonResponse({"error": "Attendance already submitted for this session."}, status=400)
-
-    existing = AttendanceCode.objects.filter(student=request.user, class_session=session).first()
-    if existing:
-        existing.delete()
-
-    code_obj = AttendanceCode.objects.create(
-        student=request.user,
-        class_session=session,
-    )
-
-    return JsonResponse({
-        "code": code_obj.code_string,
-        "expires_at": code_obj.expires_at.isoformat(),
-        "already_existed": False,
-    })
-
-
-# ── AJAX: Submit Attendance ───────────────────────────────────────────────────
-
-@login_required
-@require_POST
-def submit_attendance(request):
-    session_id = request.POST.get("session_id")
-    entered_code = request.POST.get("code", "").strip().upper()
-    
-    session = get_object_or_404(ClassSession, id=session_id)
-
-    if AttendanceRecord.objects.filter(student=request.user, class_session=session).exists():
-        return JsonResponse({"error": "Attendance already submitted."}, status=400)
-
-    try:
-        code_obj = AttendanceCode.objects.get(code_string=entered_code)
-    except AttendanceCode.DoesNotExist:
-        return JsonResponse({"error": "Invalid code. Please generate your own code first."}, status=400)
-
-    if code_obj.class_session != session:
-        CodeMisuseAlert.objects.create(
-            code=code_obj,
-            attempted_by=request.user,
-            reason=f"Student {request.user.username} submitted code for session {code_obj.class_session_id} against session {session.id}"
-        )
-        return JsonResponse({"error": "This code is not valid for this session."}, status=400)
-
-    if code_obj.student != request.user:
-        CodeMisuseAlert.objects.create(
-            code=code_obj,
-            attempted_by=request.user,
-            reason=f"Student {request.user.username} tried to use code belonging to {code_obj.student.username}"
-        )
-        return JsonResponse({"error": "This code belongs to another student. You must generate your own code."}, status=400)
-
-    can_use, message = code_obj.can_use()
-    if not can_use:
-        return JsonResponse({"error": message}, status=400)
-
-    ip_address = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", "")).split(",")[0].strip()
-    AttendanceRecord.objects.create(
-        student=request.user,
-        class_session=session,
-        code=code_obj,
-        ip_address=ip_address or None,
-        user_agent=request.META.get("HTTP_USER_AGENT", ""),
-    )
-    code_obj.used_at = timezone.now()
-    code_obj.save()
-
-    return JsonResponse({"success": True})
 
 
 # ── Support Ticket ───────────────────────────────────────────────────────────
@@ -1647,7 +1580,7 @@ def pending_tas(request):
                 ta_profile.approved_at = timezone.now()
                 ta_profile.approval_notes = request.POST.get('approval_notes', '')
                 ta_profile.save()
-                send_ta_approval_email(ta_profile)
+                send_ta_approval_email(ta_profile, request=request)
                 messages.success(request, f"TA {ta_profile.user.get_full_name() or ta_profile.user.username} approved successfully.")
             except Exception:
                 messages.error(request, "Approval failed — please try again.")
@@ -2093,6 +2026,12 @@ def ta_register(request):
         return redirect("attendance:dashboard")
 
     if request.method == "POST":
+        # Throttle registration email sends per IP (account-creation / mail abuse).
+        ip = _client_ip(request)
+        if _rate_is_over('register_ip', ip, 5):
+            messages.error(request, "Too many sign-up attempts from this device. Please wait a few minutes and try again.")
+            return render(request, "attendance/ta_register.html", {"form": TARegistrationForm()})
+
         form = TARegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -2102,6 +2041,7 @@ def ta_register(request):
                 user.delete()
                 messages.error(request, "Could not send verification email. Please try again.")
                 return render(request, "attendance/ta_register.html", {"form": form})
+            _rate_hit('register_ip', ip, 900)
             request.session['pending_reg_user_id'] = user.id
             request.session['pending_reg_type'] = 'ta'
             return redirect("attendance:otp_verify_registration")
@@ -2350,13 +2290,13 @@ def ta_generate_code(request):
                 "existing": True
             })
     
-    # Generate unique 2-5 digit code
+    # Generate a unique 6-digit code (1,000,000 space per session — no practical
+    # guessing/collision risk, unlike the old 2–5 digit codes).
     while True:
-        code_length = secrets.choice([2, 3, 4, 5])
-        code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
+        code = f"{secrets.randbelow(1000000):06d}"
         if not TACode.objects.filter(code=code, class_session=session).exists():
             break
-    
+
     ta_code = TACode.objects.create(
         code=code,
         student=student,
@@ -2411,13 +2351,12 @@ def ta_generate_all_codes(request):
                 skipped_count += 1
             continue
 
-        # Generate unique code
+        # Generate a unique 6-digit code (see ta_generate_code).
         while True:
-            code_length = secrets.choice([2, 3, 4, 5])
-            code = ''.join([str(secrets.randbelow(10)) for _ in range(code_length)])
+            code = f"{secrets.randbelow(1000000):06d}"
             if not TACode.objects.filter(code=code, class_session=session).exists():
                 break
-        
+
         TACode.objects.create(
             code=code,
             student=student_profile.user,
@@ -2515,13 +2454,28 @@ def student_submit_ta_code(request):
 
 @login_required
 def ta_get_students_ajax(request):
-    """AJAX endpoint to get paginated students for a session"""
+    """AJAX endpoint to get paginated students for a session.
+
+    Restricted to approved TAs assigned to the session's level (and admins).
+    This endpoint returns student PII and live TA codes, so it must never be
+    reachable by students or unapproved/other-level TAs.
+    """
     session_id = request.GET.get('session_id')
     page = request.GET.get('page', 1)
     search = request.GET.get('search', '')
     status_filter = request.GET.get('status', 'all')
-    
+
     session = get_object_or_404(ClassSession, id=session_id)
+
+    # Authorization: admins pass; TAs must be approved AND assigned to the
+    # session's level. Everyone else (students, unapproved/other-level TAs) is
+    # denied before any roster or code data is assembled.
+    if not request.user.is_staff:
+        ta_profile = getattr(request.user, 'taprofile', None)
+        if ta_profile is None or not ta_profile.is_approved:
+            return JsonResponse({'error': 'Not authorized.'}, status=403)
+        if session.course.level_id not in ta_profile.assigned_levels.values_list('id', flat=True):
+            return JsonResponse({'error': 'You are not authorized for this session\'s level.'}, status=403)
 
     # All students at this course level, minus anyone explicitly deregistered
     # from this course (level-minus-deregistered).
@@ -2627,7 +2581,8 @@ def ta_change_password(request):
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
             messages.success(request, "Password changed successfully!")
-            return redirect('attendance:ta_dashboard')
+            # Re-issue cookies — the password change invalidates the old JWT.
+            return set_auth_cookies(redirect('attendance:ta_dashboard'), request.user)
 
     return render(request, 'attendance/ta_change_password.html', {'error': error})
 
@@ -2940,7 +2895,10 @@ def change_password(request):
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
             messages.success(request, "Password changed successfully!")
-            return redirect('attendance:dashboard')
+            # The password change invalidates the current JWT (its security hash
+            # no longer matches), so re-issue fresh cookies to keep this user
+            # logged in.
+            return set_auth_cookies(redirect('attendance:dashboard'), request.user)
 
     return render(request, 'attendance/change_password.html', {'error': error})
 

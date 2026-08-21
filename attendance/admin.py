@@ -88,13 +88,79 @@ class TAProfileAdmin(admin.ModelAdmin):
         }),
     )
     
-    actions = ['approve_selected_tas']
-    
+    actions = ['approve_selected_tas', 'delete_ta_and_account']
+
+    def delete_ta_and_account(self, request, queryset):
+        """Fully remove selected TAs, including their underlying User account.
+
+        Deleting a TAProfile alone leaves an orphaned User that keeps the email
+        and username locked (blocking re-registration) and can still log in to a
+        broken, role-less state. This action deletes the User instead, which
+        cascades to the TAProfile — the correct way to remove a TA.
+        """
+        users = [tp.user for tp in queryset.select_related('user')]
+        deleted = 0
+        for user in users:
+            label = user.username
+            user.delete()  # cascades to the TAProfile
+            deleted += 1
+        self.message_user(
+            request,
+            f'{deleted} TA(s) fully removed, including their user account(s).'
+        )
+    delete_ta_and_account.short_description = "Delete TA AND their user account (frees the email)"
+
     def approve_selected_tas(self, request, queryset):
+        """Approve the selected TAs AND email each one.
+
+        Iterates (rather than a bulk .update()) so every newly-approved TA gets
+        the approval notification — the same behaviour as the Pending-TAs page.
+        """
         from django.utils import timezone
-        updated = queryset.update(is_approved=True, approved_by=request.user, approved_at=timezone.now())
-        self.message_user(request, f'{updated} TA(s) approved successfully.')
-    approve_selected_tas.short_description = "Approve selected TAs"
+        from .views import send_ta_approval_email
+
+        approved = 0
+        emailed = 0
+        for ta_profile in queryset.filter(is_approved=False):
+            ta_profile.is_approved = True
+            ta_profile.approved_by = request.user
+            ta_profile.approved_at = timezone.now()
+            ta_profile.save()
+            approved += 1
+            if send_ta_approval_email(ta_profile, request=request):
+                emailed += 1
+
+        self.message_user(
+            request,
+            f'{approved} TA(s) approved, {emailed} approval email(s) sent.'
+        )
+    approve_selected_tas.short_description = "Approve selected TAs (and email them)"
+
+    def save_model(self, request, obj, form, change):
+        """When an admin flips is_approved on to True via the change form,
+        stamp the approver and send the approval email."""
+        from django.utils import timezone
+        from .views import send_ta_approval_email
+
+        newly_approved = False
+        if change and 'is_approved' in form.changed_data and obj.is_approved:
+            newly_approved = True
+            if not obj.approved_by:
+                obj.approved_by = request.user
+            if not obj.approved_at:
+                obj.approved_at = timezone.now()
+
+        super().save_model(request, obj, form, change)
+
+        if newly_approved:
+            if send_ta_approval_email(obj, request=request):
+                self.message_user(request, f'Approval email sent to {obj.user.email}.')
+            else:
+                self.message_user(
+                    request,
+                    f'TA approved, but the approval email could not be sent to {obj.user.email or "(no email on file)"}.',
+                    level='WARNING',
+                )
 
 
 @admin.register(TACode)

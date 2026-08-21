@@ -258,6 +258,15 @@
 
 <div class="card-body">
 
+        {% if messages %}
+        {% for message in messages %}
+<div class="error-banner">
+<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
+            {{ message }}
+</div>
+        {% endfor %}
+        {% endif %}
+
         {% if form.non_field_errors %}
 <div class="error-banner">
 <span class="iconify" data-icon="mdi:alert-circle-outline"></span>

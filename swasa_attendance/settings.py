@@ -36,14 +36,22 @@ if not SECRET_KEY:
 
 DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 
-# ALLOWED_HOSTS - configured via .env in production
-_extra_hosts = config('ALLOWED_HOSTS', default='', cast=Csv())
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.ngrok-free.dev',
-    '.pythonanywhere.com',
-] + list(_extra_hosts)
+# ALLOWED_HOSTS
+#
+# In development we allow the local + tunneling conveniences. In production we
+# only trust what's explicitly configured via the ALLOWED_HOSTS env var (comma
+# separated), so the app isn't reachable under the whole shared .pythonanywhere
+# .com / .ngrok space. If nothing is configured we fall back to
+# .pythonanywhere.com so a missing var doesn't 400 everything — but you SHOULD
+# pin your exact host in .env for production.
+_extra_hosts = list(config('ALLOWED_HOSTS', default='', cast=Csv()))
+
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev', '.pythonanywhere.com'] + _extra_hosts
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1'] + _extra_hosts
+    if not _extra_hosts:
+        ALLOWED_HOSTS.append('.pythonanywhere.com')
 
 
 # Application definition
@@ -97,6 +105,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    # Rate limiting. The unauthenticated OTP endpoints are the main brute-force
+    # surface, so they get their own tighter scopes (applied per-view).
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/hour',
+        'user': '1000/hour',
+        'otp_request': '10/hour',   # requesting an OTP be emailed
+        'otp_verify': '15/hour',    # submitting an OTP guess
+    },
 }
 
 ROOT_URLCONF = 'swasa_attendance.urls'
@@ -149,10 +170,16 @@ else:
 
 
 # Cache
+#
+# Database cache (not LocMemCache) so security-relevant counters — rate-limit
+# buckets and OTP attempt/lockout state — are SHARED across worker processes and
+# SURVIVE restarts. LocMemCache is per-process, which would let those limits
+# reset or diverge under multiple workers. The cache table is created by the
+# 0025 migration (equivalent to `manage.py createcachetable swasa_cache_table`).
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'swasa-cache',
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'swasa_cache_table',
     }
 }
 
@@ -218,17 +245,55 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'attendance:dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-# CSRF Settings - Updated for ngrok support
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.pythonanywhere.com',
-    'http://*.pythonanywhere.com',
-    'https://*.ngrok-free.dev',    # Added for ngrok
-    'http://*.ngrok-free.dev',     # Added for ngrok
-]
+# CSRF trusted origins.
+#
+# Dev keeps the http+https tunnel wildcards for convenience. Production trusts
+# HTTPS only, derived from the configured hosts (or an explicit
+# CSRF_TRUSTED_ORIGINS env var) — no plaintext-http origins, no ngrok.
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.pythonanywhere.com',
+        'http://*.pythonanywhere.com',
+        'https://*.ngrok-free.dev',
+        'http://*.ngrok-free.dev',
+    ]
+else:
+    _csrf_env = list(config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv()))
+    if _csrf_env:
+        CSRF_TRUSTED_ORIGINS = _csrf_env
+    else:
+        CSRF_TRUSTED_ORIGINS = [
+            (f"https://*{h}" if h.startswith('.') else f"https://{h}")
+            for h in (_extra_hosts or ['.pythonanywhere.com'])
+        ]
 
-# Cookie settings — driven by environment so production HTTPS gets True automatically
-CSRF_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
+# Cookie / transport security.
+#
+# These default to `not DEBUG`, but are ALSO independently overridable via the
+# SECURE_COOKIES env var so a production box can force secure cookies on even if
+# DEBUG were ever misconfigured. The whole transport posture no longer hinges on
+# a single flag. In production set SECURE_COOKIES=True explicitly.
+SECURE_COOKIES = config('SECURE_COOKIES', default=not DEBUG, cast=bool)
+
+CSRF_COOKIE_SECURE = SECURE_COOKIES
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+# Read by the custom JWT-cookie login views to set the `secure` flag on the
+# access/refresh cookies (keeps them aligned with the session/CSRF cookies).
+JWT_COOKIE_SECURE = SECURE_COOKIES
+
+# Fail fast on an insecure production configuration: if DEBUG is off, refuse to
+# boot a real server with insecure cookies. Dev commands are exempt so local
+# work over plain HTTP still runs.
+if not DEBUG and not SECURE_COOKIES:
+    _is_dev_command = any(
+        a in sys.argv
+        for a in ['runserver', 'test', 'shell', 'migrate', 'makemigrations', 'collectstatic', 'check']
+    )
+    if not _is_dev_command:
+        raise RuntimeError(
+            "Insecure configuration: DEBUG=False but SECURE_COOKIES=False. "
+            "Set SECURE_COOKIES=True (or DJANGO_DEBUG=True for local dev)."
+        )
 
 # ========== EMAIL CONFIGURATION ==========
 # Credentials are read from .env via python-decouple.
