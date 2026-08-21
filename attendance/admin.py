@@ -231,13 +231,97 @@ class SWASAEventAdmin(admin.ModelAdmin):
     list_editable = ('is_published',)
     search_fields = ('title', 'description', 'venue')
     ordering = ('-event_date',)
-    readonly_fields = ('created_at',)
+    # created_by is auto-set to the current admin in save_model, so it must be
+    # read-only here — otherwise it's a required dropdown and leaving it blank
+    # silently blocks the save ("This field is required").
+    readonly_fields = ('created_at', 'created_by')
+    filter_horizontal = ('target_levels',)
+
+    def save_model(self, request, obj, form, change):
+        if obj.created_by_id is None:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def save_related(self, request, form, formsets, change):
+        # Runs AFTER the M2M (target_levels) is saved, so recipients can be
+        # resolved. Keeps the per-user bell notifications in sync with the event:
+        # creates them on publish, updates their text on edit, prunes users no
+        # longer targeted, and removes them all if the event is unpublished.
+        super().save_related(request, form, formsets, change)
+        self._sync_notifications(request, form.instance)
+
+    def _recipient_ids(self, event):
+        from django.contrib.auth.models import User
+        from django.db.models import Q
+        level_ids = list(event.target_levels.values_list('id', flat=True))
+        qs = User.objects.filter(is_active=True)
+        if level_ids:
+            qs = qs.filter(
+                Q(userprofile__level_id__in=level_ids)      # students in the levels
+                | Q(is_staff=True)                          # admins/lecturers see all
+                | Q(taprofile__assigned_levels__id__in=level_ids)  # TAs for the levels
+            )
+        return set(qs.values_list('id', flat=True).distinct())
+
+    def _sync_notifications(self, request, event):
+        from django.urls import reverse
+
+        existing = {n.user_id: n for n in SystemNotification.objects.filter(event=event)}
+
+        if not event.is_published:
+            if existing:
+                SystemNotification.objects.filter(event=event).delete()
+                self.message_user(request, 'Event unpublished — its notifications were removed.')
+            return
+
+        emoji = {'event': '📅', 'news': '📰', 'announcement': '📢'}.get(event.event_type, '📢')
+        label = event.get_event_type_display()
+        title = f"{label}: {event.title}"[:200]
+        desc = event.description or ''
+        message = desc if len(desc) <= 240 else desc[:237] + '…'
+        link = reverse('attendance:community_events')
+
+        recipient_ids = self._recipient_ids(event)
+
+        # Prune users no longer targeted.
+        stale = [uid for uid in existing if uid not in recipient_ids]
+        if stale:
+            SystemNotification.objects.filter(event=event, user_id__in=stale).delete()
+
+        # Update content for users who already have the notification (keeps their
+        # read state) so event edits are reflected.
+        for uid, n in existing.items():
+            if uid in recipient_ids:
+                n.title, n.message, n.emoji, n.link = title, message, emoji, link
+                n.save(update_fields=['title', 'message', 'emoji', 'link'])
+
+        # Create for newly targeted users.
+        new_ids = recipient_ids - set(existing)
+        if new_ids:
+            SystemNotification.objects.bulk_create(
+                [
+                    SystemNotification(
+                        user_id=uid, title=title, message=message, emoji=emoji,
+                        link=link, event=event,
+                        notification_type=SystemNotification.TYPE_SYSTEM,
+                    )
+                    for uid in new_ids
+                ],
+                batch_size=500,
+            )
+        self.message_user(request, f'Notified {len(recipient_ids)} user(s) about this {label.lower()}.')
     fieldsets = (
         ('Content', {
             'fields': ('title', 'description', 'event_type', 'image_url'),
         }),
         ('Date & Location', {
             'fields': ('event_date', 'event_time', 'venue'),
+        }),
+        ('Audience', {
+            'fields': ('target_levels',),
+            'description': 'Leave empty to notify everyone. Select one or more '
+                           'levels to notify only students in those levels '
+                           '(admins and their TAs are always notified).',
         }),
         ('Publishing', {
             'fields': ('is_published', 'created_by', 'created_at'),

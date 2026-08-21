@@ -1808,13 +1808,25 @@ def ta_support_tickets(request):
         link=reverse('attendance:ta_support'),
     ).update(is_read=True)
 
+    # A TA handles every ticket from students in the levels they're assigned to —
+    # not only tickets pre-assigned to them. This closes the "orphaned ticket"
+    # gap: a ticket created when no TA was approved for the level had
+    # assigned_ta=None and was invisible to (and unanswerable by) every TA.
+    level_ids = list(ta_profile.assigned_levels.values_list('id', flat=True))
+
     if request.method == 'POST':
         ticket_id = request.POST.get('ticket_id')
         response_text = request.POST.get('response')
         status = request.POST.get('status')
-        ticket = get_object_or_404(SupportTicket, id=ticket_id, assigned_ta=request.user)
+        ticket = get_object_or_404(
+            SupportTicket, id=ticket_id,
+            student__userprofile__level_id__in=level_ids,
+        )
         ticket.admin_response = response_text
         ticket.status = status
+        # Claim an unassigned ticket so it's attributed to whoever answered.
+        if ticket.assigned_ta_id is None:
+            ticket.assigned_ta = request.user
         ticket.save()
         ta_name = request.user.get_full_name() or request.user.username
         create_notification(
@@ -1825,7 +1837,12 @@ def ta_support_tickets(request):
         messages.success(request, f"Response sent to {ticket.student.username}")
         return redirect('attendance:ta_support')
 
-    tickets = SupportTicket.objects.filter(assigned_ta=request.user).order_by('-created_at').select_related('student')
+    tickets = (
+        SupportTicket.objects
+        .filter(student__userprofile__level_id__in=level_ids)
+        .order_by('-created_at')
+        .select_related('student')
+    )
     paginator = Paginator(tickets, 20)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -2203,6 +2220,18 @@ def ta_dashboard(request):
     # Group sessions by course
     sessions_by_course = {}
 
+    # Per-session code progress (one query) so each collapsed session header can
+    # show attendance at a glance without opening it. Counts all codes for the
+    # session (codes are shared across TAs), and how many have been used.
+    session_ids = [s.id for s in sessions]
+    per_session_codes = {
+        row['class_session_id']: row
+        for row in TACode.objects
+            .filter(class_session_id__in=session_ids)
+            .values('class_session_id')
+            .annotate(generated=Count('id'), used=Count('id', filter=Q(is_used=True)))
+    }
+
     for session in sessions:
         course_key = session.course.id
         if course_key not in sessions_by_course:
@@ -2210,6 +2239,7 @@ def ta_dashboard(request):
                 'course': session.course,
                 'sessions': []
             }
+        code_stats = per_session_codes.get(session.id, {})
         sessions_by_course[course_key]['sessions'].append({
             'id': session.id,
             'date': session.date,
@@ -2217,6 +2247,8 @@ def ta_dashboard(request):
             'end_time': session.end_time,
             'topic': session.topic,
             'student_count': course_student_counts.get(course_key, 0),
+            'codes_generated': code_stats.get('generated', 0),
+            'codes_used': code_stats.get('used', 0),
         })
 
     # Single query for both code stats
@@ -2800,8 +2832,18 @@ def notifications_page(request):
             active_courses(profile).filter(semester__is_active=True).order_by('code')
         )
 
+    # System notifications (events, cultural dates) — previously these only
+    # appeared in the bell and were invisible on this "view all" page. Hide them
+    # when a course filter is active (that filter only applies to announcements).
+    sys_notifs = []
+    if not course_filter:
+        sys_notifs = list(
+            SystemNotification.objects.filter(user=request.user).order_by('-created_at')[:50]
+        )
+
     return render(request, 'attendance/notifications.html', {
         'notifs':             notifs,
+        'sys_notifs':         sys_notifs,
         'registered_courses': registered_courses,
         'course_filter':      course_filter,
     })

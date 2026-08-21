@@ -148,59 +148,48 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 }
 
 /* ─── Week tabs ─── */
-.week-tabs-bar {
-    background: #F4F6FC;
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1.25rem 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-.week-tabs-bar::-webkit-scrollbar { display: none; }
+/* ─── Session accordion (collapsible per session) ─── */
+.session-accordion { border-top: 1px solid var(--border); }
+.session-accordion:first-of-type { border-top: none; }
 
-.week-tabs {
+.session-head {
+    width: 100%;
     display: flex;
-    gap: 4px;
-    min-width: max-content;
-    padding-bottom: 0.75rem;
-}
-
-.week-tab {
-    padding: 0.45rem 0.875rem;
-    border-radius: var(--r-sm);
-    border: 1.5px solid transparent;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
     background: transparent;
+    border: none;
     cursor: pointer;
     font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    transition: all 0.13s;
-    text-align: center;
-    min-width: 68px;
-    line-height: 1.25;
+    text-align: left;
+    transition: background 0.13s;
 }
+.session-head:hover { background: rgba(13,36,114,0.03); }
+.session-accordion.open > .session-head { background: #F4F6FC; }
+html[data-theme="dark"] .session-accordion.open > .session-head { background: rgba(255,255,255,0.03); }
 
-.week-tab:hover:not(.active) {
-    background: var(--surface);
-    border-color: var(--border);
-    color: var(--text);
+.session-head-left { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; flex-wrap: wrap; }
+.session-week { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.session-head-date { font-size: 12px; font-weight: 500; color: var(--muted); }
+.session-head-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+.session-count {
+    font-size: 11px; font-weight: 700; color: var(--primary);
+    background: rgba(13,36,114,0.07); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
 }
-
-.week-tab.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(13,36,114,0.28);
+html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,178,255,0.12); }
+.session-progress {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 700; color: var(--green);
+    background: var(--green-lt); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
 }
+.session-chevron { font-size: 20px; color: var(--muted); transition: transform 0.2s; }
+.session-accordion.open > .session-head .session-chevron { transform: rotate(180deg); }
 
-.wk-num { display: block; font-size: 12px; font-weight: 700; }
-.wk-date { display: block; font-size: 10px; font-weight: 500; margin-top: 1px; opacity: 0.72; }
-.week-tab.active .wk-date { opacity: 0.82; }
-
-/* ─── Session panel ─── */
-.session-panel { display: none; }
-.session-panel.active { display: block; }
+/* Body is hidden until the session is opened. */
+.session-body { display: none; }
+.session-accordion.open > .session-body { display: block; }
 
 /* ─── Session info bar ─── */
 .session-info-bar {
@@ -350,47 +339,41 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 .filter-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
 
 /* ─── Table ─── */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll { -webkit-overflow-scrolling: touch; }
 
-.student-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-
-.student-table th {
-    background: #F8F4EF;
-    color: var(--muted);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-.student-table td {
-    padding: 0.7rem 1rem;
-    border-bottom: 1px solid #F0F3FA;
-    font-size: 13px;
-    vertical-align: middle;
-}
-
-.student-table tbody tr:last-child td { border-bottom: none; }
-.student-table tbody tr:hover td { background: rgba(13,36,114,0.018); }
-
-.cell-num { color: var(--muted); font-size: 11px; font-weight: 700; }
-.cell-name { font-weight: 700; color: var(--text); }
-.cell-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 500; }
-
-.code-chip {
-    font-family: 'DM Mono', monospace;
-    font-weight: 700;
-    background: #F8F4EF;
-    color: var(--text);
-    padding: 3px 10px;
-    border-radius: var(--r-sm);
-    letter-spacing: 1.5px;
+/* ─── Student cards (mobile-first replacement for the dense table) ─── */
+.student-cards { display: flex; flex-direction: column; gap: 0.625rem; padding: 0.25rem 0; }
+.st-card {
     border: 1px solid var(--border);
-    font-size: 13px;
+    border-radius: 14px;
+    background: var(--bg-surface);
+    padding: 0.875rem 1rem;
+    transition: box-shadow 0.15s;
 }
+.st-card:hover { box-shadow: 0 2px 10px rgba(13,36,114,0.06); }
+.st-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.st-info { min-width: 0; }
+.st-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.st-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+.st-action-row { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.75rem; flex-wrap: wrap; }
+/* The code the TA reads out — big, monospaced, easy to read on a phone. */
+.st-code {
+    font-family: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: #0D2472;
+    background: rgba(13,36,114,0.07);
+    padding: 0.3rem 0.85rem;
+    border-radius: 10px;
+    line-height: 1.2;
+    user-select: all;
+}
+html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,0.12); }
+.st-action-row .btn-mark-given { min-height: 40px; }
+.st-generate { min-height: 44px; font-size: 14px; }
+.st-drop { margin-left: auto; }
+
 
 .badge {
     display: inline-flex;
@@ -705,24 +688,31 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 </div>
 </div>
 
-<!-- Week tab bar -->
-<div class="week-tabs-bar">
-<div class="week-tabs">
-                {% for session in course_data.sessions %}
-<button class="week-tab {% if forloop.first %}active{% endif %}"
-                        onclick="switchWeek(event, {{ course_id }}, {{ session.id }})">
-<span class="wk-num">Week {{ forloop.counter }}</span>
-<span class="wk-date">{{ session.date|date:"M j" }}</span>
-</button>
-                {% endfor %}
-</div>
-</div>
-
-<!-- Session panels -->
+<!-- Sessions (collapsible accordion) — collapsed by default; tap a week to open -->
         {% for session in course_data.sessions %}
-<div class="session-panel {% if forloop.first %}active{% endif %}"
+<div class="session-accordion"
              id="session-{{ course_id }}-{{ session.id }}"
              data-session-id="{{ session.id }}">
+
+<!-- Tap this header to hide/show the students for this session -->
+<button type="button" class="session-head" onclick="toggleSession(this, {{ session.id }})">
+<div class="session-head-left">
+<span class="session-week">Week {{ forloop.counter }}</span>
+<span class="session-head-date">{{ session.date|date:"D, M j" }}</span>
+</div>
+<div class="session-head-right">
+                        {% if session.codes_used %}
+<span class="session-progress" title="Students who have submitted attendance">
+<span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span>
+                            {{ session.codes_used }} in
+</span>
+                        {% endif %}
+<span class="session-count">{{ session.student_count }} student{{ session.student_count|pluralize }}</span>
+<span class="iconify session-chevron" data-icon="mdi:chevron-down"></span>
+</div>
+</button>
+
+<div class="session-body">
 
 <!-- Info bar + Generate All -->
 <div class="session-info-bar">
@@ -781,19 +771,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
                     Loading students…
 </div>
 <div id="table-container-{{ session.id }}" style="display:none;">
-<table class="student-table">
-<thead>
-<tr>
-<th style="width:40px;">#</th>
-<th>Student Name</th>
-<th>Student ID</th>
-<th>Code</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody id="students-tbody-{{ session.id }}"></tbody>
-</table>
+<div class="student-cards" id="students-cards-{{ session.id }}"></div>
 </div>
 </div>
 
@@ -806,7 +784,8 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 </div>
 </div>
 
-</div>
+</div><!-- /.session-body -->
+</div><!-- /.session-accordion -->
         {% endfor %}
 
 </div>
@@ -999,6 +978,28 @@ async function markDistributed(codeId, sessionId) {
 // ── Pagination state ──
 let sessionStates = {};
 let debounceTimers = {};
+const loadedSessions = new Set();  // sessions whose students have been fetched
+
+// Collapse / expand a session's student list. Students are lazy-loaded the
+// first time a session is opened, so opening the page (or a course) is fast even
+// with many sessions.
+function toggleSession(head, sessionId) {
+    const acc = head.closest('.session-accordion');
+    const opening = !acc.classList.contains('open');
+    acc.classList.toggle('open');
+    if (opening) {
+        if (!loadedSessions.has(String(sessionId))) {
+            loadedSessions.add(String(sessionId));
+            if (!sessionStates[sessionId]) {
+                sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+            }
+            loadStudents(sessionId);
+        }
+        // Bring the opened header into view (nice when tapping a session low
+        // on the page).
+        setTimeout(() => head.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    }
+}
 
 function debouncedLoadStudents(sessionId) {
     clearTimeout(debounceTimers[sessionId]);
@@ -1016,93 +1017,91 @@ async function loadStudents(sessionId) {
     try {
         const res = await fetch(`/ta/get-students-ajax/?session_id=${sessionId}&page=${state.page}&search=${encodeURIComponent(search)}&status=${state.filter}`);
         const data = await res.json();
-        const tbody = document.getElementById(`students-tbody-${sessionId}`);
-        tbody.innerHTML = '';
+        const container = document.getElementById(`students-cards-${sessionId}`);
+        container.innerHTML = '';
 
         if (!data.students.length) {
-            const row = tbody.insertRow();
-            const cell = row.insertCell(0);
-            cell.colSpan = 6;
-            cell.className = '';
-            cell.style.cssText = 'padding:2.5rem 1rem;text-align:center;color:#8896AB;font-size:13px;';
-            cell.textContent = state.filter !== 'all' || search
+            const empty = document.createElement('div');
+            empty.style.cssText = 'padding:2.5rem 1rem;text-align:center;color:#8896AB;font-size:13px;';
+            empty.textContent = state.filter !== 'all' || search
                 ? 'No students match your search or filter.'
                 : 'No students are enrolled in this course.';
+            container.appendChild(empty);
         } else {
             data.students.forEach((student, idx) => {
-                const row = tbody.insertRow();
+                const num = ((data.page - 1) * 50) + idx + 1;
+                const card = document.createElement('div');
+                card.className = 'st-card';
 
-                const n = row.insertCell(0);
-                n.className = 'cell-num';
-                n.textContent = ((data.page - 1) * 50) + idx + 1;
+                // ── Top row: name + ID (left), status badge (right) ──
+                const top = document.createElement('div');
+                top.className = 'st-card-top';
 
-                const name = row.insertCell(1);
-                name.className = 'cell-name';
-                name.textContent = student.full_name;
+                const info = document.createElement('div');
+                info.className = 'st-info';
+                const nameEl = document.createElement('div');
+                nameEl.className = 'st-name';
+                nameEl.textContent = `${num}. ${student.full_name}`;
+                const idEl = document.createElement('div');
+                idEl.className = 'st-id';
+                idEl.textContent = `ID: ${student.student_id}`;
+                info.appendChild(nameEl);
+                info.appendChild(idEl);
+                top.appendChild(info);
 
-                const sid = row.insertCell(2);
-                sid.className = 'cell-id';
-                sid.textContent = student.student_id;
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                if (student.code && student.code.is_used) {
+                    badge.className += ' badge-used';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
+                } else if (student.code && student.code.is_distributed) {
+                    badge.className += ' badge-given';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
+                } else if (student.code) {
+                    badge.className += ' badge-pending';
+                    badge.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
+                } else {
+                    badge.className += ' badge-none';
+                    badge.textContent = 'No code';
+                }
+                top.appendChild(badge);
+                card.appendChild(top);
 
-                const codeCell = row.insertCell(3);
+                // ── Action row: big code + Mark Given, OR Generate button ──
+                const row = document.createElement('div');
+                row.className = 'st-action-row';
+
                 if (student.code?.code_string) {
-                    const s = document.createElement('span');
-                    s.className = 'code-chip';
-                    s.textContent = student.code.code_string;
-                    codeCell.appendChild(s);
-                } else {
-                    const b = document.createElement('span');
-                    b.className = 'badge badge-none';
-                    b.textContent = '—';
-                    codeCell.appendChild(b);
-                }
+                    const code = document.createElement('span');
+                    code.className = 'st-code';
+                    code.textContent = student.code.code_string;
+                    row.appendChild(code);
 
-                const statusCell = row.insertCell(4);
-                if (student.code) {
-                    const b = document.createElement('span');
-                    b.className = 'badge';
-                    if (student.code.is_used) {
-                        b.className += ' badge-used';
-                        b.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
-                    } else if (student.code.is_distributed) {
-                        b.className += ' badge-given';
-                        b.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
-                    } else {
-                        b.className += ' badge-pending';
-                        b.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
-                    }
-                    statusCell.appendChild(b);
-                } else {
-                    const b = document.createElement('span');
-                    b.className = 'badge badge-none';
-                    b.textContent = '—';
-                    statusCell.appendChild(b);
-                }
-
-                const actionCell = row.insertCell(5);
-                if (student.code) {
                     if (!student.code.is_used && !student.code.is_distributed) {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-mark-given';
-                        btn.innerHTML = '<span class="iconify" data-icon="mdi:send-outline"></span> Mark Given';
-                        btn.onclick = () => markDistributed(student.code.id, sessionId);
-                        actionCell.appendChild(btn);
+                        const mark = document.createElement('button');
+                        mark.className = 'btn-mark-given';
+                        mark.innerHTML = '<span class="iconify" data-icon="mdi:send-outline"></span> Mark Given';
+                        mark.onclick = () => markDistributed(student.code.id, sessionId);
+                        row.appendChild(mark);
                     }
                 } else {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-generate';
-                    btn.innerHTML = '<span class="iconify" data-icon="mdi:key-outline"></span> Generate';
-                    btn.onclick = () => generateCode(sessionId, student.username);
-                    actionCell.appendChild(btn);
+                    const gen = document.createElement('button');
+                    gen.className = 'btn-generate st-generate';
+                    gen.innerHTML = '<span class="iconify" data-icon="mdi:key-outline"></span> Generate Code';
+                    gen.onclick = () => generateCode(sessionId, student.username);
+                    row.appendChild(gen);
                 }
 
-                // Drop override — TA can deregister any student from this course.
+                // Drop override — subtle, pushed to the right.
                 const drop = document.createElement('button');
-                drop.className = 'btn-deregister';
+                drop.className = 'btn-deregister st-drop';
                 drop.title = 'Deregister this student from the course';
                 drop.innerHTML = '<span class="iconify" data-icon="mdi:account-remove-outline"></span>';
                 drop.onclick = () => deregisterStudent(student.id, data.course_id, student.full_name, sessionId);
-                actionCell.appendChild(drop);
+                row.appendChild(drop);
+
+                card.appendChild(row);
+                container.appendChild(card);
             });
         }
 
@@ -1144,29 +1143,14 @@ function changePage(sessionId, delta) {
     loadStudents(sessionId);
 }
 
-function switchWeek(event, courseId, sessionId) {
-    // Hide all panels for this course
-    document.querySelectorAll(`[id^="session-${courseId}-"]`).forEach(el => el.classList.remove('active'));
-    document.getElementById(`session-${courseId}-${sessionId}`).classList.add('active');
-
-    // Update tab highlight (handle click on child span)
-    const clickedTab = event.target.closest('.week-tab');
-    if (clickedTab) {
-        clickedTab.closest('.week-tabs').querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
-        clickedTab.classList.add('active');
-    }
-
-    if (!sessionStates[sessionId]) {
-        sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
-    }
-    loadStudents(sessionId);
-}
 
 // Auto-load the first visible session of every course on page load
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.session-panel.active').forEach(panel => {
-        const sessionId = panel.dataset.sessionId;
+    // Load students for whichever sessions start expanded (the first of each course).
+    document.querySelectorAll('.session-accordion.open').forEach(acc => {
+        const sessionId = acc.dataset.sessionId;
         if (sessionId) {
+            loadedSessions.add(String(sessionId));
             sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
             loadStudents(sessionId);
         }

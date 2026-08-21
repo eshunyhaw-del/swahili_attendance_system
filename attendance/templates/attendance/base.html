@@ -880,6 +880,19 @@
             overflow: hidden;
         }
         .notif-panel.open { display: block; }
+        /* On phones a fixed 340px panel anchored to the right overflows the
+           screen edge and gets clipped. Pin it to both edges so it's always
+           fully visible. */
+        @media (max-width: 480px) {
+            .notif-panel {
+                position: fixed;
+                top: calc(var(--topbar-height) + 6px);
+                left: 10px;
+                right: 10px;
+                width: auto;
+            }
+            .notif-list { max-height: 65vh; }
+        }
         .notif-panel-head {
             display: flex; align-items: center; justify-content: space-between;
             padding: 0.875rem 1rem 0.75rem;
@@ -1304,11 +1317,19 @@
                                 {% for notif in sys_notifications %}
 <div class="notif-item sys-notif" id="sysnotif-{{ notif.id }}">
 <span class="notif-sys-emoji">{{ notif.emoji }}</span>
+                                    {% if notif.link %}
+<a href="{{ notif.link }}" class="notif-link" onclick="markSysRead({{ notif.id }})">
+<div class="notif-ann-title">{{ notif.title }}</div>
+<div class="notif-msg">{{ notif.message|truncatechars:90 }}</div>
+<div class="notif-time">{{ notif.created_at|timesince }} ago</div>
+</a>
+                                    {% else %}
 <div class="notif-link">
 <div class="notif-ann-title">{{ notif.title }}</div>
 <div class="notif-msg">{{ notif.message|truncatechars:90 }}</div>
 <div class="notif-time">{{ notif.created_at|timesince }} ago</div>
 </div>
+                                    {% endif %}
 <button class="notif-dismiss" onclick="markSysRead({{ notif.id }})" title="Dismiss">
 <span class="iconify" data-icon="mdi:close" data-width="12"></span>
 </button>
@@ -1496,15 +1517,18 @@
 
     /* System notification dismiss (cultural dates & system alerts) */
     function markSysRead(id) {
+        // keepalive lets the request complete even when this click also
+        // navigates the page to the notification's link.
         fetch('/notifications/sys/mark-read/' + id + '/', {
             method: 'POST',
             headers: { 'X-CSRFToken': getCsrf() },
+            keepalive: true,
         }).then(function(r) { return r.json(); }).then(function(data) {
             var el = document.getElementById('sysnotif-' + id);
             if (el) el.remove();
             updateBadgeCount(data.unread_count);
             _checkEmptyBell();
-        });
+        }).catch(function() {});
     }
 
     function _checkEmptyBell() {

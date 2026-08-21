@@ -193,6 +193,39 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
 </div>
     {% endif %}
 
+<!-- System notifications (events, cultural dates) -->
+    {% for s in sys_notifs %}
+<div class="notif-card {% if not s.is_read %}unread{% else %}read{% endif %}" id="syscard-{{ s.id }}">
+<div class="notif-card-head">
+<div class="notif-card-meta">
+                {% if not s.is_read %}<div class="unread-dot"></div>{% endif %}
+<span style="font-size:16px;line-height:1;">{{ s.emoji }}</span>
+</div>
+<div class="notif-card-time">{{ s.created_at|date:"N j, Y · g:i A" }}</div>
+</div>
+<div class="notif-card-title">{{ s.title }}</div>
+<div class="notif-card-body">{{ s.message }}</div>
+<div class="notif-card-footer">
+            {% if s.link %}
+<a class="notif-sender" href="{{ s.link }}" style="text-decoration:none;">
+<span class="iconify" data-icon="mdi:open-in-new"></span> View
+</a>
+            {% else %}
+<span></span>
+            {% endif %}
+            {% if not s.is_read %}
+<button class="btn-mark-read" onclick="markSysRead({{ s.id }})">
+<span class="iconify" data-icon="mdi:check"></span> Mark as read
+</button>
+            {% else %}
+<span class="read-label">
+<span class="iconify" data-icon="mdi:check-circle-outline"></span> Read
+</span>
+            {% endif %}
+</div>
+</div>
+    {% endfor %}
+
 <!-- Notification list -->
     {% for notif in notifs %}
 <div class="notif-card {% if not notif.is_read %}unread{% else %}read{% endif %}" id="ncard-{{ notif.id }}">
@@ -226,18 +259,42 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
             {% endif %}
 </div>
 </div>
-    {% empty %}
+    {% endfor %}
+
+    {% if not notifs and not sys_notifs %}
 <div class="empty-state">
 <span class="iconify" data-icon="mdi:bell-check-outline"></span>
 <p>No notifications{% if course_filter %} for this course{% endif %}.</p>
 </div>
-    {% endfor %}
+    {% endif %}
 
 </div>
 
 <script>
 function getCsrf() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+}
+
+function markSysRead(id) {
+    fetch('/notifications/sys/mark-read/' + id + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrf() },
+    }).then(function(r) { return r.json(); }).then(function(data) {
+        var card = document.getElementById('syscard-' + id);
+        if (card) {
+            card.classList.remove('unread');
+            card.classList.add('read');
+            var btn = card.querySelector('.btn-mark-read');
+            if (btn) {
+                btn.outerHTML = '<span class="read-label"><span class="iconify" data-icon="mdi:check-circle-outline"></span> Read</span>';
+            }
+            var dot = card.querySelector('.unread-dot');
+            if (dot) dot.remove();
+        }
+        if (typeof updateBadgeCount === 'function') {
+            updateBadgeCount(data.unread_count);
+        }
+    });
 }
 
 function markOneRead(id) {
