@@ -2,7 +2,6 @@ import csv
 import string
 import secrets
 import uuid
-import jwt
 from collections import defaultdict
 from datetime import timedelta, datetime
 
@@ -28,6 +27,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from .forms import StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm, TARegistrationForm
+from .tokens import set_auth_cookies
 from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
@@ -390,30 +390,8 @@ def token_login_view(request):
                 else:
                     next_url = reverse('attendance:dashboard')
 
-            access_expiry = timedelta(days=30 if remember_me else 1)
-            refresh_expiry = timedelta(days=60 if remember_me else 7)
-            now = datetime.utcnow()
-
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-
             response = redirect(next_url)
-            is_secure = settings.JWT_COOKIE_SECURE
-            response.set_cookie('access_token', access_token,
-                                max_age=int(access_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            response.set_cookie('refresh_token', refresh_token,
-                                max_age=int(refresh_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            return response
+            return set_auth_cookies(response, user, remember_me=bool(remember_me))
 
         # Failed attempt — count it against both the IP and the email.
         _rate_hit('login_ip', ip, _RL_WINDOW)
@@ -628,21 +606,7 @@ def otp_verify_registration(request):
                 profile.save()
             redirect_url = reverse('attendance:course_registration')
 
-            # Issue JWT so user is immediately logged in after redirect
-            access_expiry = timedelta(days=1)
-            refresh_expiry = timedelta(days=7)
-            now = datetime.utcnow()
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-
+            # Log the user in immediately after verification.
             context = {
                 'email': user.email,
                 'purpose': 'registration',
@@ -652,14 +616,7 @@ def otp_verify_registration(request):
                 'redirect_url': redirect_url,
             }
             resp = render(request, 'attendance/otp_verify.html', context)
-            is_secure = settings.JWT_COOKIE_SECURE
-            resp.set_cookie('access_token', access_token,
-                            max_age=int(access_expiry.total_seconds()),
-                            httponly=True, secure=is_secure, samesite='Lax')
-            resp.set_cookie('refresh_token', refresh_token,
-                            max_age=int(refresh_expiry.total_seconds()),
-                            httponly=True, secure=is_secure, samesite='Lax')
-            return resp
+            return set_auth_cookies(resp, user)
 
     return render(request, 'attendance/otp_verify.html', {
         'email': user.email,
@@ -725,30 +682,8 @@ def otp_verify_login(request):
             remember_me = request.session.pop('login_remember_me', False)
             request.session.pop('login_pending_user_id', None)
 
-            access_expiry = timedelta(days=30 if remember_me else 1)
-            refresh_expiry = timedelta(days=60 if remember_me else 7)
-            now = datetime.utcnow()
-
-            access_token = jwt.encode(
-                {'user_id': user.id, 'username': user.username,
-                 'exp': now + access_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-            refresh_token = jwt.encode(
-                {'user_id': user.id, 'type': 'refresh',
-                 'exp': now + refresh_expiry, 'iat': now},
-                settings.JWT_SECRET_KEY, algorithm='HS256'
-            )
-
             response = redirect(next_url)
-            is_secure = settings.JWT_COOKIE_SECURE
-            response.set_cookie('access_token', access_token,
-                                max_age=int(access_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            response.set_cookie('refresh_token', refresh_token,
-                                max_age=int(refresh_expiry.total_seconds()),
-                                httponly=True, secure=is_secure, samesite='Lax')
-            return response
+            return set_auth_cookies(response, user, remember_me=bool(remember_me))
 
     return render(request, 'attendance/otp_verify.html', {
         'email': user.email,
@@ -882,28 +817,8 @@ def otp_set_password(request):
 
 def _issue_jwt_response(user, redirect_url):
     """Return a redirect response with fresh JWT access+refresh cookies."""
-    access_expiry  = timedelta(days=1)
-    refresh_expiry = timedelta(days=7)
-    now = datetime.utcnow()
-    access_token = jwt.encode(
-        {'user_id': user.id, 'username': user.username,
-         'exp': now + access_expiry, 'iat': now},
-        settings.JWT_SECRET_KEY, algorithm='HS256'
-    )
-    refresh_token = jwt.encode(
-        {'user_id': user.id, 'type': 'refresh',
-         'exp': now + refresh_expiry, 'iat': now},
-        settings.JWT_SECRET_KEY, algorithm='HS256'
-    )
     response = redirect(redirect_url)
-    is_secure = settings.JWT_COOKIE_SECURE
-    response.set_cookie('access_token', access_token,
-                        max_age=int(access_expiry.total_seconds()),
-                        httponly=True, secure=is_secure, samesite='Lax')
-    response.set_cookie('refresh_token', refresh_token,
-                        max_age=int(refresh_expiry.total_seconds()),
-                        httponly=True, secure=is_secure, samesite='Lax')
-    return response
+    return set_auth_cookies(response, user)
 
 
 def magic_verify_registration(request, token):
@@ -2667,7 +2582,8 @@ def ta_change_password(request):
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
             messages.success(request, "Password changed successfully!")
-            return redirect('attendance:ta_dashboard')
+            # Re-issue cookies — the password change invalidates the old JWT.
+            return set_auth_cookies(redirect('attendance:ta_dashboard'), request.user)
 
     return render(request, 'attendance/ta_change_password.html', {'error': error})
 
@@ -2980,7 +2896,10 @@ def change_password(request):
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
             messages.success(request, "Password changed successfully!")
-            return redirect('attendance:dashboard')
+            # The password change invalidates the current JWT (its security hash
+            # no longer matches), so re-issue fresh cookies to keep this user
+            # logged in.
+            return set_auth_cookies(redirect('attendance:dashboard'), request.user)
 
     return render(request, 'attendance/change_password.html', {'error': error})
 

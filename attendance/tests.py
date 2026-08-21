@@ -17,6 +17,7 @@ from django.utils import timezone
 from .models import (
     Course, ClassSession, Level, Semester, TAProfile, UserProfile, OTPCode,
 )
+from .tokens import make_access_token, make_refresh_token
 
 
 def _make_semester():
@@ -144,6 +145,46 @@ class LoginRateLimitTests(TestCase):
             'email': 'nobody@example.com', 'password': 'wrong',
         })
         self.assertContains(resp, 'Too many failed sign-in attempts', status_code=200)
+
+
+class JWTSessionTests(TestCase):
+    """H-2: JWT cookie auth — password-bound revocation and sliding refresh."""
+
+    def setUp(self):
+        cache.clear()
+        level, _ = Level.objects.get_or_create(name='100')
+        self.user = User.objects.create_user(
+            'jwtuser', email='jwt@example.com', password='OldPass123', is_active=True,
+        )
+        UserProfile.objects.create(
+            user=self.user, level=level, student_id_number='JWT001',
+            must_change_password=False,
+        )
+        # A minimal login-required JSON endpoint (no template/profile gymnastics).
+        self.url = reverse('attendance:notification_unread_count')
+
+    def test_valid_access_token_authenticates(self):
+        self.client.cookies['access_token'] = make_access_token(self.user)
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_password_change_revokes_existing_token(self):
+        token = make_access_token(self.user)
+        # Password change rotates the security hash → old token must stop working.
+        self.user.set_password('NewPass456')
+        self.user.save()
+        self.client.cookies['access_token'] = token
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 302)  # login_required redirect
+
+    def test_refresh_token_mints_fresh_access_cookie(self):
+        refresh, _ = make_refresh_token(self.user)
+        self.client.cookies['refresh_token'] = refresh
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        # Middleware should have issued a new access cookie from the refresh.
+        self.assertIn('access_token', resp.cookies)
+        self.assertTrue(resp.cookies['access_token'].value)
 
 
 class APIOTPBruteForceTests(TestCase):
