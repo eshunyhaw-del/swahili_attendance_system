@@ -179,6 +179,11 @@ html[data-theme="dark"] .session-accordion.open > .session-head { background: rg
     background: rgba(13,36,114,0.07); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
 }
 html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,178,255,0.12); }
+.session-progress {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 700; color: var(--green);
+    background: var(--green-lt); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
+}
 .session-chevron { font-size: 20px; color: var(--muted); transition: transform 0.2s; }
 .session-accordion.open > .session-head .session-chevron { transform: rotate(180deg); }
 
@@ -334,35 +339,7 @@ html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,17
 .filter-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
 
 /* ─── Table ─── */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-.student-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-
-.student-table th {
-    background: #F8F4EF;
-    color: var(--muted);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-    padding: 0.6rem 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-}
-
-.student-table td {
-    padding: 0.7rem 1rem;
-    border-bottom: 1px solid #F0F3FA;
-    font-size: 13px;
-    vertical-align: middle;
-}
-
-.student-table tbody tr:last-child td { border-bottom: none; }
-.student-table tbody tr:hover td { background: rgba(13,36,114,0.018); }
-
-.cell-num { color: var(--muted); font-size: 11px; font-weight: 700; }
-.cell-name { font-weight: 700; color: var(--text); }
-.cell-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 500; }
+.table-scroll { -webkit-overflow-scrolling: touch; }
 
 /* ─── Student cards (mobile-first replacement for the dense table) ─── */
 .student-cards { display: flex; flex-direction: column; gap: 0.625rem; padding: 0.25rem 0; }
@@ -397,17 +374,6 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 .st-generate { min-height: 44px; font-size: 14px; }
 .st-drop { margin-left: auto; }
 
-.code-chip {
-    font-family: 'DM Mono', monospace;
-    font-weight: 700;
-    background: #F8F4EF;
-    color: var(--text);
-    padding: 3px 10px;
-    border-radius: var(--r-sm);
-    letter-spacing: 1.5px;
-    border: 1px solid var(--border);
-    font-size: 13px;
-}
 
 .badge {
     display: inline-flex;
@@ -735,6 +701,12 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 <span class="session-head-date">{{ session.date|date:"D, M j" }}</span>
 </div>
 <div class="session-head-right">
+                        {% if session.codes_used %}
+<span class="session-progress" title="Students who have submitted attendance">
+<span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span>
+                            {{ session.codes_used }} in
+</span>
+                        {% endif %}
 <span class="session-count">{{ session.student_count }} student{{ session.student_count|pluralize }}</span>
 <span class="iconify session-chevron" data-icon="mdi:chevron-down"></span>
 </div>
@@ -1015,12 +987,17 @@ function toggleSession(head, sessionId) {
     const acc = head.closest('.session-accordion');
     const opening = !acc.classList.contains('open');
     acc.classList.toggle('open');
-    if (opening && !loadedSessions.has(String(sessionId))) {
-        loadedSessions.add(String(sessionId));
-        if (!sessionStates[sessionId]) {
-            sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+    if (opening) {
+        if (!loadedSessions.has(String(sessionId))) {
+            loadedSessions.add(String(sessionId));
+            if (!sessionStates[sessionId]) {
+                sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
+            }
+            loadStudents(sessionId);
         }
-        loadStudents(sessionId);
+        // Bring the opened header into view (nice when tapping a session low
+        // on the page).
+        setTimeout(() => head.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
     }
 }
 

@@ -2220,6 +2220,18 @@ def ta_dashboard(request):
     # Group sessions by course
     sessions_by_course = {}
 
+    # Per-session code progress (one query) so each collapsed session header can
+    # show attendance at a glance without opening it. Counts all codes for the
+    # session (codes are shared across TAs), and how many have been used.
+    session_ids = [s.id for s in sessions]
+    per_session_codes = {
+        row['class_session_id']: row
+        for row in TACode.objects
+            .filter(class_session_id__in=session_ids)
+            .values('class_session_id')
+            .annotate(generated=Count('id'), used=Count('id', filter=Q(is_used=True)))
+    }
+
     for session in sessions:
         course_key = session.course.id
         if course_key not in sessions_by_course:
@@ -2227,6 +2239,7 @@ def ta_dashboard(request):
                 'course': session.course,
                 'sessions': []
             }
+        code_stats = per_session_codes.get(session.id, {})
         sessions_by_course[course_key]['sessions'].append({
             'id': session.id,
             'date': session.date,
@@ -2234,6 +2247,8 @@ def ta_dashboard(request):
             'end_time': session.end_time,
             'topic': session.topic,
             'student_count': course_student_counts.get(course_key, 0),
+            'codes_generated': code_stats.get('generated', 0),
+            'codes_used': code_stats.get('used', 0),
         })
 
     # Single query for both code stats
