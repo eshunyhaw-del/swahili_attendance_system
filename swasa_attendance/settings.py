@@ -170,10 +170,16 @@ else:
 
 
 # Cache
+#
+# Database cache (not LocMemCache) so security-relevant counters — rate-limit
+# buckets and OTP attempt/lockout state — are SHARED across worker processes and
+# SURVIVE restarts. LocMemCache is per-process, which would let those limits
+# reset or diverge under multiple workers. The cache table is created by the
+# 0025 migration (equivalent to `manage.py createcachetable swasa_cache_table`).
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'swasa-cache',
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'swasa_cache_table',
     }
 }
 
