@@ -157,12 +157,34 @@ def create_notification(recipient, message, link=''):
     Notification.objects.create(recipient=recipient, message=message, link=link)
 
 
-def send_ta_approval_email(ta_profile):
+def _absolute_url(path, request=None):
+    """Turn a reverse()'d path into an absolute URL for use inside emails.
+
+    Emails have no base URL, so a bare path like ``/ta/dashboard/`` renders as
+    ``http:///ta/dashboard/`` (empty host) in mail clients. Use the request host
+    when we have one (correct locally AND in production); otherwise fall back to
+    the configured SITE_URL.
+    """
+    if request is not None:
+        return request.build_absolute_uri(path)
+    site_url = getattr(settings, 'SITE_URL', 'https://ebenezer.pythonanywhere.com').rstrip('/')
+    return f"{site_url}{path}"
+
+
+def send_ta_approval_email(ta_profile, request=None):
+    """Email a TA that their account was approved. Returns True on success.
+
+    Never raises — a mail failure must not roll back the approval itself — but
+    the boolean lets callers (e.g. the admin) tell the approver whether the
+    notification actually went out.
+    """
+    if not ta_profile.user.email:
+        return False
     try:
         html_message = render_to_string('attendance/ta_approval_email.html', {
             'ta_profile': ta_profile,
-            'login_url': reverse('login'),
-            'dashboard_url': reverse('attendance:ta_dashboard'),
+            'login_url': _absolute_url(reverse('login'), request),
+            'dashboard_url': _absolute_url(reverse('attendance:ta_dashboard'), request),
         })
         send_mail(
             subject='Your TA Account Approved - SWASA Attendance',
@@ -170,10 +192,11 @@ def send_ta_approval_email(ta_profile):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[ta_profile.user.email],
             html_message=html_message,
-            fail_silently=True,
+            fail_silently=False,
         )
+        return True
     except Exception:
-        pass
+        return False
 
 
 def send_ta_rejection_email(ta_profile):
@@ -1646,7 +1669,7 @@ def pending_tas(request):
                 ta_profile.approved_at = timezone.now()
                 ta_profile.approval_notes = request.POST.get('approval_notes', '')
                 ta_profile.save()
-                send_ta_approval_email(ta_profile)
+                send_ta_approval_email(ta_profile, request=request)
                 messages.success(request, f"TA {ta_profile.user.get_full_name() or ta_profile.user.username} approved successfully.")
             except Exception:
                 messages.error(request, "Approval failed — please try again.")
