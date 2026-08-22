@@ -56,6 +56,8 @@
     .track-fill.good { background: var(--ds-success); }
     .track-fill.medium { background: var(--ds-warning); }
     .track-fill.low { background: var(--ds-danger); }
+    .course-elig { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .elig-meta { font-size: 11.5px; color: var(--ds-text-muted); font-weight: 600; }
     .course-expand { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--ds-text-muted); margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--ds-border); }
     .course-expand .iconify { transition: transform .2s; }
     details[open] .course-expand .iconify { transform: rotate(180deg); }
@@ -133,20 +135,33 @@
 </div>
 <div class="ds-stat">
 <div class="ds-stat-label"><span class="iconify" data-icon="mdi:alert-outline"></span> At-Risk Courses</div>
-<div class="ds-stat-value" style="{% if at_risk_count %}color:var(--ds-warning){% endif %}">{{ at_risk_count }}</div>
-<div class="ds-stat-meta">Below the 75% exam requirement</div>
+<div class="ds-stat-value" style="{% if blocked_count %}color:var(--ds-danger){% elif at_risk_count %}color:var(--ds-warning){% endif %}">{{ at_risk_count }}</div>
+<div class="ds-stat-meta">Near or over the absence limit</div>
 </div>
 </div>
 
-<!-- At-risk alert -->
-{% if at_risk_courses %}
+<!-- Exam-eligibility: blocked (danger) -->
+{% if blocked_courses %}
+<div class="ds-alert ds-alert-danger" style="margin-bottom:12px">
+<span class="iconify" data-icon="mdi:alert-octagon"></span>
+<div>
+<p class="ds-alert-title">Not eligible to sit the exam</p>
+<p class="ds-alert-body">You've missed too many sessions in {% for c in blocked_courses %}<strong>{{ c.course.code }}</strong> ({{ c.eligibility.reason }}){% if not forloop.last %}, {% endif %}{% endfor %}. Missing 3 sessions in a row, or 4 in total, blocks you from a course's exam. Speak to your teaching assistant if you believe this is a mistake.</p>
+</div>
+</div>
+{% endif %}
+
+<!-- Exam-eligibility: approaching the limit (warning) -->
+{% if warning_courses %}
 <div class="ds-alert ds-alert-warning" style="margin-bottom:20px">
 <span class="iconify" data-icon="mdi:alert"></span>
 <div>
-<p class="ds-alert-title">Attendance below the 75% requirement</p>
-<p class="ds-alert-body">Your attendance is low in {% for c in at_risk_courses %}<strong>{{ c.course.code }}</strong> ({{ c.percentage }}%){% if not forloop.last %}, {% endif %}{% endfor %}. A minimum of 75% is required to sit the exam.</p>
+<p class="ds-alert-title">Close to the absence limit</p>
+<p class="ds-alert-body">One more missed session would make you ineligible in {% for c in warning_courses %}<strong>{{ c.course.code }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}. You may sit the exam only if you miss fewer than 3 sessions in a row and fewer than 4 in total.</p>
 </div>
 </div>
+{% elif blocked_courses %}
+<div style="margin-bottom:8px"></div>
 {% endif %}
 
 <!-- Today's classes -->
@@ -196,6 +211,16 @@
 </div>
 <div class="track-line">
 <div class="track-fill {% if course.percentage >= 75 %}good{% elif course.percentage >= 50 %}medium{% else %}low{% endif %}" style="width: {{ course.percentage }}%;"></div>
+</div>
+<div class="course-elig">
+        {% if course.eligibility.status == 'blocked' %}
+<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
+        {% elif course.eligibility.status == 'warning' %}
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
+        {% else %}
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
+        {% endif %}
+<span class="elig-meta">{{ course.eligibility.total_absent }} missed{% if course.eligibility.max_consecutive_absent >= 2 %} · {{ course.eligibility.max_consecutive_absent }} in a row{% endif %}</span>
 </div>
 <div class="course-expand"><span class="iconify" data-icon="mdi:chevron-down"></span></div>
 </summary>

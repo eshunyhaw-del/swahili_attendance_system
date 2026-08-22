@@ -65,8 +65,14 @@
 <div class="track-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}" style="width:{{ item.percentage }}%;"></div>
 </div>
 <div class="track-meta">
-<span style="color:{% if item.percentage >= 75 %}var(--ds-success){% elif item.percentage >= 50 %}var(--ds-warning){% else %}var(--ds-danger){% endif %}">{{ item.percentage|floatformat:0 }}% attendance</span>
-<span class="ds-text-muted">{{ item.total }} eligible session{{ item.total|pluralize }}</span>
+<span class="ds-text-muted">{{ item.percentage|floatformat:0 }}% attendance · {{ item.eligibility.total_absent }} missed</span>
+        {% if item.eligibility.status == 'blocked' %}
+<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
+        {% elif item.eligibility.status == 'warning' %}
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
+        {% else %}
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
+        {% endif %}
 </div>
 </div>
 <div class="week-list">

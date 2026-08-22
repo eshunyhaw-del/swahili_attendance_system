@@ -491,3 +491,48 @@ class StudentEmailDomainTests(TestCase):
         # Broadening the setting lets another provider through without code change.
         self.assertTrue(self._valid('kwame@yahoo.com'))
         self.assertFalse(self._valid('kwame@outlook.com'))
+
+
+class ExamEligibilityTests(TestCase):
+    """Exam-eligibility rule: blocked if >=3 consecutive OR >=4 total absences
+    in a course; 'warning' one short of either limit."""
+
+    def _elig(self, statuses):
+        from .views import exam_eligibility
+        return exam_eligibility(statuses)
+
+    def test_eligible_with_scattered_absences(self):
+        r = self._elig(['present', 'absent', 'present', 'absent', 'present'])
+        self.assertTrue(r['eligible'])
+        self.assertEqual(r['status'], 'eligible')
+        self.assertEqual(r['total_absent'], 2)
+        self.assertEqual(r['max_consecutive_absent'], 1)
+
+    def test_blocked_by_three_consecutive(self):
+        r = self._elig(['present', 'absent', 'absent', 'absent', 'present'])
+        self.assertFalse(r['eligible'])
+        self.assertEqual(r['status'], 'blocked')
+        self.assertEqual(r['max_consecutive_absent'], 3)
+
+    def test_blocked_by_four_total(self):
+        r = self._elig(['absent', 'present', 'absent', 'present', 'absent', 'present', 'absent'])
+        self.assertFalse(r['eligible'])
+        self.assertEqual(r['status'], 'blocked')
+        self.assertEqual(r['total_absent'], 4)
+        self.assertLess(r['max_consecutive_absent'], 3)  # blocked by total, not streak
+
+    def test_warning_two_consecutive(self):
+        r = self._elig(['present', 'absent', 'absent', 'present'])
+        self.assertTrue(r['eligible'])
+        self.assertEqual(r['status'], 'warning')
+
+    def test_warning_three_total(self):
+        r = self._elig(['absent', 'present', 'absent', 'present', 'absent'])
+        self.assertTrue(r['eligible'])
+        self.assertEqual(r['status'], 'warning')
+        self.assertEqual(r['total_absent'], 3)
+
+    def test_empty_is_eligible(self):
+        r = self._elig([])
+        self.assertTrue(r['eligible'])
+        self.assertEqual(r['status'], 'eligible')

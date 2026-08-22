@@ -64,6 +64,58 @@ def role_label(user):
     return "Student"
 
 
+# ── Exam-eligibility rule ─────────────────────────────────────────────────────
+# A student may NOT sit the end-of-semester exam for a course if they miss
+# 3 CONSECUTIVE held sessions, OR 4 CUMULATIVE (total) held sessions.
+EXAM_MAX_CONSECUTIVE_ABSENCES = 3   # >= this many in a row ⇒ blocked
+EXAM_MAX_TOTAL_ABSENCES = 4         # >= this many overall ⇒ blocked
+
+
+def exam_eligibility(statuses):
+    """Given an ordered list of 'present'/'absent' for a course's HELD sessions
+    (skip not-yet-held ones), return the exam-eligibility standing for that
+    course under the absence rule.
+
+    Returns a dict:
+      total_absent, max_consecutive_absent, eligible (bool),
+      status ('eligible' | 'warning' | 'blocked'), reason (str).
+    'warning' means one more miss would cross a limit.
+    """
+    total_absent = sum(1 for s in statuses if s == 'absent')
+    max_consec = run = 0
+    for s in statuses:
+        if s == 'absent':
+            run += 1
+            max_consec = max(max_consec, run)
+        else:
+            run = 0
+
+    blocked = (
+        max_consec >= EXAM_MAX_CONSECUTIVE_ABSENCES
+        or total_absent >= EXAM_MAX_TOTAL_ABSENCES
+    )
+    if blocked:
+        if max_consec >= EXAM_MAX_CONSECUTIVE_ABSENCES:
+            reason = f"{max_consec} sessions missed in a row"
+        else:
+            reason = f"{total_absent} sessions missed in total"
+        status = 'blocked'
+    elif max_consec == EXAM_MAX_CONSECUTIVE_ABSENCES - 1 or total_absent == EXAM_MAX_TOTAL_ABSENCES - 1:
+        status = 'warning'
+        reason = "One more absence would make you ineligible"
+    else:
+        status = 'eligible'
+        reason = ""
+
+    return {
+        'total_absent': total_absent,
+        'max_consecutive_absent': max_consec,
+        'eligible': not blocked,
+        'status': status,
+        'reason': reason,
+    }
+
+
 def style_guide(request):
     """Living style guide / component gallery for the SWASA design system.
     Presentational only (no data), so it renders the reusable component language
@@ -1167,14 +1219,23 @@ def dashboard(request):
         )
     }
 
+    today = timezone.now().date()
+    date_joined = request.user.date_joined.date()
+
     for course in courses:
         sessions = course_id_to_sessions.get(course.id, [])
         weeks = []
+        held_statuses = []  # ordered present/absent for sessions already held
 
         for i, session in enumerate(sessions, start=1):
             code_obj = codes_by_session.get(session.id)
             record   = records_by_session.get(session.id)
             status   = "submitted" if record else "pending"
+
+            # Held = happened, and on/after the student joined. Only held
+            # sessions count toward the exam-eligibility absence rule.
+            if date_joined <= session.date < today:
+                held_statuses.append("present" if record else "absent")
 
             weeks.append({
                 "week_num": i,
@@ -1187,6 +1248,7 @@ def dashboard(request):
         total_sessions = len(weeks)
         attended = sum(1 for w in weeks if w['status'] == 'submitted')
         percentage = round((attended / total_sessions) * 100) if total_sessions > 0 else 0
+        eligibility = exam_eligibility(held_statuses)
 
         course_data.append({
             "course": course,
@@ -1194,6 +1256,7 @@ def dashboard(request):
             "total_sessions": total_sessions,
             "attended": attended,
             "percentage": percentage,
+            "eligibility": eligibility,
             # Student may self-drop only with zero attendance for the course.
             # `attended` counts records across all sessions of this course, so
             # attended == 0 is exactly the "no attendance" rule.
@@ -1201,11 +1264,13 @@ def dashboard(request):
         })
 
     # ── Overview: what the student most needs to see at a glance ──────────────
-    today = timezone.now().date()
     overall_attended = sum(c['attended'] for c in course_data)
     overall_total = sum(c['total_sessions'] for c in course_data)
     overall_pct = round((overall_attended / overall_total) * 100) if overall_total else 0
-    at_risk_courses = [c for c in course_data if c['total_sessions'] > 0 and c['percentage'] < 75]
+    # Exam eligibility (absence rule) drives "at risk"; % is informational only.
+    at_risk_courses = [c for c in course_data if c['eligibility']['status'] != 'eligible']
+    blocked_courses = [c for c in course_data if c['eligibility']['status'] == 'blocked']
+    warning_courses = [c for c in course_data if c['eligibility']['status'] == 'warning']
 
     course_by_id = {c['course'].id: c['course'] for c in course_data}
     todays_sessions, upcoming_sessions = [], []
@@ -1229,6 +1294,9 @@ def dashboard(request):
         "overall_total": overall_total,
         "at_risk_courses": at_risk_courses,
         "at_risk_count": len(at_risk_courses),
+        "blocked_courses": blocked_courses,
+        "blocked_count": len(blocked_courses),
+        "warning_courses": warning_courses,
         "todays_sessions": todays_sessions,
         "upcoming_sessions": upcoming_sessions[:4],
     })
@@ -1351,12 +1419,14 @@ def student_history(request):
             weeks.append({"week_num": i, "session": session, "status": day_status})
 
         percentage = round((attended / eligible_total) * 100) if eligible_total else 0
+        held_statuses = [w['status'] for w in weeks if w['status'] in ('present', 'absent')]
         history_data.append({
             "course": course,
             "weeks": weeks,
             "attended": attended,
             "total": eligible_total,
             "percentage": percentage,
+            "eligibility": exam_eligibility(held_statuses),
         })
 
     return render(request, "attendance/history.html", {
