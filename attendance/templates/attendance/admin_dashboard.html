@@ -9,7 +9,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
 
 /* ── Page Header ── */
 .ad-page-header {
-    background: linear-gradient(135deg, #091A55 0%, #0D2472 60%, #1a3a9a 100%);
+    background: #0D2472;
     border-radius: var(--radius-lg);
     padding: 1.75rem 2rem;
     margin-bottom: 1.5rem;
@@ -35,8 +35,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
 
 /* ── Notification Strip ── */
 .ad-notify {
-    background: #fffbea; border: 1px solid #f0c040;
-    border-left: 4px solid #F2C31A; border-radius: var(--radius-md);
+    background: #FBF1E3; border: 1px solid #EED6AE; border-radius: var(--radius-md);
     padding: 0.75rem 1.25rem; margin-bottom: 1.5rem;
     display: flex; align-items: center; gap: 0.75rem 1.5rem; flex-wrap: wrap;
     font-size: 13px;
@@ -144,9 +143,9 @@ html[data-theme="dark"] .ad-section-badge {
 
 .ad-prog-track { height: 6px; background: var(--border); border-radius: 99px; margin-bottom: 1rem; overflow: hidden; }
 .ad-prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
-.ad-prog-fill.good { background: linear-gradient(90deg, #1E9E5E, #2ECC71); }
-.ad-prog-fill.medium { background: linear-gradient(90deg, #C9A00E, #F2C31A); }
-.ad-prog-fill.low { background: linear-gradient(90deg, #C0392B, #E74C3C); }
+.ad-prog-fill.good { background: #167A4B; }
+.ad-prog-fill.medium { background: #B45309; }
+.ad-prog-fill.low { background: #B42318; }
 
 .ad-level-stats {
     display: grid; grid-template-columns: repeat(5, 1fr);
@@ -207,8 +206,8 @@ html[data-theme="dark"] .ad-ta-lvl {
 .ad-risk-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
 .ad-risk-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; max-width: 90px; }
 .ad-risk-bar-fill { height: 100%; border-radius: 99px; }
-.ad-risk-bar-fill.amber { background: linear-gradient(90deg, #C9A00E, #F2C31A); }
-.ad-risk-bar-fill.red { background: linear-gradient(90deg, #C0392B, #E74C3C); }
+.ad-risk-bar-fill.amber { background: #B45309; }
+.ad-risk-bar-fill.red { background: #B42318; }
 .ad-risk-pct { font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
 .ad-risk-pct.amber { color: #C9A00E; }
 .ad-risk-pct.red { color: #C0392B; }
