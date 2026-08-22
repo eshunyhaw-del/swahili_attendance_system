@@ -7,7 +7,7 @@
 <title>SWASA Attendance System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     {% load static %}
 <script src="{% static 'js/iconify.min.js' %}"></script>
 <style>
@@ -16,17 +16,17 @@
             --primary: #0D2472;
             --primary-hover: #091A55;
             --primary-light: rgba(13, 36, 114, 0.08);
-            --gold: #F2C31A;
-            --gold-hover: #D4A900;
-            --orange: #E85D26;
-            --orange-light: rgba(232, 93, 38, 0.1);
+            --gold: #E6B325;
+            --gold-hover: #C7961A;
+            --orange: #C7671F;
+            --orange-light: rgba(199, 103, 31, 0.09);
 
-            --bg-main: #F8F4EF;
+            --bg-main: #EEF1F8;
             --bg-card: #FFFFFF;
-            --text-main: #1A1A2E;
-            --text-muted: #6B7280;
-            --text-hint: #9CA3AF;
-            --border: #E8E0D8;
+            --text-main: #16203C;
+            --text-muted: #5B6577;
+            --text-hint: #98A1B3;
+            --border: #E5E8F0;
             --shadow: 0 4px 20px rgba(13, 36, 114, 0.08);
             --radius-lg: 16px;
             --radius-sm: 8px;
@@ -42,12 +42,12 @@
             --blue: #4A90D9;
             --bg-base: var(--bg-main);
             --bg-surface: var(--bg-card);
-            --bg-subtle: #EDE4D8;
+            --bg-subtle: #E7ECF6;
             --bg-overlay: rgba(13, 36, 114, 0.04);
             --text-primary: var(--text-main);
-            --text-secondary: #4A5568;
+            --text-secondary: #45506A;
             --text-inverse: #FFFFFF;
-            --border-strong: #C8D0E0;
+            --border-strong: #D2D8E6;
             --sidebar-width: 260px;
             --topbar-height: 60px;
             --shadow-xs: 0 1px 2px rgba(13, 36, 114, 0.06);
@@ -110,7 +110,7 @@
         }
 
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Montserrat', system-ui, sans-serif;
             color: var(--text-primary);
             font-size: 14px;
             line-height: 1.6;
@@ -1007,15 +1007,10 @@
             animation: cultural-glow 3.5s ease-in-out infinite;
             pointer-events: none;
         }
-        .cultural-emoji-wrap {
-            width: 50px; height: 50px;
-            background: rgba(242,195,26,0.15);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-            border: 1px solid rgba(242,195,26,0.28);
-            position: relative; z-index: 1;
+        .cultural-accent {
+            width: 4px; align-self: stretch; min-height: 40px;
+            background: var(--gold); border-radius: 4px;
+            flex-shrink: 0; position: relative; z-index: 1;
         }
         .cultural-content {
             flex: 1; min-width: 0;
@@ -1045,7 +1040,6 @@
         .cultural-dismiss:hover { background: rgba(255,255,255,0.2); color: #fff; }
         @media (max-width: 480px) {
             .cultural-date-banner { padding: 0.875rem 1rem; gap: 0.75rem; }
-            .cultural-emoji-wrap { width: 42px; height: 42px; font-size: 20px; }
             .cultural-name { font-size: 13.5px; }
         }
 
@@ -1055,9 +1049,10 @@
             border-left-color: #F2C31A;
         }
         html[data-theme="dark"] .notif-item.sys-notif { background: rgba(242,195,26,0.06); }
-        .notif-sys-emoji {
-            font-size: 18px; flex-shrink: 0; line-height: 1;
-            margin-top: 2px;
+        .notif-sys-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--gold); flex-shrink: 0; margin-top: 7px;
+            box-shadow: 0 0 0 3px rgba(230,179,37,0.14);
         }
 
         /* ─── SWAHILI GREETING BANNER ─── */
@@ -1316,7 +1311,7 @@
 
                                 {% for notif in sys_notifications %}
 <div class="notif-item sys-notif" id="sysnotif-{{ notif.id }}">
-<span class="notif-sys-emoji">{{ notif.emoji }}</span>
+<span class="notif-sys-dot" aria-hidden="true"></span>
                                     {% if notif.link %}
 <a href="{{ notif.link }}" class="notif-link" onclick="markSysRead({{ notif.id }})">
 <div class="notif-ann-title">{{ notif.title }}</div>
@@ -1413,7 +1408,7 @@
             {% if today_cultural_dates %}
             {% with cd=today_cultural_dates.0 %}
 <div class="cultural-date-banner" id="culturalDateBanner" style="display:none;">
-<div class="cultural-emoji-wrap">{{ cd.emoji }}</div>
+<div class="cultural-accent" aria-hidden="true"></div>
 <div class="cultural-content">
 <div class="cultural-name">{{ cd.name }}</div>
 <div class="cultural-msg">{{ cd.description }}</div>
@@ -1700,11 +1695,11 @@
         function buildPhraseWidget(phrase) {
             var hasResponse = phrase.response_swahili && phrase.response_swahili.length > 0;
             var html = '<div class="phrase-widget">'
-                + '<div class="phrase-category">&#x1F4AC; ' + phrase.category + ' &middot; Phrase of the Hour</div>'
+                + '<div class="phrase-category">' + phrase.category + ' &middot; Phrase of the Hour</div>'
                 + '<div class="phrase-swahili">' + phrase.swahili + '</div>'
                 + '<div class="phrase-english">' + phrase.english + '</div>';
             if (hasResponse) {
-                html += '<div class="phrase-response">&#x21A9; ' + phrase.response_swahili + ' &mdash; ' + phrase.response_english + '</div>';
+                html += '<div class="phrase-response">' + phrase.response_swahili + ' &mdash; ' + phrase.response_english + '</div>';
             }
             html += '</div>';
             return html;

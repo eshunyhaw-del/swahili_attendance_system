@@ -1,368 +1,391 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token }}">
-<title>Sign In — SWASA Attendance</title>
-<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<title>Sign in — SWASA Attendance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="{% static 'js/iconify.min.js' %}"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-        :root {
-            --navy: #0D2472;
-            --navy-dark: #091A55;
-            --gold: #F2C31A;
-            --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px;
-        }
+    :root {
+        --navy:        #0D2472;
+        --navy-deep:   #081A52;
+        --navy-900:    #06123F;
+        --gold:        #E6B325;
+        --gold-deep:   #C7961A;
 
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        --ink:         #16203C;
+        --muted:       #5B6577;
+        --line:        #E5E8F0;
+        --field-line:  #D2D8E6;
+        --bg:          #EEF1F8;
+        --white:       #FFFFFF;
 
-        html, body { height: 100%; overflow: hidden; }
+        --danger:      #C0392B;
+        --danger-bg:   #FCEDEB;
+        --danger-line: #F1C7C1;
+    }
 
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background:
-                linear-gradient(135deg, rgba(9,26,85,0.68) 0%, rgba(13,36,114,0.55) 50%, rgba(9,26,85,0.74) 100%),
-                url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            -webkit-font-smoothing: antialiased;
-            color: #fff;
-        }
+    * , *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ─── Glass card ─── */
-        .card {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(22px);
-            -webkit-backdrop-filter: blur(22px);
-            border-radius: var(--r-xl);
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
+    body {
+        font-family: 'Montserrat', system-ui, sans-serif;
+        color: var(--ink);
+        background:
+            radial-gradient(1200px 600px at 15% -10%, rgba(13,36,114,0.10), transparent 60%),
+            radial-gradient(900px 500px at 100% 110%, rgba(230,179,37,0.08), transparent 55%),
+            var(--bg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
 
-        /* ─── Navy header ─── */
-        .card-top {
-            background: linear-gradient(145deg, rgba(9,26,85,0.95) 0%, rgba(26,58,156,0.90) 55%, rgba(9,26,85,0.95) 100%);
-            padding: 1.5rem 2rem 1.4rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+    .auth {
+        width: 100%;
+        max-width: 940px;
+        display: grid;
+        grid-template-columns: 1.02fr 1fr;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px -30px rgba(13,36,114,0.30);
+    }
 
-        .auth-logo {
-            width: 56px; height: 56px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(242,195,26,0.5);
-            flex-shrink: 0;
-        }
-        .auth-brand {
-            display: flex; align-items: center; justify-content: center;
-            gap: 12px; margin-bottom: 0.5rem;
-        }
-        .auth-brand-text {
-            display: flex; flex-direction: column; line-height: 1.3;
-        }
-        .auth-brand-name {
-            font-size: 1.1rem; font-weight: 700; color: #FFFFFF;
-        }
-        .auth-brand-sub {
-            font-size: 11px; font-weight: 400;
-            color: rgba(255,255,255,0.75); letter-spacing: 0.2px;
-        }
+    /* ── Brand panel ───────────────────────────────────── */
+    .brand {
+        position: relative;
+        background:
+            linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 60%, var(--navy-900) 100%);
+        color: #fff;
+        padding: 2.75rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 520px;
+        overflow: hidden;
+    }
+    /* Quiet woven texture — a nod to kente, never loud */
+    .brand::before {
+        content: "";
+        position: absolute; inset: 0;
+        background-image:
+            repeating-linear-gradient(45deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 22px),
+            repeating-linear-gradient(-45deg, rgba(230,179,37,0.05) 0 1px, transparent 1px 22px);
+        pointer-events: none;
+    }
+    .brand > * { position: relative; z-index: 1; }
 
-        .card-top h1 {
-            font-size: 1.2rem; font-weight: 800;
-            color: #fff; letter-spacing: -0.02em;
-            margin-bottom: 0.2rem; position: relative; z-index: 1;
-        }
-        .card-top-sub {
-            font-size: 12px; color: rgba(255,255,255,0.6);
-            font-weight: 500; position: relative; z-index: 1;
-            text-align: center;
-        }
+    .brand-mark { display: flex; align-items: center; gap: 0.85rem; }
+    .brand-logo {
+        width: 46px; height: 46px; border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 0 0 3px rgba(230,179,37,0.55);
+    }
+    .brand-mark-text { display: flex; flex-direction: column; line-height: 1.15; }
+    .brand-mark-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.01em; }
+    .brand-mark-org  { font-size: 0.7rem; font-weight: 500; color: rgba(255,255,255,0.6); letter-spacing: 0.04em; }
 
-        /* ─── Form body ─── */
-        .card-body { padding: 1.25rem 1.75rem 1.25rem; }
+    .brand-lede { max-width: 22ch; }
+    .brand-eyebrow {
+        display: inline-block;
+        font-size: 0.66rem; font-weight: 600; letter-spacing: 0.22em;
+        text-transform: uppercase; color: var(--gold);
+        margin-bottom: 1rem;
+    }
+    .brand-eyebrow::after {
+        content: ""; display: block; width: 34px; height: 2px;
+        background: var(--gold); margin-top: 0.7rem; border-radius: 2px;
+    }
+    .brand-title {
+        font-size: 2rem; font-weight: 800; line-height: 1.12;
+        letter-spacing: -0.02em;
+    }
+    .brand-desc {
+        margin-top: 0.85rem; font-size: 0.82rem; font-weight: 400;
+        line-height: 1.65; color: rgba(255,255,255,0.68);
+        max-width: 30ch;
+    }
+    .brand-foot {
+        font-size: 0.66rem; font-weight: 500; letter-spacing: 0.03em;
+        color: rgba(255,255,255,0.45);
+    }
 
-        /* Error banner */
-        .error-banner {
-            background: rgba(192,57,43,0.2);
-            border: 1px solid rgba(231,76,60,0.35);
-            border-left: 3px solid #e74c3c;
-            border-radius: var(--r-sm);
-            padding: 0.6rem 0.875rem;
-            display: flex; align-items: center; gap: 0.5rem;
-            font-size: 12.5px; color: #ffaaaa;
-            margin-bottom: 1rem; line-height: 1.4;
-        }
-        .error-banner .iconify { font-size: 16px; flex-shrink: 0; }
+    /* ── Form panel ────────────────────────────────────── */
+    .panel { padding: 2.75rem 2.75rem 2.25rem; display: flex; flex-direction: column; }
 
-        /* Fields */
-        .field { margin-bottom: 0.875rem; }
-        .field-label {
-            display: block; font-size: 12px; font-weight: 600;
-            color: rgba(255,255,255,0.85); margin-bottom: 0.35rem;
-        }
-        .field-wrap { position: relative; }
-        .field-icon {
-            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-            color: rgba(255,255,255,0.45); font-size: 18px; pointer-events: none;
-        }
-        .field-input {
-            width: 100%;
-            padding: 0.85rem 2.75rem 0.85rem 2.75rem;
-            border: 1.5px solid rgba(255,255,255,0.18);
-            border-radius: var(--r-sm);
-            font-family: inherit; font-size: 14px; color: #fff;
-            background: rgba(255,255,255,0.08); outline: none;
-            transition: border-color 0.13s, box-shadow 0.13s;
-        }
-        .field-input:focus {
-            border-color: var(--gold);
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 0 0 3px rgba(242,195,26,0.18);
-        }
-        .field-input::placeholder { color: rgba(255,255,255,0.35); }
+    .panel-head { margin-bottom: 1.6rem; }
+    .panel-head h1 {
+        font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em;
+        color: var(--ink);
+    }
+    .panel-head p { margin-top: 0.4rem; font-size: 0.83rem; color: var(--muted); font-weight: 500; }
 
-        /* Password toggle */
-        .pw-toggle {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; cursor: pointer;
-            color: rgba(255,255,255,0.45); font-size: 20px; padding: 2px;
-            display: flex; align-items: center; border-radius: 6px;
-            transition: color 0.13s;
-        }
-        .pw-toggle:hover { color: var(--gold); }
+    .alert {
+        display: flex; gap: 0.5rem; align-items: flex-start;
+        background: var(--danger-bg);
+        border: 1px solid var(--danger-line);
+        border-left: 3px solid var(--danger);
+        border-radius: 8px;
+        padding: 0.65rem 0.8rem;
+        font-size: 0.78rem; font-weight: 500; color: var(--danger);
+        line-height: 1.45; margin-bottom: 1.25rem;
+    }
+    .alert svg { flex-shrink: 0; margin-top: 1px; }
 
-        /* Utilities row */
-        .util-row {
-            display: flex; align-items: center; justify-content: space-between;
-            margin: 0.4rem 0 0.875rem; font-size: 12.5px;
-        }
-        .check-label {
-            display: flex; align-items: center; gap: 0.45rem;
-            color: rgba(255,255,255,0.6); cursor: pointer; user-select: none; font-weight: 500;
-        }
-        .check-label input[type="checkbox"] {
-            appearance: none; -webkit-appearance: none;
-            width: 16px; height: 16px;
-            border: 2px solid rgba(255,255,255,0.25); border-radius: 4px;
-            cursor: pointer; flex-shrink: 0;
-            transition: all 0.13s; background: rgba(255,255,255,0.08);
-            position: relative;
-        }
-        .check-label input:checked { background: var(--gold); border-color: var(--gold); }
-        .check-label input:checked::after {
-            content: ''; position: absolute;
-            left: 3px; top: 0;
-            width: 5px; height: 9px;
-            border: 2px solid var(--navy-dark); border-top: none; border-left: none;
-            transform: rotate(45deg);
-        }
-        .forgot-link {
-            color: var(--gold); font-weight: 600; text-decoration: none; font-size: 12.5px;
-        }
-        .forgot-link:hover { text-decoration: underline; }
+    .field { margin-bottom: 1rem; }
+    .field label {
+        display: block; font-size: 0.73rem; font-weight: 600;
+        color: var(--ink); letter-spacing: 0.01em; margin-bottom: 0.4rem;
+    }
+    .field-wrap { position: relative; }
+    .field input {
+        width: 100%;
+        padding: 0.8rem 0.9rem;
+        font-family: inherit; font-size: 0.9rem; font-weight: 500; color: var(--ink);
+        background: #FBFCFE;
+        border: 1.5px solid var(--field-line);
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .field input[type="password"] { padding-right: 3rem; }
+    .field input::placeholder { color: #9AA3B5; font-weight: 400; }
+    .field input:focus {
+        border-color: var(--navy);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(13,36,114,0.12);
+    }
 
-        /* Kiswahili CTA label */
-        .kiswahili-cta {
-            text-align: center;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 0.5rem;
+    .pw-toggle {
+        position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; color: var(--muted);
+        padding: 0.4rem; border-radius: 8px; display: flex; line-height: 0;
+        transition: color 0.15s, background 0.15s;
+    }
+    .pw-toggle:hover { color: var(--navy); background: rgba(13,36,114,0.06); }
+
+    .row {
+        display: flex; align-items: center; justify-content: space-between;
+        margin: 0.25rem 0 1.4rem; gap: 1rem;
+    }
+    .remember { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
+    .remember input {
+        appearance: none; -webkit-appearance: none;
+        width: 17px; height: 17px; flex-shrink: 0;
+        border: 1.5px solid var(--field-line); border-radius: 5px;
+        background: #fff; cursor: pointer; position: relative; transition: all 0.15s;
+    }
+    .remember input:checked { background: var(--navy); border-color: var(--navy); }
+    .remember input:checked::after {
+        content: ""; position: absolute; left: 5px; top: 1.5px;
+        width: 4px; height: 8px; border: 2px solid #fff; border-top: 0; border-left: 0;
+        transform: rotate(43deg);
+    }
+    .remember span { font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+    .link {
+        font-size: 0.78rem; font-weight: 600; color: var(--navy);
+        text-decoration: none; text-underline-offset: 2px;
+    }
+    .link:hover { text-decoration: underline; }
+
+    .btn {
+        width: 100%; padding: 0.9rem 1.25rem;
+        font-family: inherit; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.01em;
+        color: #fff; background: var(--navy);
+        border: none; border-radius: 10px; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        transition: background 0.15s, transform 0.05s;
+    }
+    .btn:hover { background: var(--navy-deep); }
+    .btn:active { transform: translateY(1px); }
+    .btn svg { transition: transform 0.15s; }
+    .btn:hover svg { transform: translateX(3px); }
+
+    .sep {
+        display: flex; align-items: center; gap: 0.85rem;
+        margin: 1.75rem 0 1.1rem;
+        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+        color: #9AA3B5;
+    }
+    .sep::before, .sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    .reg { display: flex; flex-direction: column; gap: 0.6rem; }
+    .reg-link {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.8rem 0.95rem;
+        border: 1px solid var(--line); border-radius: 10px;
+        text-decoration: none; color: var(--ink);
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .reg-link:hover { border-color: var(--navy); background: #FBFCFE; }
+    .reg-link .rl-title { font-size: 0.83rem; font-weight: 600; }
+    .reg-link .rl-sub { font-size: 0.72rem; font-weight: 500; color: var(--muted); margin-top: 1px; }
+    .reg-link .rl-arrow { color: #B4BCCB; transition: transform 0.15s, color 0.15s; }
+    .reg-link:hover .rl-arrow { color: var(--navy); transform: translateX(3px); }
+
+    .credit {
+        margin-top: 1.75rem; text-align: center;
+        font-size: 0.68rem; font-weight: 500; color: #A2AAB9;
+    }
+    .credit a { color: var(--navy); text-decoration: none; font-weight: 600; }
+    .credit a:hover { text-decoration: underline; }
+
+    /* Orchestrated load — one calm reveal */
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .stagger > * { opacity: 0; animation: rise 0.5s cubic-bezier(0.22,0.61,0.36,1) forwards; }
+    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.12s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.19s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.26s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.33s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+    /* ── Responsive ────────────────────────────────────── */
+    @media (max-width: 800px) {
+        body { padding: 0; align-items: stretch; background: var(--white); }
+        .auth {
+            grid-template-columns: 1fr; max-width: 480px; margin: 0 auto;
+            border: none; border-radius: 0; box-shadow: none; min-height: 100vh;
         }
-
-        /* Sign-in button */
-        .btn-signin {
-            width: 100%; padding: 0.75rem 1.5rem;
-            background: var(--gold); color: var(--navy-dark);
-            border: none;
-            border-radius: var(--r-sm);
-            font-family: inherit; font-size: 14px; font-weight: 700;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-            transition: all 0.15s;
-            box-shadow: 0 2px 10px rgba(242,195,26,0.4);
+        .brand {
+            min-height: auto; padding: 1.75rem 1.75rem 1.6rem;
+            flex-direction: row; align-items: center; gap: 1rem;
         }
-        .btn-signin:hover { background: var(--gold-hover, #D4A900); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(242,195,26,0.5); }
-        .btn-signin:active { transform: scale(0.98); }
-
-        /* Divider */
-        .divider {
-            display: flex; align-items: center; margin: 1rem 0 0.75rem;
-        }
-        .divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid rgba(255,255,255,0.15); }
-        .divider span { padding: 0 0.75rem; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
-
-        /* Register links */
-        .reg-link {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.6rem 0.875rem;
-            border: 1.5px solid rgba(255,255,255,0.15);
-            border-radius: var(--r-sm);
-            text-decoration: none;
-            margin-bottom: 0.4rem;
-            transition: all 0.13s;
-            background: rgba(255,255,255,0.06);
-        }
-        .reg-link:last-child { margin-bottom: 0; }
-        .reg-link:hover { border-color: var(--gold); background: rgba(255,255,255,0.1); }
-
-        .reg-link-icon {
-            width: 34px; height: 34px;
-            background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
-            border-radius: var(--r-sm);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 17px; flex-shrink: 0;
-            transition: all 0.13s;
-        }
-        .reg-link:hover .reg-link-icon { background: var(--gold); color: var(--navy-dark); }
-
-        .reg-link-text { flex: 1; }
-        .reg-link-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); }
-        .reg-link-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; margin-top: 1px; }
-
-        .reg-link-chevron { color: rgba(255,255,255,0.35); font-size: 18px; flex-shrink: 0; }
-
-        /* Branding footer */
-        .card-foot {
-            text-align: center; padding: 0 1.75rem 1rem;
-            font-size: 11px; color: rgba(255,255,255,0.35); line-height: 1.7;
-        }
-        .card-foot a { color: rgba(255,255,255,0.35); text-decoration: none; }
+        .brand-lede, .brand-foot { display: none; }
+        .brand-mark { flex: 1; }
+        .panel { padding: 2rem 1.75rem 2.5rem; flex: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .stagger > * { animation: none; opacity: 1; }
+        .btn:hover svg, .reg-link:hover .rl-arrow { transform: none; }
+    }
 </style>
 </head>
 <body>
 
-<div class="card">
+<main class="auth">
 
-<!-- Navy header -->
-<div class="card-top">
-<div class="auth-brand">
-<img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA Logo" class="auth-logo"/>
-<div class="auth-brand-text">
-<span class="auth-brand-name">SWASA Attendance</span>
-<span class="auth-brand-sub">University of Ghana</span>
-</div>
-</div>
-<div class="card-top-sub">Sign in to access your portal</div>
-</div>
+    <!-- Brand side -->
+    <aside class="brand">
+        <div class="brand-mark">
+            <img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA" class="brand-logo">
+            <span class="brand-mark-text">
+                <span class="brand-mark-name">SWASA Attendance</span>
+                <span class="brand-mark-org">University of Ghana</span>
+            </span>
+        </div>
 
-<!-- Form body -->
-<div class="card-body">
+        <div class="brand-lede">
+            <span class="brand-eyebrow">Attendance Portal</span>
+            <h2 class="brand-title">Karibu tena.</h2>
+            <p class="brand-desc">Sign in to record and track attendance for the Kiswahili programme.</p>
+        </div>
+
+        <p class="brand-foot">Department of Language, Literature &amp; Drama</p>
+    </aside>
+
+    <!-- Form side -->
+    <section class="panel stagger">
+
+        <div class="panel-head">
+            <h1>Sign in</h1>
+            <p>Welcome back — access your portal.</p>
+        </div>
 
         {% if login_error %}
-<div class="error-banner">
-<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
-            {{ login_error_message|default:"Invalid email or password. Please check and try again." }}
-</div>
+        <div class="alert" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ login_error_message|default:"Invalid email or password. Please check and try again." }}</span>
+        </div>
         {% endif %}
 
-<form method="post" autocomplete="on">
+        <form method="post" autocomplete="on">
             {% csrf_token %}
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
 
-<div class="field">
-<label class="field-label" for="id_email">Email Address</label>
-<div class="field-wrap">
-<span class="iconify field-icon" data-icon="mdi:email-outline"></span>
-<input type="email" name="email" id="id_email"
-                           class="field-input" placeholder="example@gmail.com"
-                           required autocomplete="email">
-</div>
-</div>
+            <div class="field">
+                <label for="id_email">Email address</label>
+                <div class="field-wrap">
+                    <input type="email" name="email" id="id_email"
+                           placeholder="you@example.com" required autocomplete="email">
+                </div>
+            </div>
 
-<div class="field">
-<label class="field-label" for="id_password">Password</label>
-<div class="field-wrap">
-<span class="iconify field-icon" data-icon="mdi:lock-outline"></span>
-<input type="password" name="password" id="id_password"
-                           class="field-input" placeholder="Your password"
-                           required autocomplete="current-password">
-<button type="button" class="pw-toggle" onclick="togglePw()" aria-label="Show/hide password">
-<span class="iconify" id="pwIcon" data-icon="mdi:eye-outline"></span>
-</button>
-</div>
-</div>
+            <div class="field">
+                <label for="id_password">Password</label>
+                <div class="field-wrap">
+                    <input type="password" name="password" id="id_password"
+                           placeholder="Enter your password" required autocomplete="current-password">
+                    <button type="button" class="pw-toggle" id="pwToggle" onclick="togglePw()" aria-label="Show password">
+                        <svg id="pwIcon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
 
-<div class="util-row">
-<label class="check-label">
-<input type="checkbox" name="remember_me">
-                    Keep me signed in
-</label>
-<a href="{% url 'attendance:otp_password_reset' %}" class="forgot-link">Forgot password?</a>
-</div>
+            <div class="row">
+                <label class="remember">
+                    <input type="checkbox" name="remember_me">
+                    <span>Keep me signed in</span>
+                </label>
+                <a href="{% url 'attendance:otp_password_reset' %}" class="link">Forgot password?</a>
+            </div>
 
-{% comment %} <div class="kiswahili-cta">Ingia Sasa</div> {% endcomment %}
-<button type="submit" class="btn-signin">
-                Sign In
-<span class="iconify" data-icon="mdi:arrow-right" style="font-size:18px;"></span>
-</button>
-</form>
+            <button type="submit" class="btn">
+                Sign in
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </form>
 
-<div class="divider"><span>New here?</span></div>
+        <div class="sep">New to SWASA</div>
 
-<a href="{% url 'attendance:register' %}" class="reg-link">
-<div class="reg-link-icon">
-<span class="iconify" data-icon="mdi:school-outline"></span>
-</div>
-<div class="reg-link-text">
-<div class="reg-link-title">Register as Student</div>
-{% comment %} <div class="reg-link-sub">Create your student portal account</div> {% endcomment %}
-</div>
-<span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
-</a>
+        <nav class="reg">
+            <a href="{% url 'attendance:register' %}" class="reg-link">
+                <span>
+                    <span class="rl-title">Register as Student</span>
+                    <span class="rl-sub">Create your student account</span>
+                </span>
+                <svg class="rl-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+            <a href="{% url 'attendance:ta_register' %}" class="reg-link">
+                <span>
+                    <span class="rl-title">Register as Teaching Assistant</span>
+                    <span class="rl-sub">Create your TA account</span>
+                </span>
+                <svg class="rl-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+        </nav>
 
-<a href="{% url 'attendance:ta_register' %}" class="reg-link">
-<div class="reg-link-icon">
-<span class="iconify" data-icon="mdi:account-tie-outline"></span>
-</div>
-<div class="reg-link-text">
-<div class="reg-link-title">Register as TA</div>
-{% comment %} <div class="reg-link-sub">Create your Teaching Assistant account</div> {% endcomment %}
-</div>
-<span class="iconify reg-link-chevron" data-icon="mdi:chevron-right"></span>
-</a>
+        <p class="credit">
+            Developed by <a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener">Cradle Premier Network</a>
+        </p>
 
-</div>
-
-<div class="card-foot">
-        {% comment %} SWASA Attendance · University of Ghana<br>
-        Department of African and Asian Languages<br> {% endcomment %}
-<a href="https://cradle-premier-network.odoo.com/" target="_blank" rel="noopener">Developed by Cradle Premier Network</a>
-</div>
-
-</div>
+    </section>
+</main>
 
 <script>
-function togglePw() {
-    const input = document.getElementById('id_password');
-    const icon = document.getElementById('pwIcon');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.setAttribute('data-icon', 'mdi:eye-off-outline');
-    } else {
-        input.type = 'password';
-        icon.setAttribute('data-icon', 'mdi:eye-outline');
+    function togglePw() {
+        var input = document.getElementById('id_password');
+        var icon = document.getElementById('pwIcon');
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        document.getElementById('pwToggle').setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        icon.innerHTML = showing
+            ? '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>'
+            : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
     }
-}
 
-document.querySelector('form').addEventListener('submit', function() {
-    localStorage.setItem('swasa_theme', 'light');
-});
+    // Keep the rest of the app opening in light mode after login.
+    document.querySelector('form').addEventListener('submit', function () {
+        try { localStorage.setItem('swasa_theme', 'light'); } catch (e) {}
+    });
 </script>
 </body>
 </html>
