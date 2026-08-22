@@ -38,9 +38,17 @@ def alumni_invite(request):
     if not (semester.end_date - timedelta(days=window_days) <= today <= semester.end_date):
         return {}
 
+    # Only during class hours (local time). The per-day cap is enforced browser-side.
+    hour = timezone.localtime().hour
+    start_h = getattr(settings, 'ALUMNI_INVITE_HOURS_START', 7)
+    end_h = getattr(settings, 'ALUMNI_INVITE_HOURS_END', 18)
+    if not (start_h <= hour < end_h):
+        return {}
+
     return {
         'show_alumni_popup': True,
         'alumni_whatsapp_url': getattr(settings, 'ALUMNI_WHATSAPP_URL', ''),
+        'alumni_max_per_day': getattr(settings, 'ALUMNI_INVITE_MAX_PER_DAY', 2),
     }
 
 

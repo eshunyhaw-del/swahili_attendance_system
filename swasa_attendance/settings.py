@@ -348,6 +348,11 @@ ALUMNI_WHATSAPP_URL = config(
 )
 # How many days before the second semester's end_date the pop-up starts showing.
 ALUMNI_INVITE_WINDOW_DAYS = config('ALUMNI_INVITE_WINDOW_DAYS', default=7, cast=int)
+# Only show during class hours (local Africa/Accra time), and at most N times per
+# day per browser (once per app-open, capped). All overridable via .env.
+ALUMNI_INVITE_HOURS_START = config('ALUMNI_INVITE_HOURS_START', default=7, cast=int)   # 07:00
+ALUMNI_INVITE_HOURS_END = config('ALUMNI_INVITE_HOURS_END', default=18, cast=int)      # 18:00
+ALUMNI_INVITE_MAX_PER_DAY = config('ALUMNI_INVITE_MAX_PER_DAY', default=2, cast=int)
 
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
