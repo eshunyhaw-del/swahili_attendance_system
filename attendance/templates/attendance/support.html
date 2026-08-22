@@ -7,10 +7,10 @@
     --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #F8F4EF;
+    --bg: #EEF1F8;
     --text: #1A1A2E;
     --muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --green: #1A9E60;
     --green-lt: rgba(26,158,96,0.10);
     --amber: #B8920C;
@@ -24,7 +24,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -153,8 +153,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
                               placeholder="Describe your issue in detail…" required>{{ form.message.value|default:'' }}</textarea>
 </div>
 <button type="submit" class="btn-submit">
-<span class="iconify" data-icon="mdi:send-outline"></span>
-                    Submit Ticket
+Submit Ticket
 </button>
 </form>
 </div>

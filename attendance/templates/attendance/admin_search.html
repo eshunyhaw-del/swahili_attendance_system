@@ -385,13 +385,11 @@
 <div class="data-card">
 <div class="data-actions-bar">
 <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-outline">
-<span class="iconify" data-icon="mdi:file-delimited-outline" style="font-size: 1.2rem;"></span> 
-                Export All (CSV)
+Export All (CSV)
 </a>
             {% if selected_level %}
 <a href="{% url 'attendance:export_level' selected_level %}" class="btn btn-outline">
-<span class="iconify" data-icon="mdi:file-table-outline" style="font-size: 1.2rem;"></span>
-                    Export Level (CSV)
+Export Level (CSV)
 </a>
             {% endif %}
 </div>

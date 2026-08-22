@@ -7,23 +7,23 @@
     --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #F8F4EF;
+    --bg: #EEF1F8;
     --text: #1A1A2E;
     --muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --green: #1A9E60;
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
     --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
 /* ─── Page header ─── */
 .page-header {
-    background: #EDE4D8;
+    background: #E7ECF6;
     color: var(--text);
     border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
@@ -226,8 +226,7 @@ body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-s
 
                 {% if form.courses %}
 <button type="submit" class="btn-register" id="submitBtn">
-<span class="iconify" data-icon="mdi:check-bold"></span>
-                    Register Selected Courses
+Register Selected Courses
 </button>
                 {% endif %}
 </form>

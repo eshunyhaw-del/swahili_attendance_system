@@ -238,13 +238,13 @@ html[data-theme="dark"] .ad-ta-lvl {
 </div>
 <div class="ad-header-actions">
 <a href="{% url 'attendance:admin_search' %}" class="ad-btn-ghost">
-<span class="iconify" data-icon="mdi:magnify"></span> Search Students
+Search Students
 </a>
 <a href="{% url 'attendance:admin_export_all_csv' %}" class="ad-btn-ghost">
-<span class="iconify" data-icon="mdi:download-outline"></span> Export All
+Export All
 </a>
 <a href="{% url 'attendance:lecturer_dashboard' %}" class="ad-btn-ghost">
-<span class="iconify" data-icon="mdi:calendar-today-outline"></span> Daily View
+Daily View
 </a>
 </div>
 </div>
@@ -358,10 +358,10 @@ html[data-theme="dark"] .ad-ta-lvl {
 
 <div class="ad-level-actions">
 <a href="{% url 'attendance:export_level' stat.level.id %}" class="ad-btn-sm ad-btn-outline">
-<span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+Export CSV
 </a>
 <a href="{% url 'attendance:student_report' %}?level={{ stat.level.id }}" class="ad-btn-sm ad-btn-primary">
-<span class="iconify" data-icon="mdi:eye-outline"></span> View Report
+View Report
 </a>
 </div>
 </div>

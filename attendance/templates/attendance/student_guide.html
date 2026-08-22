@@ -7,10 +7,10 @@
     --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #F8F4EF;
+    --bg: #EEF1F8;
     --text: #1A1A2E;
     --muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --green: #1A9E60;
     --green-lt: rgba(26,158,96,0.10);
     --amber: #B8920C;
@@ -22,7 +22,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -339,8 +339,7 @@ html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
                 >
 </div>
 <button class="dict-btn" id="dictSearchBtn" onclick="doSearch()">
-<span class="iconify" data-icon="mdi:magnify" data-width="16"></span>
-                Tafuta
+Tafuta
 </button>
 </div>
 
@@ -363,8 +362,7 @@ html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
 </div>
 
 <button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">
-<span class="iconify" data-icon="mdi:lightbulb-outline" data-width="14"></span>
-            Tips for searching
+Tips for searching
 <span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span>
 </button>
 <div class="dict-tips-body" id="dictTipsBody">

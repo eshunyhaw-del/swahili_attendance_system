@@ -4,16 +4,16 @@
 {% block content %}
 <style>
 :root {
-    --bg-base: #F8F4EF;
+    --bg-base: #EEF1F8;
     --bg-surface: #FFFFFF;
-    --bg-subtle: #F8F4EF;
+    --bg-subtle: #EEF1F8;
     --radius-lg: 16px;
     --shadow-xs: 0 1px 3px rgba(13,36,114,0.07);
     --shadow-md: 0 4px 14px rgba(13,36,114,0.10);
     --text-primary: #1A1A2E;
     --text-secondary: #6B7280;
     --text-muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --border-strong: #D4C8BE;
     --gold: #F2C31A;
 }
@@ -228,15 +228,14 @@ html[data-theme="dark"] .ld-course-code {
 <!-- Week Navigation -->
 <div class="ld-week-nav">
 <a href="?week={{ week_offset|add:"-1" }}" class="ld-week-btn">
-<span class="iconify" data-icon="mdi:chevron-left"></span> Prev
+Prev
 </a>
 <span class="ld-week-range">{{ week_start|date:"M j" }} – {{ week_end|date:"M j" }}</span>
 <a href="?week={{ week_offset|add:"1" }}" class="ld-week-btn">
-            Next<span class="iconify" data-icon="mdi:chevron-right"></span>
-</a>
+            Next</a>
         {% if week_offset != 0 %}
 <a href="?" class="ld-week-btn ld-week-current">
-<span class="iconify" data-icon="mdi:calendar-today"></span> This Week
+This Week
 </a>
         {% endif %}
 <form method="get" class="ld-jump-form">
@@ -293,7 +292,7 @@ html[data-theme="dark"] .ld-course-code {
 </div>
 </div>
 <a href="{% url 'attendance:export_csv' item.session.id %}" class="ld-export-btn">
-<span class="iconify" data-icon="mdi:download-outline"></span> Export CSV
+Export CSV
 </a>
 </div>
 
@@ -336,8 +335,7 @@ html[data-theme="dark"] .ld-course-code {
 <div class="ld-absent-section">
             {% if item.absent_profiles %}
 <button class="ld-absent-toggle" onclick="toggleAbsent(this)">
-<span class="iconify" data-icon="mdi:account-remove-outline" style="font-size:16px;"></span>
-                Absent students ({{ absent_count }})
+Absent students ({{ absent_count }})
 <span class="iconify arrow" data-icon="mdi:chevron-down" style="font-size:16px;"></span>
 </button>
 <div class="ld-absent-list">

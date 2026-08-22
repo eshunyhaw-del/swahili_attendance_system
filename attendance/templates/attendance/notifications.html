@@ -7,10 +7,10 @@
     --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #F8F4EF;
+    --bg: #EEF1F8;
     --text: #1A1A2E;
     --muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --green: #1A9E60;
     --green-lt: rgba(26,158,96,0.10);
     --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
@@ -18,7 +18,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 700px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -171,8 +171,7 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
 </div>
         {% if notifs %}
 <button class="btn-mark-all-header" onclick="markAllReadPage()">
-<span class="iconify" data-icon="mdi:check-all"></span>
-            Mark all as read
+Mark all as read
 </button>
         {% endif %}
 </div>
@@ -215,7 +214,7 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
             {% endif %}
             {% if not s.is_read %}
 <button class="btn-mark-read" onclick="markSysRead({{ s.id }})">
-<span class="iconify" data-icon="mdi:check"></span> Mark as read
+Mark as read
 </button>
             {% else %}
 <span class="read-label">
@@ -250,7 +249,7 @@ html[data-theme="dark"] .btn-mark-read:hover { background: var(--gold); color: #
 </div>
             {% if not notif.is_read %}
 <button class="btn-mark-read" onclick="markOneRead({{ notif.id }})">
-<span class="iconify" data-icon="mdi:check"></span> Mark as read
+Mark as read
 </button>
             {% else %}
 <span class="read-label">

@@ -4,16 +4,16 @@
 {% block content %}
 <style>
 :root {
-    --bg-base: #F8F4EF;
+    --bg-base: #EEF1F8;
     --bg-surface: #FFFFFF;
-    --bg-subtle: #F8F4EF;
+    --bg-subtle: #EEF1F8;
     --radius-lg: 16px;
     --shadow-xs: 0 1px 3px rgba(13,36,114,0.07);
     --shadow-md: 0 4px 14px rgba(13,36,114,0.10);
     --text-primary: #1A1A2E;
     --text-secondary: #6B7280;
     --text-muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --border-strong: #D4C8BE;
     --gold: #F2C31A;
 }
@@ -204,8 +204,7 @@ html[data-theme="dark"] .alr-code-tag {
                     {% csrf_token %}
 <input type="hidden" name="alert_id" value="{{ alert.id }}">
 <button type="submit" class="alr-resolve-btn">
-<span class="iconify" data-icon="mdi:check-circle-outline"></span>
-                        Mark as Resolved
+Mark as Resolved
 </button>
 </form>
 </div>

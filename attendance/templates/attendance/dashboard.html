@@ -752,7 +752,7 @@
 </div>
                 {% endfor %}
 
-<div class="course-footer" style="padding:0.85rem 0 0.25rem;border-top:1px solid var(--border,#E8E0D8);margin-top:0.5rem;">
+<div class="course-footer" style="padding:0.85rem 0 0.25rem;border-top:1px solid var(--border,#E5E8F0);margin-top:0.5rem;">
                     {% if course.can_deregister %}
 <form method="post" action="{% url 'attendance:student_deregister_course' %}"
                           onsubmit="return confirm('Deregister from {{ course.course.code }}? You can re-register later from the course registration page.');"

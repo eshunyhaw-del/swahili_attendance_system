@@ -8,10 +8,10 @@
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #F8F4EF;
+    --bg: #EEF1F8;
     --text: #1A1A2E;
     --muted: #6B7280;
-    --border: #E8E0D8;
+    --border: #E5E8F0;
     --green: #1A9E60;
     --green-lt: rgba(26,158,96,0.10);
     --green-bd: rgba(26,158,96,0.25);
@@ -22,7 +22,7 @@
     --sh-md: 0 4px 14px rgba(13,36,114,0.10);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Inter', system-ui, sans-serif; color: var(--text); }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
@@ -313,8 +313,7 @@ html[data-theme="dark"] .modal-head { color: var(--text-primary); }
 </div>
 
 <button type="submit" class="btn-send">
-<span class="iconify" data-icon="mdi:send"></span>
-                Send Announcement
+Send Announcement
 </button>
 </form>
 </div>
@@ -355,14 +354,14 @@ html[data-theme="dark"] .modal-head { color: var(--text-primary); }
                             data-title="{{ ann.title|escapejs }}"
                             data-message="{{ ann.message|escapejs }}"
                             data-id="{{ ann.id }}">
-<span class="iconify" data-icon="mdi:pencil-outline"></span> Edit
+Edit
 </button>
 <form method="post" action="{% url 'attendance:ta_delete_announcement' ann.id %}"
                           style="display:inline;"
                           onsubmit="return confirm('Delete this announcement and all student notifications?');">
                         {% csrf_token %}
 <button type="submit" class="btn-ann-del">
-<span class="iconify" data-icon="mdi:trash-can-outline"></span> Delete
+Delete
 </button>
 </form>
 </div>
