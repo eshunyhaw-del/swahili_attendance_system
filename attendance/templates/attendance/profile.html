@@ -1,0 +1,205 @@
+{% extends "attendance/base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<style>
+:root {
+    --primary: #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --gold: #E6B325;
+    --surface: #FFFFFF;
+    --bg: #EEF1F8;
+    --text: #1A1A2E;
+    --muted: #6B7280;
+    --border: #E5E8F0;
+    --red: #DC2626;
+    --red-lt: rgba(220,38,38,0.08);
+    --green: #15803D;
+    --green-lt: rgba(21,128,61,0.08);
+    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
+    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
+    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
+
+.wrap { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+
+.page-header {
+    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
+    position: relative; overflow: hidden; box-shadow: var(--sh-md);
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
+.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+
+.card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--sh-sm);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+}
+.card-title {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); margin-bottom: 1.1rem;
+}
+
+/* ── Photo row ── */
+.photo-row { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.photo-frame {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: var(--primary); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; font-weight: 700; flex-shrink: 0;
+    overflow: hidden; border: 3px solid var(--border);
+}
+.photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+.photo-actions { flex: 1; min-width: 200px; }
+.file-label {
+    display: inline-block; cursor: pointer;
+    padding: 0.55rem 1rem; border: 1.5px solid var(--primary);
+    color: var(--primary); background: var(--surface);
+    border-radius: var(--r-sm); font-size: 13px; font-weight: 700;
+    transition: all 0.13s;
+}
+.file-label:hover { background: var(--primary-lt); }
+.file-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.file-chosen { font-size: 12px; color: var(--muted); margin-top: 0.5rem; }
+.file-hint { font-size: 11.5px; color: var(--muted); margin-top: 0.35rem; }
+
+/* ── Fields ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 1.125rem; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.form-input {
+    width: 100%;
+    padding: 0.65rem 0.875rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; color: var(--text);
+    background: var(--surface); outline: none; transition: border-color 0.13s;
+}
+.form-input:focus { border-color: var(--primary); }
+html[data-theme="dark"] .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,195,26,0.15); }
+.field-error { font-size: 12px; color: var(--red); margin-top: 0.35rem; }
+
+/* ── Read-only meta ── */
+.meta-row { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.meta-row:last-child { border-bottom: none; }
+.meta-key { color: var(--muted); font-weight: 600; }
+.meta-val { color: var(--text); font-weight: 600; }
+
+.btn-save {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.13s; box-shadow: 0 2px 6px rgba(13,36,114,0.22);
+}
+.btn-save:hover { background: #0a1b5c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.28); }
+.btn-save:active { transform: scale(0.98); }
+</style>
+
+<div class="wrap">
+<div class="page-header">
+<h1>My Profile</h1>
+<div class="page-header-sub">Update your name, contact details and profile photo.</div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+<!-- ── Photo ── -->
+<div class="card">
+<div class="card-title">Profile Photo</div>
+<div class="photo-row">
+<div class="photo-frame">
+            {% if avatar.image %}
+<img src="{{ avatar.image.url }}" alt="Profile photo" id="avatarPreview">
+            {% else %}
+<span id="avatarInitial">{{ user.username|first|upper }}</span>
+<img src="" alt="Profile photo" id="avatarPreview" style="display:none;">
+            {% endif %}
+</div>
+<div class="photo-actions">
+<label class="file-label" for="{{ avatar_form.image.id_for_label }}">Choose Photo</label>
+            {{ avatar_form.image }}
+<div class="file-chosen" id="fileChosen"></div>
+<div class="file-hint">JPG or PNG, up to 5&nbsp;MB.</div>
+            {% for err in avatar_form.image.errors %}<div class="field-error">{{ err }}</div>{% endfor %}
+</div>
+</div>
+</div>
+
+<!-- ── Details ── -->
+<div class="card">
+<div class="card-title">Personal Details</div>
+<div class="grid-2">
+<div class="form-group">
+<label class="form-label" for="{{ details_form.first_name.id_for_label }}">First Name</label>
+            {{ details_form.first_name }}
+            {% for err in details_form.first_name.errors %}<div class="field-error">{{ err }}</div>{% endfor %}
+</div>
+<div class="form-group">
+<label class="form-label" for="{{ details_form.last_name.id_for_label }}">Last Name</label>
+            {{ details_form.last_name }}
+            {% for err in details_form.last_name.errors %}<div class="field-error">{{ err }}</div>{% endfor %}
+</div>
+</div>
+<div class="form-group">
+<label class="form-label" for="{{ details_form.email.id_for_label }}">Email <span style="color:var(--muted);font-weight:500;">(used to sign in)</span></label>
+        {{ details_form.email }}
+        {% for err in details_form.email.errors %}<div class="field-error">{{ err }}</div>{% endfor %}
+</div>
+<div class="form-group">
+<label class="form-label" for="{{ avatar_form.phone_number.id_for_label }}">Phone Number</label>
+        {{ avatar_form.phone_number }}
+        {% for err in avatar_form.phone_number.errors %}<div class="field-error">{{ err }}</div>{% endfor %}
+</div>
+</div>
+
+<!-- ── Account (read-only) ── -->
+<div class="card">
+<div class="card-title">Account</div>
+<div class="meta-row"><span class="meta-key">Username</span><span class="meta-val">{{ user.username }}</span></div>
+<div class="meta-row"><span class="meta-key">Role</span><span class="meta-val">{{ role_label }}</span></div>
+    {% if user.userprofile.student_id_number %}
+<div class="meta-row"><span class="meta-key">Student ID</span><span class="meta-val">{{ user.userprofile.student_id_number }}</span></div>
+    {% endif %}
+    {% if user.userprofile.level %}
+<div class="meta-row"><span class="meta-key">Level</span><span class="meta-val">{{ user.userprofile.level.name }}</span></div>
+    {% endif %}
+</div>
+
+<button type="submit" class="btn-save">Save Changes</button>
+</form>
+</div>
+
+<script>
+(function () {
+    var input = document.getElementById('{{ avatar_form.image.id_for_label }}');
+    var chosen = document.getElementById('fileChosen');
+    var preview = document.getElementById('avatarPreview');
+    var initial = document.getElementById('avatarInitial');
+    if (!input) return;
+    input.addEventListener('change', function () {
+        if (input.files && input.files[0]) {
+            var file = input.files[0];
+            chosen.textContent = file.name;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+                if (initial) { initial.style.display = 'none'; }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+})();
+</script>
+{% endblock %}

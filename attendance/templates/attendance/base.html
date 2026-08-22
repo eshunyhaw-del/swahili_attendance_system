@@ -363,6 +363,15 @@
             font-size: 13px;
             flex-shrink: 0;
             border: 2px solid var(--border);
+            overflow: hidden;
+            text-decoration: none;
+            transition: border-color 0.15s;
+        }
+        a.user-avatar:hover { border-color: var(--gold); }
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .icon-btn {
@@ -1145,6 +1154,10 @@
 <a href="{% url 'attendance:admin_alerts' %}" class="nav-item">
 <span class="iconify" data-icon="mdi:alert-outline"></span> Security Alerts
 </a>
+<div class="nav-label">Account</div>
+<a href="{% url 'attendance:profile' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:account-circle-outline"></span> My Profile
+</a>
 <!-- Community: staff sees Events only -->
 <div class="nav-label">Community</div>
 <a href="{% url 'attendance:community_events' %}" class="nav-item">
@@ -1174,6 +1187,9 @@
 <span class="iconify" data-icon="mdi:ticket-account-outline"></span> Student Tickets
 </a>
 <div class="nav-label">Account</div>
+<a href="{% url 'attendance:profile' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:account-circle-outline"></span> My Profile
+</a>
 <a href="{% url 'attendance:ta_change_password' %}" class="nav-item">
 <span class="iconify" data-icon="mdi:lock-reset"></span> Change Password
 </a>
@@ -1196,6 +1212,9 @@
 <span class="iconify" data-icon="lucide:book-open"></span> Resources
 </a>
 <div class="nav-label">Menu</div>
+<a href="{% url 'attendance:profile' %}" class="nav-item">
+<span class="iconify" data-icon="mdi:account-circle-outline"></span> My Profile
+</a>
 <a href="{% url 'attendance:history' %}" class="nav-item">
 <span class="iconify" data-icon="mdi:history"></span> My History
 </a>
@@ -1381,7 +1400,7 @@
 <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
 <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
 </div>
-<div class="user-avatar">{{ user.username|first|upper }}</div>
+<a href="{% url 'attendance:profile' %}" class="user-avatar" title="Edit profile" aria-label="Edit profile">{% if user.avatar.image %}<img src="{{ user.avatar.image.url }}" alt="Profile photo">{% else %}{{ user.username|first|upper }}{% endif %}</a>
 <form method="post" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
 <button type="submit" class="icon-btn danger" aria-label="Logout">

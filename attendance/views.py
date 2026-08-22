@@ -26,13 +26,16 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from .forms import StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm, TARegistrationForm
+from .forms import (
+    StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm,
+    TARegistrationForm, UserDetailsForm, AvatarForm,
+)
 from .tokens import set_auth_cookies
 from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
     TAProfile, TACode, OTPCode, TAnnouncement, Notification, StudentNotification,
-    CulturalDate, SystemNotification, CourseRegistration,
+    CulturalDate, SystemNotification, CourseRegistration, Avatar,
 )
 
 
@@ -49,6 +52,44 @@ def get_profile(user):
         return user.userprofile
     except UserProfile.DoesNotExist:
         return None
+
+
+def role_label(user):
+    if user.is_superuser:
+        return "Admin"
+    if user.is_staff:
+        return "Lecturer"
+    if hasattr(user, 'taprofile'):
+        return "Teaching Assistant"
+    return "Student"
+
+
+@login_required
+def profile(request):
+    """Everyone (student, TA, lecturer, admin) edits their name, email, phone and
+    profile photo here. Name/email live on the User; photo/phone on Avatar."""
+    user = request.user
+    avatar, _ = Avatar.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        details_form = UserDetailsForm(request.POST, instance=user)
+        avatar_form = AvatarForm(request.POST, request.FILES, instance=avatar)
+        if details_form.is_valid() and avatar_form.is_valid():
+            details_form.save()
+            avatar_form.save()
+            messages.success(request, "Your profile has been updated.")
+            return redirect('attendance:profile')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        details_form = UserDetailsForm(instance=user)
+        avatar_form = AvatarForm(instance=avatar)
+
+    return render(request, 'attendance/profile.html', {
+        'details_form': details_form,
+        'avatar_form': avatar_form,
+        'avatar': avatar,
+        'role_label': role_label(user),
+    })
 
 
 # ── Rate limiting (cache-based, no extra dependency) ──────────────────────────

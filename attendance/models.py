@@ -78,6 +78,23 @@ class UserProfile(models.Model):
         return f"{self.user.username} - Level {self.level}"
 
 
+class Avatar(models.Model):
+    """Universal profile record for EVERY user (student, TA, lecturer, admin).
+
+    Kept separate from UserProfile — which is student-only and drives student
+    analytics such as ``UserProfile.objects.count()`` — so giving a lecturer or
+    TA a profile photo never inflates student counts. Name and email are edited
+    directly on the ``User``; this model only stores the photo and phone.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='avatar')
+    image = models.ImageField(upload_to='avatars/', blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Avatar<{self.user.username}>"
+
+
 class CourseRegistration(models.Model):
     """Explicit through-model for UserProfile.registered_courses.
 

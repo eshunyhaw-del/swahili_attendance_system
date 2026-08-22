@@ -258,3 +258,96 @@ class APIOTPBruteForceTests(TestCase):
             ).exists(),
             "outstanding OTPs should be invalidated after the attempt cap",
         )
+
+
+import tempfile
+from django.test import override_settings
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class ProfileEditTests(TestCase):
+    """Profile editing for every role: name/email on User, photo/phone on Avatar."""
+
+    def setUp(self):
+        cache.clear()
+        self.level100, _ = Level.objects.get_or_create(name="100")
+        self.student = User.objects.create_user(
+            "prof_stud", email="stud@example.com", password="x",
+            first_name="Ama", last_name="Mensah",
+        )
+        UserProfile.objects.create(
+            user=self.student, level=self.level100,
+            student_id_number="20000001", must_change_password=False,
+        )
+        # Another account to test email-uniqueness collision.
+        self.other = User.objects.create_user(
+            "prof_other", email="taken@example.com", password="x",
+        )
+        self.url = reverse("attendance:profile")
+
+    @staticmethod
+    def _png_upload(name="pic.png"):
+        from io import BytesIO
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        buf = BytesIO()
+        Image.new("RGB", (4, 4), (13, 36, 114)).save(buf, format="PNG")
+        return SimpleUploadedFile(name, buf.getvalue(), content_type="image/png")
+
+    def test_get_requires_login(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 302)
+
+    def test_get_renders_for_logged_in_user(self):
+        self.client.force_login(self.student)
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        # Avatar is lazily created on first visit.
+        from .models import Avatar
+        self.assertTrue(Avatar.objects.filter(user=self.student).exists())
+
+    def test_updates_name_email_and_phone(self):
+        self.client.force_login(self.student)
+        resp = self.client.post(self.url, {
+            "first_name": "Akosua", "last_name": "Boateng",
+            "email": "new@example.com", "phone_number": "0241234567",
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.first_name, "Akosua")
+        self.assertEqual(self.student.email, "new@example.com")
+        self.assertEqual(self.student.avatar.phone_number, "0241234567")
+
+    def test_duplicate_email_is_rejected(self):
+        self.client.force_login(self.student)
+        resp = self.client.post(self.url, {
+            "first_name": "Ama", "last_name": "Mensah",
+            "email": "TAKEN@example.com",  # case-insensitive clash with self.other
+            "phone_number": "",
+        })
+        self.assertEqual(resp.status_code, 200)  # re-rendered with errors
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.email, "stud@example.com")  # unchanged
+
+    def test_photo_upload_saves_image(self):
+        self.client.force_login(self.student)
+        resp = self.client.post(self.url, {
+            "first_name": "Ama", "last_name": "Mensah",
+            "email": "stud@example.com", "phone_number": "",
+            "image": self._png_upload(),
+        })
+        self.assertEqual(resp.status_code, 302)
+        self.student.refresh_from_db()
+        self.assertTrue(self.student.avatar.image)
+
+    def test_lecturer_can_edit_profile(self):
+        lecturer = User.objects.create_user("prof_lect", password="x", is_staff=True)
+        self.client.force_login(lecturer)
+        resp = self.client.post(self.url, {
+            "first_name": "Kofi", "last_name": "Asante",
+            "email": "lect@example.com", "phone_number": "0555555555",
+        })
+        self.assertEqual(resp.status_code, 302)
+        lecturer.refresh_from_db()
+        self.assertEqual(lecturer.first_name, "Kofi")
+        self.assertEqual(lecturer.avatar.phone_number, "0555555555")
