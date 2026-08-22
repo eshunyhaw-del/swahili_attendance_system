@@ -417,3 +417,40 @@ class AdminRecordsViewTests(TestCase):
         self.assertTrue(row['has_data'])
         self.assertFalse(row['at_risk'])
         self.assertEqual(row['attendance_percentage'], 100.0)
+
+
+class SupportRoutingTests(TestCase):
+    """A student support request goes to the level's TA first, with staff/admins
+    always notified as a backup (and as the sole recipient when no TA covers the
+    level)."""
+
+    def setUp(self):
+        cache.clear()
+        self.level, _ = Level.objects.get_or_create(name="100")
+        self.student = User.objects.create_user("sup_stud", password="x")
+        UserProfile.objects.create(
+            user=self.student, level=self.level,
+            student_id_number="40000001", must_change_password=False,
+        )
+        self.ta = User.objects.create_user("sup_ta", password="x")
+        tap = TAProfile.objects.create(user=self.ta, is_approved=True, is_active=True)
+        tap.assigned_levels.add(self.level)
+        self.admin = User.objects.create_user("sup_admin", password="x", is_staff=True)
+        self.url = reverse("attendance:support")
+
+    def test_ticket_notifies_both_ta_and_admin(self):
+        from .models import Notification, SupportTicket
+        self.client.force_login(self.student)
+        resp = self.client.post(self.url, {"subject": "Cannot check in", "message": "The code won't work."})
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(SupportTicket.objects.filter(student=self.student).exists())
+        self.assertTrue(Notification.objects.filter(recipient=self.ta).exists(), "level TA should be notified")
+        self.assertTrue(Notification.objects.filter(recipient=self.admin).exists(), "admin backup should be notified")
+
+    def test_admin_notified_even_without_a_ta(self):
+        from .models import Notification
+        TAProfile.objects.all().delete()  # no TA covers the level
+        self.client.force_login(self.student)
+        self.client.post(self.url, {"subject": "Help", "message": "Test."})
+        self.assertTrue(Notification.objects.filter(recipient=self.admin).exists(),
+                        "admin should still receive tickets when no TA is assigned")

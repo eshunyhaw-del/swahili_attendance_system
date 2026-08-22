@@ -1256,14 +1256,25 @@ def support(request):
             except UserProfile.DoesNotExist:
                 pass
             ticket.save()
+
+            student_name = request.user.get_full_name() or request.user.username
+            summary = f"New support ticket from {student_name}: \"{ticket.subject}\""
+
+            # Route to the level's TA first (they are closest to the student)…
             if ticket.assigned_ta:
-                student_name = request.user.get_full_name() or request.user.username
                 create_notification(
-                    ticket.assigned_ta,
-                    f"New support ticket from {student_name}: \"{ticket.subject}\"",
-                    reverse('attendance:ta_support'),
+                    ticket.assigned_ta, summary, reverse('attendance:ta_support'),
                 )
-            messages.success(request, "Support ticket submitted successfully! Your TA will respond soon.")
+            # …and always notify staff/admins as a backup, so nothing is missed
+            # and tickets with no TA for the student's level are still handled.
+            admin_link = reverse('attendance:admin_support')
+            for admin in User.objects.filter(is_staff=True, is_active=True):
+                create_notification(admin, summary, admin_link)
+
+            messages.success(
+                request,
+                "Support request submitted. Your teaching assistant or the support team will respond soon.",
+            )
             return redirect('attendance:support')
     else:
         form = SupportTicketForm()
