@@ -527,8 +527,7 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 .modal-overlay {
     display: none;
     position: fixed; inset: 0;
-    background: rgba(5,15,45,0.45);
-    backdrop-filter: blur(4px);
+    background: rgba(5,15,45,0.55);
     z-index: 2000;
     align-items: center; justify-content: center;
     padding: 1.5rem;
@@ -737,11 +736,9 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 </div>
 <div class="session-actions">
 <a href="{% url 'attendance:ta_export_session_csv' session.id %}" class="btn-export-csv">
-<span class="iconify" data-icon="mdi:download-outline"></span>
                         Export CSV
 </a>
 <button class="btn-gen-all" onclick="generateAllCodes({{ session.id }})">
-<span class="iconify" data-icon="mdi:lightning-bolt"></span>
                         Generate All
 </button>
 </div>
@@ -1080,14 +1077,14 @@ async function loadStudents(sessionId) {
                     if (!student.code.is_used && !student.code.is_distributed) {
                         const mark = document.createElement('button');
                         mark.className = 'btn-mark-given';
-                        mark.innerHTML = '<span class="iconify" data-icon="mdi:send-outline"></span> Mark Given';
+                        mark.textContent = 'Mark Given';
                         mark.onclick = () => markDistributed(student.code.id, sessionId);
                         row.appendChild(mark);
                     }
                 } else {
                     const gen = document.createElement('button');
                     gen.className = 'btn-generate st-generate';
-                    gen.innerHTML = '<span class="iconify" data-icon="mdi:key-outline"></span> Generate Code';
+                    gen.textContent = 'Generate Code';
                     gen.onclick = () => generateCode(sessionId, student.username);
                     row.appendChild(gen);
                 }

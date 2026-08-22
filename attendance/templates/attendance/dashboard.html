@@ -358,9 +358,7 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(13,27,62,0.45);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        background: rgba(13,27,62,0.55);
         z-index: 1000;
         align-items: center;
         justify-content: center;
@@ -501,8 +499,7 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(13,27,62,0.45);
-        backdrop-filter: blur(6px);
+        background: rgba(13,27,62,0.55);
         z-index: 1100;
         align-items: center;
         justify-content: center;
@@ -748,7 +745,6 @@
 </span>
                         {% else %}
 <button class="action-link act-submit" onclick="openTaCodeModal({{ week.session.id }})">
-<span class="iconify" data-icon="mdi:keyboard-outline" data-width="13"></span>
                                 Submit Code
 </button>
                         {% endif %}
@@ -765,7 +761,6 @@
 <input type="hidden" name="course_id" value="{{ course.course.id }}">
 <button type="submit" class="action-link"
                                 style="color:#B91C1C;background:none;border:none;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:0.35rem;padding:0;">
-<span class="iconify" data-icon="mdi:book-remove-outline" data-width="14"></span>
                             Deregister from this course
 </button>
 </form>
@@ -785,7 +780,6 @@
 <p>No courses registered yet.</p>
 <a href="{% url 'attendance:course_registration' %}" class="pop-btn pop-btn-main"
                style="text-decoration:none;display:inline-flex;width:auto;padding:0.6rem 1.5rem;margin:0 auto;">
-<span class="iconify" data-icon="mdi:plus" data-width="15"></span>
                 Register Courses
 </a>
 </div>
@@ -804,7 +798,6 @@
 <input type="text" id="taCodeInput" placeholder="· · · · · ·" maxlength="6"
                class="pop-input" autocomplete="off" inputmode="numeric">
 <button onclick="submitTaCode()" class="pop-btn pop-btn-main">
-<span class="iconify" data-icon="mdi:send-outline" data-width="15"></span>
             Submit Attendance
 </button>
 <button onclick="closeTaCodeModal()" class="pop-btn pop-btn-sub">Cancel</button>
