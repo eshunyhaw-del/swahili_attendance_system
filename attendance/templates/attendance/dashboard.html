@@ -6,13 +6,16 @@
 <style>
     .dash { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; }
 
-    /* Header */
-    .dash-head { margin-bottom: 20px; }
-    .dash-head .greeting { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; color: var(--ds-text); }
-    .dash-head .greeting .swahili-greeting-kw { color: inherit; }
-    .dash-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .dash-head .sub .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ds-text-disabled); }
+    /* Header — navy overview banner */
+    .dash-head { background: var(--ds-navy); color: #fff; border-radius: var(--ds-radius-lg); padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--ds-shadow-sm); }
+    .dash-head .greeting { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 0; color: #fff; }
+    .dash-head .greeting .swahili-greeting-kw { color: var(--ds-gold); }
     .phrase-block { margin-top: 12px; }
+    /* Phrase-of-the-hour widget sits on the navy banner — white/gold variants */
+    .dash-head .phrase-category { color: var(--ds-gold); opacity: 0.85; }
+    .dash-head .phrase-swahili { color: #fff; }
+    .dash-head .phrase-english { color: rgba(255,255,255,0.72); }
+    .dash-head .phrase-response { color: var(--ds-gold); opacity: 0.9; }
 
     /* Stat grid */
     .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
@@ -112,8 +115,7 @@
 
 <!-- Header -->
 <header class="dash-head">
-<p class="ds-eyebrow">Attendance Overview</p>
-<h1 class="greeting"><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}</h1>
+<h1 class="greeting"><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!</h1>
 <div class="phrase-block" data-phrase-widget></div>
 </header>
 
