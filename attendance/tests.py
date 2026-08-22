@@ -538,9 +538,12 @@ class ExamEligibilityTests(TestCase):
         self.assertEqual(r['status'], 'eligible')
 
 
+@override_settings(ALUMNI_INVITE_HOURS_START=0, ALUMNI_INVITE_HOURS_END=24)
 class AlumniInviteTests(TestCase):
     """Alumni pop-up shows to Level 400 students + approved TAs during the final
-    ALUMNI_INVITE_WINDOW_DAYS of an active SECOND semester only."""
+    ALUMNI_INVITE_WINDOW_DAYS of an active SECOND semester only. Class-hours gate
+    is opened wide here so the audience/timing assertions don't depend on the
+    clock; the gate itself is covered separately below."""
 
     def setUp(self):
         cache.clear()
@@ -599,3 +602,14 @@ class AlumniInviteTests(TestCase):
         self._semester('Second Semester', days_to_end=3)
         lect = User.objects.create_user('a_lect', password='x', is_staff=True)
         self.assertFalse(self._ctx(lect).get('show_alumni_popup'))
+
+    @override_settings(ALUMNI_INVITE_HOURS_START=0, ALUMNI_INVITE_HOURS_END=0)
+    def test_outside_class_hours_does_not_show(self):
+        # Empty window (0 <= hour < 0 is never true) → gated off regardless of clock.
+        self._semester('Second Semester', days_to_end=3)
+        self.assertFalse(self._ctx(self._student('a400d', self.l400)).get('show_alumni_popup'))
+
+    @override_settings(ALUMNI_INVITE_MAX_PER_DAY=3)
+    def test_daily_cap_passed_to_template(self):
+        self._semester('Second Semester', days_to_end=3)
+        self.assertEqual(self._ctx(self._student('a400e', self.l400)).get('alumni_max_per_day'), 3)
