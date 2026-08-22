@@ -89,9 +89,15 @@ html[data-theme="dark"] .btn-outline:hover { border-color: var(--gold); }
     padding: 0.85rem 1rem; margin-bottom: 1.25rem;
     display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
-.segmented { display: inline-flex; border: 1.5px solid var(--border-strong); border-radius: var(--r-sm); overflow: hidden; }
+.segmented {
+    display: inline-flex; max-width: 100%;
+    border: 1.5px solid var(--border-strong); border-radius: var(--r-sm);
+    overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.segmented::-webkit-scrollbar { display: none; }
 .seg-btn {
-    font-family: inherit; font-size: 13px; font-weight: 700;
+    font-family: inherit; font-size: 13px; font-weight: 700; flex: 0 0 auto;
     padding: 0.5rem 0.9rem; background: var(--surface); color: var(--muted);
     border: none; border-right: 1.5px solid var(--border-strong); cursor: pointer;
     display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.12s; white-space: nowrap;
