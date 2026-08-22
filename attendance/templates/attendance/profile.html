@@ -8,31 +8,27 @@
     --primary-lt: rgba(13,36,114,0.07);
     --gold: #E6B325;
     --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
+    --bg: #F4F6F9;
+    --text: #1F2937;
+    --muted: #6B7484;
+    --border: #E1E5EC;
     --red: #DC2626;
     --red-lt: rgba(220,38,38,0.08);
     --green: #15803D;
     --green-lt: rgba(21,128,61,0.08);
-    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+    --r-sm: 8px; --r-lg: 12px; --r-xl: 14px;
+    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-.page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
-    color: #fff; border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
-.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
+.page-header { margin-bottom: 1.25rem; }
+.page-header .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+.page-header h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; color: var(--text); }
+.page-header-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
 .card {
     background: var(--surface);
@@ -108,6 +104,7 @@ html[data-theme="dark"] .form-input:focus { border-color: var(--gold); box-shado
 
 <div class="wrap">
 <div class="page-header">
+<p class="eyebrow">Account</p>
 <h1>My Profile</h1>
 <div class="page-header-sub">Update your name, contact details and profile photo.</div>
 </div>
