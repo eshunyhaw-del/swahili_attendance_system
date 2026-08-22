@@ -1,729 +1,256 @@
-﻿{% extends "attendance/base.html" %}
-{% block title %}Student Guide{% endblock %}
+{% extends "attendance/base.html" %}
+{% block title %}Help &amp; Guide{% endblock %}
 
 {% block content %}
 <style>
-:root {
-    --primary: #0D2472;
-    --primary-lt: rgba(13,36,114,0.07);
-    --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
-    --green: #1A9E60;
-    --green-lt: rgba(26,158,96,0.10);
-    --amber: #B8920C;
-    --amber-lt: rgba(184,146,12,0.10);
-    --red: #C0392B;
-    --red-lt: rgba(192,57,43,0.09);
-    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 4px 0 40px; }
+    .page-head { margin-bottom: 18px; }
+    .page-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .page-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
+    .card-mb { margin-bottom: 14px; }
 
-.wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    /* Dictionary widget */
+    .dict { margin-bottom: 22px; }
+    .dict-head { display: flex; align-items: center; gap: 12px; }
+    .dict-mark { width: 40px; height: 40px; border-radius: var(--ds-radius-md); background: var(--ds-navy); color: var(--ds-gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dict-mark .iconify { font-size: 22px; }
+    .dict-title { font-size: 16px; font-weight: 700; }
+    .dict-sub { font-size: 12px; color: var(--ds-text-muted); }
+    .dict-toggle-row { display: flex; gap: 8px; margin: 16px 0 12px; }
+    .dict-toggle { flex: 1; font-family: inherit; font-size: 13px; font-weight: 600; padding: 9px 12px; border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-border-strong); background: var(--ds-surface); color: var(--ds-text-muted); cursor: pointer; transition: all .12s; }
+    .dict-toggle.active { background: var(--ds-primary); color: #fff; border-color: var(--ds-primary); }
+    :root[data-theme="dark"] .dict-toggle.active { color: var(--ds-gold); }
+    .dict-search-row { display: flex; gap: 8px; }
+    .dict-search-row .ds-input { flex: 1; }
+    .dict-chips-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ds-text-muted); margin: 16px 0 8px; }
+    .dict-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dict-chip { font-family: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--ds-border); background: var(--ds-surface-sunken); color: var(--ds-text-secondary); cursor: pointer; transition: all .12s; }
+    .dict-chip:hover { border-color: var(--ds-primary); color: var(--ds-primary); }
+    .dict-tips-toggle { display: inline-flex; align-items: center; gap: 5px; margin-top: 16px; font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--ds-text-secondary); background: none; border: none; cursor: pointer; padding: 0; }
+    .dict-tips-chevron { transition: transform .2s; }
+    .dict-tips-toggle[aria-expanded="true"] .dict-tips-chevron { transform: rotate(180deg); }
+    .dict-tips-body { display: none; margin-top: 10px; }
+    .dict-tips-body.open { display: block; }
+    .dict-tip { display: flex; gap: 8px; font-size: 13px; color: var(--ds-text-secondary); margin-bottom: 6px; }
+    .dict-tip .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ds-text-disabled); margin-top: 7px; flex-shrink: 0; }
 
-/* ─── Page header ─── */
-.page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 100%);
-    color: #fff; border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
-.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
+    /* Quick reference */
+    .qref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 20px; }
+    .qref-item { font-size: 13px; color: var(--ds-text-secondary); }
+    .qref-item b { color: var(--ds-text); }
+    .mono { font-family: var(--ds-font-mono); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-xs); padding: 1px 6px; font-size: 12px; color: var(--ds-primary); }
+    :root[data-theme="dark"] .mono { color: var(--ds-text); }
 
-/* ─── Quick ref bar ─── */
-.quick-ref {
-    background: var(--surface); border-radius: var(--r-lg);
-    box-shadow: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04); padding: 1rem 1.25rem;
-    margin-bottom: 1.25rem;
-}
-.quick-ref-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
-.quick-ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.4rem 1.25rem; }
-.quick-ref-item { font-size: 13px; color: #4A5568; }
-.quick-ref-item strong { color: var(--text); font-weight: 700; }
-.mono { font-family: 'DM Mono', monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 12px; color: var(--primary); font-weight: 600; }
-
-/* ─── Accordion sections ─── */
-.guide-section {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sh-sm);
-    margin-bottom: 0.875rem;
-    overflow: hidden;
-}
-
-.section-head {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: #F8F9FD;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer; user-select: none;
-}
-.section-num {
-    width: 28px; height: 28px;
-    background: var(--primary); color: #fff;
-    border-radius: 9999px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 800; flex-shrink: 0;
-}
-.section-title { font-size: 14px; font-weight: 700; flex: 1; }
-.chevron { font-size: 18px; color: var(--muted); transition: transform 0.2s; }
-.section-head[aria-expanded="true"] .chevron { transform: rotate(180deg); }
-
-.section-body { padding: 1.25rem; display: none; }
-.section-body.open { display: block; }
-
-/* ─── Steps ─── */
-.step-list { display: flex; flex-direction: column; gap: 0.875rem; }
-.step { display: flex; gap: 0.875rem; align-items: flex-start; }
-.step-icon {
-    width: 36px; height: 36px; border-radius: var(--r-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-    background: var(--primary-lt); color: var(--primary);
-}
-.step-icon.green { background: var(--green-lt); color: var(--green); }
-.step-icon.amber { background: var(--amber-lt); color: var(--amber); }
-.step-icon.red { background: var(--red-lt); color: var(--red); }
-.step-text { font-size: 13.5px; line-height: 1.6; padding-top: 0.4rem; }
-.step-text strong { color: var(--primary); }
-
-/* Status row */
-.status-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; font-size: 13px; }
-.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-/* Tip box */
-.tip-box {
-    background: var(--amber-lt); border: 1px solid rgba(184,146,12,0.25);
-    border-radius: var(--r-sm); padding: 0.75rem 1rem;
-    display: flex; gap: 0.625rem; align-items: flex-start;
-    font-size: 12.5px; color: #7A5C00; margin-top: 1rem; line-height: 1.55;
-}
-.tip-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: var(--amber); }
-
-/* Info box */
-.info-box {
-    background: var(--primary-lt); border: 1px solid rgba(13,36,114,0.12);
-    border-radius: var(--r-sm); padding: 0.75rem 1rem;
-    display: flex; gap: 0.625rem; align-items: flex-start;
-    font-size: 12.5px; color: #2A3A6B; margin-top: 1rem; line-height: 1.55;
-}
-.info-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: var(--primary); }
-
-/* ─── Quick ref table ─── */
-.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.ref-table th { background: var(--bg); color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.5rem 0.875rem; border-bottom: 1px solid var(--border); text-align: left; }
-.ref-table td { padding: 0.6rem 0.875rem; border-bottom: 1px solid var(--border); color: #4A5568; }
-.ref-table tbody tr:last-child td { border-bottom: none; }
-.ref-table tbody tr:hover td { background: rgba(13,36,114,0.02); }
-.ref-table td:first-child { font-weight: 700; color: var(--text); }
-
-/* ─── Key dates ─── */
-.dates-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.625rem; margin-top: 1rem; }
-.date-card {
-    background: var(--bg); border-radius: var(--r-sm);
-    padding: 0.75rem 1rem;
-}
-.date-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 3px; }
-.date-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
-
-/* ─── Tips grid ─── */
-.tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.625rem; }
-.tip-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 13px; color: #4A5568; line-height: 1.5; }
-.tip-check { width: 18px; height: 18px; background: var(--green-lt); border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-.tip-check::after { content: ''; font-size: 10px; color: var(--green); font-weight: 800; }
-
-/* ─── Dictionary Widget ─── */
-.dict-card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-}
-html[data-theme="dark"] .dict-card {
-    background: var(--bg-card, #1E2A3B);
-}
-.dict-header {
-    padding: 1.25rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;
-}
-.dict-emoji {
-    font-size: 36px; line-height: 1; flex-shrink: 0; margin-top: 2px;
-}
-.dict-header-text { flex: 1; min-width: 0; }
-.dict-title {
-    font-size: 20px; font-weight: 800; color: var(--primary);
-    letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 3px;
-}
-html[data-theme="dark"] .dict-title { color: #F2C31A; }
-.dict-subtitle {
-    font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 0.4rem;
-}
-.dict-badges { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.dict-badge-gold {
-    display: inline-flex; align-items: center; gap: 0.25rem;
-    font-size: 11px; font-weight: 700;
-    background: rgba(242,195,26,0.15); color: #9A7B00;
-    border: 1px solid rgba(242,195,26,0.3);
-    border-radius: 99px; padding: 2px 10px;
-}
-html[data-theme="dark"] .dict-badge-gold { background: rgba(242,195,26,0.1); color: #F2C31A; border-color: rgba(242,195,26,0.25); }
-.dict-powered {
-    font-size: 11px; color: var(--muted); font-style: italic;
-}
-
-.dict-body { padding: 1.25rem 1.5rem; }
-
-/* Toggle buttons */
-.dict-toggle-row {
-    display: flex; gap: 0.375rem; margin-bottom: 0.875rem; flex-wrap: wrap;
-}
-.dict-toggle {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.45rem 1rem; border-radius: 8px;
-    font-family: inherit; font-size: 12.5px; font-weight: 600;
-    cursor: pointer; transition: all 0.14s; border: 1.5px solid;
-    white-space: nowrap;
-}
-.dict-toggle.active {
-    background: var(--primary); color: #fff; border-color: var(--primary);
-}
-html[data-theme="dark"] .dict-toggle.active { background: #1B3A9C; border-color: #1B3A9C; }
-.dict-toggle.inactive {
-    background: transparent; color: var(--primary); border-color: rgba(13,36,114,0.3);
-}
-html[data-theme="dark"] .dict-toggle.inactive { color: #7BAEE8; border-color: rgba(123,174,232,0.3); }
-.dict-toggle:hover.inactive { border-color: var(--primary); background: var(--primary-lt); }
-html[data-theme="dark"] .dict-toggle:hover.inactive { border-color: #7BAEE8; background: rgba(123,174,232,0.08); }
-
-/* Search row */
-.dict-search-row {
-    display: flex; gap: 0.625rem; align-items: stretch;
-}
-.dict-input-wrap { flex: 1; position: relative; }
-.dict-input {
-    width: 100%; padding: 0.875rem 1.125rem;
-    border: 1.5px solid var(--border); border-radius: 12px;
-    font-family: inherit; font-size: 15px; color: var(--text);
-    background: var(--bg); outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    line-height: 1.4;
-}
-html[data-theme="dark"] .dict-input {
-    background: var(--bg-card, #1E2A3B); color: var(--text-main, #E8EDF5);
-    border-color: var(--border, #2E3D50);
-}
-.dict-input::placeholder { color: var(--muted); font-size: 14px; }
-.dict-input:focus { border-color: #0D2472; box-shadow: 0 0 0 3px rgba(13,36,114,0.1); }
-html[data-theme="dark"] .dict-input:focus { border-color: #F2C31A; box-shadow: 0 0 0 3px rgba(242,195,26,0.12); }
-.dict-input.shake { animation: dict-shake 0.35s ease; border-color: #C0392B !important; }
-.dict-input.empty-hint::placeholder { color: #C0392B; }
-@keyframes dict-shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-5px); }
-    40% { transform: translateX(5px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-}
-.dict-btn {
-    padding: 0 1.375rem; border-radius: 12px;
-    background: #0D2472; color: #fff;
-    border: none; cursor: pointer;
-    font-family: inherit; font-size: 13.5px; font-weight: 600;
-    white-space: nowrap; transition: all 0.14s;
-    display: flex; align-items: center; gap: 0.4rem;
-    min-height: 52px;
-}
-.dict-btn:hover { background: #091A55; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(13,36,114,0.25); }
-.dict-btn:active { transform: translateY(0); }
-
-/* Quick chips */
-.dict-chips-section { margin-top: 0.875rem; }
-.dict-chips-label {
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.5rem;
-}
-.dict-chips-row { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.375rem; }
-.dict-chip {
-    display: inline-flex; align-items: center;
-    padding: 4px 12px; border-radius: 99px;
-    border: 1px solid var(--border);
-    font-family: inherit; font-size: 12px; font-weight: 500;
-    color: var(--text); background: var(--bg);
-    cursor: pointer; transition: all 0.13s;
-}
-html[data-theme="dark"] .dict-chip { background: var(--bg-card, #1E2A3B); color: var(--text-main, #E8EDF5); border-color: var(--border, #2E3D50); }
-.dict-chip:hover { background: #0D2472; color: #fff; border-color: #0D2472; }
-html[data-theme="dark"] .dict-chip:hover { background: #1B3A9C; border-color: #1B3A9C; }
-
-/* Tips collapsible */
-.dict-tips-toggle {
-    display: flex; align-items: center; gap: 0.4rem;
-    margin-top: 1rem; padding: 0;
-    background: none; border: none; cursor: pointer;
-    font-family: inherit; font-size: 12px; font-weight: 600;
-    color: var(--muted); transition: color 0.13s;
-}
-.dict-tips-toggle:hover { color: var(--primary); }
-html[data-theme="dark"] .dict-tips-toggle:hover { color: #F2C31A; }
-.dict-tips-chevron { font-size: 16px; transition: transform 0.2s; }
-.dict-tips-toggle[aria-expanded="true"] .dict-tips-chevron { transform: rotate(180deg); }
-.dict-tips-body { display: none; margin-top: 0.625rem; }
-.dict-tips-body.open { display: block; }
-.dict-tip-item {
-    display: flex; align-items: flex-start; gap: 0.5rem;
-    font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-bottom: 0.35rem;
-}
-.dict-tip-dot {
-    width: 5px; height: 5px; border-radius: 50%;
-    background: #F2C31A; flex-shrink: 0; margin-top: 6px;
-}
-
-/* Mobile */
-@media (max-width: 520px) {
-    .dict-header { flex-direction: column; gap: 0.5rem; }
-    .dict-emoji { font-size: 28px; }
-    .dict-title { font-size: 17px; }
-    .dict-search-row { flex-direction: column; }
-    .dict-btn { width: 100%; justify-content: center; min-height: 48px; }
-    .dict-body { padding: 1rem; }
-    .dict-header { padding: 1rem; }
-}
+    /* Accordion */
+    .acc { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); margin-bottom: 10px; overflow: hidden; }
+    .acc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 15px 18px; font-size: 14px; font-weight: 600; }
+    .acc > summary::-webkit-details-marker { display: none; }
+    .acc-num { width: 26px; height: 26px; border-radius: var(--ds-radius-sm); background: var(--ds-primary-soft); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    :root[data-theme="dark"] .acc-num { color: var(--ds-text); }
+    .acc-num.green { background: var(--ds-success-bg); color: var(--ds-success); }
+    .acc-num.gold { background: var(--ds-warning-bg); color: var(--ds-warning); }
+    .acc-chev { margin-left: auto; color: var(--ds-text-muted); transition: transform .2s; }
+    .acc[open] .acc-chev { transform: rotate(180deg); }
+    .acc-body { padding: 4px 18px 18px; }
+    .step { display: flex; gap: 12px; margin-bottom: 14px; }
+    .step:last-child { margin-bottom: 0; }
+    .step-icon { width: 30px; height: 30px; border-radius: var(--ds-radius-sm); background: var(--ds-primary-soft); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    :root[data-theme="dark"] .step-icon { color: var(--ds-text); }
+    .step-icon.green { background: var(--ds-success-bg); color: var(--ds-success); }
+    .step-icon.amber { background: var(--ds-warning-bg); color: var(--ds-warning); }
+    .step-icon.red { background: var(--ds-danger-bg); color: var(--ds-danger); }
+    .step-text { font-size: 13.5px; line-height: 1.6; color: var(--ds-text-secondary); padding-top: 4px; }
+    .step-text strong { color: var(--ds-text); font-weight: 600; }
+    .note { display: flex; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); font-size: 12.5px; color: var(--ds-text-secondary); line-height: 1.5; }
+    .note .iconify { color: var(--ds-info); flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+    .status-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ds-text-secondary); margin-bottom: 6px; }
+    .ref-table { width: 100%; border-collapse: collapse; }
+    .ref-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-text-muted); padding: 10px 16px; background: var(--ds-surface-sunken); border-bottom: 1px solid var(--ds-border); }
+    .ref-table td { font-size: 12.5px; padding: 10px 16px; border-bottom: 1px solid var(--ds-border); color: var(--ds-text-secondary); }
+    .ref-table tr:last-child td { border-bottom: none; }
+    .tips-grid { display: flex; flex-direction: column; gap: 8px; }
+    .tip-item { display: flex; gap: 8px; font-size: 13px; color: var(--ds-text-secondary); }
+    .tip-item .iconify { color: var(--ds-success); flex-shrink: 0; margin-top: 2px; }
 </style>
 
 <div class="wrap">
 
 {% if is_student %}
-<div class="dict-card" id="dictWidget">
-
-<div class="dict-header">
-<div class="dict-emoji"></div>
-<div class="dict-header-text">
+<!-- Kiswahili dictionary -->
+<div class="ds-card ds-card-body dict" id="dictWidget">
+<div class="dict-head">
+<div class="dict-mark"><span class="iconify" data-icon="mdi:book-alphabet"></span></div>
+<div>
 <div class="dict-title">Kamusi ya Kiswahili</div>
-<div class="dict-subtitle">MobiTUKI — English Swahili Dictionary</div>
-<div class="dict-badges">
-<span class="dict-badge-gold"> 16,000+ entries</span>
-<span class="dict-powered">Powered by TUKI — University of Dar es Salaam</span>
+<div class="dict-sub">English–Swahili dictionary · 16,000+ entries, powered by TUKI (University of Dar es Salaam)</div>
 </div>
 </div>
-</div>
-
-<div class="dict-body">
-
 <div class="dict-toggle-row">
-<button class="dict-toggle active" id="toggleEN" onclick="setMode('en')">
-<span>🇬🇧</span> English → Swahili
-</button>
-<button class="dict-toggle inactive" id="toggleSW" onclick="setMode('sw')">
-<span>🇹🇿</span> Swahili → English
-</button>
+<button class="dict-toggle active" id="toggleEN" onclick="setMode('en')">English → Swahili</button>
+<button class="dict-toggle" id="toggleSW" onclick="setMode('sw')">Swahili → English</button>
 </div>
-
 <div class="dict-search-row">
-<div class="dict-input-wrap">
-<input
-                    type="text"
-                    class="dict-input"
-                    id="dictInput"
-                    placeholder="Type an English word... (e.g. love, freedom, education)"
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                >
+<input type="text" class="ds-input" id="dictInput" placeholder="Type an English word — e.g. love, freedom, education" autocomplete="off" autocorrect="off" spellcheck="false">
+<button class="ds-btn ds-btn-primary" id="dictSearchBtn" onclick="doSearch()">Tafuta</button>
 </div>
-<button class="dict-btn" id="dictSearchBtn" onclick="doSearch()">
-Tafuta
-</button>
-</div>
-
-<div class="dict-chips-section">
 <div class="dict-chips-label">Popular words</div>
-<div class="dict-chips-row" id="chipsRow1">
+<div class="dict-chips">
 <button class="dict-chip" onclick="chipSearch('love')">love</button>
 <button class="dict-chip" onclick="chipSearch('peace')">peace</button>
 <button class="dict-chip" onclick="chipSearch('education')">education</button>
 <button class="dict-chip" onclick="chipSearch('family')">family</button>
 <button class="dict-chip" onclick="chipSearch('freedom')">freedom</button>
-</div>
-<div class="dict-chips-row" id="chipsRow2">
 <button class="dict-chip" onclick="chipSearch('university')">university</button>
 <button class="dict-chip" onclick="chipSearch('language')">language</button>
 <button class="dict-chip" onclick="chipSearch('culture')">culture</button>
-<button class="dict-chip" onclick="chipSearch('literature')">literature</button>
-<button class="dict-chip" onclick="chipSearch('history')">history</button>
 </div>
-</div>
-
-<button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">
-Tips for searching
-<span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span>
-</button>
+<button class="dict-tips-toggle" id="tipToggle" aria-expanded="false" onclick="toggleTips()">Tips for searching <span class="iconify dict-tips-chevron" data-icon="mdi:chevron-down" data-width="16"></span></button>
 <div class="dict-tips-body" id="dictTipsBody">
-<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Try searching root words (e.g.<strong>run</strong> instead of<strong>running</strong>).</span></div>
-<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use<strong>English → Swahili</strong> when you need help translating an English word.</span></div>
-<div class="dict-tip-item"><div class="dict-tip-dot"></div><span>Use<strong>Swahili → English</strong> to understand the meaning of a Kiswahili word.</span></div>
-</div>
-
+<div class="dict-tip"><div class="dot"></div><span>Search root words (e.g. <strong>run</strong> instead of <strong>running</strong>).</span></div>
+<div class="dict-tip"><div class="dot"></div><span>Use <strong>English → Swahili</strong> to translate an English word.</span></div>
+<div class="dict-tip"><div class="dot"></div><span>Use <strong>Swahili → English</strong> to understand a Kiswahili word.</span></div>
 </div>
 </div>
 {% endif %}
 
-<div class="page-header">
-<h1>Student Quick Guide</h1>
-<div class="page-header-sub">Everything you need to track your attendance with SWASA</div>
-</div>
+<header class="page-head">
+<p class="ds-eyebrow">Help &amp; Guide</p>
+<h1>How to use the attendance portal</h1>
+<p class="sub">A step-by-step guide to registering, checking in to class, and tracking your attendance.</p>
+</header>
 
-<!-- Quick ref -->
-<div class="quick-ref">
-<div class="quick-ref-title">
-<span class="iconify" data-icon="mdi:pin-outline" style="font-size:14px;"></span>
-            Quick Look
-</div>
-<div class="quick-ref-grid">
-<div class="quick-ref-item">Website:<strong>swasa-attendance.onrender.com</strong></div>
-<div class="quick-ref-item">Login with:<span class="mono">Email address</span> + your password</div>
-<div class="quick-ref-item">Password: the one you chose when you registered — not your Student ID</div>
-</div>
-</div>
-
-<!-- 1. Set up account -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="true">
-<div class="section-num">1</div>
-<div class="section-title">Set Up Your Account</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-</div>
-<div class="section-body open">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:account-plus-outline"></span></div>
-<div class="step-text">Go to the<strong>registration page</strong> and fill in your<strong>Full Name</strong>,<strong>Student ID</strong>,<strong>Level</strong>,<strong>Email address</strong>, and a<strong>Password</strong> of your choice.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:numeric-6-box-outline"></span></div>
-<div class="step-text">A<strong>6-digit verification code</strong> is sent to the email you provided. Enter that code on the next page to activate your account.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-<div class="step-text">Once verified, you are<strong>automatically logged in</strong> and taken straight to the course registration page — no extra steps needed.</div>
-</div>
-</div>
-<div class="info-box">
-<span class="iconify" data-icon="mdi:information-outline"></span>
-                Use any valid email address you have access to. Check your<strong>spam folder</strong> if you don't see the verification code within a minute.
-</div>
+<!-- Quick reference -->
+<div class="ds-card ds-card-body card-mb">
+<p class="ds-eyebrow" style="margin-bottom:10px">At a glance</p>
+<div class="qref-grid">
+<div class="qref-item">Sign in with your <b>email address</b> and password</div>
+<div class="qref-item">Check in with the <b>6-digit code</b> from your TA</div>
+<div class="qref-item">Minimum attendance required: <b>75%</b></div>
+<div class="qref-item">Support responds within <b>24–48 hours</b></div>
 </div>
 </div>
 
-<!-- 2. Log in -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">2</div>
-<div class="section-title">Log In</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<!-- Steps -->
+<details class="acc" open>
+<summary><span class="acc-num">1</span> Set up your account <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:account-plus-outline"></span></div><div class="step-text">On the <strong>registration page</strong>, enter your full name, Student ID, level, email address, and a password of your choice.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:numeric-6-box-outline"></span></div><div class="step-text">A <strong>6-digit verification code</strong> is sent to your email. Enter it on the next page to activate your account.</div></div>
+<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Once verified, you are signed in and taken to course registration.</div></div>
+<div class="note"><span class="iconify" data-icon="mdi:information-outline"></span> Use an email address you can access. Check your spam folder if the code doesn't arrive within a minute.</div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
-<div class="step-text">On the login page enter your<strong>email address</strong> — the same one you registered with.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div>
-<div class="step-text">Enter the<strong>password you chose</strong> when you registered. This is not your Student ID — it is the password you set during sign-up.</div>
-</div>
-<div class="step">
-<div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div>
-<div class="step-text">If you forget your password, click<strong>Forgot Password</strong> on the login page. A reset code will be sent to your email.</div>
-</div>
-</div>
-<div class="tip-box">
-<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
-                Never share your password with anyone. Your Student ID is only used for identification — it is not your password.
-</div>
-</div>
-</div>
+</details>
 
-<!-- 3. Register courses -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">3</div>
-<div class="section-title">Register Your Courses</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="acc">
+<summary><span class="acc-num">2</span> Sign in <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div><div class="step-text">Enter the <strong>email address</strong> you registered with.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div><div class="step-text">Enter the <strong>password you chose</strong> at sign-up — this is not your Student ID.</div></div>
+<div class="step"><div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div><div class="step-text">Forgotten it? Use <strong>Forgot password</strong> on the sign-in page and a reset code will be emailed to you.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div>
-<div class="step-text">Click<strong>Register Courses</strong> in the sidebar. You will see all courses available for your level and semester.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:checkbox-marked-outline"></span></div>
-<div class="step-text"><strong>Check every course you are taking</strong> this semester, then click Register. You only need to do this once per semester.</div>
-</div>
-</div>
-<div class="tip-box">
-<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
-                Register early — the course list may be locked after the registration deadline.
-</div>
-</div>
-</div>
+</details>
 
-<!-- 4. Receive TA code -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">4</div>
-<div class="section-title">Receive Your TA Code in Class</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="acc">
+<summary><span class="acc-num">3</span> Register your courses <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div><div class="step-text">Open <strong>Register Courses</strong> from the sidebar to see every course for your level and semester.</div></div>
+<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:checkbox-marked-outline"></span></div><div class="step-text">Select each course you are taking, then submit. You only do this once per semester.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div>
-<div class="step-text">During each class session, your<strong>Teaching Assistant</strong> will generate a unique 2–5 digit code and hand it to you in person.</div>
-</div>
-<div class="step">
-<div class="step-icon red"><span class="iconify" data-icon="mdi:shield-alert-outline"></span></div>
-<div class="step-text">Each code is<strong>unique to you</strong> and this specific session. It cannot be shared or used more than once.</div>
-</div>
-</div>
-</div>
-</div>
+</details>
 
-<!-- 5. Submit attendance -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">5</div>
-<div class="section-title">Submit Your Attendance Code</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="acc">
+<summary><span class="acc-num">4</span> Check in to class <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div><div class="step-text">During each session, your <strong>teaching assistant</strong> reads out a <strong>6-digit code</strong> that is unique to you and that session.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:qrcode-scan"></span></div><div class="step-text">On your <strong>Dashboard</strong>, find today's class and select <strong>Check In</strong>.</div></div>
+<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Enter the code and confirm. The session updates to <strong>Present</strong> immediately — no page reload needed.</div></div>
+<div class="note"><span class="iconify" data-icon="mdi:shield-alert-outline"></span> Your code cannot be shared or reused. Entering another student's code is recorded as misuse.</div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
-<div class="step-text">Go to your<strong>Dashboard</strong>. Find the course and locate the current week in the session list.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:keyboard-outline"></span></div>
-<div class="step-text">Click<strong>Submit Code</strong>, type the code your TA gave you, then tap<em>Submit Attendance</em>.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-<div class="step-text">The week row will immediately update to a green<strong>"Submitted"</strong> badge — no page reload needed.</div>
-</div>
-</div>
-<div class="tip-box">
-<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
-                Submit as soon as your TA hands you the code — codes expire after the session ends.
-</div>
-</div>
-</div>
+</details>
 
-<!-- 6. Track progress -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">6</div>
-<div class="section-title">Track Your Attendance Progress</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-</div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div>
-<div class="step-text">Your<strong>Dashboard</strong> shows each course with an attendance progress bar and a score (e.g.,<em>5 / 8</em>).</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
-<div class="step-text">Click<strong>My History</strong> in the sidebar for a full week-by-week breakdown with colour-coded status badges:</div>
+<details class="acc">
+<summary><span class="acc-num">5</span> Track your attendance <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div><div class="step-text">Your <strong>Dashboard</strong> shows overall attendance plus a progress bar and score for each course.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div><div class="step-text">Open <strong>My History</strong> for a full week-by-week record:</div></div>
+<div style="padding-left:42px">
+<div class="status-row"><span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span> code confirmed for the session</div>
+<div class="status-row"><span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span> no code confirmed</div>
+<div class="status-row"><span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not recorded</span> session hasn't happened yet</div>
 </div>
 </div>
-<div style="margin-top:0.875rem;display:flex;flex-direction:column;gap:0.4rem;">
-<div class="status-row"><div class="status-dot" style="background:#1A9E60;"></div><span><strong>Attended</strong> — code submitted for this session</span></div>
-<div class="status-row"><div class="status-dot" style="background:#C0392B;"></div><span><strong>Absent</strong> — no code submitted</span></div>
-<div class="status-row"><div class="status-dot" style="background:#8896AB;"></div><span><strong>Upcoming</strong> — session has not happened yet</span></div>
-</div>
-</div>
-</div>
+</details>
 
-<!-- 7. Export & support -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">7</div>
-<div class="section-title">Export Records &amp; Get Support</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="acc">
+<summary><span class="acc-num">6</span> Export records &amp; get support <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:download-outline"></span></div><div class="step-text">Use <strong>Export CSV</strong> in the sidebar to download your full attendance record as a spreadsheet.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lifebuoy"></span></div><div class="step-text">Have a problem? Use <strong>Contact Support</strong> to raise a request. A teaching assistant responds within 24–48 hours.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:download-outline"></span></div>
-<div class="step-text">Click<strong>Export CSV</strong> in the sidebar to download your full attendance record as a spreadsheet for personal reference.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:lifebuoy"></span></div>
-<div class="step-text">If you have a problem, click<strong>Support</strong> in the sidebar to submit a help ticket. The admin team responds within 24–48 hours.</div>
-</div>
-</div>
-</div>
-</div>
+</details>
 
-<!-- Quick reference table -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num" style="background:var(--green);">
-<span class="iconify" data-icon="mdi:table" style="font-size:13px;"></span>
-</div>
-<div class="section-title">Quick Reference Table</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-</div>
-<div class="section-body" style="padding:0;">
+<details class="acc">
+<summary><span class="acc-num green"><span class="iconify" data-icon="mdi:table" data-width="14"></span></span> Quick reference <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div style="padding:0">
 <table class="ref-table">
-<thead>
-<tr><th>Action</th><th>How</th><th>Where</th></tr>
-</thead>
+<thead><tr><th>Task</th><th>How</th><th>Where</th></tr></thead>
 <tbody>
-<tr><td>Create account</td><td>Register with Student ID + UG email</td><td>Register page</td></tr>
-<tr><td>Log in</td><td>Email address / password</td><td>Login page</td></tr>
-<tr><td>Register courses</td><td>Check courses → Register</td><td>Sidebar → Register Courses</td></tr>
-<tr><td>Submit attendance</td><td>Click Submit Code → enter TA code</td><td>Dashboard</td></tr>
-<tr><td>View history</td><td>Open My History</td><td>Sidebar → My History</td></tr>
-<tr><td>Download records</td><td>Export CSV</td><td>Sidebar → Export CSV</td></tr>
-<tr><td>Get help</td><td>Submit a support ticket</td><td>Sidebar → Support</td></tr>
+<tr><td>Create account</td><td>Register with Student ID + email</td><td>Registration page</td></tr>
+<tr><td>Sign in</td><td>Email address + password</td><td>Sign-in page</td></tr>
+<tr><td>Register courses</td><td>Select courses, submit</td><td>Register Courses</td></tr>
+<tr><td>Check in</td><td>Enter the 6-digit TA code</td><td>Dashboard</td></tr>
+<tr><td>View history</td><td>Open My History</td><td>My History</td></tr>
+<tr><td>Download records</td><td>Export CSV</td><td>Export CSV</td></tr>
+<tr><td>Get help</td><td>Submit a support request</td><td>Contact Support</td></tr>
 </tbody>
 </table>
 </div>
-</div>
+</details>
 
-<!-- Student tips -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num" style="background:#B8920C;">
-<span class="iconify" data-icon="mdi:lightbulb-outline" style="font-size:13px;"></span>
-</div>
-<div class="section-title">Student Pro Tips</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-</div>
-<div class="section-body">
+<details class="acc">
+<summary><span class="acc-num gold"><span class="iconify" data-icon="mdi:lightbulb-outline" data-width="14"></span></span> Tips <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
+<div class="acc-body">
 <div class="tips-grid">
-<div class="tip-item"><div class="tip-check"></div><span>Save the website to your phone's home screen for quick access.</span></div>
-<div class="tip-item"><div class="tip-check"></div><span>Submit your code right away — don't wait until after class.</span></div>
-<div class="tip-item"><div class="tip-check"></div><span>Check your history weekly to catch any missed sessions early.</span></div>
-<div class="tip-item"><div class="tip-check"></div><span>Use a strong, unique password — not something easy to guess. Never share it.</span></div>
-<div class="tip-item"><div class="tip-check"></div><span>Export your CSV at the end of semester for your personal records.</span></div>
-</div>
-
-<div style="margin-top:1.25rem;">
-<div class="dates-grid">
-<div class="date-card">
-<div class="date-lbl">Semester Begins</div>
-<div class="date-val">June 1, 2026</div>
-</div>
-<div class="date-card">
-<div class="date-lbl">Semester Ends</div>
-<div class="date-val">October 31, 2026</div>
-</div>
-<div class="date-card">
-<div class="date-lbl">Registration Closes</div>
-<div class="date-val">End of Week 2</div>
-</div>
-<div class="date-card">
-<div class="date-lbl">Final Submission</div>
-<div class="date-val">End of Semester</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Add the portal to your phone's home screen for quick access.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Check in during class — don't wait until you've left.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Review your history weekly to catch any missed sessions early.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Use a strong, unique password and never share it.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Export your records at the end of the semester for your own reference.</div>
 </div>
 </div>
-</div>
-</div>
-</div>
+</details>
 
 </div>
 
 <script>
-function toggle(head) {
-    const body = head.nextElementSibling;
-    const open = body.classList.toggle('open');
-    head.setAttribute('aria-expanded', open);
-}
-
 {% if is_student %}
-/* ── Dictionary widget ── */
-var dictMode = 'en'; // 'en' = English→Swahili, 'sw' = Swahili→English
-
-var DICT_PLACEHOLDERS = {
-    en: 'Type an English word... (e.g. love, freedom, education)',
-    sw: 'Andika neno la Kiswahili... (mfano: upendo, uhuru)',
-};
-
+var dictMode = 'en';
+var DICT_PLACEHOLDERS = { en: 'Type an English word — e.g. love, freedom, education', sw: 'Andika neno la Kiswahili — mfano: upendo, uhuru' };
 function setMode(mode) {
     dictMode = mode;
     var input = document.getElementById('dictInput');
     input.placeholder = DICT_PLACEHOLDERS[mode];
-    input.value = '';
-    input.classList.remove('shake', 'empty-hint');
-    input.focus();
-
-    document.getElementById('toggleEN').className = 'dict-toggle ' + (mode === 'en' ? 'active' : 'inactive');
-    document.getElementById('toggleSW').className = 'dict-toggle ' + (mode === 'sw' ? 'active' : 'inactive');
+    input.value = ''; input.focus();
+    document.getElementById('toggleEN').className = 'dict-toggle ' + (mode === 'en' ? 'active' : '');
+    document.getElementById('toggleSW').className = 'dict-toggle ' + (mode === 'sw' ? 'active' : '');
 }
-
 function buildUrl(term) {
-    var encoded = encodeURIComponent(term.trim().toLowerCase());
-    if (dictMode === 'en') {
-        return 'https://swahili-dictionary.com/english-swahili/' + encoded;
-    }
-    return 'https://swahili-dictionary.com/swahili-english/' + encoded;
+    var e = encodeURIComponent(term.trim().toLowerCase());
+    return dictMode === 'en' ? 'https://swahili-dictionary.com/english-swahili/' + e : 'https://swahili-dictionary.com/swahili-english/' + e;
 }
-
 function doSearch() {
     var input = document.getElementById('dictInput');
-    var term = input.value.trim();
-
-    if (!term) {
-        input.classList.remove('shake', 'empty-hint');
-        /* Force reflow so animation re-triggers if already shaking */
-        void input.offsetWidth;
-        input.classList.add('shake', 'empty-hint');
-        input.addEventListener('animationend', function onEnd() {
-            input.classList.remove('shake');
-            input.removeEventListener('animationend', onEnd);
-        });
-        input.addEventListener('input', function onType() {
-            input.classList.remove('empty-hint');
-            input.removeEventListener('input', onType);
-        });
-        input.focus();
-        return;
-    }
-
-    window.open(buildUrl(term), '_blank', 'noopener,noreferrer');
+    if (!input.value.trim()) { input.classList.add('ds-input-invalid'); input.focus(); input.addEventListener('input', function h(){ input.classList.remove('ds-input-invalid'); input.removeEventListener('input', h); }); return; }
+    window.open(buildUrl(input.value), '_blank', 'noopener,noreferrer');
 }
-
-function chipSearch(word) {
-    var input = document.getElementById('dictInput');
-    input.value = word;
-    input.classList.remove('empty-hint');
-    window.open(buildUrl(word), '_blank', 'noopener,noreferrer');
-}
-
+function chipSearch(word) { document.getElementById('dictInput').value = word; window.open(buildUrl(word), '_blank', 'noopener,noreferrer'); }
 function toggleTips() {
-    var btn = document.getElementById('tipToggle');
-    var body = document.getElementById('dictTipsBody');
-    var open = body.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open);
+    var btn = document.getElementById('tipToggle'), body = document.getElementById('dictTipsBody');
+    var open = body.classList.toggle('open'); btn.setAttribute('aria-expanded', open);
 }
-
 document.addEventListener('DOMContentLoaded', function () {
     var input = document.getElementById('dictInput');
-    if (input) {
-        input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
-        });
-    }
+    if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
 });
 {% endif %}
 </script>
