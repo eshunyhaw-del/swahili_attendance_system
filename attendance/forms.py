@@ -32,6 +32,17 @@ class StudentRegistrationForm(forms.ModelForm):
         if not re.match(email_regex, email):
             raise forms.ValidationError("Please enter a valid email address (e.g., name@example.com).")
 
+        # New students may not register with the university student email
+        # (@st.ug.edu.gh): our verification codes are sent via Gmail and do not
+        # reach that domain reliably. Existing accounts are unaffected — this
+        # only runs on new registrations.
+        domain = email.rsplit('@', 1)[-1].lower()
+        if domain == 'st.ug.edu.gh' or domain.endswith('.st.ug.edu.gh'):
+            raise forms.ValidationError(
+                "Please register with a personal email such as Gmail. University "
+                "student emails (@st.ug.edu.gh) can't receive our verification codes."
+            )
+
         existing = User.objects.filter(email__iexact=email).first()
         if existing:
             if existing.is_active:

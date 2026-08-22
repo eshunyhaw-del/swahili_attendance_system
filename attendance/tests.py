@@ -454,3 +454,32 @@ class SupportRoutingTests(TestCase):
         self.client.post(self.url, {"subject": "Help", "message": "Test."})
         self.assertTrue(Notification.objects.filter(recipient=self.admin).exists(),
                         "admin should still receive tickets when no TA is assigned")
+
+
+class StudentEmailDomainTests(TestCase):
+    """New students may not register with a @st.ug.edu.gh student email
+    (verification codes are sent via Gmail and don't reach that domain)."""
+
+    def _data(self, email):
+        return {
+            'full_name': 'Kwame Test', 'email': email,
+            'student_id': '50000001', 'level': '100',
+            'password': 'Str0ngPass!', 'password2': 'Str0ngPass!',
+        }
+
+    def test_student_email_is_blocked(self):
+        from .forms import StudentRegistrationForm
+        form = StudentRegistrationForm(data=self._data('kwame@st.ug.edu.gh'))
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+    def test_student_email_is_blocked_case_insensitive(self):
+        from .forms import StudentRegistrationForm
+        form = StudentRegistrationForm(data=self._data('Kwame@ST.UG.EDU.GH'))
+        self.assertFalse(form.is_valid())
+        self.assertIn('email', form.errors)
+
+    def test_gmail_is_allowed(self):
+        from .forms import StudentRegistrationForm
+        form = StudentRegistrationForm(data=self._data('kwame@gmail.com'))
+        self.assertTrue(form.is_valid(), form.errors)

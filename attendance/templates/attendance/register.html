@@ -170,6 +170,7 @@
                 <label class="field-label" for="id_email">Email address</label>
                 <div class="field-wrap">{{ form.email }}</div>
                 {% if form.email.errors %}<ul class="field-error">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                <div class="field-hint">Use a personal email such as Gmail. University student emails (@st.ug.edu.gh) can't receive verification codes.</div>
             </div>
 
             <hr class="divider">
