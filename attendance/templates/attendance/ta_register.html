@@ -43,10 +43,10 @@
     .steps { display: flex; align-items: center; justify-content: center; margin-top: 1.25rem; flex-wrap: wrap; gap: 0.15rem; }
     .step { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; font-weight: 600; color: #A2AAB9; }
     .step.active { color: var(--navy); }
-    .step-dot { width: 20px; height: 20px; border-radius: 50%; background: #ECEFF6; color: #97A0B2;
+    .step-dot { width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; background: #ECEFF6; color: #97A0B2;
         display: flex; align-items: center; justify-content: center; font-size: 0.66rem; font-weight: 700; }
     .step.active .step-dot { background: var(--navy); color: #fff; }
-    .step-line { width: 16px; height: 1.5px; background: var(--line); margin: 0 0.35rem; }
+    .step-line { width: 16px; height: 1.5px; flex-shrink: 0; background: var(--line); margin: 0 0.35rem; }
     @media (max-width: 460px) { .step span:not(.step-dot) { display: none; } .step-line { width: 22px; } }
 
     .card-body { padding: 1.6rem 2rem 2rem; }
