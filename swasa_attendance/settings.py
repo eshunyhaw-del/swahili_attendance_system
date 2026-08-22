@@ -128,6 +128,7 @@ _TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'attendance.context_processors.notifications',
+    'attendance.context_processors.alumni_invite',
 ]
 
 _BASE_LOADERS = [
@@ -335,6 +336,18 @@ ALLOWED_STUDENT_EMAIL_DOMAINS = [
     for d in config('ALLOWED_STUDENT_EMAIL_DOMAINS', default='gmail.com,googlemail.com').split(',')
     if d.strip()
 ]
+
+# ── SWASA alumni invite pop-up ────────────────────────────────────────────────
+# A pop-up invites Level 400 students and TAs to the alumni WhatsApp group during
+# the final days of the active SECOND semester. It appears once per app session
+# for anyone in the audience while the window is open. Both values are
+# overridable via .env without a code change.
+ALUMNI_WHATSAPP_URL = config(
+    'ALUMNI_WHATSAPP_URL',
+    default='https://chat.whatsapp.com/DhRMUT39Jlg56QGxhNklgl?s=cl&p=a&ilr=1',
+)
+# How many days before the second semester's end_date the pop-up starts showing.
+ALUMNI_INVITE_WINDOW_DAYS = config('ALUMNI_INVITE_WINDOW_DAYS', default=7, cast=int)
 
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'

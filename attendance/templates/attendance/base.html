@@ -1464,6 +1464,42 @@
 </div>
 </div>
 
+{% if show_alumni_popup %}
+<!-- ── SWASA alumni invite (Level 400 students + TAs, closing weeks of 2nd semester) ── -->
+<div id="alumniPopup" class="ds-modal-overlay" style="display:none; z-index:1300;">
+<div class="ds-modal" style="max-width:400px; text-align:center;">
+<div style="padding:26px 26px 0;">
+<div style="width:54px; height:54px; border-radius:14px; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+<span class="iconify" data-icon="mdi:whatsapp" data-width="30"></span>
+</div>
+<h3 style="font-size:1.2rem; font-weight:700; margin:0 0 6px; color:var(--text-primary);">Join the SWASA Alumni Network</h3>
+<p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0;">You're in your final stretch with SWASA. Stay connected with fellow members and graduates — join the alumni WhatsApp group.</p>
+</div>
+<div style="display:flex; flex-direction:column; gap:8px; padding:20px 26px 24px;">
+<a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="dismissAlumniPopup()" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; font-weight:700; font-size:14px; padding:0.75rem; border-radius:var(--radius-sm); text-decoration:none;">
+<span class="iconify" data-icon="mdi:whatsapp" data-width="18"></span> Join on WhatsApp
+</a>
+<button type="button" onclick="dismissAlumniPopup()" style="background:none; border:none; color:var(--text-muted); font-family:inherit; font-size:13px; font-weight:600; padding:0.5rem; cursor:pointer;">Maybe later</button>
+</div>
+</div>
+</div>
+<script>
+    (function () {
+        try { if (sessionStorage.getItem('swasa_alumni_popup')) return; } catch (e) {}
+        var el = document.getElementById('alumniPopup');
+        if (el) setTimeout(function () { el.style.display = 'flex'; }, 900);
+    })();
+    function dismissAlumniPopup() {
+        var el = document.getElementById('alumniPopup');
+        if (el) el.style.display = 'none';
+        try { sessionStorage.setItem('swasa_alumni_popup', '1'); } catch (e) {}
+    }
+    document.getElementById('alumniPopup').addEventListener('click', function (e) {
+        if (e.target === this) dismissAlumniPopup();
+    });
+</script>
+{% endif %}
+
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');

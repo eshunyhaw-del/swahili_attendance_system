@@ -536,3 +536,66 @@ class ExamEligibilityTests(TestCase):
         r = self._elig([])
         self.assertTrue(r['eligible'])
         self.assertEqual(r['status'], 'eligible')
+
+
+class AlumniInviteTests(TestCase):
+    """Alumni pop-up shows to Level 400 students + approved TAs during the final
+    ALUMNI_INVITE_WINDOW_DAYS of an active SECOND semester only."""
+
+    def setUp(self):
+        cache.clear()
+        from .models import Semester
+        Semester.objects.update(is_active=False)  # isolate from any seeded semester
+        self.l400, _ = Level.objects.get_or_create(name='400')
+        self.l100, _ = Level.objects.get_or_create(name='100')
+
+    def _semester(self, name, days_to_end):
+        from .models import Semester
+        today = timezone.localdate()
+        return Semester.objects.create(
+            name=name, year=2026,
+            start_date=today - timedelta(days=90),
+            end_date=today + timedelta(days=days_to_end),
+            is_active=True,
+        )
+
+    def _ctx(self, user):
+        from django.test import RequestFactory
+        from .context_processors import alumni_invite
+        req = RequestFactory().get('/')
+        req.user = user
+        return alumni_invite(req)
+
+    def _student(self, username, level):
+        u = User.objects.create_user(username, password='x')
+        UserProfile.objects.create(user=u, level=level, student_id_number=username[:8], must_change_password=False)
+        return u
+
+    def test_l400_student_in_window_sees_popup(self):
+        self._semester('Second Semester', days_to_end=3)
+        ctx = self._ctx(self._student('a400a', self.l400))
+        self.assertTrue(ctx.get('show_alumni_popup'))
+        self.assertIn('chat.whatsapp.com', ctx.get('alumni_whatsapp_url', ''))
+
+    def test_approved_ta_in_window_sees_popup(self):
+        self._semester('Second Semester', days_to_end=2)
+        ta = User.objects.create_user('a_ta', password='x')
+        TAProfile.objects.create(user=ta, is_approved=True)
+        self.assertTrue(self._ctx(ta).get('show_alumni_popup'))
+
+    def test_l100_student_does_not_see_popup(self):
+        self._semester('Second Semester', days_to_end=3)
+        self.assertFalse(self._ctx(self._student('a100a', self.l100)).get('show_alumni_popup'))
+
+    def test_first_semester_does_not_show(self):
+        self._semester('First Semester', days_to_end=3)
+        self.assertFalse(self._ctx(self._student('a400b', self.l400)).get('show_alumni_popup'))
+
+    def test_outside_window_does_not_show(self):
+        self._semester('Second Semester', days_to_end=40)  # far from end
+        self.assertFalse(self._ctx(self._student('a400c', self.l400)).get('show_alumni_popup'))
+
+    def test_lecturer_does_not_see_popup(self):
+        self._semester('Second Semester', days_to_end=3)
+        lect = User.objects.create_user('a_lect', password='x', is_staff=True)
+        self.assertFalse(self._ctx(lect).get('show_alumni_popup'))

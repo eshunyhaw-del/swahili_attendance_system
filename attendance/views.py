@@ -3162,7 +3162,9 @@ def community_alumni(request):
         if not is_level_400:
             messages.warning(request, 'The Alumni Network is only available to Level 400 students.')
             return redirect(reverse('attendance:dashboard'))
-    return render(request, 'attendance/community/alumni.html')
+    return render(request, 'attendance/community/alumni.html', {
+        'alumni_whatsapp_url': getattr(settings, 'ALUMNI_WHATSAPP_URL', ''),
+    })
 
 
 @login_required

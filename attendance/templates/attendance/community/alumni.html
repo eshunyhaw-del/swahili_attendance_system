@@ -15,10 +15,10 @@
 <p class="sub">Stay connected with SWASA graduates after you leave the programme.</p>
 </header>
 <div class="ds-card"><div class="ds-empty">
-<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:school-outline"></span></div>
-<p class="ds-empty-title">Coming soon</p>
-<p class="ds-empty-text">As a Level 400 student, you'll soon be able to connect with SWASA alumni across East Africa and beyond.</p>
-<a href="{% url 'attendance:dashboard' %}" class="ds-btn ds-btn-secondary"><span class="iconify" data-icon="mdi:arrow-left"></span> Back to dashboard</a>
+<div class="ds-empty-icon" style="background:#25D366; color:#fff;"><span class="iconify" data-icon="mdi:whatsapp"></span></div>
+<p class="ds-empty-title">Join the SWASA Alumni Network</p>
+<p class="ds-empty-text">As a Level 400 student, stay connected with SWASA members and graduates after you leave the programme. Join the alumni WhatsApp group below.</p>
+<a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="ds-btn" style="background:#25D366; color:#fff;"><span class="iconify" data-icon="mdi:whatsapp"></span> Join on WhatsApp</a>
 </div></div>
 </div>
 {% endblock %}
