@@ -1719,20 +1719,18 @@ def export_level_attendance(request, level_id):
 
 @staff_member_required
 def student_attendance_report(request):
-    students = UserProfile.objects.select_related('user', 'level').all()
+    # The consolidated "records" screen switches level/segment and searches
+    # entirely client-side (Meta-Ads-Manager style), so we always load the full
+    # student set once. ``?level=`` is honoured only to preselect the opening tab
+    # (deep links / no-JS fallback), not to trim the dataset.
+    students = (
+        UserProfile.objects
+        .select_related('user', 'level')
+        .order_by('user__first_name', 'user__last_name', 'user__username')
+    )
 
     level_id = request.GET.get('level')
-    if level_id:
-        students = students.filter(level_id=level_id)
-
     search_query = request.GET.get('search')
-    if search_query:
-        students = students.filter(
-            Q(user__first_name__icontains=search_query) |
-            Q(user__last_name__icontains=search_query) |
-            Q(user__username__icontains=search_query) |
-            Q(student_id_number__icontains=search_query)
-        )
 
     students = list(students)
     student_ids = [p.user_id for p in students]
@@ -1793,15 +1791,44 @@ def student_attendance_report(request):
             'attendance_percentage': round(attendance_percentage, 1),
             'course_attendance': course_attendance,
             'alerts': alerts,
+            'has_data': total_possible > 0,      # has at least one held session
+            'at_risk': total_possible > 0 and attendance_percentage < 75,
         })
-    
+
+    # ── Level segments (tab metadata) + opening-view summary ──────────────────
+    levels = list(Level.objects.all().order_by('name'))
+
+    def _summary(rows):
+        tracked = [r for r in rows if r['has_data']]
+        avg = round(sum(r['attendance_percentage'] for r in tracked) / len(tracked), 1) if tracked else 0
+        return {
+            'count': len(rows),
+            'avg_attendance': avg,
+            'at_risk': sum(1 for r in rows if r['at_risk']),
+            'good': sum(1 for r in tracked if r['attendance_percentage'] >= 75),
+        }
+
+    level_segments = []
+    for level in levels:
+        level_segments.append({
+            'level': level,
+            'count': sum(1 for r in student_data if r['profile'].level_id == level.id),
+        })
+
+    # Initial active tab: a valid ?level= id, else 'all'.
+    active_level = 'all'
+    if level_id and any(str(level.id) == str(level_id) for level in levels):
+        active_level = str(level_id)
+
     context = {
         'students': student_data,
-        'levels': Level.objects.all(),
-        'selected_level': level_id,
+        'levels': levels,
+        'level_segments': level_segments,
+        'active_level': active_level,
         'search_query': search_query,
+        'summary_all': _summary(student_data),
     }
-    
+
     return render(request, 'attendance/student_report.html', context)
 
 

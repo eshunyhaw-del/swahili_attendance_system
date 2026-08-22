@@ -351,3 +351,69 @@ class ProfileEditTests(TestCase):
         lecturer.refresh_from_db()
         self.assertEqual(lecturer.first_name, "Kofi")
         self.assertEqual(lecturer.avatar.phone_number, "0555555555")
+
+
+class AdminRecordsViewTests(TestCase):
+    """Consolidated Meta-Ads-style records screen (student_attendance_report)."""
+
+    def setUp(self):
+        cache.clear()
+        self.level100, _ = Level.objects.get_or_create(name="100")
+        self.level200, _ = Level.objects.get_or_create(name="200")
+        semester = _make_semester()
+        self.course = Course.objects.create(
+            code="REC 101", name="Records", level=self.level100, semester=semester,
+        )
+        self.session = ClassSession.objects.create(
+            course=self.course, date=timezone.now().date(),
+            topic="W1", lecturer=User.objects.create_user("rec_lect", password="x"),
+        )
+        # A level-100 student who attended the one session.
+        self.stud_user = User.objects.create_user(
+            "rec_stud", password="x", first_name="Nana", last_name="Owusu",
+        )
+        self.stud_profile = UserProfile.objects.create(
+            user=self.stud_user, level=self.level100,
+            student_id_number="30000001", must_change_password=False,
+        )
+        from .models import CourseRegistration, AttendanceRecord, AttendanceCode
+        CourseRegistration.objects.create(user_profile=self.stud_profile, course=self.course)
+        code = AttendanceCode.objects.create(
+            student=self.stud_user, class_session=self.session, code_string="ABC12345",
+        )
+        AttendanceRecord.objects.create(
+            student=self.stud_user, class_session=self.session, code=code,
+        )
+
+        self.staff = User.objects.create_user("rec_admin", password="x", is_staff=True)
+        self.url = reverse("attendance:student_report")
+
+    def test_non_staff_is_redirected(self):
+        self.client.force_login(self.stud_user)
+        resp = self.client.get(self.url)
+        self.assertNotEqual(resp.status_code, 200)  # staff_member_required bounces
+
+    def test_staff_sees_all_students_and_segments(self):
+        self.client.force_login(self.staff)
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "attendance/student_report.html")
+        self.assertContains(resp, "Nana Owusu")
+        # Level segments + opening summary present in context.
+        seg_levels = {s['level'].name for s in resp.context['level_segments']}
+        self.assertTrue({"100", "200"}.issubset(seg_levels))
+        self.assertEqual(resp.context['active_level'], 'all')
+        self.assertEqual(resp.context['summary_all']['count'], UserProfile.objects.count())
+
+    def test_level_query_preselects_active_tab(self):
+        self.client.force_login(self.staff)
+        resp = self.client.get(self.url, {"level": self.level100.id})
+        self.assertEqual(resp.context['active_level'], str(self.level100.id))
+
+    def test_attended_student_is_on_track(self):
+        self.client.force_login(self.staff)
+        resp = self.client.get(self.url)
+        row = next(s for s in resp.context['students'] if s['profile'].id == self.stud_profile.id)
+        self.assertTrue(row['has_data'])
+        self.assertFalse(row['at_risk'])
+        self.assertEqual(row['attendance_percentage'], 100.0)
