@@ -64,6 +64,13 @@ def role_label(user):
     return "Student"
 
 
+def style_guide(request):
+    """Living style guide / component gallery for the SWASA design system.
+    Presentational only (no data), so it renders the reusable component language
+    for review and reference across the application."""
+    return render(request, 'attendance/style_guide.html')
+
+
 @login_required
 def profile(request):
     """Everyone (student, TA, lecturer, admin) edits their name, email, phone and

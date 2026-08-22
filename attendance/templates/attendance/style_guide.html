@@ -1,0 +1,359 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design System — SWASA Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+<style>
+    html, body { margin: 0; }
+    body { background: var(--ds-bg); }
+    .sg-top { position: sticky; top: 0; z-index: 50; background: var(--ds-surface); border-bottom: 1px solid var(--ds-border); }
+    .sg-top-inner { max-width: 1080px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .sg-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+    .sg-brand .mark { width: 26px; height: 26px; border-radius: 6px; background: var(--ds-navy); color: var(--ds-gold); display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+    .sg-wrap { max-width: 1080px; margin: 0 auto; padding: 32px 24px 96px; }
+    .sg-lead { color: var(--ds-text-secondary); font-size: 15px; max-width: 720px; margin: 8px 0 0; line-height: 1.6; }
+    .sg-section { margin-top: 56px; }
+    .sg-section > .ds-eyebrow { margin-bottom: 4px; }
+    .sg-section > h2 { margin: 0 0 20px; }
+    .sg-sub { font-size: 13px; font-weight: 600; color: var(--ds-text-muted); margin: 24px 0 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .sg-panel { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); padding: 24px; }
+    .sg-flex { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .sg-swatch { border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); overflow: hidden; }
+    .sg-swatch .chip { height: 56px; }
+    .sg-swatch .meta { padding: 8px 10px; font-size: 11px; }
+    .sg-swatch .meta b { display: block; font-size: 12px; }
+    .sg-swatch .meta span { color: var(--ds-text-muted); font-family: var(--ds-font-mono); }
+    .sg-type-row { display: flex; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--ds-border); }
+    .sg-type-row:last-child { border-bottom: none; }
+    .sg-type-row .lbl { width: 110px; flex-shrink: 0; font-size: 11px; color: var(--ds-text-muted); font-family: var(--ds-font-mono); }
+</style>
+</head>
+<body class="ds-scope">
+<div class="sg-top">
+<div class="sg-top-inner">
+<div class="sg-brand"><span class="mark">S</span> SWASA Design System</div>
+<button class="ds-btn ds-btn-secondary ds-btn-sm" onclick="toggleTheme()">
+<span class="iconify" data-icon="mdi:theme-light-dark"></span> <span id="themeLabel">Dark</span>
+</button>
+</div>
+</div>
+
+<div class="sg-wrap">
+<p class="ds-eyebrow">University Attendance System</p>
+<h1 class="ds-h1">Design language &amp; components</h1>
+<p class="sg-lead">The shared visual system for the student, teaching assistant and lecturer experiences. Flat neutral surfaces, subtle shadows, restrained radii, and a fixed, accessible vocabulary for attendance status. Every screen is built from these components so the system reads as one coherent institutional product.</p>
+
+<!-- COLOUR -->
+<section class="sg-section">
+<p class="ds-eyebrow">Foundations</p>
+<h2 class="ds-h2">Colour</h2>
+<p class="sg-sub">Brand</p>
+<div class="sg-swatches">
+<div class="sg-swatch"><div class="chip" style="background:#0D2472"></div><div class="meta"><b>Navy</b><span>#0D2472</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#E6B325"></div><div class="meta"><b>Gold accent</b><span>#E6B325</span></div></div>
+</div>
+<p class="sg-sub">Neutrals</p>
+<div class="sg-swatches">
+<div class="sg-swatch"><div class="chip" style="background:#F4F6F9"></div><div class="meta"><b>Canvas</b><span>#F4F6F9</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#FFFFFF;border-bottom:1px solid #E1E5EC"></div><div class="meta"><b>Surface</b><span>#FFFFFF</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#E1E5EC"></div><div class="meta"><b>Border</b><span>#E1E5EC</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#6B7484"></div><div class="meta"><b>Muted text</b><span>#6B7484</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#1F2937"></div><div class="meta"><b>Text</b><span>#1F2937</span></div></div>
+</div>
+<p class="sg-sub">Status</p>
+<div class="sg-swatches">
+<div class="sg-swatch"><div class="chip" style="background:#167A4B"></div><div class="meta"><b>Success</b><span>#167A4B</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#B45309"></div><div class="meta"><b>Warning</b><span>#B45309</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#B42318"></div><div class="meta"><b>Danger</b><span>#B42318</span></div></div>
+<div class="sg-swatch"><div class="chip" style="background:#175CD3"></div><div class="meta"><b>Info</b><span>#175CD3</span></div></div>
+</div>
+</section>
+
+<!-- TYPOGRAPHY -->
+<section class="sg-section">
+<p class="ds-eyebrow">Foundations</p>
+<h2 class="ds-h2">Typography — Montserrat</h2>
+<div class="sg-panel">
+<div class="sg-type-row"><span class="lbl">H1 / 28</span><span class="ds-h1">Attendance Overview</span></div>
+<div class="sg-type-row"><span class="lbl">H2 / 23</span><span class="ds-h2">Today's Classes</span></div>
+<div class="sg-type-row"><span class="lbl">H3 / 19</span><span class="ds-h3">Assigned Courses</span></div>
+<div class="sg-type-row"><span class="lbl">Body / 14</span><span style="font-size:14px">Your attendance is calculated across all recorded class sessions.</span></div>
+<div class="sg-type-row"><span class="lbl">Small / 12</span><span style="font-size:12px" class="ds-text-muted">Last updated a few minutes ago</span></div>
+<div class="sg-type-row"><span class="lbl">Eyebrow</span><span class="ds-eyebrow">Class Session</span></div>
+<div class="sg-type-row"><span class="lbl">Mono</span><span class="ds-mono" style="font-size:14px">SWAH 201 · 4820FA</span></div>
+</div>
+</section>
+
+<!-- BUTTONS -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Buttons</h2>
+<div class="sg-panel ds-stack ds-gap-4">
+<div class="sg-flex">
+<button class="ds-btn ds-btn-primary">Mark Attendance</button>
+<button class="ds-btn ds-btn-secondary">Export Report</button>
+<button class="ds-btn ds-btn-subtle">View Details</button>
+<button class="ds-btn ds-btn-ghost">Cancel</button>
+<button class="ds-btn ds-btn-danger">Remove</button>
+</div>
+<div class="sg-flex">
+<button class="ds-btn ds-btn-primary"><span class="iconify" data-icon="mdi:check"></span> Confirm Present</button>
+<button class="ds-btn ds-btn-secondary"><span class="iconify" data-icon="mdi:download"></span> Download CSV</button>
+<button class="ds-btn ds-btn-icon ds-btn-secondary" aria-label="More"><span class="iconify" data-icon="mdi:dots-horizontal"></span></button>
+</div>
+<div class="sg-flex">
+<button class="ds-btn ds-btn-primary ds-btn-lg">Large</button>
+<button class="ds-btn ds-btn-primary">Default</button>
+<button class="ds-btn ds-btn-primary ds-btn-sm">Small</button>
+<button class="ds-btn ds-btn-primary" disabled>Disabled</button>
+</div>
+</div>
+</section>
+
+<!-- ATTENDANCE STATES -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Attendance status</h2>
+<p class="sg-lead" style="margin-bottom:16px">A fixed vocabulary reused on every roster, history row and report. Each state pairs a colour with an icon and label, so status is never conveyed by colour alone.</p>
+<div class="sg-panel sg-flex">
+<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+<span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span>
+<span class="ds-att ds-att-late"><span class="iconify" data-icon="mdi:clock-alert"></span> Late</span>
+<span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span>
+<span class="ds-att ds-att-pending"><span class="iconify" data-icon="mdi:progress-clock"></span> Pending</span>
+<span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not Recorded</span>
+</div>
+</section>
+
+<!-- BADGES -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Badges</h2>
+<div class="sg-panel sg-flex">
+<span class="ds-badge ds-badge-neutral">Level 200</span>
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check"></span> On track</span>
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> Needs attention</span>
+<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:alert-octagon"></span> At risk</span>
+<span class="ds-badge ds-badge-info">Session open</span>
+</div>
+</section>
+
+<!-- CARDS + STATS -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Cards &amp; statistics</h2>
+<p class="sg-lead" style="margin-bottom:16px">Hierarchy comes from type and a subtle neutral shadow — never a coloured border.</p>
+<div class="ds-grid ds-grid-4" style="margin-bottom:16px">
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:chart-line"></span> Attendance</div>
+<div class="ds-stat-value">86%</div>
+<div class="ds-stat-meta ds-stat-trend-up"><span class="iconify" data-icon="mdi:arrow-up" style="vertical-align:-2px"></span> 3% this month</div>
+</div>
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:calendar-today"></span> Classes today</div>
+<div class="ds-stat-value">3</div>
+<div class="ds-stat-meta">Next at 10:30</div>
+</div>
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:book-outline"></span> Courses</div>
+<div class="ds-stat-value">6</div>
+<div class="ds-stat-meta">Semester 1</div>
+</div>
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:alert-outline"></span> Below 75%</div>
+<div class="ds-stat-value">1</div>
+<div class="ds-stat-meta">SWAH 305</div>
+</div>
+</div>
+<div class="ds-card" style="max-width:420px">
+<div class="ds-card-header">
+<h3 class="ds-card-title">Kiswahili Grammar</h3>
+<span class="ds-badge ds-badge-neutral">SWAH 201</span>
+</div>
+<div class="ds-card-body ds-stack ds-gap-3">
+<div class="ds-between"><span class="ds-text-secondary" style="font-size:13px">Attendance</span><strong>82%</strong></div>
+<div class="ds-progress"><div class="ds-progress-bar" style="width:82%"></div></div>
+<div class="ds-text-muted" style="font-size:12px">14 of 17 sessions attended</div>
+</div>
+<div class="ds-card-footer ds-between">
+<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present today</span>
+<button class="ds-btn ds-btn-subtle ds-btn-sm">View sessions</button>
+</div>
+</div>
+</section>
+
+<!-- FORMS -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Forms &amp; inputs</h2>
+<div class="sg-panel ds-grid ds-grid-2">
+<div>
+<div class="ds-field">
+<label class="ds-label">Full name</label>
+<input class="ds-input" value="Ama Boateng">
+</div>
+<div class="ds-field">
+<label class="ds-label">Course <span class="ds-optional">(optional)</span></label>
+<select class="ds-select"><option>Kiswahili Grammar — SWAH 201</option><option>Swahili Literature — SWAH 305</option></select>
+</div>
+<div class="ds-field ds-search">
+<span class="iconify" data-icon="mdi:magnify"></span>
+<input class="ds-input" placeholder="Search students by name or ID">
+</div>
+</div>
+<div>
+<div class="ds-field">
+<label class="ds-label">Reason for correction <span class="ds-req">*</span></label>
+<textarea class="ds-textarea" placeholder="Briefly explain why this attendance record should be reviewed."></textarea>
+<div class="ds-hint">A teaching assistant will review your request within 48 hours.</div>
+</div>
+<div class="ds-field">
+<label class="ds-label">Student ID</label>
+<input class="ds-input ds-input-invalid" value="1080-9707-X">
+<div class="ds-error-text"><span class="iconify" data-icon="mdi:alert-circle"></span> Enter a valid 8-digit student ID.</div>
+</div>
+<label class="ds-check"><input type="checkbox" checked> Notify me when this is resolved</label>
+</div>
+</div>
+</section>
+
+<!-- TABLE -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Tables</h2>
+<div class="ds-card">
+<div class="ds-table-wrap">
+<table class="ds-table">
+<thead><tr><th>Student</th><th>ID</th><th>Course</th><th>Status</th><th style="text-align:right">Recorded</th></tr></thead>
+<tbody>
+<tr><td class="ds-td-strong">Ama Boateng</td><td class="ds-mono">10809707</td><td>SWAH 201</td><td><span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span></td><td style="text-align:right" class="ds-text-muted">09:02</td></tr>
+<tr><td class="ds-td-strong">Kwame Mensah</td><td class="ds-mono">10811245</td><td>SWAH 201</td><td><span class="ds-att ds-att-late"><span class="iconify" data-icon="mdi:clock-alert"></span> Late</span></td><td style="text-align:right" class="ds-text-muted">09:14</td></tr>
+<tr><td class="ds-td-strong">Efua Sarpong</td><td class="ds-mono">10809930</td><td>SWAH 201</td><td><span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span></td><td style="text-align:right" class="ds-text-muted">—</td></tr>
+<tr><td class="ds-td-strong">Yaw Osei</td><td class="ds-mono">10812007</td><td>SWAH 201</td><td><span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span></td><td style="text-align:right" class="ds-text-muted">—</td></tr>
+</tbody>
+</table>
+</div>
+<div class="ds-card-footer ds-between">
+<span class="ds-text-muted" style="font-size:13px">Showing 4 of 48 students</span>
+<div class="ds-pagination">
+<a class="ds-page" href="#"><span class="iconify" data-icon="mdi:chevron-left"></span></a>
+<a class="ds-page ds-page-active" href="#">1</a>
+<a class="ds-page" href="#">2</a>
+<a class="ds-page" href="#">3</a>
+<a class="ds-page" href="#"><span class="iconify" data-icon="mdi:chevron-right"></span></a>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TABS + SEGMENTED -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Tabs, filters &amp; segmented controls</h2>
+<div class="sg-panel ds-stack ds-gap-5">
+<div class="ds-tabs">
+<button class="ds-tab ds-tab-active">Overview</button>
+<button class="ds-tab">Sessions</button>
+<button class="ds-tab">Students</button>
+<button class="ds-tab">Reports</button>
+</div>
+<div class="sg-flex">
+<div class="ds-segmented">
+<button class="ds-seg ds-seg-active">All <span class="ds-seg-count">151</span></button>
+<button class="ds-seg">100 <span class="ds-seg-count">40</span></button>
+<button class="ds-seg">200 <span class="ds-seg-count">38</span></button>
+<button class="ds-seg">300 <span class="ds-seg-count">41</span></button>
+<button class="ds-seg">400 <span class="ds-seg-count">32</span></button>
+</div>
+</div>
+<div class="ds-breadcrumb">
+<a href="#">Dashboard</a><span class="sep">/</span>
+<a href="#">Courses</a><span class="sep">/</span>
+<span class="current">SWAH 201</span>
+</div>
+</div>
+</section>
+
+<!-- ALERTS -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Alerts &amp; feedback</h2>
+<div class="ds-stack ds-gap-3">
+<div class="ds-alert ds-alert-success"><span class="iconify" data-icon="mdi:check-circle"></span><div><p class="ds-alert-title">Attendance recorded</p><p class="ds-alert-body">Your check-in for Kiswahili Grammar was confirmed at 09:02.</p></div></div>
+<div class="ds-alert ds-alert-info"><span class="iconify" data-icon="mdi:information"></span><div><p class="ds-alert-title">Session opens soon</p><p class="ds-alert-body">Check-in for your 10:30 class will open 10 minutes before it begins.</p></div></div>
+<div class="ds-alert ds-alert-warning"><span class="iconify" data-icon="mdi:alert"></span><div><p class="ds-alert-title">Attendance below requirement</p><p class="ds-alert-body">Your attendance in Swahili Literature is 68%. A minimum of 75% is required to sit the exam.</p></div></div>
+<div class="ds-alert ds-alert-danger"><span class="iconify" data-icon="mdi:alert-octagon"></span><div><p class="ds-alert-title">Check-in failed</p><p class="ds-alert-body">The session code has expired. Ask your teaching assistant to reopen the session.</p></div></div>
+</div>
+</section>
+
+<!-- STATES: EMPTY / LOADING -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Empty &amp; loading states</h2>
+<div class="ds-grid ds-grid-2">
+<div class="ds-card">
+<div class="ds-empty">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:calendar-blank-outline"></span></div>
+<p class="ds-empty-title">No classes today</p>
+<p class="ds-empty-text">You have no scheduled sessions today. Your next class is on Thursday at 08:30.</p>
+<button class="ds-btn ds-btn-secondary"><span class="iconify" data-icon="mdi:calendar"></span> View full schedule</button>
+</div>
+</div>
+<div class="ds-card ds-card-body">
+<div class="ds-skeleton ds-skeleton-title"></div>
+<div class="ds-skeleton ds-skeleton-text"></div>
+<div class="ds-skeleton ds-skeleton-text" style="width:90%"></div>
+<div class="ds-skeleton ds-skeleton-text" style="width:70%"></div>
+<div class="sg-flex" style="margin-top:20px">
+<span class="ds-spinner"></span><span class="ds-text-muted" style="font-size:13px">Loading attendance records…</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- MODAL -->
+<section class="sg-section">
+<p class="ds-eyebrow">Components</p>
+<h2 class="ds-h2">Confirmation dialog</h2>
+<div class="sg-panel" style="display:flex;justify-content:center">
+<div class="ds-modal" style="box-shadow:var(--ds-shadow-md)">
+<div class="ds-modal-header"><h3 class="ds-modal-title">Close attendance session?</h3></div>
+<div class="ds-modal-body">Once you close this session, students can no longer check in. You recorded 42 of 48 students as present.</div>
+<div class="ds-modal-footer">
+<button class="ds-btn ds-btn-ghost">Keep open</button>
+<button class="ds-btn ds-btn-primary">Close session</button>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+
+<script>
+    (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('theme'); } catch (e) {}
+        if (saved) document.documentElement.setAttribute('data-theme', saved);
+        syncLabel();
+    })();
+    function toggleTheme() {
+        var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', cur);
+        try { localStorage.setItem('theme', cur); } catch (e) {}
+        syncLabel();
+    }
+    function syncLabel() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var el = document.getElementById('themeLabel');
+        if (el) el.textContent = dark ? 'Light' : 'Dark';
+    }
+</script>
+</body>
+</html>
