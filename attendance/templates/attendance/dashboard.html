@@ -114,11 +114,6 @@
 <header class="dash-head">
 <p class="ds-eyebrow">Attendance Overview</p>
 <h1 class="greeting"><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}</h1>
-<div class="sub">
-<span>Student ID: {{ user.userprofile.student_id_number|default:"—" }}</span>
-<span class="dot"></span>
-<span>{{ course_data|length }} registered course{{ course_data|length|pluralize }}</span>
-</div>
 <div class="phrase-block" data-phrase-widget></div>
 </header>
 
