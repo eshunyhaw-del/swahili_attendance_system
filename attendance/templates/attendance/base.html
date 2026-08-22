@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     {% load static %}
 <script src="{% static 'js/iconify.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}">
 <style>
         :root {
             /* ── Design tokens ── */
@@ -21,14 +22,14 @@
             --orange: #C7671F;
             --orange-light: rgba(199, 103, 31, 0.09);
 
-            --bg-main: #EEF1F8;
+            --bg-main: #F4F6F9;
             --bg-card: #FFFFFF;
-            --text-main: #16203C;
-            --text-muted: #5B6577;
-            --text-hint: #98A1B3;
-            --border: #E5E8F0;
-            --shadow: 0 4px 20px rgba(13, 36, 114, 0.08);
-            --radius-lg: 16px;
+            --text-main: #1F2937;
+            --text-muted: #6B7484;
+            --text-hint: #9BA4B4;
+            --border: #E1E5EC;
+            --shadow: 0 2px 4px -2px rgba(16, 24, 40, 0.06), 0 4px 10px -2px rgba(16, 24, 40, 0.08);
+            --radius-lg: 12px;
             --radius-sm: 8px;
 
             /* ── Legacy aliases ── */
@@ -42,24 +43,24 @@
             --blue: #4A90D9;
             --bg-base: var(--bg-main);
             --bg-surface: var(--bg-card);
-            --bg-subtle: #E7ECF6;
-            --bg-overlay: rgba(13, 36, 114, 0.04);
+            --bg-subtle: #F0F2F5;
+            --bg-overlay: rgba(16, 24, 40, 0.04);
             --text-primary: var(--text-main);
-            --text-secondary: #45506A;
+            --text-secondary: #4B5563;
             --text-inverse: #FFFFFF;
-            --border-strong: #D2D8E6;
+            --border-strong: #CDD3DE;
             --sidebar-width: 260px;
             --topbar-height: 60px;
-            --shadow-xs: 0 1px 2px rgba(13, 36, 114, 0.06);
-            --shadow-sm: 0 1px 4px rgba(13, 36, 114, 0.08);
+            --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+            --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
             --shadow-md: var(--shadow);
-            --shadow-lg: 0 8px 32px rgba(13, 36, 114, 0.14);
-            --shadow-card: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04);
-            --shadow-card-hover: 0 4px 16px rgba(13,36,114,0.10), 0 2px 6px rgba(13,36,114,0.06);
-            --shadow-modal: 0 8px 32px rgba(13,36,114,0.14), 0 2px 8px rgba(13,36,114,0.08);
-            --shadow-stat: 0 2px 6px rgba(13,36,114,0.07);
-            --radius-md: 12px;
-            --radius-xl: 20px;
+            --shadow-lg: 0 4px 6px -2px rgba(16, 24, 40, 0.05), 0 12px 20px -4px rgba(16, 24, 40, 0.10);
+            --shadow-card: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+            --shadow-card-hover: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
+            --shadow-modal: 0 4px 6px -2px rgba(16,24,40,0.05), 0 12px 20px -4px rgba(16,24,40,0.10);
+            --shadow-stat: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+            --radius-md: 10px;
+            --radius-xl: 14px;
         }
 
         html[data-theme="dark"] {
@@ -68,34 +69,34 @@
             --primary-light: rgba(27, 58, 156, 0.15);
             --orange: #F07040;
             --orange-light: rgba(240, 112, 64, 0.15);
-            --bg-main: #0F1923;
-            --bg-card: #1E2A3B;
-            --text-main: #E8EDF5;
-            --text-muted: #8896AB;
-            --text-hint: #4A5568;
-            --border: #2E3D50;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --bg-main: #0E141C;
+            --bg-card: #171F2A;
+            --text-main: #E7ECF2;
+            --text-muted: #8B95A5;
+            --text-hint: #5C6675;
+            --border: #29323F;
+            --shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.5);
 
             /* Legacy aliases */
-            --bg-base: #0F1923;
-            --bg-surface: #1E2A3B;
-            --bg-subtle: #162131;
+            --bg-base: #0E141C;
+            --bg-surface: #171F2A;
+            --bg-subtle: #121924;
             --bg-overlay: rgba(255,255,255,0.04);
-            --text-primary: #E8EDF5;
-            --text-secondary: #C4CDD8;
-            --border-strong: #3A4E66;
-            --shadow-xs: 0 1px 3px rgba(0,0,0,0.5);
-            --shadow-sm: 0 1px 5px rgba(0,0,0,0.6);
-            --shadow-md: 0 4px 18px rgba(0,0,0,0.7);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,0.8);
-            --shadow-card: 0 2px 8px rgba(0,0,0,0.20), 0 1px 3px rgba(0,0,0,0.14);
-            --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.18);
-            --shadow-modal: 0 8px 32px rgba(0,0,0,0.36), 0 2px 8px rgba(0,0,0,0.22);
-            --shadow-stat: 0 2px 6px rgba(0,0,0,0.18);
-            --surface: #1E2A3B;
-            --bg: #0F1923;
-            --text: #E8EDF5;
-            --muted: #8896AB;
+            --text-primary: #E7ECF2;
+            --text-secondary: #B8C1CE;
+            --border-strong: #3A4757;
+            --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.45);
+            --shadow-md: 0 4px 10px -2px rgba(0,0,0,0.5);
+            --shadow-lg: 0 12px 20px -4px rgba(0,0,0,0.55);
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.45);
+            --shadow-card-hover: 0 4px 10px -2px rgba(0,0,0,0.5);
+            --shadow-modal: 0 12px 20px -4px rgba(0,0,0,0.55);
+            --shadow-stat: 0 1px 3px rgba(0,0,0,0.45);
+            --surface: #171F2A;
+            --bg: #0E141C;
+            --text: #E7ECF2;
+            --muted: #8B95A5;
         }
 
         *, *::before, *::after {

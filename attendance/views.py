@@ -1200,8 +1200,37 @@ def dashboard(request):
             "can_deregister": attended == 0,
         })
 
+    # ── Overview: what the student most needs to see at a glance ──────────────
+    today = timezone.now().date()
+    overall_attended = sum(c['attended'] for c in course_data)
+    overall_total = sum(c['total_sessions'] for c in course_data)
+    overall_pct = round((overall_attended / overall_total) * 100) if overall_total else 0
+    at_risk_courses = [c for c in course_data if c['total_sessions'] > 0 and c['percentage'] < 75]
+
+    course_by_id = {c['course'].id: c['course'] for c in course_data}
+    todays_sessions, upcoming_sessions = [], []
+    for s in all_sessions:
+        info = {
+            'session': s,
+            'course': course_by_id.get(s.course_id),
+            'submitted': s.id in records_by_session,
+        }
+        if s.date == today:
+            todays_sessions.append(info)
+        elif s.date > today:
+            upcoming_sessions.append(info)
+    todays_sessions.sort(key=lambda x: x['session'].start_time)
+    upcoming_sessions.sort(key=lambda x: (x['session'].date, x['session'].start_time))
+
     return render(request, "attendance/dashboard.html", {
         "course_data": course_data,
+        "overall_pct": overall_pct,
+        "overall_attended": overall_attended,
+        "overall_total": overall_total,
+        "at_risk_courses": at_risk_courses,
+        "at_risk_count": len(at_risk_courses),
+        "todays_sessions": todays_sessions,
+        "upcoming_sessions": upcoming_sessions[:4],
     })
 
 
@@ -2554,7 +2583,11 @@ def student_submit_ta_code(request):
             ta_code.distributed_at = now
         ta_code.save()
 
-    return JsonResponse({"success": True, "message": "Attendance submitted successfully!"})
+    return JsonResponse({
+        "success": True,
+        "course_id": session.course_id,
+        "message": "Attendance submitted successfully!",
+    })
 
 
 # ── AJAX: Get Students for TA Dashboard (PAGINATED) ──────────────────────────
