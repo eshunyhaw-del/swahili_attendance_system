@@ -5,151 +5,105 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
-        {% if state == 'verified' %}Account Verified
-        {% elif state == 'ta_pending' %}Pending Approval
-        {% elif state == 'already_used' %}Already Verified
-        {% elif state == 'expired' %}Link Expired
-        {% else %}Invalid Link
+        {% if state == 'verified' %}Account verified
+        {% elif state == 'ta_pending' %}Pending approval
+        {% elif state == 'already_used' %}Already verified
+        {% elif state == 'expired' %}Link expired
+        {% else %}Invalid link
         {% endif %} — SWASA Attendance
 </title>
-<script>(function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="{% static 'js/iconify.min.js' %}"></script>
 <style>
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-        body{
-            font-family:'DM Sans',system-ui,sans-serif;
-            background:linear-gradient(135deg,rgba(9,26,85,0.72) 0%,rgba(13,36,114,0.60) 100%),
-                       url("{% static 'img/students talking.webp' %}") center/cover no-repeat fixed;
-            min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;
-            color:#fff;-webkit-font-smoothing:antialiased;
-        }
-        .card{
-            background:rgba(255,255,255,0.09);
-            backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
-            border-radius:24px;width:100%;max-width:400px;
-            overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.5);
-            text-align:center;
-        }
-        .card-top{
-            background:linear-gradient(145deg,rgba(9,26,85,0.95) 0%,rgba(26,58,156,0.90) 55%,rgba(9,26,85,0.95) 100%);
-            padding:2rem 2rem 1.75rem;position:relative;overflow:hidden;
-        }
-        .icon-wrap{
-            width:72px;height:72px;border-radius:50%;
-            display:flex;align-items:center;justify-content:center;
-            margin:0 auto 1rem;position:relative;z-index:1;
-        }
-        .icon-wrap.green{background:rgba(26,158,96,0.2);}
-        .icon-wrap.gold{background:rgba(242,195,26,0.15);}
-        .icon-wrap.red{background:rgba(231,76,60,0.15);}
-        .icon-wrap .iconify{font-size:36px;}
-        .icon-wrap.green .iconify{color:#4ade80;}
-        .icon-wrap.gold .iconify{color:#F2C31A;}
-        .icon-wrap.red .iconify{color:#f87171;}
-        .card-top h1{font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:-0.02em;margin-bottom:0.4rem;position:relative;z-index:1;}
-        .card-top p{font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;position:relative;z-index:1;}
-        .card-body{padding:1.75rem;}
-        .card-body p{font-size:13.5px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:1.25rem;}
-        .btn{
-            display:inline-flex;align-items:center;justify-content:center;gap:0.4rem;
-            width:100%;padding:0.75rem;border-radius:10px;border:none;cursor:pointer;
-            font-family:inherit;font-size:14px;font-weight:800;text-decoration:none;
-            transition:all 0.13s;
-        }
-        .btn-primary{background:#0D2472;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.35);}
-        .btn-primary:hover{background:#091A55;transform:translateY(-1px);}
-        .btn-ghost{background:transparent;color:rgba(255,255,255,0.65);border:1.5px solid rgba(255,255,255,0.2);margin-top:0.5rem;}
-        .btn-ghost:hover{border-color:rgba(255,255,255,0.5);color:#fff;background:rgba(255,255,255,0.08);}
-        .card-foot{padding:0 1.75rem 1.25rem;font-size:11px;color:rgba(255,255,255,0.35);line-height:1.6;}
+    :root { --navy: #0D2472; --navy-deep: #081A52; --gold: #E6B325;
+        --ink: #16203C; --muted: #5B6577; --line: #E5E8F0; --bg: #EEF1F8; --white: #FFFFFF;
+        --green: #1A9E60; --danger: #C0392B; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Montserrat', system-ui, sans-serif; color: var(--ink);
+        background: radial-gradient(1000px 500px at 15% -10%, rgba(13,36,114,0.09), transparent 60%),
+            radial-gradient(800px 460px at 100% 110%, rgba(230,179,37,0.07), transparent 55%), var(--bg);
+        min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem 1rem; -webkit-font-smoothing: antialiased; }
+    .card { width: 100%; max-width: 400px; background: var(--white); border: 1px solid var(--line);
+        border-radius: 18px; overflow: hidden; box-shadow: 0 26px 60px -28px rgba(13,36,114,0.28); text-align: center; }
+    .card-top { padding: 2.25rem 2rem 1.5rem; border-bottom: 1px solid var(--line); position: relative; }
+    .card-top::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--navy), var(--gold)); }
+    .icon-wrap { width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1rem; font-size: 34px; }
+    .icon-wrap.green { background: #E9F7F0; color: var(--green); }
+    .icon-wrap.gold { background: rgba(230,179,37,0.14); color: var(--gold); }
+    .icon-wrap.red { background: #FCEDEB; color: var(--danger); }
+    .card-top h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+    .card-top p { font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+    .card-body { padding: 1.6rem 1.75rem; }
+    .card-body p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.25rem; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%;
+        padding: 0.8rem; border-radius: 10px; border: none; cursor: pointer; font-family: inherit; font-size: 0.86rem;
+        font-weight: 700; text-decoration: none; transition: all 0.15s; }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover { background: var(--navy-deep); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--line); margin-top: 0.5rem; }
+    .btn-ghost:hover { border-color: var(--navy); color: var(--navy); }
+    .card-foot { padding: 0 1.75rem 1.5rem; font-size: 0.66rem; color: #A2AAB9; line-height: 1.7; }
 </style>
 </head>
 <body>
 <div class="card">
 
-<div class="card-top">
+    <div class="card-top">
         {% if state == 'verified' %}
-<div class="icon-wrap green">
-<span class="iconify" data-icon="mdi:check-circle-outline"></span>
-</div>
-<h1>Account Verified!</h1>
-<p>Redirecting you now&hellip;</p>
-
+        <div class="icon-wrap green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
+        <h1>Account verified</h1>
+        <p>Redirecting you now&hellip;</p>
         {% elif state == 'ta_pending' %}
-<div class="icon-wrap gold">
-<span class="iconify" data-icon="mdi:account-clock-outline"></span>
-</div>
-<h1>Email Verified</h1>
-<p>Your TA account is pending approval</p>
-
+        <div class="icon-wrap gold"><span class="iconify" data-icon="mdi:account-clock-outline"></span></div>
+        <h1>Email verified</h1>
+        <p>Your TA account is pending approval</p>
         {% elif state == 'already_used' %}
-<div class="icon-wrap gold">
-<span class="iconify" data-icon="mdi:check-decagram-outline"></span>
-</div>
-<h1>Already Verified</h1>
-<p>This link has already been used</p>
-
+        <div class="icon-wrap gold"><span class="iconify" data-icon="mdi:check-decagram-outline"></span></div>
+        <h1>Already verified</h1>
+        <p>This link has already been used</p>
         {% elif state == 'expired' %}
-<div class="icon-wrap red">
-<span class="iconify" data-icon="mdi:clock-alert-outline"></span>
-</div>
-<h1>Link Expired</h1>
-<p>This verification link has expired</p>
-
+        <div class="icon-wrap red"><span class="iconify" data-icon="mdi:clock-alert-outline"></span></div>
+        <h1>Link expired</h1>
+        <p>This verification link has expired</p>
         {% else %}
-<div class="icon-wrap red">
-<span class="iconify" data-icon="mdi:link-off"></span>
-</div>
-<h1>Invalid Link</h1>
-<p>This verification link is not recognised</p>
+        <div class="icon-wrap red"><span class="iconify" data-icon="mdi:link-off"></span></div>
+        <h1>Invalid link</h1>
+        <p>This verification link is not recognised</p>
         {% endif %}
-</div>
+    </div>
 
-<div class="card-body">
+    <div class="card-body">
         {% if state == 'ta_pending' %}
-<p>Thanks — your email address is confirmed. An admin will review your TA application and approve your account. You'll be able to log in once it's approved.</p>
-<a href="{% url 'login' %}" class="btn btn-primary">
-<span class="iconify" data-icon="mdi:login"></span>
-            Go to Login
-</a>
+        <p>Thanks — your email address is confirmed. An admin will review your TA application and approve your account. You'll be able to log in once it's approved.</p>
+        <a href="{% url 'login' %}" class="btn btn-primary">Go to sign in</a>
 
         {% elif state == 'already_used' %}
-<p>Your account is already active. Log in to continue.</p>
-<a href="{% url 'login' %}" class="btn btn-primary">
-<span class="iconify" data-icon="mdi:login"></span>
-            Go to Login
-</a>
+        <p>Your account is already active. Sign in to continue.</p>
+        <a href="{% url 'login' %}" class="btn btn-primary">Go to sign in</a>
 
         {% elif state == 'expired' %}
-<p>Magic links expire after 30 minutes. Request a new one and try again.</p>
+        <p>Magic links expire after 30 minutes. Request a new one and try again.</p>
         {% if purpose == 'password_reset' %}
-<a href="{% url 'attendance:otp_password_reset' %}" class="btn btn-primary">
-<span class="iconify" data-icon="mdi:email-sync-outline"></span>
-            Request New Reset Link
-</a>
+        <a href="{% url 'attendance:otp_password_reset' %}" class="btn btn-primary">Request new reset link</a>
         {% else %}
-<a href="{% url 'attendance:resend_verification' %}" class="btn btn-primary">
-<span class="iconify" data-icon="mdi:email-sync-outline"></span>
-            Request New Verification Link
-</a>
+        <a href="{% url 'attendance:resend_verification' %}" class="btn btn-primary">Request new verification link</a>
         {% endif %}
-<a href="{% url 'login' %}" class="btn btn-ghost">Back to Login</a>
+        <a href="{% url 'login' %}" class="btn btn-ghost">Back to sign in</a>
 
         {% elif state == 'invalid' %}
-<p>This link is invalid or has already been removed. If you need to verify your account, request a new link.</p>
-<a href="{% url 'attendance:resend_verification' %}" class="btn btn-primary">
-<span class="iconify" data-icon="mdi:email-sync-outline"></span>
-            Request New Link
-</a>
-<a href="{% url 'login' %}" class="btn btn-ghost">Back to Login</a>
+        <p>This link is invalid or has already been removed. If you need to verify your account, request a new link.</p>
+        <a href="{% url 'attendance:resend_verification' %}" class="btn btn-primary">Request new link</a>
+        <a href="{% url 'login' %}" class="btn btn-ghost">Back to sign in</a>
         {% endif %}
-</div>
+    </div>
 
-<div class="card-foot">
+    <div class="card-foot">
         SWASA Attendance · University of Ghana<br>
-        Department of African and Asian Languages
-</div>
-
+        Department of Language, Literature &amp; Drama
+    </div>
 </div>
 </body>
 </html>
