@@ -1,1009 +1,388 @@
 {% extends "attendance/base.html" %}
 {% block title %}Dashboard{% endblock %}
-
 {% block greeting %}{% endblock %}
 
 {% block content %}
 <style>
-    body {
-        background: var(--bg-base) !important;
-        background-image: none !important;
-        background-attachment: unset !important;
-    }
+    .dash { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; }
 
-    .dash-wrapper {
-        max-width: 580px;
-        margin: 0 auto;
-        padding: 0.5rem 0 2rem;
-    }
+    /* Header — navy overview banner */
+    .dash-head { background: var(--ds-navy); color: #fff; border-radius: var(--ds-radius-lg); padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--ds-shadow-sm); }
+    .dash-head .greeting { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 0; color: #fff; }
+    .dash-head .greeting .swahili-greeting-kw { color: var(--ds-gold); }
+    .phrase-block { margin-top: 12px; }
+    /* Phrase-of-the-hour widget sits on the navy banner — white/gold variants */
+    .dash-head .phrase-category { color: var(--ds-gold); opacity: 0.85; }
+    .dash-head .phrase-swahili { color: #fff; }
+    .dash-head .phrase-english { color: rgba(255,255,255,0.72); }
+    .dash-head .phrase-response { color: var(--ds-gold); opacity: 0.9; }
 
-    /* ── Header ── */
-    .dash-header {
-        background: linear-gradient(135deg, #0D2472 0%, #1A3A9C 60%, #0D2472 100%);
-        color: #fff;
-        border-radius: var(--radius-xl, 20px);
-        padding: 1.5rem 1.75rem;
-        margin-bottom: 1rem;
-        position: relative;
-        overflow: hidden;
-        box-shadow: var(--shadow-md);
-    }
+    /* Stat grid */
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    @media (max-width: 620px) { .stat-grid { grid-template-columns: 1fr; } }
 
+    /* Section heading */
+    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 12px; }
+    .sec-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+    .sec-head a { font-size: 12px; font-weight: 600; color: var(--ds-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+    :root[data-theme="dark"] .sec-head a { color: var(--ds-text-secondary); }
 
-    .dash-header::after {
-        content: '';
-        position: absolute; inset: 0;
-        background-image:
-            repeating-linear-gradient(
-                45deg,
-                rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
-                transparent 1px, transparent 18px
-            ),
-            repeating-linear-gradient(
-                -45deg,
-                rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
-                transparent 1px, transparent 18px
-            );
-        pointer-events: none;
-        z-index: 0;
-    }
+    /* Session rows (today / upcoming) */
+    .sess-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--ds-border); }
+    .sess-row:last-child { border-bottom: none; }
+    .sess-time { flex-shrink: 0; width: 64px; text-align: center; }
+    .sess-time .t1 { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .sess-time .t2 { font-size: 11px; color: var(--ds-text-muted); font-variant-numeric: tabular-nums; }
+    .sess-main { flex: 1; min-width: 0; }
+    .sess-course { font-size: 13.5px; font-weight: 600; }
+    .sess-topic { font-size: 12px; color: var(--ds-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sess-action { flex-shrink: 0; }
+    .sess-date { flex-shrink: 0; width: 58px; text-align: center; }
+    .sess-date .d1 { font-size: 17px; font-weight: 700; line-height: 1; }
+    .sess-date .d2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ds-text-muted); margin-top: 2px; }
 
-    .dash-header-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        position: relative;
-    }
+    /* Course panels */
+    .course-panel { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); margin-bottom: 12px; overflow: hidden; }
+    .course-panel > summary { list-style: none; cursor: pointer; padding: 16px 18px; }
+    .course-panel > summary::-webkit-details-marker { display: none; }
+    .course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+    .course-code { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ds-primary); background: var(--ds-primary-soft); padding: 3px 8px; border-radius: var(--ds-radius-xs); align-self: flex-start; }
+    :root[data-theme="dark"] .course-code { color: var(--ds-text-secondary); }
+    .course-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin-top: 6px; }
+    .course-score { font-family: var(--ds-font-mono); font-size: 13px; font-weight: 500; color: var(--ds-text-secondary); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); padding: 5px 10px; border-radius: var(--ds-radius-sm); white-space: nowrap; flex-shrink: 0; }
+    .track-line { height: 6px; background: var(--ds-neutral-150); border-radius: 999px; overflow: hidden; }
+    :root[data-theme="dark"] .track-line { background: var(--ds-surface-sunken); }
+    .track-fill { height: 100%; border-radius: 999px; background: var(--ds-primary); transition: width .6s cubic-bezier(.4,0,.2,1); }
+    .track-fill.good { background: var(--ds-success); }
+    .track-fill.medium { background: var(--ds-warning); }
+    .track-fill.low { background: var(--ds-danger); }
+    .course-elig { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .elig-meta { font-size: 11.5px; color: var(--ds-text-muted); font-weight: 600; }
+    .course-expand { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--ds-text-muted); margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--ds-border); }
+    .course-expand .iconify { transition: transform .2s; }
+    details[open] .course-expand .iconify { transform: rotate(180deg); }
+    details[open] .course-expand::before { content: "Hide sessions"; }
+    details:not([open]) .course-expand::before { content: "View sessions"; }
 
-    .dash-greeting {
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--gold);
-        margin-bottom: 2px;
-        line-height: 1.2;
-        position: relative;
-        z-index: 1;
-    }
-    .dash-proverb {
-        font-size: 13px;
-        color: rgba(255,255,255,0.5);
-        margin-top: 0.4rem;
-        line-height: 1.5;
-        font-style: italic;
-        position: relative;
-        z-index: 1;
-    }
-
-    .dash-header-top { position: relative; z-index: 1; }
-    .dash-header h1 {
-        font-size: 1.45rem;
-        font-weight: 600;
-        color: #fff;
-        letter-spacing: -0.02em;
-        line-height: 1.2;
-        margin: 0;
-    }
-
-    .dash-header-sub {
-        font-size: 12px;
-        color: rgba(255,255,255,0.6);
-        margin-top: 4px;
-        font-weight: 500;
-        position: relative;
-        z-index: 1;
-    }
-
-    .dash-courses-badge {
-        background: rgba(255,255,255,0.14);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: var(--radius-sm);
-        padding: 0.35rem 0.7rem;
-        font-size: 11px;
-        font-weight: 700;
-        color: rgba(255,255,255,0.85);
-        white-space: nowrap;
-        flex-shrink: 0;
-        display: flex; align-items: center; gap: 0.3rem;
-    }
-
-    /* ── Quick action row ── */
-    .quick-actions {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1.25rem;
-        flex-wrap: wrap;
-    }
-
-    .qa-chip {
-        display: inline-flex; align-items: center; gap: 0.35rem;
-        background: var(--bg-surface); border: 1px solid var(--border);
-        border-radius: 99px; padding: 0.35rem 0.875rem;
-        font-size: 12px; font-weight: 700; color: var(--navy);
-        text-decoration: none; white-space: nowrap;
-        box-shadow: var(--shadow-xs);
-        transition: all 0.13s;
-    }
-    html[data-theme="dark"] .qa-chip { color: var(--text-primary); }
-    .qa-chip:hover { background: var(--navy); color: #fff; border-color: var(--navy); box-shadow: var(--shadow-sm); }
-    .qa-chip .iconify { font-size: 14px; }
-
-    /* ── Course Panel ── */
-    .course-panel {
-        background: var(--bg-surface);
-        border-radius: var(--radius-lg);
-        margin-bottom: 1rem;
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .course-panel:hover {
-        box-shadow: var(--shadow-card-hover);
-        transform: translateY(-2px);
-    }
-
-    details[open].course-panel { box-shadow: var(--shadow-card-hover); }
-
-    .course-summary {
-        padding: 1.25rem;
-        cursor: pointer;
-        list-style: none;
-        user-select: none;
-        display: block;
-    }
-
-    .course-summary::-webkit-details-marker { display: none; }
-
-    .course-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .course-info {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        flex: 1;
-        min-width: 0;
-    }
-
-    .course-code {
-        align-self: flex-start;
-        color: var(--navy);
-        font-size: 10px;
-        font-weight: 700;
-        background: rgba(13,36,114,0.07);
-        padding: 3px 8px;
-        border-radius: 6px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    .course-name {
-        font-weight: 600;
-        font-size: 15px;
-        color: var(--text-primary);
-        line-height: 1.3;
-        letter-spacing: -0.01em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .course-score {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text-primary);
-        background: var(--bg-subtle);
-        padding: 0.4rem 0.75rem;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        white-space: nowrap;
-        font-family: 'DM Mono', monospace;
-        flex-shrink: 0;
-    }
-
-    /* ── Progress bar ── */
-    .track-line {
-        height: 6px;
-        background: var(--bg-subtle);
-        border-radius: 99px;
-        overflow: hidden;
-        margin-bottom: 0.875rem;
-    }
-
-    .track-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--navy) 0%, var(--navy-light) 100%);
-        border-radius: 99px;
-        transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .track-fill.good { background: linear-gradient(90deg, #1E9E5E 0%, #2ECC71 100%); }
-    .track-fill.medium { background: linear-gradient(90deg, #C9A00E 0%, #F2C31A 100%); }
-    .track-fill.low { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
-
-    /* ── Toggle trigger ── */
-    .history-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.35rem;
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
-        padding-top: 0.6rem;
-        border-top: 1px dashed var(--border);
-        letter-spacing: 0.03em;
-        transition: color 0.15s;
-    }
-
-    .course-panel:hover .history-trigger { color: var(--text-secondary); }
-    details[open] .history-trigger { color: var(--navy); }
-
-    details[open] .history-trigger::before { content: "Hide history"; }
-    details:not([open]) .history-trigger::before { content: "View history & actions"; }
-    details[open] .history-trigger::after { content: " "; }
-    details:not([open]) .history-trigger::after { content: " "; }
-
-    /* ── Weeks ── */
-    .weeks-box {
-        border-top: 1px solid var(--border);
-        background: var(--bg-subtle);
-    }
-
-    .week-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.875rem 1.25rem;
-        border-bottom: 1px solid var(--border);
-        transition: background 0.12s;
-        gap: 1rem;
-    }
-
-    .week-item:hover { background: rgba(13,36,114,0.03); }
+    .weeks-box { border-top: 1px solid var(--ds-border); background: var(--ds-surface-sunken); }
+    .week-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--ds-border); }
     .week-item:last-child { border-bottom: none; }
+    .week-title { font-size: 13px; font-weight: 600; }
+    .week-date { font-size: 11.5px; color: var(--ds-text-muted); margin-top: 1px; }
+    .course-foot { padding: 12px 18px; }
+    .deregister-btn { background: none; border: none; cursor: pointer; font: inherit; color: var(--ds-danger); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; padding: 0; }
+    .deregister-lock { font-size: 12px; color: var(--ds-text-muted); display: inline-flex; align-items: center; gap: 6px; }
 
-    .week-title {
-        font-weight: 600;
-        font-size: 13px;
-        color: var(--text-primary);
-    }
+    /* Status chip injected by JS keeps these class names */
+    .txt-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; }
+    .txt-done { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
 
-    .week-date {
-        font-size: 11px;
-        color: var(--text-muted);
-        margin-top: 2px;
-        font-weight: 500;
-    }
+    /* Toast */
+    .toast-success { position: fixed; top: 72px; right: 20px; z-index: 2000; display: flex; align-items: center; gap: 8px; padding: 11px 15px; border-radius: var(--ds-radius-md); background: var(--ds-success-bg); color: var(--ds-success); border: 1px solid var(--ds-success-border); box-shadow: var(--ds-shadow-md); font-size: 13px; font-weight: 600; animation: toastInOut 2.2s ease forwards; }
+    @keyframes toastInOut { 0%{opacity:0;transform:translateY(-10px)} 12%{opacity:1;transform:translateY(0)} 85%{opacity:1} 100%{opacity:0;transform:translateY(-10px)} }
+    @keyframes ds-spin { to { transform: rotate(360deg); } }
 
-    .state-zone { text-align: right; flex-shrink: 0; }
+    /* Social */
+    .social { text-align: center; }
+    .social-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ds-text-muted); margin-bottom: 12px; }
+    .social-links { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+    .social-btn { width: 38px; height: 38px; border-radius: var(--ds-radius-sm); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); color: var(--ds-text-secondary); display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: all .14s; }
+    .social-btn:hover { border-color: var(--ds-border-strong); color: var(--ds-text); }
+    .social-btn .iconify { font-size: 18px; }
 
-    /* ── Action button ── */
-    .action-link {
-        border: none;
-        padding: 0.45rem 0.9rem;
-        border-radius: var(--radius-sm);
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        font-family: inherit;
-        min-height: 32px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    .action-link:active { transform: scale(0.97); }
-
-    .act-submit {
-        background: var(--navy);
-        color: #fff;
-        box-shadow: 0 1px 3px rgba(13,36,114,0.2);
-    }
-
-    .act-submit:hover {
-        background: var(--navy-dark);
-        box-shadow: 0 3px 8px rgba(13,36,114,0.3);
-    }
-
-    /* ── Status ── */
-    .txt-status {
-        font-size: 11px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        padding: 4px 10px;
-        border-radius: 20px;
-    }
-
-    .txt-done {
-        background: #DCFCE7;
-        color: #166534;
-    }
-
-    /* ── Empty state ── */
-    .blank-state {
-        text-align: center;
-        padding: 3.5rem 2rem;
-        background: var(--bg-surface);
-        border-radius: var(--radius-lg);
-        border: 2px dashed var(--border-strong);
-        box-shadow: var(--shadow-xs);
-    }
-
-    .blank-state-icon {
-        font-size: 2.5rem;
-        color: var(--text-muted);
-        display: block;
-        margin-bottom: 0.75rem;
-    }
-
-    .blank-state p {
-        color: var(--text-muted);
-        font-size: 14px;
-        font-weight: 500;
-        margin-bottom: 1.25rem;
-    }
-
-    /* ── Modal ── */
-    .pop-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(13,27,62,0.55);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @keyframes scaleUp {
-        from { transform: scale(0.94) translateY(8px); opacity: 0; }
-        to { transform: scale(1) translateY(0); opacity: 1; }
-    }
-
-    @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateY(-12px); }
-        12% { opacity: 1; transform: translateY(0); }
-        85% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-12px); }
-    }
-
-    .pop-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-xl, 20px);
-        max-width: 360px;
-        width: 100%;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: var(--shadow-modal);
-        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
-    }
-
-    .pop-card-icon {
-        width: 52px;
-        height: 52px;
-        background: rgba(13,36,114,0.07);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.25rem;
-        font-size: 24px;
-        color: var(--navy);
-    }
-
-    .pop-card h3 {
-        margin: 0 0 0.4rem;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        letter-spacing: -0.02em;
-    }
-
-    .pop-card-sub {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-bottom: 1.25rem;
-        line-height: 1.5;
-    }
-
-    .pop-input {
-        width: 100%;
-        padding: 0.875rem;
-        border: 2px solid var(--border-strong);
-        border-radius: var(--radius-md);
-        font-size: 1.5rem;
-        text-align: center;
-        letter-spacing: 6px;
-        font-weight: 700;
-        color: var(--text-primary);
-        background: var(--bg-subtle);
-        margin-bottom: 1rem;
-        box-sizing: border-box;
-        font-family: 'DM Mono', monospace;
-        transition: border-color 0.15s, box-shadow 0.15s;
-        outline: none;
-    }
-
-    .pop-input::placeholder {
-        letter-spacing: 2px;
-        color: var(--text-muted);
-        font-size: 1rem;
-    }
-
-    .pop-input:focus {
-        border-color: var(--navy);
-        background: var(--bg-surface);
-        box-shadow: 0 0 0 4px rgba(13,36,114,0.1);
-    }
-
-    .pop-btn {
-        width: 100%;
-        padding: 0.75rem;
-        border-radius: var(--radius-md);
-        font-size: 13px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        margin-bottom: 0.5rem;
-        transition: all 0.15s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
-        font-family: inherit;
-        min-height: 42px;
-    }
-
-    .pop-btn:last-child { margin-bottom: 0; }
-    .pop-btn:active { transform: scale(0.98); }
-
-    .pop-btn-main {
-        background: var(--navy);
-        color: #fff;
-        box-shadow: 0 1px 3px rgba(13,36,114,0.25);
-    }
-
-    .pop-btn-main:hover {
-        background: var(--navy-dark);
-        box-shadow: 0 3px 10px rgba(13,36,114,0.3);
-    }
-
-    .pop-btn-sub {
-        background: var(--bg-subtle);
-        color: var(--text-secondary);
-        border: 1px solid var(--border);
-    }
-
-    .pop-btn-sub:hover {
-        background: var(--border);
-        color: var(--text-primary);
-    }
-
-    /* ── Error Modal ── */
-    .error-modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(13,27,62,0.55);
-        z-index: 1100;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-    }
-
-    .error-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-xl, 20px);
-        max-width: 340px;
-        width: 100%;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 24px 48px rgba(13,27,62,0.18);
-        border-left: 4px solid #C0392B;
-        animation: scaleUp 0.22s cubic-bezier(0.34,1.46,0.64,1) forwards;
-    }
-
-    .error-card-icon {
-        width: 52px;
-        height: 52px;
-        background: rgba(192,57,43,0.1);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.25rem;
-        font-size: 24px;
-        color: #C0392B;
-    }
-
-    .error-card h3 {
-        margin: 0 0 0.4rem;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-
-    .error-card p {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-bottom: 1.5rem;
-        line-height: 1.5;
-    }
-
-    .error-btn {
-        background: #C0392B;
-        color: white;
-        width: 100%;
-        padding: 0.75rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        font-family: inherit;
-        border: none;
-        cursor: pointer;
-        transition: all 0.15s;
-    }
-
-    .error-btn:hover { background: #A93226; transform: translateY(-1px); }
-
-    /* ── Toast ── */
-    .toast-success {
-        position: fixed;
-        top: 72px;
-        right: 1.25rem;
-        padding: 0.7rem 1.1rem;
-        border-radius: var(--radius-md);
-        z-index: 2000;
-        animation: fadeInOut 2.2s ease forwards;
-        background: rgba(30,158,94,0.1);
-        color: #1E9E5E;
-        border: 1px solid rgba(30,158,94,0.2);
-        box-shadow: var(--shadow-md);
-        font-weight: 600;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 280px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Skeleton Loader ── */
-    .shimmer {
-        background: linear-gradient(90deg, #e3e7f3 25%, #eff2f9 50%, #e3e7f3 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite ease-in-out;
-        border-radius: 6px;
-    }
-
-    @keyframes shimmer {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    .skel-panel {
-        background: var(--bg-surface);
-        border-radius: var(--radius-lg);
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        box-shadow: var(--shadow-card);
-    }
-
-    .skel-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .skel-header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding: 1.5rem 1.75rem;
-        background: linear-gradient(135deg, #c5cde8 0%, #d0d8ee 100%);
-        border-radius: 20px;
-    }
-
-    #skeletonLoader { transition: opacity 0.3s ease; }
-    #realContent { display: none; opacity: 0; transition: opacity 0.3s ease; }
-
-    /* Social follow buttons */
-    .swasa-social-btn {
-        width: 38px; height: 38px;
-        border-radius: 10px;
-        background: var(--navy);
-        color: var(--gold);
-        display: flex; align-items: center; justify-content: center;
-        text-decoration: none;
-        transition: background 0.15s, color 0.15s, transform 0.15s;
-        font-size: 17px;
-    }
-    html[data-theme="dark"] .swasa-social-btn { background: rgba(27,58,156,0.5); }
+    #skeletonLoader { transition: opacity .3s ease; }
+    #realContent { display: none; opacity: 0; transition: opacity .3s ease; }
+    .skel-line { height: 12px; border-radius: 4px; }
 </style>
 
-<!-- ── Skeleton Loader ── -->
-<div id="skeletonLoader" class="dash-wrapper" aria-hidden="true">
-<div class="skel-header-row">
-<div>
-<div class="shimmer" style="width:70px;height:11px;margin-bottom:10px;"></div>
-<div class="shimmer" style="width:200px;height:26px;border-radius:8px;"></div>
-<div class="shimmer" style="width:130px;height:11px;margin-top:8px;"></div>
+<!-- ── Skeleton ── -->
+<div id="skeletonLoader" class="dash" aria-hidden="true">
+<div style="margin-bottom:20px">
+<div class="ds-skeleton skel-line" style="width:180px;height:22px;margin-bottom:8px"></div>
+<div class="ds-skeleton skel-line" style="width:120px"></div>
 </div>
-<div class="shimmer" style="width:80px;height:28px;border-radius:8px;flex-shrink:0;"></div>
+<div class="stat-grid">
+    {% for i in "123" %}<div class="ds-stat"><div class="ds-skeleton skel-line" style="width:70px;margin-bottom:12px"></div><div class="ds-skeleton skel-line" style="width:60px;height:26px"></div></div>{% endfor %}
+</div>
+<div class="ds-card ds-card-body">
+<div class="ds-skeleton skel-line" style="width:140px;height:16px;margin-bottom:16px"></div>
+<div class="ds-skeleton skel-line" style="margin-bottom:10px"></div>
+<div class="ds-skeleton skel-line" style="width:80%"></div>
+</div>
 </div>
 
-    {% for i in "123" %}
-<div class="skel-panel">
-<div class="skel-top">
+<!-- ── Real content ── -->
+<div id="realContent">
+<div class="dash">
+
+<!-- Header -->
+<header class="dash-head">
+<h1 class="greeting"><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!</h1>
+<div class="phrase-block" data-phrase-widget></div>
+</header>
+
+<!-- Stats -->
+<div class="stat-grid">
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:chart-line"></span> Overall Attendance</div>
+<div class="ds-stat-value" style="{% if overall_pct < 75 and overall_total %}color:var(--ds-danger){% endif %}">{{ overall_pct }}%</div>
+<div class="ds-stat-meta">{{ overall_attended }} of {{ overall_total }} session{{ overall_total|pluralize }} attended</div>
+</div>
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:book-outline"></span> Registered Courses</div>
+<div class="ds-stat-value">{{ course_data|length }}</div>
+<div class="ds-stat-meta">This semester</div>
+</div>
+<div class="ds-stat">
+<div class="ds-stat-label"><span class="iconify" data-icon="mdi:alert-outline"></span> At-Risk Courses</div>
+<div class="ds-stat-value" style="{% if blocked_count %}color:var(--ds-danger){% elif at_risk_count %}color:var(--ds-warning){% endif %}">{{ at_risk_count }}</div>
+<div class="ds-stat-meta">Near or over the absence limit</div>
+</div>
+</div>
+
+<!-- Exam-eligibility: blocked (danger) -->
+{% if blocked_courses %}
+<div class="ds-alert ds-alert-danger" style="margin-bottom:12px">
+<span class="iconify" data-icon="mdi:alert-octagon"></span>
 <div>
-<div class="shimmer" style="width:60px;height:19px;border-radius:6px;margin-bottom:10px;"></div>
-<div class="shimmer" style="width:175px;height:15px;border-radius:5px;"></div>
+<p class="ds-alert-title">Not eligible to sit the exam</p>
+<p class="ds-alert-body">You've missed too many sessions in {% for c in blocked_courses %}<strong>{{ c.course.code }}</strong> ({{ c.eligibility.reason }}){% if not forloop.last %}, {% endif %}{% endfor %}. Missing 3 sessions in a row, or 4 in total, blocks you from a course's exam. Speak to your teaching assistant if you believe this is a mistake.</p>
 </div>
-<div class="shimmer" style="width:52px;height:36px;border-radius:8px;flex-shrink:0;"></div>
 </div>
-<div class="shimmer" style="height:6px;border-radius:99px;"></div>
-<div class="shimmer" style="width:140px;height:11px;border-radius:5px;margin:14px auto 2px;"></div>
+{% endif %}
+
+<!-- Exam-eligibility: approaching the limit (warning) -->
+{% if warning_courses %}
+<div class="ds-alert ds-alert-warning" style="margin-bottom:20px">
+<span class="iconify" data-icon="mdi:alert"></span>
+<div>
+<p class="ds-alert-title">Close to the absence limit</p>
+<p class="ds-alert-body">One more missed session would make you ineligible in {% for c in warning_courses %}<strong>{{ c.course.code }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}. You may sit the exam only if you miss fewer than 3 sessions in a row and fewer than 4 in total.</p>
+</div>
+</div>
+{% elif blocked_courses %}
+<div style="margin-bottom:8px"></div>
+{% endif %}
+
+<!-- Today's classes -->
+<div class="sec-head"><h2>Today's Classes</h2></div>
+<div class="ds-card">
+{% if todays_sessions %}
+    {% for item in todays_sessions %}
+<div class="sess-row" id="week-{{ item.session.id }}">
+<div class="sess-time">
+<div class="t1">{{ item.session.start_time|time:"H:i" }}</div>
+<div class="t2">{{ item.session.end_time|time:"H:i" }}</div>
+</div>
+<div class="sess-main">
+<div class="sess-course">{{ item.course.code }} · {{ item.course.name }}</div>
+<div class="sess-topic">{{ item.session.topic }}</div>
+</div>
+<div class="sess-action js-state" data-session="{{ item.session.id }}">
+        {% if item.submitted %}
+<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+        {% else %}
+<button class="ds-btn ds-btn-primary ds-btn-sm" onclick="openTaCodeModal({{ item.session.id }})"><span class="iconify" data-icon="mdi:qrcode-scan"></span> Check In</button>
+        {% endif %}
+</div>
 </div>
     {% endfor %}
+{% else %}
+<div class="ds-empty" style="padding:36px 24px">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:calendar-blank-outline"></span></div>
+<p class="ds-empty-title">No classes scheduled today</p>
+<p class="ds-empty-text">You have no recorded sessions for today. Check the sessions under each course below.</p>
+</div>
+{% endif %}
 </div>
 
-<!-- ── Real Content ── -->
-<div id="realContent">
-<div class="dash-wrapper">
-
-<div class="dash-header">
-<div class="dash-header-top">
-<div>
-<div class="dash-greeting">
-<span class="swahili-greeting-kw" data-swahili-kw></span>
-</div>
-<h1>{{ user.first_name|default:user.username }}!</h1>
-<div class="dash-header-sub">
-                    Student ID: {{ user.userprofile.student_id_number }}
-</div>
-<div class="dash-proverb" data-phrase-widget></div>
-</div>
-<div class="dash-courses-badge">
-<span class="iconify" data-icon="mdi:book-open-outline" data-width="13"></span>
-                {{ course_data|length }} course{{ course_data|length|pluralize }}
-</div>
-</div>
-</div>
-
-<!-- Quick actions -->
-<div class="quick-actions">
-<a href="{% url 'attendance:course_registration' %}" class="qa-chip">
-<span class="iconify" data-icon="mdi:plus-circle-outline"></span>
-            Register Courses
-</a>
-<a href="{% url 'attendance:history' %}" class="qa-chip">
-<span class="iconify" data-icon="mdi:history"></span>
-            My History
-</a>
-<a href="{% url 'attendance:export_my_csv' %}" class="qa-chip">
-<span class="iconify" data-icon="mdi:download-outline"></span>
-            Export CSV
-</a>
-</div>
-
-
-    {% if course_data %}
-        {% for course in course_data %}
-<details class="course-panel" {% if forloop.first %}open{% endif %}>
-<summary class="course-summary">
-<div class="course-meta">
-<div class="course-info">
+<!-- Courses -->
+<div class="sec-head"><h2>My Courses</h2><a href="{% url 'attendance:history' %}">Full history <span class="iconify" data-icon="mdi:arrow-right" data-width="14"></span></a></div>
+{% if course_data %}
+    {% for course in course_data %}
+<details class="course-panel" {% if forloop.first and not todays_sessions %}open{% endif %}>
+<summary>
+<div class="course-top">
+<div style="min-width:0">
 <span class="course-code">{{ course.course.code }}</span>
-<span class="course-name">{{ course.course.name }}</span>
-                        {% if course.course.code == 'KISW 106A' %}
-<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#EFF6FF;color:#1D4ED8;margin-top:3px;">Monday Group</span>
-                        {% elif course.course.code == 'KISW 106B' %}
-<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;background:#F5F3FF;color:#6D28D9;margin-top:3px;">Thursday Group</span>
-                        {% endif %}
+<div class="course-name">{{ course.course.name }}</div>
 </div>
-<div class="course-score" id="course-score-{{ course.course.id }}">
-                        {{ course.attended }} / {{ course.total_sessions }}
-</div>
+<div class="course-score" id="course-score-{{ course.course.id }}">{{ course.attended }} / {{ course.total_sessions }}</div>
 </div>
 <div class="track-line">
-<div class="track-fill {% if course.percentage >= 75 %}good{% elif course.percentage >= 50 %}medium{% else %}low{% endif %}"
-                         style="width: {{ course.percentage }}%;"></div>
+<div class="track-fill {% if course.percentage >= 75 %}good{% elif course.percentage >= 50 %}medium{% else %}low{% endif %}" style="width: {{ course.percentage }}%;"></div>
 </div>
-<div class="history-trigger"></div>
+<div class="course-elig">
+        {% if course.eligibility.status == 'blocked' %}
+<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
+        {% elif course.eligibility.status == 'warning' %}
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
+        {% else %}
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
+        {% endif %}
+<span class="elig-meta">{{ course.eligibility.total_absent }} missed{% if course.eligibility.max_consecutive_absent >= 2 %} · {{ course.eligibility.max_consecutive_absent }} in a row{% endif %}</span>
+</div>
+<div class="course-expand"><span class="iconify" data-icon="mdi:chevron-down"></span></div>
 </summary>
-
 <div class="weeks-box">
-                {% for week in course.weeks %}
-<div id="week-{{ week.session.id }}" class="week-item">
+        {% for week in course.weeks %}
+<div class="week-item">
 <div>
-<div class="week-title">Week {{ week.week_num }}</div>
-<div class="week-date">{{ week.session.date|date:"d M Y" }}</div>
+<div class="week-title">Week {{ week.week_num }} · {{ week.session.topic }}</div>
+<div class="week-date">{{ week.session.date|date:"D, d M Y" }} · {{ week.session.start_time|time:"H:i" }}</div>
 </div>
-<div class="state-zone" id="state-zone-{{ week.session.id }}">
-                        {% if week.status == 'submitted' %}
-<span class="txt-status txt-done">
-<span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
-</span>
-                        {% else %}
-<button class="action-link act-submit" onclick="openTaCodeModal({{ week.session.id }})">
-                                Submit Code
-</button>
-                        {% endif %}
+<div class="js-state" data-session="{{ week.session.id }}">
+            {% if week.status == 'submitted' %}
+<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+            {% else %}
+<button class="ds-btn ds-btn-secondary ds-btn-sm" onclick="openTaCodeModal({{ week.session.id }})">Check In</button>
+            {% endif %}
 </div>
 </div>
-                {% endfor %}
-
-<div class="course-footer" style="padding:0.85rem 0 0.25rem;border-top:1px solid var(--border,#E5E8F0);margin-top:0.5rem;">
-                    {% if course.can_deregister %}
-<form method="post" action="{% url 'attendance:student_deregister_course' %}"
-                          onsubmit="return confirm('Deregister from {{ course.course.code }}? You can re-register later from the course registration page.');"
-                          style="margin:0;">
-                        {% csrf_token %}
+        {% endfor %}
+<div class="course-foot">
+        {% if course.can_deregister %}
+<form method="post" action="{% url 'attendance:student_deregister_course' %}" onsubmit="return confirm('Deregister from {{ course.course.code }}? You can re-register later from the course registration page.');" style="margin:0">
+            {% csrf_token %}
 <input type="hidden" name="course_id" value="{{ course.course.id }}">
-<button type="submit" class="action-link"
-                                style="color:#B91C1C;background:none;border:none;cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:0.35rem;padding:0;">
-                            Deregister from this course
-</button>
+<button type="submit" class="deregister-btn"><span class="iconify" data-icon="mdi:close-circle-outline" data-width="14"></span> Deregister from this course</button>
 </form>
-                    {% else %}
-<span style="font-size:12px;color:var(--muted,#6B7280);display:inline-flex;align-items:center;gap:0.35rem;">
-<span class="iconify" data-icon="mdi:lock-outline" data-width="13"></span>
-                        Can't deregister — attendance already recorded. Contact your TA to drop this course.
-</span>
-                    {% endif %}
+        {% else %}
+<span class="deregister-lock"><span class="iconify" data-icon="mdi:lock-outline" data-width="14"></span> Attendance recorded — contact your TA to drop this course.</span>
+        {% endif %}
 </div>
 </div>
 </details>
-        {% endfor %}
-    {% else %}
-<div class="blank-state">
-<span class="iconify blank-state-icon" data-icon="mdi:book-open-blank-variant-outline" data-width="40"></span>
-<p>No courses registered yet.</p>
-<a href="{% url 'attendance:course_registration' %}" class="pop-btn pop-btn-main"
-               style="text-decoration:none;display:inline-flex;width:auto;padding:0.6rem 1.5rem;margin:0 auto;">
-                Register Courses
-</a>
-</div>
-    {% endif %}
+    {% endfor %}
+{% else %}
+<div class="ds-card"><div class="ds-empty">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:book-plus-outline"></span></div>
+<p class="ds-empty-title">No courses registered</p>
+<p class="ds-empty-text">Register for your courses to start tracking attendance.</p>
+<a href="{% url 'attendance:course_registration' %}" class="ds-btn ds-btn-primary"><span class="iconify" data-icon="mdi:plus"></span> Register Courses</a>
+</div></div>
+{% endif %}
 
+<!-- Upcoming -->
+{% if upcoming_sessions %}
+<div class="sec-head"><h2>Upcoming Classes</h2></div>
+<div class="ds-card">
+    {% for item in upcoming_sessions %}
+<div class="sess-row">
+<div class="sess-date">
+<div class="d1">{{ item.session.date|date:"j" }}</div>
+<div class="d2">{{ item.session.date|date:"M" }}</div>
+</div>
+<div class="sess-main">
+<div class="sess-course">{{ item.course.code }} · {{ item.course.name }}</div>
+<div class="sess-topic">{{ item.session.topic }}</div>
+</div>
+<div class="ds-text-muted" style="font-size:12.5px;font-variant-numeric:tabular-nums;flex-shrink:0">{{ item.session.start_time|time:"H:i" }}–{{ item.session.end_time|time:"H:i" }}</div>
+</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Stay connected -->
+<div class="ds-card ds-card-body social" style="margin-top:20px">
+<p class="social-title">Stay connected with SWASA</p>
+<div class="social-links">
+<a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer" class="social-btn" title="WhatsApp Community"><span class="iconify" data-icon="mdi:whatsapp"></span></a>
+<a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer" class="social-btn" title="Instagram"><span class="iconify" data-icon="mdi:instagram"></span></a>
+<a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer" class="social-btn" title="Facebook"><span class="iconify" data-icon="mdi:facebook"></span></a>
+<a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer" class="social-btn" title="TikTok"><span class="iconify" data-icon="simple-icons:tiktok" data-width="15"></span></a>
+<a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer" class="social-btn" title="YouTube"><span class="iconify" data-icon="mdi:youtube"></span></a>
+</div>
 </div>
 
-<!-- TA Code Modal -->
-<div id="taCodeModal" class="pop-overlay">
-<div class="pop-card">
-<div class="pop-card-icon">
-<span class="iconify" data-icon="mdi:shield-key-outline" data-width="24"></span>
+</div><!-- /.dash -->
+</div><!-- /#realContent -->
+
+<!-- Check-in modal -->
+<div id="taCodeModal" class="ds-modal-overlay" style="display:none">
+<div class="ds-modal" style="max-width:380px">
+<div class="ds-modal-header">
+<h3 class="ds-modal-title">Check in to class</h3>
 </div>
-<h3>Enter TA Code</h3>
-<p class="pop-card-sub">Enter the 6-digit code given by your Teaching Assistant</p>
-<input type="text" id="taCodeInput" placeholder="· · · · · ·" maxlength="6"
-               class="pop-input" autocomplete="off" inputmode="numeric">
-<button onclick="submitTaCode()" class="pop-btn pop-btn-main">
-            Submit Attendance
-</button>
-<button onclick="closeTaCodeModal()" class="pop-btn pop-btn-sub">Cancel</button>
+<div class="ds-modal-body">
+<p style="margin:0 0 14px">Enter the 6-digit code your teaching assistant read out in class.</p>
+<input type="text" id="taCodeInput" class="ds-input ds-mono" placeholder="——————" maxlength="6" autocomplete="off" inputmode="numeric" style="text-align:center;font-size:22px;letter-spacing:8px;height:52px">
+</div>
+<div class="ds-modal-footer">
+<button onclick="closeTaCodeModal()" class="ds-btn ds-btn-ghost">Cancel</button>
+<button onclick="submitTaCode()" class="ds-btn ds-btn-primary">Confirm attendance</button>
+</div>
 </div>
 </div>
 
-<!-- Custom Error Modal -->
-<div id="errorModal" class="error-modal-overlay">
-<div class="error-card">
-<div class="error-card-icon">
-<span class="iconify" data-icon="mdi:alert-circle-outline" data-width="24"></span>
-</div>
-<h3 id="errorTitle">Error</h3>
-<p id="errorMessage">Something went wrong.</p>
-<button class="error-btn" onclick="closeErrorModal()">Got it</button>
+<!-- Error modal -->
+<div id="errorModal" class="ds-modal-overlay" style="display:none">
+<div class="ds-modal" style="max-width:360px">
+<div class="ds-modal-header"><h3 class="ds-modal-title" id="errorTitle">Something went wrong</h3></div>
+<div class="ds-modal-body" id="errorMessage">Please try again.</div>
+<div class="ds-modal-footer"><button class="ds-btn ds-btn-primary" onclick="closeErrorModal()">Got it</button></div>
 </div>
 </div>
 
 <script>
 let currentTaSessionId = null;
-let currentErrorMessage = "";
-
-function getCsrfToken() {
-    return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
-}
-
-function openTaCodeModal(sessionId) {
-    currentTaSessionId = sessionId;
-    document.getElementById('taCodeInput').value = '';
-    document.getElementById('taCodeModal').style.display = 'flex';
-    setTimeout(() => document.getElementById('taCodeInput').focus(), 50);
-}
-
-function closeTaCodeModal() {
-    document.getElementById('taCodeModal').style.display = 'none';
-    currentTaSessionId = null;
-}
-
-function showSuccessMessage(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-success';
-    toast.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span> ' + message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2200);
-}
-
-function showErrorModal(message, title = "Error") {
-    document.getElementById('errorMessage').innerText = message;
-    document.getElementById('errorTitle').innerText = title;
-    document.getElementById('errorModal').style.display = 'flex';
-}
-
-function closeErrorModal() {
-    document.getElementById('errorModal').style.display = 'none';
-}
+function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1]; }
+function openTaCodeModal(sessionId) { currentTaSessionId = sessionId; document.getElementById('taCodeInput').value = ''; document.getElementById('taCodeModal').style.display = 'flex'; setTimeout(() => document.getElementById('taCodeInput').focus(), 50); }
+function closeTaCodeModal() { document.getElementById('taCodeModal').style.display = 'none'; currentTaSessionId = null; }
+function showSuccessMessage(message) { const t = document.createElement('div'); t.className = 'toast-success'; t.innerHTML = '<span class="iconify" data-icon="mdi:check-circle"></span> ' + message; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
+function showErrorModal(message, title = "Something went wrong") { document.getElementById('errorMessage').innerText = message; document.getElementById('errorTitle').innerText = title; document.getElementById('errorModal').style.display = 'flex'; }
+function closeErrorModal() { document.getElementById('errorModal').style.display = 'none'; }
 
 async function submitTaCode() {
     const code = document.getElementById('taCodeInput').value.trim();
-
-    if (!code) {
-        showErrorModal('Please enter the code from your TA.', 'Missing Code');
-        return;
-    }
-
+    if (!code) { showErrorModal('Please enter the code from your teaching assistant.', 'Missing code'); return; }
     const btn = event.target;
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="iconify" data-icon="mdi:loading" data-width="15" style="animation:spin 1s linear infinite"></span> Submitting...';
-
+    btn.innerHTML = '<span class="iconify" data-icon="mdi:loading" style="animation:ds-spin 1s linear infinite"></span> Checking in…';
     try {
         const res = await fetch("{% url 'attendance:student_submit_ta_code' %}", {
             method: "POST",
-            headers: {
-                "X-CSRFToken": getCsrfToken(),
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
+            headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
             body: `session_id=${currentTaSessionId}&code=${code}`
         });
-
         const data = await res.json();
-
         if (res.ok) {
-            const stateZone = document.getElementById(`state-zone-${currentTaSessionId}`);
-            if (stateZone) {
-                stateZone.innerHTML = `
-<span class="txt-status txt-done">
-<span class="iconify" data-icon="mdi:check-circle" data-width="13"></span> Submitted
-</span>
-                `;
-            }
-
-            const weekElement = document.getElementById(`week-${currentTaSessionId}`);
-            if (weekElement) {
-                const coursePanel = weekElement.closest('.course-panel');
-                const scoreElement = coursePanel.querySelector('.course-score');
-                if (scoreElement) {
-                    const match = scoreElement.innerText.match(/(\d+)\s*\/\s*(\d+)/);
-                    if (match) {
-                        const newCount = parseInt(match[1]) + 1;
-                        const total = parseInt(match[2]);
-                        scoreElement.innerText = `${newCount} / ${total}`;
-                        const pct = (newCount / total) * 100;
-                        const fill = coursePanel.querySelector('.track-fill');
-                        if (fill) {
-                            fill.style.width = `${pct}%`;
-                            fill.className = 'track-fill ' + (pct >= 75 ? 'good' : pct >= 50 ? 'medium' : 'low');
-                        }
-                    }
+            document.querySelectorAll(`.js-state[data-session="${currentTaSessionId}"]`).forEach(function (zone) {
+                zone.innerHTML = '<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>';
+            });
+            const scoreEl = document.getElementById(`course-score-${data.course_id}`);
+            if (scoreEl) {
+                const m = scoreEl.innerText.match(/(\d+)\s*\/\s*(\d+)/);
+                if (m) {
+                    const n = parseInt(m[1]) + 1, tot = parseInt(m[2]);
+                    scoreEl.innerText = `${n} / ${tot}`;
+                    const panel = scoreEl.closest('.course-panel');
+                    const fill = panel ? panel.querySelector('.track-fill') : null;
+                    if (fill) { const pct = (n / tot) * 100; fill.style.width = `${pct}%`; fill.className = 'track-fill ' + (pct >= 75 ? 'good' : pct >= 50 ? 'medium' : 'low'); }
                 }
             }
-
             closeTaCodeModal();
-            showSuccessMessage('Attendance submitted!');
+            showSuccessMessage('Attendance recorded');
         } else {
             closeTaCodeModal();
-            showErrorModal(data.error || 'Error submitting attendance', 'Submission Failed');
+            showErrorModal(data.error || 'We could not record your attendance.', 'Check-in failed');
         }
-    } catch (error) {
+    } catch (e) {
         closeTaCodeModal();
-        showErrorModal('Network error. Please check your connection and try again.', 'Connection Error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalHTML;
-    }
+        showErrorModal('Network error. Please check your connection and try again.', 'Connection error');
+    } finally { btn.disabled = false; btn.innerHTML = originalHTML; }
 }
+document.getElementById('taCodeModal').addEventListener('click', function (e) { if (e.target === this) closeTaCodeModal(); });
+document.getElementById('errorModal').addEventListener('click', function (e) { if (e.target === this) closeErrorModal(); });
+document.getElementById('taCodeInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitTaCode(); });
 
-// Close modal on backdrop click
-document.getElementById('taCodeModal').addEventListener('click', function(e) {
-    if (e.target === this) closeTaCodeModal();
-});
-
-// Close error modal on backdrop click
-document.getElementById('errorModal').addEventListener('click', function(e) {
-    if (e.target === this) closeErrorModal();
-});
-
-// Submit on Enter
-document.getElementById('taCodeInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') submitTaCode();
-});
-</script>
-
-<!-- Social media follow section -->
-<div class="dash-wrapper" style="padding-top:0;">
-<div style="background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:1.125rem 1.25rem;text-align:center;">
-<p style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem;">
-        Stay connected with SWASA 
-</p>
-<div style="display:flex;justify-content:center;gap:0.6rem;flex-wrap:wrap;">
-<a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer"
-           title="WhatsApp Community"
-           class="swasa-social-btn"
-           onmouseover="this.style.background='#25D366';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
-<span class="iconify" data-icon="mdi:whatsapp" data-width="18"></span>
-</a>
-<a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer"
-           title="Instagram"
-           class="swasa-social-btn"
-           onmouseover="this.style.background='#E1306C';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
-<span class="iconify" data-icon="mdi:instagram" data-width="18"></span>
-</a>
-<a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer"
-           title="Facebook"
-           class="swasa-social-btn"
-           onmouseover="this.style.background='#1877F2';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
-<span class="iconify" data-icon="mdi:facebook" data-width="18"></span>
-</a>
-<a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer"
-           title="TikTok"
-           class="swasa-social-btn"
-           onmouseover="this.style.background='#010101';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
-<span class="iconify" data-icon="simple-icons:tiktok" data-width="15"></span>
-</a>
-<a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer"
-           title="YouTube"
-           class="swasa-social-btn"
-           onmouseover="this.style.background='#FF0000';this.style.color='#fff';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.background='';this.style.color='';this.style.transform=''">
-<span class="iconify" data-icon="mdi:youtube" data-width="18"></span>
-</a>
-</div>
-</div>
-</div>
-
-</div><!-- end #realContent -->
-
-<script>
-/* Skeleton → real content swap */
 document.addEventListener('DOMContentLoaded', function () {
-    var skeleton = document.getElementById('skeletonLoader');
-    var real = document.getElementById('realContent');
-
+    var skeleton = document.getElementById('skeletonLoader'), real = document.getElementById('realContent');
     setTimeout(function () {
         skeleton.style.opacity = '0';
-        setTimeout(function () {
-            skeleton.style.display = 'none';
-            real.style.display = 'block';
-            requestAnimationFrame(function () {
-                real.style.opacity = '1';
-            });
-        }, 300);
-    }, 500);
+        setTimeout(function () { skeleton.style.display = 'none'; real.style.display = 'block'; requestAnimationFrame(function () { real.style.opacity = '1'; }); }, 300);
+    }, 400);
 });
 </script>
 {% endblock %}

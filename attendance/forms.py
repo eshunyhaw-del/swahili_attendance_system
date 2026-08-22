@@ -1,7 +1,8 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
-from .models import UserProfile, SupportTicket, Course, TAProfile, Level
+from .models import UserProfile, SupportTicket, Course, TAProfile, Level, Avatar
 import uuid
 import re
 
@@ -31,6 +32,26 @@ class StudentRegistrationForm(forms.ModelForm):
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_regex, email):
             raise forms.ValidationError("Please enter a valid email address (e.g., name@example.com).")
+
+        # New students may register only with an approved email domain. Our
+        # verification codes are sent via Gmail and reliably reach only those
+        # domains (see settings.ALLOWED_STUDENT_EMAIL_DOMAINS). This runs only on
+        # new registrations, so existing accounts are unaffected.
+        allowed = [d.lower() for d in getattr(
+            settings, 'ALLOWED_STUDENT_EMAIL_DOMAINS', ['gmail.com', 'googlemail.com']
+        )]
+        domain = email.rsplit('@', 1)[-1].lower()
+        if allowed and domain not in allowed:
+            if allowed == ['gmail.com'] or set(allowed) <= {'gmail.com', 'googlemail.com'}:
+                raise forms.ValidationError(
+                    "Please register with a Gmail address (@gmail.com). Verification "
+                    "codes are sent from Gmail and reliably reach only Gmail inboxes."
+                )
+            pretty = ' or '.join('@' + d for d in allowed)
+            raise forms.ValidationError(
+                f"Please register with a supported email address ({pretty}). "
+                "Verification codes may not reach other providers."
+            )
 
         existing = User.objects.filter(email__iexact=email).first()
         if existing:
@@ -209,4 +230,51 @@ class TAApprovalForm(forms.ModelForm):
         widgets = {
             'approval_notes': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Add any notes about this approval...'}),
         }
-        
+
+
+# ── Profile editing (all roles) ──────────────────────────────────────────────
+
+class UserDetailsForm(forms.ModelForm):
+    """Name + email, editable by every role. Email is the login key, so it must
+    stay unique case-insensitively across all users."""
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'First name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Last name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'you@example.com'}),
+        }
+
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise forms.ValidationError("Email is required — it is how you sign in.")
+        clash = User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
+        if clash.exists():
+            raise forms.ValidationError("That email is already used by another account.")
+        return email
+
+
+class AvatarForm(forms.ModelForm):
+    """Profile photo + phone, shared by every role via the Avatar model."""
+
+    class Meta:
+        model = Avatar
+        fields = ['image', 'phone_number']
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'file-input', 'accept': 'image/*'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 024 123 4567'}),
+        }
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        # Only validate a freshly uploaded file (has content_type); an unchanged
+        # existing image comes through as the stored FieldFile and is fine.
+        if image and hasattr(image, 'content_type'):
+            if image.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Image must be 5 MB or smaller.")
+            if not image.content_type.startswith('image/'):
+                raise forms.ValidationError("Please upload an image file.")
+        return image

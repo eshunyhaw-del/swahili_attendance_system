@@ -6,6 +6,8 @@ app_name = "attendance"
 urlpatterns = [
     # Student
     path("", views.dashboard, name="dashboard"),
+    path("profile/", views.profile, name="profile"),
+    path("style-guide/", views.style_guide, name="style_guide"),
     path("change-password/", views.change_password, name="change_password"),
     path("history/", views.student_history, name="history"),
     path("register/", views.register, name="register"),

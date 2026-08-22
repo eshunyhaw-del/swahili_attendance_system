@@ -1,264 +1,121 @@
-﻿{% extends "attendance/base.html" %}
+{% extends "attendance/base.html" %}
 {% block title %}Attendance History{% endblock %}
 
 {% block content %}
 <style>
-:root {
-    --primary: #0D2472;
-    --primary-lt: rgba(13,36,114,0.07);
-    --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
-    --green: #1A9E60;
-    --green-lt: rgba(26,158,96,0.10);
-    --amber: #B8920C;
-    --amber-lt: rgba(184,146,12,0.10);
-    --red: #C0392B;
-    --red-lt: rgba(192,57,43,0.09);
-    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 4px 0 40px; }
+    .page-head { margin-bottom: 20px; }
+    .page-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .page-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
 
-.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+    @media (max-width: 560px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+    .ds-stat.center { text-align: left; }
 
-/* ─── Page header ─── */
-.page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
-    color: #fff; border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
-.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
+    .course-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); margin-bottom: 14px; overflow: hidden; }
+    .course-head { padding: 16px 18px; }
+    .course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+    .course-code { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ds-primary); background: var(--ds-primary-soft); padding: 3px 8px; border-radius: var(--ds-radius-xs); }
+    :root[data-theme="dark"] .course-code { color: var(--ds-text-secondary); }
+    .course-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin-top: 6px; }
+    .course-score { font-family: var(--ds-font-mono); font-size: 13px; color: var(--ds-text-secondary); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); padding: 5px 10px; border-radius: var(--ds-radius-sm); white-space: nowrap; flex-shrink: 0; }
+    .track-line { height: 6px; background: var(--ds-neutral-150); border-radius: 999px; overflow: hidden; }
+    :root[data-theme="dark"] .track-line { background: var(--ds-surface-sunken); }
+    .track-fill { height: 100%; border-radius: 999px; }
+    .track-fill.good { background: var(--ds-success); }
+    .track-fill.medium { background: var(--ds-warning); }
+    .track-fill.low { background: var(--ds-danger); }
+    .track-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; font-weight: 600; }
 
-/* ─── Stat cards ─── */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.625rem;
-    margin-bottom: 1.25rem;
-}
-.stat-card {
-    background: var(--surface);
-    border-radius: var(--r-lg);
-    box-shadow: var(--sh-sm);
-    padding: 0.875rem 1rem;
-    text-align: center;
-}
-.stat-val { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.03em; }
-.stat-lbl { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 2px; }
-.stat-val.green { color: var(--green); }
-.stat-val.amber { color: var(--amber); }
-.stat-val.red { color: var(--red); }
-.stat-val.navy { color: var(--primary); }
-
-/* ─── Course card ─── */
-.course-card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sh-sm);
-    margin-bottom: 1rem;
-    overflow: hidden;
-}
-
-.course-head {
-    padding: 1.125rem 1.25rem 1rem;
-}
-.course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.875rem; }
-.course-code-chip {
-    display: inline-block;
-    background: var(--primary-lt);
-    color: var(--primary);
-    font-size: 10px; font-weight: 800;
-    padding: 3px 8px; border-radius: 6px;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    margin-bottom: 0.35rem;
-}
-.course-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.course-score {
-    font-size: 13px; font-weight: 800;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-sm);
-    padding: 0.35rem 0.75rem;
-    white-space: nowrap; flex-shrink: 0;
-    font-family: 'DM Mono', monospace;
-    color: var(--text);
-}
-
-.progress-bar {
-    height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden;
-}
-.progress-fill {
-    height: 100%; border-radius: 99px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
-}
-.progress-fill.good { background: linear-gradient(90deg, #1A9E60 0%, #2ECC71 100%); }
-.progress-fill.medium { background: linear-gradient(90deg, #B8920C 0%, #F2C31A 100%); }
-.progress-fill.low { background: linear-gradient(90deg, #C0392B 0%, #E74C3C 100%); }
-
-.progress-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; }
-.progress-pct { font-size: 11.5px; font-weight: 700; color: var(--muted); }
-
-/* ─── Week list ─── */
-.week-list { border-top: 1px solid var(--border); }
-.week-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.75rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    gap: 1rem;
-    transition: background 0.1s;
-}
-.week-row:last-child { border-bottom: none; }
-.week-row:hover { background: rgba(13,36,114,0.02); }
-
-.week-left { display: flex; align-items: center; gap: 0.75rem; }
-.week-num-badge {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: var(--bg); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 800; color: var(--muted);
-    flex-shrink: 0;
-}
-.week-title { font-size: 13px; font-weight: 700; color: var(--text); }
-.week-date { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 1px; }
-
-.badge {
-    font-size: 11px; font-weight: 700;
-    padding: 3px 10px; border-radius: 20px;
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    white-space: nowrap;
-}
-.badge-present { background: #DCFCE7; color: #166534; }
-.badge-absent { background: #FEE2E2; color: #991B1B; }
-.badge-na { background: #F3F4F6; color: #6B7280; }
-
-/* ─── Empty state ─── */
-.empty {
-    text-align: center; padding: 3.5rem 2rem;
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    border: 2px dashed var(--border);
-    box-shadow: var(--sh-sm);
-}
-.empty .iconify { font-size: 2.5rem; color: var(--muted); margin-bottom: 0.75rem; display: block; }
-.empty p { color: var(--muted); font-size: 14px; font-weight: 500; }
-
-@media (max-width: 500px) {
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-}
+    .week-list { border-top: 1px solid var(--ds-border); background: var(--ds-surface-sunken); }
+    .week-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 18px; border-bottom: 1px solid var(--ds-border); }
+    .week-row:last-child { border-bottom: none; }
+    .week-left { display: flex; align-items: center; gap: 12px; }
+    .week-num { width: 28px; height: 28px; border-radius: var(--ds-radius-sm); background: var(--ds-surface); border: 1px solid var(--ds-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--ds-text-muted); flex-shrink: 0; }
+    .week-title { font-size: 13px; font-weight: 600; }
+    .week-date { font-size: 11.5px; color: var(--ds-text-muted); margin-top: 1px; }
 </style>
 
 <div class="wrap">
+<header class="page-head">
+<p class="ds-eyebrow">Attendance History</p>
+<h1>Your attendance record</h1>
+<p class="sub">A complete record of every recorded session across your courses.</p>
+</header>
 
-<div class="page-header">
-<h1>Attendance History</h1>
-<div class="page-header-sub">Your full attendance record across all courses</div>
+{% if history_data %}
+<div class="stat-grid">
+<div class="ds-stat"><div class="ds-stat-label">Courses</div><div class="ds-stat-value">{{ history_data|length }}</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Sessions</div><div class="ds-stat-value" id="stat-total">—</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Present</div><div class="ds-stat-value" id="stat-attended" style="color:var(--ds-success)">—</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Absent</div><div class="ds-stat-value" id="stat-absent" style="color:var(--ds-danger)">—</div></div>
 </div>
 
-<!-- Summary stats -->
-    {% if history_data %}
-    {% with total_sessions=0 total_attended=0 total_absent=0 %}
-<div class="stats-row">
-<div class="stat-card">
-<div class="stat-val navy">
-                {% with ns=0 %}{% for item in history_data %}{% with ns=ns|add:item.total %}{% endwith %}{% endfor %}
-                {{ history_data|length }}{% endwith %}
-</div>
-<div class="stat-lbl">Courses</div>
-</div>
-<div class="stat-card">
-<div class="stat-val navy" id="stat-total">—</div>
-<div class="stat-lbl">Sessions</div>
-</div>
-<div class="stat-card">
-<div class="stat-val green" id="stat-attended">—</div>
-<div class="stat-lbl">Attended</div>
-</div>
-<div class="stat-card">
-<div class="stat-val red" id="stat-absent">—</div>
-<div class="stat-lbl">Absent</div>
-</div>
-</div>
-    {% endwith %}
-    {% endif %}
-
-<!-- Course cards -->
-    {% for item in history_data %}
+{% for item in history_data %}
 <div class="course-card">
 <div class="course-head">
 <div class="course-top">
-<div>
-<div class="course-code-chip">{{ item.course.code }}</div>
+<div style="min-width:0">
+<span class="course-code">{{ item.course.code }}</span>
 <div class="course-name">{{ item.course.name }}</div>
 </div>
 <div class="course-score">{{ item.attended }} / {{ item.total }}</div>
 </div>
-<div class="progress-bar">
-<div class="progress-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}"
-                     style="width:{{ item.percentage }}%;"></div>
+<div class="track-line">
+<div class="track-fill {% if item.percentage >= 75 %}good{% elif item.percentage >= 50 %}medium{% else %}low{% endif %}" style="width:{{ item.percentage }}%;"></div>
 </div>
-<div class="progress-meta">
-<span class="progress-pct" style="color:{% if item.percentage >= 75 %}var(--green){% elif item.percentage >= 50 %}var(--amber){% else %}var(--red){% endif %};">
-                    {{ item.percentage|floatformat:0 }}% attendance
-</span>
-<span class="progress-pct">{{ item.total }} session{{ item.total|pluralize }}</span>
+<div class="track-meta">
+<span class="ds-text-muted">{{ item.percentage|floatformat:0 }}% attendance · {{ item.eligibility.total_absent }} missed</span>
+        {% if item.eligibility.status == 'blocked' %}
+<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
+        {% elif item.eligibility.status == 'warning' %}
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
+        {% else %}
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
+        {% endif %}
 </div>
 </div>
-
 <div class="week-list">
-            {% for week in item.weeks %}
-<div class="week-row" id="hist-row-{{ week.session.id }}">
+        {% for week in item.weeks %}
+<div class="week-row" data-status="{{ week.status }}">
 <div class="week-left">
-<div class="week-num-badge">{{ week.week_num }}</div>
+<div class="week-num">{{ week.week_num }}</div>
 <div>
-<div class="week-title">Week {{ week.week_num }}</div>
+<div class="week-title">Week {{ week.week_num }} · {{ week.session.topic }}</div>
 <div class="week-date">{{ week.session.date|date:"l, d M Y" }}</div>
 </div>
 </div>
-                {% if week.status == 'present' %}
-<span class="badge badge-present">
-<span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span> Present
-</span>
-                {% elif week.status == 'absent' %}
-<span class="badge badge-absent">
-<span class="iconify" data-icon="mdi:close-circle" style="font-size:12px;"></span> Absent
-</span>
-                {% else %}
-<span class="badge badge-na">N/A</span>
-                {% endif %}
+            {% if week.status == 'present' %}
+<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+            {% elif week.status == 'absent' %}
+<span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span>
+            {% else %}
+<span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not recorded</span>
+            {% endif %}
 </div>
-            {% endfor %}
+        {% endfor %}
 </div>
 </div>
-    {% empty %}
-<div class="empty">
-<span class="iconify" data-icon="mdi:history"></span>
-<p>No attendance history yet.</p>
-</div>
-    {% endfor %}
-
+{% endfor %}
+{% else %}
+<div class="ds-card"><div class="ds-empty">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:history"></span></div>
+<p class="ds-empty-title">No attendance history yet</p>
+<p class="ds-empty-text">Once your classes begin and attendance is recorded, your full history will appear here.</p>
+</div></div>
+{% endif %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    let total = 0, attended = 0, absent = 0;
+    var total = 0, attended = 0, absent = 0;
     document.querySelectorAll('.week-row').forEach(function (row) {
-        if (row.querySelector('.badge-na')) return;
-        total++;
-        if (row.querySelector('.badge-present')) attended++;
-        else absent++;
+        var s = row.getAttribute('data-status');
+        if (s === 'present') { total++; attended++; }
+        else if (s === 'absent') { total++; absent++; }
     });
-    const st = document.getElementById('stat-total');
-    const sa = document.getElementById('stat-attended');
-    const sb = document.getElementById('stat-absent');
-    if (st) st.textContent = total;
-    if (sa) sa.textContent = attended;
-    if (sb) sb.textContent = absent;
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    set('stat-total', total); set('stat-attended', attended); set('stat-absent', absent);
 });
 </script>
 {% endblock %}

@@ -26,13 +26,16 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from .forms import StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm, TARegistrationForm
+from .forms import (
+    StudentRegistrationForm, CourseRegistrationForm, SupportTicketForm,
+    TARegistrationForm, UserDetailsForm, AvatarForm,
+)
 from .tokens import set_auth_cookies
 from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
     TAProfile, TACode, OTPCode, TAnnouncement, Notification, StudentNotification,
-    CulturalDate, SystemNotification, CourseRegistration,
+    CulturalDate, SystemNotification, CourseRegistration, Avatar,
 )
 
 
@@ -49,6 +52,103 @@ def get_profile(user):
         return user.userprofile
     except UserProfile.DoesNotExist:
         return None
+
+
+def role_label(user):
+    if user.is_superuser:
+        return "Admin"
+    if user.is_staff:
+        return "Lecturer"
+    if hasattr(user, 'taprofile'):
+        return "Teaching Assistant"
+    return "Student"
+
+
+# ── Exam-eligibility rule ─────────────────────────────────────────────────────
+# A student may NOT sit the end-of-semester exam for a course if they miss
+# 3 CONSECUTIVE held sessions, OR 4 CUMULATIVE (total) held sessions.
+EXAM_MAX_CONSECUTIVE_ABSENCES = 3   # >= this many in a row ⇒ blocked
+EXAM_MAX_TOTAL_ABSENCES = 4         # >= this many overall ⇒ blocked
+
+
+def exam_eligibility(statuses):
+    """Given an ordered list of 'present'/'absent' for a course's HELD sessions
+    (skip not-yet-held ones), return the exam-eligibility standing for that
+    course under the absence rule.
+
+    Returns a dict:
+      total_absent, max_consecutive_absent, eligible (bool),
+      status ('eligible' | 'warning' | 'blocked'), reason (str).
+    'warning' means one more miss would cross a limit.
+    """
+    total_absent = sum(1 for s in statuses if s == 'absent')
+    max_consec = run = 0
+    for s in statuses:
+        if s == 'absent':
+            run += 1
+            max_consec = max(max_consec, run)
+        else:
+            run = 0
+
+    blocked = (
+        max_consec >= EXAM_MAX_CONSECUTIVE_ABSENCES
+        or total_absent >= EXAM_MAX_TOTAL_ABSENCES
+    )
+    if blocked:
+        if max_consec >= EXAM_MAX_CONSECUTIVE_ABSENCES:
+            reason = f"{max_consec} sessions missed in a row"
+        else:
+            reason = f"{total_absent} sessions missed in total"
+        status = 'blocked'
+    elif max_consec == EXAM_MAX_CONSECUTIVE_ABSENCES - 1 or total_absent == EXAM_MAX_TOTAL_ABSENCES - 1:
+        status = 'warning'
+        reason = "One more absence would make you ineligible"
+    else:
+        status = 'eligible'
+        reason = ""
+
+    return {
+        'total_absent': total_absent,
+        'max_consecutive_absent': max_consec,
+        'eligible': not blocked,
+        'status': status,
+        'reason': reason,
+    }
+
+
+def style_guide(request):
+    """Living style guide / component gallery for the SWASA design system.
+    Presentational only (no data), so it renders the reusable component language
+    for review and reference across the application."""
+    return render(request, 'attendance/style_guide.html')
+
+
+@login_required
+def profile(request):
+    """Everyone (student, TA, lecturer, admin) edits their name, email, phone and
+    profile photo here. Name/email live on the User; photo/phone on Avatar."""
+    user = request.user
+    avatar, _ = Avatar.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        details_form = UserDetailsForm(request.POST, instance=user)
+        avatar_form = AvatarForm(request.POST, request.FILES, instance=avatar)
+        if details_form.is_valid() and avatar_form.is_valid():
+            details_form.save()
+            avatar_form.save()
+            messages.success(request, "Your profile has been updated.")
+            return redirect('attendance:profile')
+        messages.error(request, "Please correct the errors below.")
+    else:
+        details_form = UserDetailsForm(instance=user)
+        avatar_form = AvatarForm(instance=avatar)
+
+    return render(request, 'attendance/profile.html', {
+        'details_form': details_form,
+        'avatar_form': avatar_form,
+        'avatar': avatar,
+        'role_label': role_label(user),
+    })
 
 
 # ── Rate limiting (cache-based, no extra dependency) ──────────────────────────
@@ -1119,14 +1219,23 @@ def dashboard(request):
         )
     }
 
+    today = timezone.now().date()
+    date_joined = request.user.date_joined.date()
+
     for course in courses:
         sessions = course_id_to_sessions.get(course.id, [])
         weeks = []
+        held_statuses = []  # ordered present/absent for sessions already held
 
         for i, session in enumerate(sessions, start=1):
             code_obj = codes_by_session.get(session.id)
             record   = records_by_session.get(session.id)
             status   = "submitted" if record else "pending"
+
+            # Held = happened, and on/after the student joined. Only held
+            # sessions count toward the exam-eligibility absence rule.
+            if date_joined <= session.date < today:
+                held_statuses.append("present" if record else "absent")
 
             weeks.append({
                 "week_num": i,
@@ -1139,6 +1248,7 @@ def dashboard(request):
         total_sessions = len(weeks)
         attended = sum(1 for w in weeks if w['status'] == 'submitted')
         percentage = round((attended / total_sessions) * 100) if total_sessions > 0 else 0
+        eligibility = exam_eligibility(held_statuses)
 
         course_data.append({
             "course": course,
@@ -1146,14 +1256,49 @@ def dashboard(request):
             "total_sessions": total_sessions,
             "attended": attended,
             "percentage": percentage,
+            "eligibility": eligibility,
             # Student may self-drop only with zero attendance for the course.
             # `attended` counts records across all sessions of this course, so
             # attended == 0 is exactly the "no attendance" rule.
             "can_deregister": attended == 0,
         })
 
+    # ── Overview: what the student most needs to see at a glance ──────────────
+    overall_attended = sum(c['attended'] for c in course_data)
+    overall_total = sum(c['total_sessions'] for c in course_data)
+    overall_pct = round((overall_attended / overall_total) * 100) if overall_total else 0
+    # Exam eligibility (absence rule) drives "at risk"; % is informational only.
+    at_risk_courses = [c for c in course_data if c['eligibility']['status'] != 'eligible']
+    blocked_courses = [c for c in course_data if c['eligibility']['status'] == 'blocked']
+    warning_courses = [c for c in course_data if c['eligibility']['status'] == 'warning']
+
+    course_by_id = {c['course'].id: c['course'] for c in course_data}
+    todays_sessions, upcoming_sessions = [], []
+    for s in all_sessions:
+        info = {
+            'session': s,
+            'course': course_by_id.get(s.course_id),
+            'submitted': s.id in records_by_session,
+        }
+        if s.date == today:
+            todays_sessions.append(info)
+        elif s.date > today:
+            upcoming_sessions.append(info)
+    todays_sessions.sort(key=lambda x: x['session'].start_time)
+    upcoming_sessions.sort(key=lambda x: (x['session'].date, x['session'].start_time))
+
     return render(request, "attendance/dashboard.html", {
         "course_data": course_data,
+        "overall_pct": overall_pct,
+        "overall_attended": overall_attended,
+        "overall_total": overall_total,
+        "at_risk_courses": at_risk_courses,
+        "at_risk_count": len(at_risk_courses),
+        "blocked_courses": blocked_courses,
+        "blocked_count": len(blocked_courses),
+        "warning_courses": warning_courses,
+        "todays_sessions": todays_sessions,
+        "upcoming_sessions": upcoming_sessions[:4],
     })
 
 
@@ -1179,14 +1324,25 @@ def support(request):
             except UserProfile.DoesNotExist:
                 pass
             ticket.save()
+
+            student_name = request.user.get_full_name() or request.user.username
+            summary = f"New support ticket from {student_name}: \"{ticket.subject}\""
+
+            # Route to the level's TA first (they are closest to the student)…
             if ticket.assigned_ta:
-                student_name = request.user.get_full_name() or request.user.username
                 create_notification(
-                    ticket.assigned_ta,
-                    f"New support ticket from {student_name}: \"{ticket.subject}\"",
-                    reverse('attendance:ta_support'),
+                    ticket.assigned_ta, summary, reverse('attendance:ta_support'),
                 )
-            messages.success(request, "Support ticket submitted successfully! Your TA will respond soon.")
+            # …and always notify staff/admins as a backup, so nothing is missed
+            # and tickets with no TA for the student's level are still handled.
+            admin_link = reverse('attendance:admin_support')
+            for admin in User.objects.filter(is_staff=True, is_active=True):
+                create_notification(admin, summary, admin_link)
+
+            messages.success(
+                request,
+                "Support request submitted. Your teaching assistant or the support team will respond soon.",
+            )
             return redirect('attendance:support')
     else:
         form = SupportTicketForm()
@@ -1263,12 +1419,14 @@ def student_history(request):
             weeks.append({"week_num": i, "session": session, "status": day_status})
 
         percentage = round((attended / eligible_total) * 100) if eligible_total else 0
+        held_statuses = [w['status'] for w in weeks if w['status'] in ('present', 'absent')]
         history_data.append({
             "course": course,
             "weeks": weeks,
             "attended": attended,
             "total": eligible_total,
             "percentage": percentage,
+            "eligibility": exam_eligibility(held_statuses),
         })
 
     return render(request, "attendance/history.html", {
@@ -1678,20 +1836,18 @@ def export_level_attendance(request, level_id):
 
 @staff_member_required
 def student_attendance_report(request):
-    students = UserProfile.objects.select_related('user', 'level').all()
+    # The consolidated "records" screen switches level/segment and searches
+    # entirely client-side (Meta-Ads-Manager style), so we always load the full
+    # student set once. ``?level=`` is honoured only to preselect the opening tab
+    # (deep links / no-JS fallback), not to trim the dataset.
+    students = (
+        UserProfile.objects
+        .select_related('user', 'level')
+        .order_by('user__first_name', 'user__last_name', 'user__username')
+    )
 
     level_id = request.GET.get('level')
-    if level_id:
-        students = students.filter(level_id=level_id)
-
     search_query = request.GET.get('search')
-    if search_query:
-        students = students.filter(
-            Q(user__first_name__icontains=search_query) |
-            Q(user__last_name__icontains=search_query) |
-            Q(user__username__icontains=search_query) |
-            Q(student_id_number__icontains=search_query)
-        )
 
     students = list(students)
     student_ids = [p.user_id for p in students]
@@ -1752,15 +1908,44 @@ def student_attendance_report(request):
             'attendance_percentage': round(attendance_percentage, 1),
             'course_attendance': course_attendance,
             'alerts': alerts,
+            'has_data': total_possible > 0,      # has at least one held session
+            'at_risk': total_possible > 0 and attendance_percentage < 75,
         })
-    
+
+    # ── Level segments (tab metadata) + opening-view summary ──────────────────
+    levels = list(Level.objects.all().order_by('name'))
+
+    def _summary(rows):
+        tracked = [r for r in rows if r['has_data']]
+        avg = round(sum(r['attendance_percentage'] for r in tracked) / len(tracked), 1) if tracked else 0
+        return {
+            'count': len(rows),
+            'avg_attendance': avg,
+            'at_risk': sum(1 for r in rows if r['at_risk']),
+            'good': sum(1 for r in tracked if r['attendance_percentage'] >= 75),
+        }
+
+    level_segments = []
+    for level in levels:
+        level_segments.append({
+            'level': level,
+            'count': sum(1 for r in student_data if r['profile'].level_id == level.id),
+        })
+
+    # Initial active tab: a valid ?level= id, else 'all'.
+    active_level = 'all'
+    if level_id and any(str(level.id) == str(level_id) for level in levels):
+        active_level = str(level_id)
+
     context = {
         'students': student_data,
-        'levels': Level.objects.all(),
-        'selected_level': level_id,
+        'levels': levels,
+        'level_segments': level_segments,
+        'active_level': active_level,
         'search_query': search_query,
+        'summary_all': _summary(student_data),
     }
-    
+
     return render(request, 'attendance/student_report.html', context)
 
 
@@ -2479,7 +2664,11 @@ def student_submit_ta_code(request):
             ta_code.distributed_at = now
         ta_code.save()
 
-    return JsonResponse({"success": True, "message": "Attendance submitted successfully!"})
+    return JsonResponse({
+        "success": True,
+        "course_id": session.course_id,
+        "message": "Attendance submitted successfully!",
+    })
 
 
 # ── AJAX: Get Students for TA Dashboard (PAGINATED) ──────────────────────────
@@ -2973,7 +3162,9 @@ def community_alumni(request):
         if not is_level_400:
             messages.warning(request, 'The Alumni Network is only available to Level 400 students.')
             return redirect(reverse('attendance:dashboard'))
-    return render(request, 'attendance/community/alumni.html')
+    return render(request, 'attendance/community/alumni.html', {
+        'alumni_whatsapp_url': getattr(settings, 'ALUMNI_WHATSAPP_URL', ''),
+    })
 
 
 @login_required

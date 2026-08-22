@@ -1,56 +1,24 @@
 {% extends "attendance/base.html" %}
-{% block title %}Alumni Network — SWASA{% endblock %}
+{% block title %}Alumni Network{% endblock %}
 
 {% block content %}
 <style>
-
-.cs-wrap { max-width: 600px; margin: 0 auto; padding: 0 0 4rem; }
-
-.cs-card {
-    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
-    border-radius: 24px;
-    padding: 3rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(13,36,114,0.35);
-}
-
-.cs-heading { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; line-height: 1.2; position: relative; z-index: 1; }
-.cs-sub { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 1rem; line-height: 1.55; position: relative; z-index: 1; }
-.cs-msg {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px; padding: 1rem 1.25rem;
-    font-size: 13px; color: rgba(255,255,255,0.75);
-    line-height: 1.6; margin-bottom: 2rem;
-    position: relative; z-index: 1;
-}
-
-.cs-back {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 10px; padding: 0.6rem 1.25rem;
-    color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: all 0.15s;
-    position: relative; z-index: 1;
-}
-.cs-back:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.4); }
+    .comm { max-width: 620px; margin: 0 auto; padding: 4px 0 40px; }
+    .comm-head { margin-bottom: 16px; }
+    .comm-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .comm-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
 </style>
-
-<div class="cs-wrap">
-<div class="cs-card">
-<h1 class="cs-heading">SWASA Alumni Network</h1>
-<p class="cs-sub">Connect with SWASA graduates — coming soon!</p>
-
-<div class="cs-msg">
-            As a Level 400 student, you'll soon be able to connect with SWASA alumni across East Africa and beyond.
-</div>
-
-<a href="{% url 'attendance:dashboard' %}" class="cs-back">
-<span class="iconify" data-icon="mdi:arrow-left" data-width="15"></span>
-            Back to Dashboard
-</a>
-</div>
+<div class="comm">
+<header class="comm-head">
+<p class="ds-eyebrow">Community · Level 400</p>
+<h1>SWASA Alumni Network</h1>
+<p class="sub">Stay connected with SWASA graduates after you leave the programme.</p>
+</header>
+<div class="ds-card"><div class="ds-empty">
+<div class="ds-empty-icon" style="background:#25D366; color:#fff;"><span class="iconify" data-icon="mdi:whatsapp"></span></div>
+<p class="ds-empty-title">Join the SWASA Alumni Network</p>
+<p class="ds-empty-text">As a Level 400 student, stay connected with SWASA members and graduates after you leave the programme. Join the alumni WhatsApp group below.</p>
+<a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="ds-btn" style="background:#25D366; color:#fff;"><span class="iconify" data-icon="mdi:whatsapp"></span> Join on WhatsApp</a>
+</div></div>
 </div>
 {% endblock %}

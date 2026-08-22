@@ -51,10 +51,10 @@
     .steps { display: flex; align-items: center; justify-content: center; margin-top: 1.25rem; }
     .step { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 600; color: #A2AAB9; }
     .step.active { color: var(--navy); }
-    .step-dot { width: 21px; height: 21px; border-radius: 50%; background: #ECEFF6; color: #97A0B2;
+    .step-dot { width: 21px; height: 21px; flex-shrink: 0; border-radius: 50%; background: #ECEFF6; color: #97A0B2;
         display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; }
     .step.active .step-dot { background: var(--navy); color: #fff; }
-    .step-line { width: 26px; height: 1.5px; background: var(--line); margin: 0 0.5rem; }
+    .step-line { width: 26px; height: 1.5px; flex-shrink: 0; background: var(--line); margin: 0 0.5rem; }
 
     .card-body { padding: 1.6rem 2rem 2rem; }
 
@@ -170,6 +170,7 @@
                 <label class="field-label" for="id_email">Email address</label>
                 <div class="field-wrap">{{ form.email }}</div>
                 {% if form.email.errors %}<ul class="field-error">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                <div class="field-hint">Use a Gmail address (@gmail.com). Verification codes are sent from Gmail and reliably arrive only at Gmail inboxes — university and other emails may not receive them.</div>
             </div>
 
             <hr class="divider">

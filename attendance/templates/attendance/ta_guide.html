@@ -7,23 +7,35 @@
     --primary: #0D2472;
     --primary-lt: rgba(13,36,114,0.07);
     --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
-    --green: #1A9E60;
+    --bg: #F4F6F9;
+    --text: #1F2937;
+    --muted: #6B7484;
+    --border: #E1E5EC;
+    --green: #167A4B;
     --green-lt: rgba(26,158,96,0.10);
-    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
+    --r-sm: 8px; --r-lg: 12px; --r-xl: 14px;
+    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html[data-theme="dark"] {
+    --primary: #1B3A9C; --primary-lt: rgba(242,195,26,0.10);
+    --surface: #171F2A; --bg: #0E141C;
+    --text: #E7ECF2; --muted: #8B95A5; --border: #29323F;
+    --green: #4ED08A; --green-lt: rgba(22,122,75,0.20);
+    --amber: #E6A23C; --amber-lt: rgba(180,83,9,0.20);
+    --red: #F0776B; --red-lt: rgba(180,35,24,0.20);
+    --blue: #6AA0F0; --blue-lt: rgba(23,92,211,0.20);
+    --sh-sm: 0 1px 3px rgba(0,0,0,0.45);
+    --sh-md: 0 4px 10px -2px rgba(0,0,0,0.5);
+    --sh-lg: 0 12px 20px -4px rgba(0,0,0,0.55);
+}
 body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
 .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
 .page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1B3A9C 100%);
+    background: #0D2472;
     color: #fff; border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
     position: relative; overflow: hidden; box-shadow: var(--sh-md);
@@ -106,15 +118,15 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 <div class="step-list">
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
-<div class="step-text">Your dashboard shows all<strong>sessions grouped by course</strong>. Each course card lists every week as a tab at the top.</div>
+<div class="step-text">Your dashboard shows all <strong>sessions grouped by course</strong>. Each course card lists every week as a tab at the top.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:calendar-week"></span></div>
-<div class="step-text">Click a<strong>Week tab</strong> to open that session. You'll see the date, time, topic, and the list of enrolled students below.</div>
+<div class="step-text">Click a <strong>Week tab</strong> to open that session. You'll see the date, time, topic, and the list of enrolled students below.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
-<div class="step-text">The<strong>student count chip</strong> next to the session date shows how many students are registered for that course.</div>
+<div class="step-text">The <strong>student count chip</strong> next to the session date shows how many students are registered for that course.</div>
 </div>
 </div>
 </div>
@@ -135,11 +147,11 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 </div>
 <div class="step">
 <div class="step-icon green"><span class="iconify" data-icon="mdi:key-outline"></span></div>
-<div class="step-text"><strong>Generate one</strong> — find the student in the table and click the green<em>Generate</em> button in their row. The code appears instantly without reloading the page.</div>
+<div class="step-text"><strong>Generate one</strong> — find the student in the table and click the green <em>Generate</em> button in their row. The code appears instantly without reloading the page.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:send-outline"></span></div>
-<div class="step-text">Once a code is generated, click<strong>Mark Given</strong> after you hand it to the student. This changes the status from<em>Pending</em> to<em>Given</em>.</div>
+<div class="step-text">Once a code is generated, click <strong>Mark Given</strong> after you hand it to the student. This changes the status from <em>Pending</em> to <em>Given</em>.</div>
 </div>
 </div>
 <div class="tip-box">
@@ -189,7 +201,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 <div class="step-list">
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:book-edit-outline"></span></div>
-<div class="step-text">Go to<strong>Manage Courses</strong> in the sidebar to see all available levels. Your currently assigned ones are shown in green.</div>
+<div class="step-text">Go to <strong>Manage Courses</strong> in the sidebar to see all available levels. Your currently assigned ones are shown in green.</div>
 </div>
 <div class="step">
 <div class="step-icon green"><span class="iconify" data-icon="mdi:plus-circle-outline"></span></div>
@@ -197,7 +209,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 </div>
 <div class="step">
 <div class="step-icon" style="background:rgba(220,38,38,0.08);color:#DC2626;"><span class="iconify" data-icon="mdi:minus-circle-outline"></span></div>
-<div class="step-text">Uncheck a green level to remove it. Click<strong>Save Changes</strong> to confirm. The level will no longer appear on your dashboard.</div>
+<div class="step-text">Uncheck a green level to remove it. Click <strong>Save Changes</strong> to confirm. The level will no longer appear on your dashboard.</div>
 </div>
 </div>
 </div>
@@ -214,11 +226,11 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 <div class="step-list">
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:bullhorn-outline"></span></div>
-<div class="step-text">Click<strong>Announcements</strong> in the sidebar. Write a subject and your message, then choose which levels to target — or leave all unchecked to send to every student in your levels.</div>
+<div class="step-text">Click <strong>Announcements</strong> in the sidebar. Write a subject and your message, then choose which levels to target — or leave all unchecked to send to every student in your levels.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
-<div class="step-text">Students receive the announcement as an email. The subject line will be prefixed with<em>[SWASA]</em> so it is easy to identify.</div>
+<div class="step-text">Students receive the announcement as an email. The subject line will be prefixed with <em>[SWASA]</em> so it is easy to identify.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
@@ -243,11 +255,11 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 <div class="step-list">
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
-<div class="step-text">Click<strong>My History</strong> in the sidebar for a full record of every session — codes generated, given out, used, and the overall usage rate per week.</div>
+<div class="step-text">Click <strong>My History</strong> in the sidebar for a full record of every session — codes generated, given out, used, and the overall usage rate per week.</div>
 </div>
 <div class="step">
 <div class="step-icon"><span class="iconify" data-icon="mdi:percent"></span></div>
-<div class="step-text">The<strong>usage rate bar</strong> for each session shows what percentage of generated codes were actually used to submit attendance.</div>
+<div class="step-text">The <strong>usage rate bar</strong> for each session shows what percentage of generated codes were actually used to submit attendance.</div>
 </div>
 </div>
 </div>

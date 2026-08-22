@@ -1,522 +1,463 @@
-﻿{% extends "attendance/base.html" %}
-{% block title %}Student Reports{% endblock %}
+{% extends "attendance/base.html" %}
+{% block title %}Attendance Records{% endblock %}
 
 {% block content %}
 <style>
-    /* Theme Variables - Defaults to Light Mode */
-    :root {
-        --dash-bg: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
-        --panel-bg: #FFFFFF;
-        --text-primary: #0F172A;
-        --text-secondary: #334155;
-        --text-muted: #64748B;
-        --border-color: rgba(226, 232, 240, 0.9);
-        --panel-shadow: 0 4px 10px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-        --panel-shadow-hover: 0 20px 25px -5px rgba(13, 36, 114, 0.08), 0 8px 10px -6px rgba(13, 36, 114, 0.03);
-        
-        --input-bg: #F8FAFC;
-        --input-border: #CBD5E1;
-        --input-focus: rgba(13, 36, 114, 0.15);
-        --input-focus-border: #0D2472;
-        
-        --btn-main-bg: #0D2472;
-        --btn-main-hover: #0A1B56;
-        --btn-main-text: #FFFFFF;
-        
-        --btn-out-bg: transparent;
-        --btn-out-text: #0D2472;
-        --btn-out-border: #0D2472;
-        --btn-out-hover: #F8FAFC;
-        
-        --table-head-bg: #F8FAFC;
-        --table-row-hover: #F1F5F9;
-        
-        --track-base: #F1F5F9;
-        --track-fill: #0D2472;
-        
-        --alert-danger: #EF4444;
-        --alert-danger-bg: #FEF2F2;
-        
-        --details-bg: #F8FAFC;
-        --details-hover: #F1F5F9;
-    }
+:root {
+    --primary: #0D2472;
+    --primary-lt: rgba(13,36,114,0.07);
+    --gold: #E6B325;
+    --surface: #FFFFFF;
+    --bg: #F4F6F9;
+    --text: #1F2937;
+    --muted: #6B7484;
+    --border: #E1E5EC;
+    --border-strong: #CDD3DE;
+    --row-hover: #F7F8FA;
+    --track: #E8EBF0;
+    --green: #167A4B;
+    --green-lt: #E7F4EC;
+    --red: #B42318;
+    --red-lt: #FBEAE8;
+    --grey-lt: rgba(107,114,128,0.12);
+    --r-sm: 8px; --r-md: 10px; --r-xl: 14px;
+    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
+}
+html[data-theme="dark"] {
+    --primary: #1B3A9C;
+    --primary-lt: rgba(242,195,26,0.10);
+    --surface: #171F2A;
+    --bg: #0E141C;
+    --text: #E7ECF2;
+    --muted: #8B95A5;
+    --border: #29323F;
+    --border-strong: #3A4757;
+    --row-hover: rgba(46,61,80,0.4);
+    --track: #29323F;
+    --green: #4ED08A;
+    --green-lt: rgba(22,122,75,0.20);
+    --red: #F0776B;
+    --red-lt: rgba(180,35,24,0.20);
+    --grey-lt: rgba(139,151,168,0.15);
+    --sh-sm: 0 1px 3px rgba(0,0,0,0.45);
+    --sh-md: 0 4px 10px -2px rgba(0,0,0,0.5);
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
 
-    /* Dark Mode Overrides */
-    [data-theme="dark"] {
-        --dash-bg: linear-gradient(135deg, #0F1923 0%, #0A1018 100%);
-        --panel-bg: #1E2A3B;
-        --text-primary: #E8EDF5;
-        --text-secondary: #C4CDD8;
-        --text-muted: #6B7280;
-        --border-color: #2E3D50;
-        --panel-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-        --panel-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+.wrap { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
-        --input-bg: #162131;
-        --input-border: #3A4E66;
-        --input-focus: rgba(242, 195, 26, 0.15);
-        --input-focus-border: #F2C31A;
+/* ── Header ── */
+.page-header {
+    background: #0D2472;
+    color: #fff; border-radius: var(--r-xl);
+    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+    box-shadow: var(--sh-md);
+}
+.page-header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.2rem; }
+.page-header-sub { font-size: 12.5px; opacity: 0.7; font-weight: 500; }
+.btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    padding: 0.6rem 1rem; border-radius: var(--r-sm);
+    cursor: pointer; text-decoration: none; border: 1.5px solid transparent; transition: all 0.13s;
+}
+.btn-ghost { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.28); }
+.btn-ghost:hover { background: rgba(255,255,255,0.22); }
+.btn-outline { background: var(--surface); color: var(--primary); border-color: var(--border-strong); }
+html[data-theme="dark"] .btn-outline { color: var(--gold); }
+.btn-outline:hover { border-color: var(--primary); }
+html[data-theme="dark"] .btn-outline:hover { border-color: var(--gold); }
 
-        --btn-main-bg: #0D2472;
-        --btn-main-hover: #091A55;
-        --btn-main-text: #FFFFFF;
+/* ── KPI strip ── */
+.kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+@media (max-width: 720px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+.kpi {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+    box-shadow: var(--sh-sm); padding: 1rem 1.1rem;
+}
+.kpi-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.35rem; }
+.kpi-val { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.kpi.risk .kpi-val { color: var(--red); }
+.kpi.good .kpi-val { color: var(--green); }
 
-        --btn-out-bg: transparent;
-        --btn-out-text: #F2C31A;
-        --btn-out-border: #F2C31A;
-        --btn-out-hover: rgba(242, 195, 26, 0.08);
+/* ── Control bar ── */
+.controls {
+    background: var(--surface); border-radius: var(--r-md); box-shadow: var(--sh-sm);
+    padding: 0.85rem 1rem; margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.segmented {
+    display: inline-flex; max-width: 100%;
+    border: 1.5px solid var(--border-strong); border-radius: var(--r-sm);
+    overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.segmented::-webkit-scrollbar { display: none; }
+.seg-btn {
+    font-family: inherit; font-size: 13px; font-weight: 700; flex: 0 0 auto;
+    padding: 0.5rem 0.9rem; background: var(--surface); color: var(--muted);
+    border: none; border-right: 1.5px solid var(--border-strong); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.12s; white-space: nowrap;
+}
+.seg-btn:last-child { border-right: none; }
+.seg-btn:hover { background: var(--primary-lt); color: var(--text); }
+.seg-btn.active { background: var(--primary); color: #fff; }
+html[data-theme="dark"] .seg-btn.active { color: var(--gold); }
+.seg-count {
+    font-size: 10.5px; font-weight: 800; padding: 0.05rem 0.4rem; border-radius: 99px;
+    background: var(--grey-lt); color: inherit;
+}
+.seg-btn.active .seg-count { background: rgba(255,255,255,0.22); }
 
-        --table-head-bg: #162131;
-        --table-row-hover: rgba(46, 61, 80, 0.5);
+.search-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-wrap .iconify { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.05rem; }
+.search-input {
+    width: 100%; padding: 0.55rem 0.85rem 0.55rem 2.3rem;
+    border: 1.5px solid var(--border-strong); border-radius: var(--r-sm);
+    font-family: inherit; font-size: 13.5px; color: var(--text); background: var(--surface); outline: none; transition: border-color 0.13s;
+}
+.search-input:focus { border-color: var(--primary); }
+html[data-theme="dark"] .search-input:focus { border-color: var(--gold); }
+.showing { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 
-        --track-base: #2E3D50;
-        --track-fill: #F2C31A;
+/* ── Table ── */
+.table-card { background: var(--surface); border-radius: var(--r-md); box-shadow: var(--sh-sm); overflow: hidden; }
+.table-scroll { overflow-x: auto; max-height: 68vh; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--bg); color: var(--muted);
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    text-align: left; padding: 0.75rem 1rem; border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+}
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--text); }
+th .sort-ind { opacity: 0.35; font-size: 0.9em; }
+th.sort-asc .sort-ind, th.sort-desc .sort-ind { opacity: 1; color: var(--primary); }
+html[data-theme="dark"] th.sort-asc .sort-ind, html[data-theme="dark"] th.sort-desc .sort-ind { color: var(--gold); }
 
-        --alert-danger: #F08888;
-        --alert-danger-bg: rgba(192, 57, 43, 0.15);
+tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.srow { transition: background 0.1s; }
+.srow:hover { background: var(--row-hover); }
+.stu-name { font-weight: 700; color: var(--text); }
+.stu-id { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 1px; }
 
-        --details-bg: #162131;
-        --details-hover: #2E3D50;
-    }
+.lvl-chip {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 0.15rem 0.55rem; border-radius: 99px;
+    background: var(--primary-lt); color: var(--primary);
+}
+html[data-theme="dark"] .lvl-chip { color: var(--gold); }
 
-    /* Layout */
-    body {
-        background: var(--dash-bg);
-        min-height: 100vh;
-        margin: 0;
-        background-attachment: fixed;
-        color: var(--text-primary);
-        transition: background 0.3s ease, color 0.3s ease;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+/* attendance cell: bar + pct */
+.att-cell { display: flex; align-items: center; gap: 0.6rem; min-width: 150px; }
+.att-bar { flex: 1; height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; min-width: 60px; }
+.att-fill { height: 100%; border-radius: 99px; background: var(--primary); }
+.att-fill.low { background: var(--red); }
+.att-pct { font-weight: 800; font-size: 12.5px; min-width: 42px; text-align: right; }
+.att-pct.low { color: var(--red); }
+.att-na { color: var(--muted); font-weight: 600; font-size: 12px; }
 
-    .page-wrapper {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 2.5rem 1.25rem;
-    }
+.status-badge { font-size: 10.5px; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 99px; white-space: nowrap; }
+.status-ok   { background: var(--green-lt); color: var(--green); }
+.status-risk { background: var(--red-lt); color: var(--red); }
+.status-none { background: var(--grey-lt); color: var(--muted); }
 
-    .page-header {
-        margin-bottom: 2rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .page-header h1 {
-        font-size: 2rem;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -0.75px;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
+.row-actions { display: flex; gap: 0.35rem; justify-content: flex-end; }
+.icon-act {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: var(--r-sm);
+    border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--muted);
+    cursor: pointer; text-decoration: none; transition: all 0.12s;
+}
+.icon-act:hover { border-color: var(--primary); color: var(--primary); }
+html[data-theme="dark"] .icon-act:hover { border-color: var(--gold); color: var(--gold); }
+.icon-act .iconify { font-size: 1.05rem; }
+.srow.open .expand-btn .iconify { transform: rotate(180deg); }
+.expand-btn .iconify { transition: transform 0.2s; }
 
-    /* Filter Card */
-    .filter-card {
-        background: var(--panel-bg);
-        padding: 1.5rem;
-        border-radius: 20px;
-        box-shadow: var(--panel-shadow);
-        margin-bottom: 2rem;
-    }
+/* detail row */
+.drow { display: none; }
+.drow.show { display: table-row; }
+.drow > td { background: var(--bg); padding: 0.5rem 1rem 1rem; }
+.brk-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--r-sm); overflow: hidden; box-shadow: var(--sh-sm); }
+.brk-table th { position: static; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0.55rem 0.9rem; }
+.brk-table td { padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.brk-table tr:last-child td { border-bottom: none; }
+.brk-course { font-weight: 700; }
+.brk-course span { color: var(--muted); font-weight: 500; }
+.brk-empty { color: var(--muted); font-size: 12.5px; padding: 0.4rem 0; }
 
-    .filter-form {
-        display: flex;
-        gap: 1.25rem;
-        flex-wrap: wrap;
-        align-items: flex-end;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .form-label {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .form-control {
-        padding: 0.85rem 1rem;
-        border: 1px solid var(--input-border);
-        border-radius: 12px;
-        font-size: 0.95rem;
-        background: var(--input-bg);
-        color: var(--text-primary);
-        box-sizing: border-box;
-        transition: all 0.2s ease;
-        width: 100%;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--input-focus-border);
-        box-shadow: 0 0 0 4px var(--input-focus);
-    }
-
-    .form-select {
-        padding-right: 2.5rem;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 1em;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 0.85rem 1.5rem;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.2s;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-primary {
-        background: var(--btn-main-bg);
-        color: var(--btn-main-text);
-        white-space: nowrap;
-    }
-
-    .btn-primary:hover {
-        background: var(--btn-main-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(13, 36, 114, 0.15);
-    }
-
-    .btn-outline {
-        background: var(--btn-out-bg);
-        color: var(--btn-out-text);
-        border: 2px solid var(--btn-out-border);
-    }
-
-    .btn-outline:hover {
-        background: var(--btn-out-hover);
-    }
-
-    .btn-sm {
-        padding: 0.5rem 1rem;
-        font-size: 0.85rem;
-        border-radius: 10px;
-    }
-
-    /* Student Card */
-    .student-card {
-        background: var(--panel-bg);
-        border-radius: 20px;
-        box-shadow: var(--panel-shadow);
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .student-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--panel-shadow-hover);
-    }
-
-    .card-header {
-        padding: 1.25rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        background: rgba(0, 0, 0, 0.01);
-    }
-
-    .student-info strong {
-        display: block;
-        font-size: 1.15rem;
-        font-weight: 800;
-        color: var(--text-primary);
-        margin-bottom: 0.25rem;
-    }
-
-    .student-info small {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .card-stats {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-    }
-
-    .stat-pct {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--text-primary);
-        letter-spacing: -0.5px;
-    }
-
-    .card-body {
-        padding: 0 1.5rem 1.5rem 1.5rem;
-    }
-
-    /* Progress Bar */
-    .progress-track {
-        height: 8px;
-        background: var(--track-base);
-        border-radius: 99px;
-        overflow: hidden;
-        margin-bottom: 1.25rem;
-        width: 100%;
-    }
-    
-    .progress-fill {
-        height: 100%;
-        background: var(--track-fill);
-        border-radius: 99px;
-        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Alerts */
-    .alerts-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .alert-badge {
-        background: var(--alert-danger-bg);
-        color: var(--alert-danger);
-        padding: 0.35rem 0.85rem;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    /* Expandable Details Block */
-    details {
-        background: var(--details-bg);
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    summary {
-        padding: 1rem 1.25rem;
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text-secondary);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        list-style: none;
-        transition: background 0.2s ease;
-    }
-
-    summary::-webkit-details-marker {
-        display: none;
-    }
-
-    summary:hover {
-        background: var(--details-hover);
-        color: var(--text-primary);
-    }
-
-    summary::after {
-        content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        transition: transform 0.3s ease;
-    }
-
-    details[open] summary::after {
-        transform: rotate(180deg);
-    }
-
-    /* Table within details */
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-        background: var(--panel-bg);
-        border-top: 1px solid var(--border-color);
-    }
-
-    th {
-        background: var(--table-head-bg);
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        white-space: nowrap;
-    }
-
-    td {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-primary);
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
-    
-    tbody tr:hover {
-        background-color: var(--table-row-hover);
-    }
-
-    .pct-danger {
-        color: var(--alert-danger);
-        font-weight: 700;
-    }
-
-    /* Blank State */
-    .blank-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: var(--panel-bg);
-        border-radius: 20px;
-        border: 2px dashed var(--border-color);
-        box-shadow: var(--panel-shadow);
-    }
+.empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--muted); }
+.empty-state .iconify { font-size: 2.75rem; opacity: 0.4; }
+.empty-state h3 { color: var(--text); margin: 0.75rem 0 0.3rem; font-size: 1rem; }
+.hidden { display: none !important; }
 </style>
 
-<div class="page-wrapper">
+<div class="wrap">
 <div class="page-header">
-<h1>
-<span class="iconify" data-icon="mdi:chart-bar"></span>
-            Student Attendance Reports
-</h1>
+<div>
+<h1>Attendance Records</h1>
+<div class="page-header-sub">All students across every level — switch segments, search and drill in without leaving this screen.</div>
 </div>
-
-<div class="filter-card">
-<form method="get" class="filter-form">
-<div class="form-group" style="flex: 1; min-width: 200px;">
-<label class="form-label">Level</label>
-<select name="level" class="form-control form-select" onchange="this.form.submit()">
-<option value="">All Levels</option>
-                    {% for level in levels %}
-<option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
-                        Level {{ level.name }}
-</option>
-                    {% endfor %}
-</select>
-</div>
-            
-<div class="form-group" style="flex: 2; min-width: 250px;">
-<label class="form-label">Search Student</label>
-<div style="position: relative;">
-<span class="iconify" data-icon="mdi:magnify" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem;"></span>
-<input type="text" name="search" class="form-control" style="padding-left: 2.75rem;" placeholder="Search by Name or Student ID..." value="{{ search_query|default:'' }}">
-</div>
-</div>
-            
-<div class="form-group">
-<button type="submit" class="btn btn-primary">
-                    Filter Reports
-</button>
-</div>
-</form>
-</div>
-
-    {% for student in students %}
-<div class="student-card">
-<div class="card-header">
-<div class="student-info">
-<strong>{{ student.profile.user.get_full_name|default:student.profile.user.username }}</strong>
-<small>
-<span class="iconify" data-icon="mdi:id-card-outline" style="vertical-align: middle; margin-right: 0.2rem;"></span>
-                    ID: {{ student.profile.student_id_number|default:"-" }} &bull; Level {{ student.profile.level.name }}
-</small>
-</div>
-            
-<div class="card-stats">
-<span class="stat-pct">{{ student.attendance_percentage }}%</span>
-<a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="btn btn-outline btn-sm" title="Export CSV">
-CSV
+<a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-ghost">
+<span class="iconify" data-icon="mdi:download-outline"></span> Export All
 </a>
 </div>
+
+<!-- ── KPI strip (recomputed per active segment) ── -->
+<div class="kpi-strip">
+<div class="kpi"><div class="kpi-label">Students</div><div class="kpi-val" data-kpi="count">{{ summary_all.count }}</div></div>
+<div class="kpi avg"><div class="kpi-label">Avg Attendance</div><div class="kpi-val" data-kpi="avg">{{ summary_all.avg_attendance }}%</div></div>
+<div class="kpi risk"><div class="kpi-label">At Risk (&lt;75%)</div><div class="kpi-val" data-kpi="risk">{{ summary_all.at_risk }}</div></div>
+<div class="kpi good"><div class="kpi-label">Good Standing</div><div class="kpi-val" data-kpi="good">{{ summary_all.good }}</div></div>
 </div>
-        
-<div class="card-body">
-<div class="progress-track">
-<div class="progress-fill" style="width: {{ student.attendance_percentage }}%;"></div>
+
+<!-- ── Controls ── -->
+<div class="controls">
+<div class="segmented" id="segmented">
+<button class="seg-btn {% if active_level == 'all' %}active{% endif %}" data-level="all" data-export="{% url 'attendance:admin_export_all_csv' %}">
+All <span class="seg-count">{{ summary_all.count }}</span>
+</button>
+        {% for seg in level_segments %}
+<button class="seg-btn {% if active_level == seg.level.id|stringformat:'s' %}active{% endif %}" data-level="{{ seg.level.name }}" data-export="{% url 'attendance:export_level' seg.level.id %}">
+{{ seg.level.name }} <span class="seg-count">{{ seg.count }}</span>
+</button>
+        {% endfor %}
 </div>
-            
-            {% if student.alerts %}
-<div class="alerts-container">
-                {% for alert in student.alerts %}
-<span class="alert-badge">
-<span class="iconify" data-icon="mdi:alert-circle-outline"></span>
-                    Low in {{ alert.course }} ({{ alert.percentage }}%)
-</span>
-                {% endfor %}
+
+<div class="search-wrap">
+<span class="iconify" data-icon="mdi:magnify"></span>
+<input type="text" id="searchInput" class="search-input" placeholder="Search by name or student ID..." value="{{ search_query|default:'' }}" autocomplete="off">
 </div>
-            {% endif %}
-            
-<details>
-<summary>
-<span>
-<span class="iconify" data-icon="mdi:format-list-bulleted" style="vertical-align: middle; margin-right: 0.5rem;"></span>
-                        Course Breakdown
-</span>
-</summary>
-<div class="table-responsive">
-<table>
+
+<a href="{% url 'attendance:admin_export_all_csv' %}" id="segExport" class="btn btn-outline">
+<span class="iconify" data-icon="mdi:file-export-outline"></span> Export View
+</a>
+<span class="showing" id="showingCount"></span>
+</div>
+
+<!-- ── Table ── -->
+<div class="table-card">
+<div class="table-scroll">
+<table id="recordsTable">
 <thead>
 <tr>
-<th>Course</th>
-<th>Attended</th>
-<th>Total Sessions</th>
-<th>Percentage</th>
+<th class="sortable" data-sort="name" data-type="text">Student <span class="sort-ind">↕</span></th>
+<th class="sortable" data-sort="level" data-type="text">Level <span class="sort-ind">↕</span></th>
+<th class="sortable" data-sort="pct" data-type="num">Attendance <span class="sort-ind">↕</span></th>
+<th>Status</th>
+<th style="text-align:right;">Actions</th>
 </tr>
 </thead>
-<tbody>
-                            {% for code, data in student.course_attendance.items %}
-<tr>
-<td style="font-weight: 700;">{{ code }}<span style="color: var(--text-muted); font-weight: 500;">- {{ data.name }}</span></td>
-<td>{{ data.attended }}</td>
-<td>{{ data.total }}</td>
-<td class="{% if data.percentage < 75 %}pct-danger{% endif %}">
-                                    {{ data.percentage }}%
+<tbody id="recordsBody">
+                {% for s in students %}
+<tr class="srow"
+    data-level="{{ s.profile.level.name|default:'—' }}"
+    data-name="{{ s.profile.user.get_full_name|default:s.profile.user.username|lower }} {{ s.profile.student_id_number|default:''|lower }}"
+    data-sortname="{{ s.profile.user.get_full_name|default:s.profile.user.username|lower }}"
+    data-pct="{% if s.has_data %}{{ s.attendance_percentage }}{% else %}-1{% endif %}">
+<td>
+<div class="stu-name">{{ s.profile.user.get_full_name|default:s.profile.user.username }}</div>
+<div class="stu-id">ID: {{ s.profile.student_id_number|default:'—' }}</div>
+</td>
+<td><span class="lvl-chip">{{ s.profile.level.name|default:'—' }}</span></td>
+<td>
+                        {% if s.has_data %}
+<div class="att-cell">
+<div class="att-bar"><div class="att-fill {% if s.attendance_percentage < 75 %}low{% endif %}" style="width: {{ s.attendance_percentage }}%;"></div></div>
+<span class="att-pct {% if s.attendance_percentage < 75 %}low{% endif %}">{{ s.attendance_percentage }}%</span>
+</div>
+                        {% else %}
+<span class="att-na">No sessions</span>
+                        {% endif %}
+</td>
+<td>
+                        {% if not s.has_data %}
+<span class="status-badge status-none">No data</span>
+                        {% elif s.at_risk %}
+<span class="status-badge status-risk">At risk</span>
+                        {% else %}
+<span class="status-badge status-ok">On track</span>
+                        {% endif %}
+</td>
+<td>
+<div class="row-actions">
+<a href="{% url 'attendance:admin_export_student_csv' s.profile.id %}" class="icon-act" title="Export student CSV">
+<span class="iconify" data-icon="mdi:download-outline"></span>
+</a>
+<button type="button" class="icon-act expand-btn" title="Course breakdown" aria-label="Toggle breakdown">
+<span class="iconify" data-icon="mdi:chevron-down"></span>
+</button>
+</div>
 </td>
 </tr>
-                            {% endfor %}
+<tr class="drow">
+<td colspan="5">
+                        {% if s.course_attendance %}
+<table class="brk-table">
+<thead>
+<tr><th>Course</th><th>Attended</th><th>Sessions</th><th>Percentage</th></tr>
+</thead>
+<tbody>
+                                {% for code, data in s.course_attendance.items %}
+<tr>
+<td class="brk-course">{{ code }} <span>· {{ data.name }}</span></td>
+<td>{{ data.attended }}</td>
+<td>{{ data.total }}</td>
+<td class="att-pct {% if data.percentage < 75 and data.total > 0 %}low{% endif %}">{{ data.percentage }}%</td>
+</tr>
+                                {% endfor %}
+</tbody>
+</table>
+                        {% else %}
+<div class="brk-empty">No registered courses for this student's level yet.</div>
+                        {% endif %}
+</td>
+</tr>
+                {% endfor %}
 </tbody>
 </table>
 </div>
-</details>
+<div class="empty-state hidden" id="emptyState">
+<span class="iconify" data-icon="mdi:file-search-outline"></span>
+<h3>No students match</h3>
+<p style="margin:0;font-size:13px;">Try a different segment or clear your search.</p>
 </div>
 </div>
-    {% empty %}
-<div class="blank-state">
-<span class="iconify" data-icon="mdi:file-document-remove-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
-<h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
-<p style="color: var(--text-muted); font-weight: 500; margin: 0;">Adjust your search query or level filter to see reports.</p>
 </div>
-    {% endfor %}
-</div>
+
+<script>
+(function () {
+    var table   = document.getElementById('recordsTable');
+    var body    = document.getElementById('recordsBody');
+    var segbar  = document.getElementById('segmented');
+    var search  = document.getElementById('searchInput');
+    var showing = document.getElementById('showingCount');
+    var empty   = document.getElementById('emptyState');
+    var segExport = document.getElementById('segExport');
+    var srows   = Array.prototype.slice.call(body.querySelectorAll('.srow'));
+
+    var activeLevel = (function () {
+        var a = segbar.querySelector('.seg-btn.active');
+        return a ? a.getAttribute('data-level') : 'all';
+    })();
+
+    function drowFor(srow) { return srow.nextElementSibling; }
+
+    function matchesFilters(srow) {
+        var lvl = srow.getAttribute('data-level');
+        if (activeLevel !== 'all' && lvl !== activeLevel) return false;
+        var q = search.value.trim().toLowerCase();
+        if (q && srow.getAttribute('data-name').indexOf(q) === -1) return false;
+        return true;
+    }
+
+    function segmentRows() {
+        // Rows in the active segment, ignoring the text search (KPIs read the segment).
+        return srows.filter(function (r) {
+            return activeLevel === 'all' || r.getAttribute('data-level') === activeLevel;
+        });
+    }
+
+    function recomputeKPIs() {
+        var seg = segmentRows();
+        var tracked = seg.filter(function (r) { return parseFloat(r.getAttribute('data-pct')) >= 0; });
+        var count = seg.length;
+        var avg = tracked.length
+            ? Math.round((tracked.reduce(function (a, r) { return a + parseFloat(r.getAttribute('data-pct')); }, 0) / tracked.length) * 10) / 10
+            : 0;
+        var risk = tracked.filter(function (r) { return parseFloat(r.getAttribute('data-pct')) < 75; }).length;
+        var good = tracked.filter(function (r) { return parseFloat(r.getAttribute('data-pct')) >= 75; }).length;
+        set('count', count); set('avg', avg + '%'); set('risk', risk); set('good', good);
+    }
+    function set(key, val) {
+        var el = document.querySelector('[data-kpi="' + key + '"]');
+        if (el) el.textContent = val;
+    }
+
+    function applyFilters() {
+        var visible = 0;
+        srows.forEach(function (r) {
+            var show = matchesFilters(r);
+            r.classList.toggle('hidden', !show);
+            if (!show) {
+                r.classList.remove('open');
+                var d = drowFor(r);
+                if (d) { d.classList.remove('show'); d.classList.add('hidden'); }
+            } else {
+                var d = drowFor(r);
+                if (d) d.classList.remove('hidden');
+            }
+            if (show) visible++;
+        });
+        empty.classList.toggle('hidden', visible !== 0);
+        showing.textContent = visible + (visible === 1 ? ' record' : ' records');
+        recomputeKPIs();
+    }
+
+    // ── Segment switch ──
+    segbar.addEventListener('click', function (e) {
+        var btn = e.target.closest('.seg-btn');
+        if (!btn) return;
+        segbar.querySelectorAll('.seg-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeLevel = btn.getAttribute('data-level');
+        segExport.setAttribute('href', btn.getAttribute('data-export'));
+        applyFilters();
+    });
+
+    // ── Search ──
+    search.addEventListener('input', applyFilters);
+    search.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
+
+    // ── Expand / collapse breakdown ──
+    body.addEventListener('click', function (e) {
+        var btn = e.target.closest('.expand-btn');
+        if (!btn) return;
+        var srow = btn.closest('.srow');
+        var d = drowFor(srow);
+        var open = srow.classList.toggle('open');
+        if (d) d.classList.toggle('show', open);
+    });
+
+    // ── Column sorting (keeps each detail row paired to its student) ──
+    var sortState = { key: null, dir: 1 };
+    table.querySelectorAll('th.sortable').forEach(function (th) {
+        th.addEventListener('click', function () {
+            var key = th.getAttribute('data-sort');
+            var type = th.getAttribute('data-type');
+            sortState.dir = (sortState.key === key) ? -sortState.dir : 1;
+            sortState.key = key;
+
+            table.querySelectorAll('th.sortable').forEach(function (h) { h.classList.remove('sort-asc', 'sort-desc'); });
+            th.classList.add(sortState.dir === 1 ? 'sort-asc' : 'sort-desc');
+
+            var pairs = srows.map(function (r) { return { s: r, d: drowFor(r) }; });
+            pairs.sort(function (a, b) {
+                var av, bv;
+                if (type === 'num') {
+                    av = parseFloat(a.s.getAttribute('data-pct'));
+                    bv = parseFloat(b.s.getAttribute('data-pct'));
+                } else if (key === 'level') {
+                    av = a.s.getAttribute('data-level'); bv = b.s.getAttribute('data-level');
+                } else {
+                    av = a.s.getAttribute('data-sortname'); bv = b.s.getAttribute('data-sortname');
+                }
+                if (av < bv) return -1 * sortState.dir;
+                if (av > bv) return 1 * sortState.dir;
+                return 0;
+            });
+            pairs.forEach(function (p) { body.appendChild(p.s); if (p.d) body.appendChild(p.d); });
+            srows = pairs.map(function (p) { return p.s; });
+        });
+    });
+
+    applyFilters();
+})();
+</script>
 {% endblock %}

@@ -3,8 +3,15 @@ from .models import (
     Level, Semester, Course, ClassSession, UserProfile,
     TAProfile, TACode, AttendanceCode, AttendanceRecord,
     SupportTicket, CodeMisuseAlert, CulturalDate, SystemNotification,
-    SWASAEvent, CourseRegistration,
+    SWASAEvent, CourseRegistration, Avatar,
 )
+
+
+@admin.register(Avatar)
+class AvatarAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone_number', 'image', 'updated_at')
+    search_fields = ('user__username', 'user__email', 'phone_number')
+    raw_id_fields = ('user',)
 
 
 class CourseRegistrationInline(admin.TabularInline):

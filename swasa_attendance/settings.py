@@ -128,6 +128,7 @@ _TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
     'attendance.context_processors.notifications',
+    'attendance.context_processors.alumni_invite',
 ]
 
 _BASE_LOADERS = [
@@ -321,6 +322,32 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
 
 # Email timeout (seconds)
 EMAIL_TIMEOUT = 30
+
+# ── Student registration: allowed email domains ───────────────────────────────
+# Verification/OTP codes are sent FROM Gmail, and only Gmail reliably delivers
+# them (institutional servers like @st.ug.edu.gh, and sometimes other providers,
+# filter or drop the mail). So new student registration is restricted to the
+# domains below. Broaden this list ONLY after confirming a real OTP arrives at
+# that provider — override without a code change by setting a comma-separated
+# ALLOWED_STUDENT_EMAIL_DOMAINS in .env (e.g. "gmail.com,yahoo.com").
+# Existing accounts are never affected; this is enforced only at registration.
+ALLOWED_STUDENT_EMAIL_DOMAINS = [
+    d.strip().lower()
+    for d in config('ALLOWED_STUDENT_EMAIL_DOMAINS', default='gmail.com,googlemail.com').split(',')
+    if d.strip()
+]
+
+# ── SWASA alumni invite pop-up ────────────────────────────────────────────────
+# A pop-up invites Level 400 students and TAs to the alumni WhatsApp group during
+# the final days of the active SECOND semester. It appears once per app session
+# for anyone in the audience while the window is open. Both values are
+# overridable via .env without a code change.
+ALUMNI_WHATSAPP_URL = config(
+    'ALUMNI_WHATSAPP_URL',
+    default='https://chat.whatsapp.com/DhRMUT39Jlg56QGxhNklgl?s=cl&p=a&ilr=1',
+)
+# How many days before the second semester's end_date the pop-up starts showing.
+ALUMNI_INVITE_WINDOW_DAYS = config('ALUMNI_INVITE_WINDOW_DAYS', default=7, cast=int)
 
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'

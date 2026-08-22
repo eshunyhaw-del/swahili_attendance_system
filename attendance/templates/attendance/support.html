@@ -1,202 +1,90 @@
-﻿{% extends "attendance/base.html" %}
-{% block title %}Support{% endblock %}
+{% extends "attendance/base.html" %}
+{% block title %}Contact Support{% endblock %}
 
 {% block content %}
 <style>
-:root {
-    --primary: #0D2472;
-    --primary-lt: rgba(13,36,114,0.07);
-    --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
-    --green: #1A9E60;
-    --green-lt: rgba(26,158,96,0.10);
-    --amber: #B8920C;
-    --amber-lt: rgba(184,146,12,0.10);
-    --red: #C0392B;
-    --red-lt: rgba(192,57,43,0.09);
-    --blue: #2563EB;
-    --blue-lt: rgba(37,99,235,0.09);
-    --r-sm: 8px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 4px 0 40px; }
+    .page-head { margin-bottom: 20px; }
+    .page-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .page-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
+    .sec-title { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+    .card-mb { margin-bottom: 18px; }
 
-.wrap { max-width: 600px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-
-/* ─── Page header ─── */
-.page-header {
-    background: linear-gradient(135deg, #0D2472 0%, #1E3A5F 100%);
-    color: #fff; border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; }
-.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; position: relative; }
-
-/* ─── Cards ─── */
-.card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sh-sm);
-    margin-bottom: 1.125rem;
-    overflow: hidden;
-}
-.card-head {
-    padding: 1rem 1.25rem;
-    background: #F8F9FD;
-    border-bottom: 1px solid var(--border);
-    font-size: 13.5px; font-weight: 800; color: var(--text);
-    display: flex; align-items: center; gap: 0.5rem;
-}
-.card-head .iconify { font-size: 16px; color: var(--primary); }
-.card-body { padding: 1.25rem; }
-
-/* ─── Form ─── */
-.form-group { margin-bottom: 1rem; }
-.form-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
-.form-input, .form-textarea {
-    width: 100%;
-    padding: 0.65rem 0.875rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-sm);
-    font-family: inherit; font-size: 14px; color: var(--text);
-    background: #FAFBFD; outline: none; transition: border-color 0.13s;
-    box-sizing: border-box;
-}
-.form-input:focus, .form-textarea:focus { border-color: var(--primary); background: #fff; }
-.form-textarea { min-height: 110px; resize: vertical; }
-
-.btn-submit {
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--primary); color: #fff;
-    border: none; border-radius: var(--r-sm);
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.45rem;
-    transition: all 0.13s; box-shadow: 0 2px 6px rgba(13,36,114,0.22);
-    margin-top: 0.25rem;
-}
-.btn-submit:hover { background: #0a1b5c; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.28); }
-.btn-submit:active { transform: scale(0.97); }
-
-/* ─── Ticket list ─── */
-.ticket-list { display: flex; flex-direction: column; }
-.ticket-item {
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-}
-.ticket-item:last-child { border-bottom: none; }
-
-.ticket-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
-.ticket-subject { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
-.ticket-date { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
-
-.status-badge {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    font-size: 11px; font-weight: 700;
-    padding: 3px 9px; border-radius: 99px;
-    white-space: nowrap; margin-bottom: 0.5rem;
-}
-.status-open { background: var(--amber-lt); color: var(--amber); }
-.status-resolved { background: var(--green-lt); color: var(--green); }
-.status-replied { background: var(--blue-lt); color: var(--blue); }
-
-.ticket-msg { font-size: 13px; color: #4A5568; line-height: 1.6; }
-
-.admin-reply {
-    margin-top: 0.75rem;
-    padding: 0.75rem 1rem;
-    background: var(--primary-lt);
-    border-left: 3px solid var(--primary);
-    border-radius: 0 var(--r-sm) var(--r-sm) 0;
-    font-size: 13px; color: var(--text); line-height: 1.6;
-}
-.admin-reply strong { font-size: 11px; font-weight: 800; color: var(--primary); display: block; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
-
-.empty-tickets {
-    text-align: center; padding: 2rem;
-}
-.empty-tickets .iconify { font-size: 2rem; color: var(--muted); display: block; margin-bottom: 0.5rem; }
-.empty-tickets p { color: var(--muted); font-size: 13px; font-weight: 500; }
+    .ticket { padding: 16px 18px; border-bottom: 1px solid var(--ds-border); }
+    .ticket:last-child { border-bottom: none; }
+    .ticket-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .ticket-subject { font-size: 14px; font-weight: 600; }
+    .ticket-date { font-size: 11.5px; color: var(--ds-text-muted); white-space: nowrap; }
+    .ticket-msg { font-size: 13px; color: var(--ds-text-secondary); line-height: 1.6; }
+    .ticket-reply { margin-top: 12px; padding: 12px 14px; background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); font-size: 13px; line-height: 1.6; }
+    .ticket-reply .who { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ds-text-muted); display: block; margin-bottom: 3px; }
 </style>
 
 <div class="wrap">
+<header class="page-head">
+<p class="ds-eyebrow">Help &amp; Support</p>
+<h1>Contact Support</h1>
+<p class="sub">Raise an issue with attendance, your account, or the portal. Your teaching assistant or the support team will respond within 24–48 hours.</p>
+</header>
 
-<div class="page-header">
-<h1>Support Center</h1>
-<div class="page-header-sub">Need help? Submit a ticket and we'll get back to you within 24–48 hours</div>
-</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="ds-alert ds-alert-success card-mb"><span class="iconify" data-icon="mdi:check-circle"></span><div><p class="ds-alert-body" style="color:var(--ds-text)">{{ message }}</p></div></div>
+    {% endfor %}
+{% endif %}
 
-<!-- New ticket form -->
-<div class="card">
-<div class="card-head">
-<span class="iconify" data-icon="mdi:ticket-outline"></span>
-            New Ticket
-</div>
-<div class="card-body">
+<!-- New request -->
+<div class="ds-card card-mb">
+<div class="ds-card-header"><h2 class="ds-card-title">Submit a request</h2></div>
+<div class="ds-card-body">
 <form method="post">
-                {% csrf_token %}
-<div class="form-group">
-<label class="form-label">Subject</label>
-<input type="text" name="subject" class="form-input"
-                           placeholder="Brief description of your issue"
-                           value="{{ form.subject.value|default:'' }}" required>
+        {% csrf_token %}
+<div class="ds-field">
+<label class="ds-label" for="id_subject">Subject <span class="ds-req">*</span></label>
+<input type="text" id="id_subject" name="subject" class="ds-input" placeholder="Briefly summarise your issue" value="{{ form.subject.value|default:'' }}" required>
 </div>
-<div class="form-group">
-<label class="form-label">Message</label>
-<textarea name="message" class="form-textarea"
-                              placeholder="Describe your issue in detail…" required>{{ form.message.value|default:'' }}</textarea>
+<div class="ds-field">
+<label class="ds-label" for="id_message">Message <span class="ds-req">*</span></label>
+<textarea id="id_message" name="message" class="ds-textarea" placeholder="Describe what happened, including the course and date if it relates to attendance." required>{{ form.message.value|default:'' }}</textarea>
+<div class="ds-hint">The more detail you give, the faster we can help.</div>
 </div>
-<button type="submit" class="btn-submit">
-Submit Ticket
-</button>
+<button type="submit" class="ds-btn ds-btn-primary"><span class="iconify" data-icon="mdi:send"></span> Submit request</button>
 </form>
 </div>
 </div>
 
-<!-- Ticket history -->
-<div class="card">
-<div class="card-head">
-<span class="iconify" data-icon="mdi:history"></span>
-            My Tickets
-</div>
-<div class="ticket-list">
-            {% for ticket in tickets %}
-<div class="ticket-item">
+<!-- Previous requests -->
+<h2 class="sec-title">Your requests</h2>
+<div class="ds-card">
+{% for ticket in tickets %}
+<div class="ticket">
 <div class="ticket-top">
 <div class="ticket-subject">{{ ticket.subject }}</div>
 <div class="ticket-date">{{ ticket.created_at|date:"d M Y" }}</div>
 </div>
-<span class="status-badge
-                    {% if ticket.status == 'open' %}status-open
-                    {% elif ticket.status == 'resolved' %}status-resolved
-                    {% else %}status-replied{% endif %}">
-<span class="iconify"
-                        data-icon="{% if ticket.status == 'open' %}mdi:clock-outline{% elif ticket.status == 'resolved' %}mdi:check-circle{% else %}mdi:reply{% endif %}"
-                        style="font-size:12px;"></span>
-                    {{ ticket.get_status_display }}
-</span>
+<div style="margin-bottom:8px">
+        {% if ticket.status == 'resolved' %}
+<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check"></span> Resolved</span>
+        {% elif ticket.status == 'in_progress' %}
+<span class="ds-badge ds-badge-info"><span class="iconify" data-icon="mdi:progress-clock"></span> In progress</span>
+        {% elif ticket.status == 'closed' %}
+<span class="ds-badge ds-badge-neutral"><span class="iconify" data-icon="mdi:archive-outline"></span> Closed</span>
+        {% else %}
+<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:clock-outline"></span> Open</span>
+        {% endif %}
+</div>
 <div class="ticket-msg">{{ ticket.message }}</div>
-                {% if ticket.admin_response %}
-<div class="admin-reply">
-<strong>Response</strong>
-                    {{ ticket.admin_response }}
+        {% if ticket.admin_response %}
+<div class="ticket-reply"><span class="who">Response from support</span>{{ ticket.admin_response }}</div>
+        {% endif %}
 </div>
-                {% endif %}
+{% empty %}
+<div class="ds-empty" style="padding:36px 24px">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:ticket-outline"></span></div>
+<p class="ds-empty-title">No requests yet</p>
+<p class="ds-empty-text">When you submit a support request, it will appear here with its status and any response.</p>
 </div>
-            {% empty %}
-<div class="empty-tickets">
-<span class="iconify" data-icon="mdi:ticket-outline"></span>
-<p>No tickets submitted yet.</p>
+{% endfor %}
 </div>
-            {% endfor %}
-</div>
-</div>
-
 </div>
 {% endblock %}

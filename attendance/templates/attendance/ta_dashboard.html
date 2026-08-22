@@ -9,23 +9,39 @@
     --primary: #0D2472;
     --primary-dk: #091A55;
     --primary-lt: rgba(13,36,114,0.07);
-    --gold: #F2C31A;
+    --gold: #E6B325;
     --surface: #FFFFFF;
-    --bg: #EEF1F8;
-    --text: #1A1A2E;
-    --muted: #6B7280;
-    --border: #E5E8F0;
-    --green: #1A9E60;
-    --green-lt: rgba(26,158,96,0.1);
-    --amber: #B8920C;
-    --amber-lt: rgba(242,195,26,0.13);
-    --blue: #2563EB;
-    --blue-lt: rgba(37,99,235,0.09);
-    --red: #DC2626;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
-    --sh-sm: 0 1px 3px rgba(13,36,114,0.07);
-    --sh-md: 0 4px 14px rgba(13,36,114,0.10);
-    --sh-lg: 0 8px 28px rgba(13,36,114,0.14);
+    --bg: #F4F6F9;
+    --text: #1F2937;
+    --muted: #6B7484;
+    --border: #E1E5EC;
+    --green: #167A4B;
+    --green-lt: #E7F4EC;
+    --amber: #B45309;
+    --amber-lt: #FBF1E3;
+    --blue: #175CD3;
+    --blue-lt: #E8F0FC;
+    --red: #B42318;
+    --r-sm: 8px; --r-md: 10px; --r-lg: 12px; --r-xl: 14px;
+    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
+    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
+    --sh-lg: 0 4px 6px -2px rgba(16,24,40,0.05), 0 12px 20px -4px rgba(16,24,40,0.10);
+}
+html[data-theme="dark"] {
+    --primary: #1B3A9C;
+    --primary-lt: rgba(242,195,26,0.10);
+    --surface: #171F2A;
+    --bg: #0E141C;
+    --text: #E7ECF2;
+    --muted: #8B95A5;
+    --border: #29323F;
+    --green: #4ED08A; --green-lt: rgba(22,122,75,0.20);
+    --amber: #E6A23C; --amber-lt: rgba(180,83,9,0.20);
+    --blue: #6AA0F0;  --blue-lt: rgba(23,92,211,0.20);
+    --red: #F0776B;
+    --sh-sm: 0 1px 3px rgba(0,0,0,0.45);
+    --sh-md: 0 4px 10px -2px rgba(0,0,0,0.5);
+    --sh-lg: 0 12px 20px -4px rgba(0,0,0,0.55);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +51,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 
 /* ─── Header ─── */
 .ta-header {
-    background: linear-gradient(135deg, #091A55 0%, #0D2472 60%, #1B3A9C 100%);
+    background: var(--primary);
     color: #fff;
     border-radius: var(--r-xl);
     padding: 1.5rem 1.75rem;
@@ -55,6 +71,11 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 .ta-greeting-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 0.2rem; }
 .ta-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
 .ta-proverb { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 0.35rem; line-height: 1.5; }
+/* Phrase-of-the-hour widget sits on the navy header — force white/gold variants */
+.ta-header .phrase-category { color: var(--gold); opacity: 0.85; }
+.ta-header .phrase-swahili { color: #fff; }
+.ta-header .phrase-english { color: rgba(255,255,255,0.75); }
+.ta-header .phrase-response { color: var(--gold); opacity: 0.9; }
 
 .level-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.875rem; }
 .level-pill {
@@ -109,7 +130,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 
 .course-header {
     padding: 1rem 1.25rem;
-    background: linear-gradient(90deg, #0D2472 0%, #1B3A9C 100%);
+    background: var(--primary);
     display: flex;
     align-items: center;
     gap: 0.875rem;
@@ -212,7 +233,7 @@ html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,17
     font-weight: 600;
     color: var(--muted);
     padding: 4px 10px;
-    background: #F0F3FA;
+    background: var(--bg);
     border-radius: 9999px;
     border: 1px solid var(--border);
     white-space: nowrap;
@@ -282,7 +303,7 @@ html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,17
     align-items: center;
     gap: 0.625rem;
     padding: 0.7rem 1.25rem;
-    background: #F8F9FD;
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
 }
@@ -388,7 +409,7 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 .badge-used { background: var(--green-lt); color: var(--green); }
 .badge-given { background: var(--blue-lt); color: var(--blue); }
 .badge-pending { background: var(--amber-lt); color: var(--amber); }
-.badge-none { background: #EEF1F8; color: var(--muted); border: 1px solid var(--border); }
+.badge-none { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
 
 /* ─── Action buttons ─── */
 .btn-generate {
@@ -481,7 +502,7 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
     align-items: center;
     padding: 0.7rem 1.25rem;
     border-top: 1px solid var(--border);
-    background: #F8F9FD;
+    background: var(--bg);
     font-size: 12px;
 }
 
@@ -568,7 +589,7 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 
 .modal-btn-primary { background: var(--primary); color: #fff; }
 .modal-btn-primary:hover { background: var(--primary-dk); }
-.modal-btn-secondary { background: #F0F3FA; color: var(--text); border: 1px solid var(--border); }
+.modal-btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
 .modal-btn-secondary:hover { background: var(--border); }
 
 /* ─── Toast ─── */
