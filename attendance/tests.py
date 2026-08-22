@@ -457,8 +457,9 @@ class SupportRoutingTests(TestCase):
 
 
 class StudentEmailDomainTests(TestCase):
-    """New students may not register with a @st.ug.edu.gh student email
-    (verification codes are sent via Gmail and don't reach that domain)."""
+    """New students may register only with an allowed email domain
+    (settings.ALLOWED_STUDENT_EMAIL_DOMAINS — Gmail by default), because
+    verification codes are Gmail-sent and reliably reach only those inboxes."""
 
     def _data(self, email):
         return {
@@ -467,19 +468,26 @@ class StudentEmailDomainTests(TestCase):
             'password': 'Str0ngPass!', 'password2': 'Str0ngPass!',
         }
 
-    def test_student_email_is_blocked(self):
+    def _valid(self, email):
         from .forms import StudentRegistrationForm
-        form = StudentRegistrationForm(data=self._data('kwame@st.ug.edu.gh'))
-        self.assertFalse(form.is_valid())
-        self.assertIn('email', form.errors)
+        return StudentRegistrationForm(data=self._data(email)).is_valid()
 
-    def test_student_email_is_blocked_case_insensitive(self):
-        from .forms import StudentRegistrationForm
-        form = StudentRegistrationForm(data=self._data('Kwame@ST.UG.EDU.GH'))
-        self.assertFalse(form.is_valid())
-        self.assertIn('email', form.errors)
+    def test_student_email_is_blocked(self):
+        self.assertFalse(self._valid('kwame@st.ug.edu.gh'))
+
+    def test_other_providers_are_blocked(self):
+        # Gmail-only default: institutional + other consumer providers blocked.
+        for addr in ('kwame@yahoo.com', 'kwame@outlook.com', 'kwame@icloud.com', 'k@ug.edu.gh'):
+            self.assertFalse(self._valid(addr), f"{addr} should be blocked")
 
     def test_gmail_is_allowed(self):
-        from .forms import StudentRegistrationForm
-        form = StudentRegistrationForm(data=self._data('kwame@gmail.com'))
-        self.assertTrue(form.is_valid(), form.errors)
+        self.assertTrue(self._valid('kwame@gmail.com'))
+
+    def test_gmail_is_allowed_case_insensitive(self):
+        self.assertTrue(self._valid('Kwame@GMAIL.com'))
+
+    @override_settings(ALLOWED_STUDENT_EMAIL_DOMAINS=['gmail.com', 'yahoo.com'])
+    def test_allowlist_is_configurable(self):
+        # Broadening the setting lets another provider through without code change.
+        self.assertTrue(self._valid('kwame@yahoo.com'))
+        self.assertFalse(self._valid('kwame@outlook.com'))

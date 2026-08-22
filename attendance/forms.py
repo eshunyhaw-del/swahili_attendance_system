@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserProfile, SupportTicket, Course, TAProfile, Level, Avatar
@@ -32,15 +33,24 @@ class StudentRegistrationForm(forms.ModelForm):
         if not re.match(email_regex, email):
             raise forms.ValidationError("Please enter a valid email address (e.g., name@example.com).")
 
-        # New students may not register with the university student email
-        # (@st.ug.edu.gh): our verification codes are sent via Gmail and do not
-        # reach that domain reliably. Existing accounts are unaffected — this
-        # only runs on new registrations.
+        # New students may register only with an approved email domain. Our
+        # verification codes are sent via Gmail and reliably reach only those
+        # domains (see settings.ALLOWED_STUDENT_EMAIL_DOMAINS). This runs only on
+        # new registrations, so existing accounts are unaffected.
+        allowed = [d.lower() for d in getattr(
+            settings, 'ALLOWED_STUDENT_EMAIL_DOMAINS', ['gmail.com', 'googlemail.com']
+        )]
         domain = email.rsplit('@', 1)[-1].lower()
-        if domain == 'st.ug.edu.gh' or domain.endswith('.st.ug.edu.gh'):
+        if allowed and domain not in allowed:
+            if allowed == ['gmail.com'] or set(allowed) <= {'gmail.com', 'googlemail.com'}:
+                raise forms.ValidationError(
+                    "Please register with a Gmail address (@gmail.com). Verification "
+                    "codes are sent from Gmail and reliably reach only Gmail inboxes."
+                )
+            pretty = ' or '.join('@' + d for d in allowed)
             raise forms.ValidationError(
-                "Please register with a personal email such as Gmail. University "
-                "student emails (@st.ug.edu.gh) can't receive our verification codes."
+                f"Please register with a supported email address ({pretty}). "
+                "Verification codes may not reach other providers."
             )
 
         existing = User.objects.filter(email__iexact=email).first()

@@ -322,6 +322,20 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
 # Email timeout (seconds)
 EMAIL_TIMEOUT = 30
 
+# ── Student registration: allowed email domains ───────────────────────────────
+# Verification/OTP codes are sent FROM Gmail, and only Gmail reliably delivers
+# them (institutional servers like @st.ug.edu.gh, and sometimes other providers,
+# filter or drop the mail). So new student registration is restricted to the
+# domains below. Broaden this list ONLY after confirming a real OTP arrives at
+# that provider — override without a code change by setting a comma-separated
+# ALLOWED_STUDENT_EMAIL_DOMAINS in .env (e.g. "gmail.com,yahoo.com").
+# Existing accounts are never affected; this is enforced only at registration.
+ALLOWED_STUDENT_EMAIL_DOMAINS = [
+    d.strip().lower()
+    for d in config('ALLOWED_STUDENT_EMAIL_DOMAINS', default='gmail.com,googlemail.com').split(',')
+    if d.strip()
+]
+
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
 
