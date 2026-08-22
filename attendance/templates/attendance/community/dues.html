@@ -1,98 +1,41 @@
 {% extends "attendance/base.html" %}
-{% block title %}Pay Your Dues — SWASA{% endblock %}
+{% block title %}Pay Your Dues{% endblock %}
 
 {% block content %}
 <style>
-
-.cs-wrap { max-width: 640px; margin: 0 auto; padding: 0 0 4rem; }
-
-.cs-card {
-    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
-    border-radius: 24px;
-    padding: 3rem 2rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(13,36,114,0.35);
-    margin-bottom: 1.25rem;
-}
-
-.cs-heading { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; line-height: 1.2; position: relative; z-index: 1; }
-.cs-sub { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 1.25rem; line-height: 1.55; position: relative; z-index: 1; }
-
-.cs-notify {
-    background: rgba(242,195,26,0.12);
-    border: 1px solid rgba(242,195,26,0.25);
-    border-radius: 10px; padding: 0.75rem 1rem;
-    font-size: 13px; color: rgba(255,255,255,0.75);
-    margin-bottom: 1.75rem; position: relative; z-index: 1;
-    display: flex; align-items: center; gap: 0.5rem; text-align: left;
-}
-
-.cs-back {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 10px; padding: 0.6rem 1.25rem;
-    color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: all 0.15s;
-    position: relative; z-index: 1;
-}
-.cs-back:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.4); }
-
-/* Benefits + payment info cards */
-.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 540px) { .info-row { grid-template-columns: 1fr; } }
-
-.info-section {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xs);
-    padding: 1.25rem;
-}
-.info-section-title {
-    font-size: 12px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.07em; color: var(--text-muted);
-    margin-bottom: 0.875rem;
-}
-.info-item {
-    display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.45rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px; color: var(--text-secondary); font-weight: 500;
-}
-.info-item:last-child { border-bottom: none; }
-.info-item-icon { font-size: 16px; flex-shrink: 0; }
+    .comm { max-width: 680px; margin: 0 auto; padding: 4px 0 40px; }
+    .comm-head { margin-bottom: 16px; }
+    .comm-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .comm-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
+    .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+    @media (max-width: 540px) { .info-row { grid-template-columns: 1fr; } }
+    .info-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ds-text-muted); margin-bottom: 12px; }
+    .info-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--ds-border); font-size: 13px; color: var(--ds-text-secondary); }
+    .info-item:last-child { border-bottom: none; }
+    .info-item .iconify { color: var(--ds-text-muted); flex-shrink: 0; }
 </style>
+<div class="comm">
+<header class="comm-head">
+<p class="ds-eyebrow">Community</p>
+<h1>Pay Your SWASA Dues</h1>
+<p class="sub">Membership dues support SWASA events, resources and the alumni network.</p>
+</header>
 
-<div class="cs-wrap">
-<div class="cs-card">
-<h1 class="cs-heading">Pay Your SWASA Dues</h1>
-<p class="cs-sub">Secure online payments — coming soon!</p>
-
-<div class="cs-notify">
-<span class="iconify" data-icon="mdi:bell-outline" data-width="15" style="color:var(--gold);flex-shrink:0;"></span>
-            We'll notify you when payments go live.
-</div>
-
-<a href="{% url 'attendance:dashboard' %}" class="cs-back">
-<span class="iconify" data-icon="mdi:arrow-left" data-width="15"></span>
-            Back to Dashboard
-</a>
-</div>
+<div class="ds-alert ds-alert-info" style="margin-bottom:18px"><span class="iconify" data-icon="mdi:information"></span><div><p class="ds-alert-title">Online payments coming soon</p><p class="ds-alert-body">We'll notify you here and by announcement once online payment goes live.</p></div></div>
 
 <div class="info-row">
-<div class="info-section">
-<div class="info-section-title">What Dues Cover</div>
-<div class="info-item"><span class="info-item-icon"></span> SWASA membership benefits</div>
-<div class="info-item"><span class="info-item-icon"></span> Access to exclusive events</div>
-<div class="info-item"><span class="info-item-icon"></span> Alumni network access</div>
-<div class="info-item"><span class="info-item-icon"></span> Certificate of membership</div>
+<div class="ds-card ds-card-body">
+<div class="info-title">What your dues cover</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:check-circle-outline"></span> SWASA membership benefits</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:check-circle-outline"></span> Access to member events</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:check-circle-outline"></span> Alumni network access</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:check-circle-outline"></span> Certificate of membership</div>
 </div>
-<div class="info-section">
-<div class="info-section-title">Payment Methods Coming</div>
-<div class="info-item"><span class="info-item-icon"></span> MTN Mobile Money</div>
-<div class="info-item"><span class="info-item-icon"></span> Vodafone Cash</div>
-<div class="info-item"><span class="info-item-icon"></span> Bank Transfer</div>
+<div class="ds-card ds-card-body">
+<div class="info-title">Payment methods planned</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:cellphone"></span> MTN Mobile Money</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:cellphone"></span> Telecel Cash</div>
+<div class="info-item"><span class="iconify" data-icon="mdi:bank-outline"></span> Bank transfer</div>
 </div>
 </div>
 </div>

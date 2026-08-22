@@ -1,94 +1,49 @@
 {% extends "attendance/base.html" %}
-{% block title %}SWASA Clubs — SWASA{% endblock %}
+{% block title %}SWASA Clubs{% endblock %}
 
 {% block content %}
 <style>
-
-.cs-wrap { max-width: 680px; margin: 0 auto; padding: 0 0 4rem; }
-
-.cs-card {
-    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
-    border-radius: 24px;
-    padding: 3rem 2rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(13,36,114,0.35);
-    margin-bottom: 1.25rem;
-}
-
-.cs-heading { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; line-height: 1.2; position: relative; z-index: 1; }
-.cs-sub { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 2rem; line-height: 1.55; position: relative; z-index: 1; }
-
-.cs-back {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 10px; padding: 0.6rem 1.25rem;
-    color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: all 0.15s;
-    position: relative; z-index: 1;
-}
-.cs-back:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.4); }
-
-/* Club cards */
-.club-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-.club-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xs);
-    padding: 1.25rem;
-    text-align: center;
-    transition: box-shadow 0.2s, transform 0.2s;
-}
-.club-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-
-.club-icon { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
-.club-cs-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
-    background: rgba(242,195,26,0.15); color: #8A6A00;
-    margin-bottom: 0.6rem;
-}
-html[data-theme="dark"] .club-cs-badge { color: var(--gold); }
-
-.club-card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1.35; }
-.club-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .comm { max-width: 720px; margin: 0 auto; padding: 4px 0 40px; }
+    .comm-head { margin-bottom: 16px; }
+    .comm-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .comm-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
+    .sec-title { font-size: 15px; font-weight: 700; margin: 22px 0 12px; }
+    .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+    .club-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); padding: 18px; }
+    .club-icon { width: 38px; height: 38px; border-radius: var(--ds-radius-sm); background: var(--ds-primary-soft); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+    :root[data-theme="dark"] .club-icon { color: var(--ds-text); }
+    .club-icon .iconify { font-size: 20px; }
+    .club-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .club-desc { font-size: 12.5px; color: var(--ds-text-muted); line-height: 1.5; margin-bottom: 10px; }
 </style>
+<div class="comm">
+<header class="comm-head">
+<p class="ds-eyebrow">Community</p>
+<h1>SWASA Clubs &amp; Interest Groups</h1>
+<p class="sub">Join a club and connect with students who share your interests.</p>
+</header>
 
-<div class="cs-wrap">
-<div class="cs-card">
-<h1 class="cs-heading">SWASA Clubs &amp; Interest Groups</h1>
-<p class="cs-sub">Join a club, find your community — coming soon!</p>
+<div class="ds-alert ds-alert-info" style="margin-bottom:4px"><span class="iconify" data-icon="mdi:information"></span><div><p class="ds-alert-body" style="color:var(--ds-text)">Club registration opens later this semester. Explore the groups below in the meantime.</p></div></div>
 
-<a href="{% url 'attendance:dashboard' %}" class="cs-back">
-<span class="iconify" data-icon="mdi:arrow-left" data-width="15"></span>
-            Back to Dashboard
-</a>
-</div>
-
+<h2 class="sec-title">Planned clubs</h2>
 <div class="club-grid">
 <div class="club-card">
-<span class="club-icon"></span>
-<div class="club-cs-badge">Coming Soon</div>
-<div class="club-card-title">Kiswahili Literature Club</div>
-<div class="club-card-desc">Explore Kiswahili poetry, prose, and storytelling traditions.</div>
+<div class="club-icon"><span class="iconify" data-icon="mdi:book-open-page-variant-outline"></span></div>
+<div class="club-title">Kiswahili Literature Club</div>
+<div class="club-desc">Explore Kiswahili poetry, prose and storytelling traditions.</div>
+<span class="ds-badge ds-badge-neutral">Coming soon</span>
 </div>
 <div class="club-card">
-<span class="club-icon"></span>
-<div class="club-cs-badge">Coming Soon</div>
-<div class="club-card-title">Kiswahili Music &amp; Culture Club</div>
-<div class="club-card-desc">Celebrate East African music, dance, and cultural heritage.</div>
+<div class="club-icon"><span class="iconify" data-icon="mdi:music-note-outline"></span></div>
+<div class="club-title">Music &amp; Culture Club</div>
+<div class="club-desc">Celebrate East African music, dance and cultural heritage.</div>
+<span class="ds-badge ds-badge-neutral">Coming soon</span>
 </div>
 <div class="club-card">
-<span class="club-icon"></span>
-<div class="club-cs-badge">Coming Soon</div>
-<div class="club-card-title">Debate &amp; Public Speaking Club</div>
-<div class="club-card-desc">Sharpen your oratory skills in Kiswahili and English.</div>
+<div class="club-icon"><span class="iconify" data-icon="mdi:podium"></span></div>
+<div class="club-title">Debate &amp; Public Speaking</div>
+<div class="club-desc">Sharpen your oratory skills in Kiswahili and English.</div>
+<span class="ds-badge ds-badge-neutral">Coming soon</span>
 </div>
 </div>
 </div>

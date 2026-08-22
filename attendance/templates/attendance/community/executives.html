@@ -1,55 +1,24 @@
 {% extends "attendance/base.html" %}
-{% block title %}Know Your Executives — SWASA{% endblock %}
+{% block title %}Know Your Executives{% endblock %}
 
 {% block content %}
 <style>
-
-.cs-wrap { max-width: 600px; margin: 0 auto; padding: 0 0 4rem; }
-
-.cs-card {
-    background: linear-gradient(135deg, #0D2472 0%, #091A55 100%);
-    border-radius: 24px;
-    padding: 3rem 2rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(13,36,114,0.35);
-}
-
-.cs-heading { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem; line-height: 1.2; position: relative; z-index: 1; }
-.cs-sub { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 1.25rem; line-height: 1.55; position: relative; z-index: 1; }
-.cs-swahili {
-    display: inline-block;
-    background: rgba(242,195,26,0.14);
-    border: 1px solid rgba(242,195,26,0.3);
-    border-radius: 99px;
-    padding: 0.45rem 1.25rem;
-    font-size: 14px; font-weight: 700; color: var(--gold);
-    margin-bottom: 2rem; position: relative; z-index: 1;
-}
-
-.cs-back {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 10px; padding: 0.6rem 1.25rem;
-    color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: all 0.15s;
-    position: relative; z-index: 1;
-}
-.cs-back:hover { background: rgba(255,255,255,0.2); color: #fff; border-color: rgba(255,255,255,0.4); }
+    .comm { max-width: 620px; margin: 0 auto; padding: 4px 0 40px; }
+    .comm-head { margin-bottom: 16px; }
+    .comm-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .comm-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; }
 </style>
-
-<div class="cs-wrap">
-<div class="cs-card">
-<h1 class="cs-heading">Know Your Executives</h1>
-<p class="cs-sub">Meet the faces behind SWASA — coming soon!</p>
-<div class="cs-swahili">Tunakuja hivi karibuni!</div>
-
-<br>
-<a href="{% url 'attendance:dashboard' %}" class="cs-back">
-<span class="iconify" data-icon="mdi:arrow-left" data-width="15"></span>
-            Back to Dashboard
-</a>
-</div>
+<div class="comm">
+<header class="comm-head">
+<p class="ds-eyebrow">Community</p>
+<h1>Know Your Executives</h1>
+<p class="sub">Meet the students leading SWASA this academic year.</p>
+</header>
+<div class="ds-card"><div class="ds-empty">
+<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
+<p class="ds-empty-title">Coming soon</p>
+<p class="ds-empty-text">Profiles of the SWASA executive committee will be published here shortly — <span lang="sw">tunakuja hivi karibuni</span>.</p>
+<a href="{% url 'attendance:dashboard' %}" class="ds-btn ds-btn-secondary"><span class="iconify" data-icon="mdi:arrow-left"></span> Back to dashboard</a>
+</div></div>
 </div>
 {% endblock %}
