@@ -12,7 +12,7 @@ NEXT = [('400', None), ('300', '400'), ('200', '300'), ('100', '200')]  # order 
 class Command(BaseCommand):
     help = (
         "Academic-year rollover: 100->200, 200->300, 300->400, last year's 400 become graduates, "
-        "last year's course registrations are deactivated, and old TAs are retired. "
+        "last year's course registrations are deactivated, and old TAs are retired to the alumni page. "
         "DRY RUN unless --yes is given. Run ONCE per year, after a database backup."
     )
 
@@ -46,16 +46,17 @@ class Command(BaseCommand):
         self.stdout.write(f'Deactivated course registrations: {regs.count()}')
         regs.update(is_active=False, deregistered_at=timezone.now())
 
-        # 3. Retire old TAs (they can no longer log in); new TAs register and are approved afresh.
+        # 3. Retire old TAs (they only see the alumni invite); new TAs register and are approved afresh.
         keep = {e.lower() for e in o['keep_ta']}
         retired = []
         for ta in TAProfile.objects.select_related('user'):
             if (ta.user.email or '').lower() in keep:
                 continue
+            # Retired: unapproved + inactive. They can still log in, but are sent only to
+            # the alumni invite page (middleware) and cannot use any TA feature.
             ta.is_active = False
-            ta.save(update_fields=['is_active'])
-            ta.user.is_active = False
-            ta.user.save(update_fields=['is_active'])
+            ta.is_approved = False
+            ta.save(update_fields=['is_active', 'is_approved'])
             retired.append(ta.user.email or ta.user.username)
         self.stdout.write(f'Retired TAs ({len(retired)}): ' + ', '.join(retired))
 

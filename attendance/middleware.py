@@ -89,6 +89,16 @@ class ForcePasswordChangeMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        user = request.user
+        if (
+            user.is_authenticated and not user.is_staff and hasattr(user, 'taprofile')
+            and not user.taprofile.is_active
+            and request.path not in EXEMPT_URLS
+            and request.path != reverse('attendance:graduate_alumni')
+            and not request.path.startswith(('/static/', '/media/', '/admin/'))
+        ):
+            return redirect('attendance:graduate_alumni')  # retired TA: alumni invite only
+
         if (
             request.user.is_authenticated
             and not request.user.is_staff

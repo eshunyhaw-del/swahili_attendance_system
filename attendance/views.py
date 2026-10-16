@@ -1721,7 +1721,7 @@ def admin_dashboard(request):
 def pending_tas(request):
     pending_ta_list = (
         TAProfile.objects
-        .filter(is_approved=False)
+        .filter(is_approved=False, is_active=True)  # is_active=False = retired TA, not an applicant
         .select_related('user')
         .prefetch_related('assigned_levels')
     )
@@ -3158,7 +3158,8 @@ def community_executives(request):
 def graduate_alumni(request):
     """Landing page for graduates: only the alumni invite, nothing else."""
     profile = get_profile(request.user)
-    if not (profile and profile.is_graduate):
+    retired_ta = hasattr(request.user, 'taprofile') and not request.user.taprofile.is_active
+    if not ((profile and profile.is_graduate) or retired_ta):
         return redirect('attendance:dashboard')
     return render(request, 'attendance/graduate_alumni.html', {
         'alumni_whatsapp_url': getattr(settings, 'ALUMNI_WHATSAPP_URL', ''),

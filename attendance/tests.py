@@ -655,12 +655,34 @@ class YearRolloverTests(TestCase):
         from .models import CourseRegistration
         self.assertFalse(CourseRegistration.objects.filter(is_active=True).exists())
         self.ta.refresh_from_db()
-        self.assertFalse(self.ta.is_active)
+        self.assertFalse(self.ta.taprofile.is_active)
+        self.assertFalse(self.ta.taprofile.is_approved)
+        self.assertTrue(self.ta.is_active)  # can still log in, to see the alumni page
+
+    def test_retired_ta_only_sees_alumni_page(self):
+        self._run('--yes')
+        self.client.force_login(self.ta)
+        resp = self.client.get(reverse('attendance:ta_dashboard'))
+        self.assertRedirects(resp, reverse('attendance:graduate_alumni'), fetch_redirect_response=False)
+        self.assertContains(self.client.get(reverse('attendance:graduate_alumni')), 'chat.whatsapp.com')
+
+    def test_retired_ta_not_listed_as_pending(self):
+        from django.test import RequestFactory
+        from .views import pending_tas
+        self._run('--yes')
+        req = RequestFactory().get('/')
+        req.user = User.objects.create_user('roll_admin2', password='x', is_staff=True)
+        req.session = {}
+        from django.contrib.messages.storage.fallback import FallbackStorage
+        setattr(req, '_messages', FallbackStorage(req))
+        resp = pending_tas(req)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn(b'roll_ta', resp.content)
 
     def test_keep_ta(self):
         self._run('--yes', '--keep-ta', 'ta@gmail.com')
         self.ta.refresh_from_db()
-        self.assertTrue(self.ta.is_active)
+        self.assertTrue(self.ta.taprofile.is_active)
 
     def test_graduate_only_sees_alumni_page(self):
         self._run('--yes')
