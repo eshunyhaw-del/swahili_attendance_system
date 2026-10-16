@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token }}">
 <title>SWASA Attendance System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,8 @@
     {% load static %}
 <script src="{% static 'js/iconify.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+{% if user.is_authenticated and not user.is_staff and not user.taprofile %}<link rel="stylesheet" href="{% static 'css/shell-student.css' %}">{% endif %}
+<script src="{% static 'js/ui.js' %}" defer></script>
 <style>
         :root {
             /* ── Design tokens ── */
@@ -25,7 +27,7 @@
             --bg-main: #F4F6F9;
             --bg-card: #FFFFFF;
             --text-main: #1F2937;
-            --text-muted: #6B7484;
+            --text-muted: #667080;
             --text-hint: #9BA4B4;
             --border: #E1E5EC;
             --shadow: 0 2px 4px -2px rgba(16, 24, 40, 0.06), 0 4px 10px -2px rgba(16, 24, 40, 0.08);
@@ -1119,7 +1121,7 @@
         (function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
 </script>
 </head>
-<body>
+<body{% if user.is_authenticated and not user.is_staff and not user.taprofile %} class="shell-student"{% endif %}>
 
 <div class="app">
 
@@ -1401,7 +1403,7 @@
 </div>
 </div>
                 {% endif %}
-<button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+<button class="icon-btn shell-extra" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
 <span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
 <span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
 </button>
@@ -1411,7 +1413,7 @@
 <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
 </div>
 <a href="{% url 'attendance:profile' %}" class="user-avatar" title="Edit profile" aria-label="Edit profile">{% if user.avatar.image %}<img src="{{ user.avatar.image.url }}" alt="Profile photo">{% else %}{{ user.username|first|upper }}{% endif %}</a>
-<form method="post" action="{% url 'logout' %}" style="display:inline;">
+<form class="shell-extra" method="post" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
 <button type="submit" class="icon-btn danger" aria-label="Logout">
 <span class="iconify" data-icon="mdi:logout" data-width="18" data-height="18"></span>
@@ -1424,14 +1426,14 @@
 </div>
 
 <div class="container">
-            {% if messages %}
+            {% if messages %}{% if user.is_authenticated and not user.is_staff and not user.taprofile %}{% else %}
                 {% for message in messages %}
 <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
 <span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
                     {{ message }}
 </div>
                 {% endfor %}
-            {% endif %}
+            {% endif %}{% endif %}
 
             {% if today_cultural_dates %}
             {% with cd=today_cultural_dates.0 %}
@@ -1466,6 +1468,12 @@
 
 </div>
 </div>
+
+{% if user.is_authenticated and not user.is_staff and not user.taprofile %}
+{% include "attendance/components/_bottom_nav.html" %}
+{% include "attendance/components/_more_sheet.html" %}
+{% include "attendance/components/_toasts.html" %}
+{% endif %}
 
 {% if show_alumni_popup %}
 <!-- ── SWASA alumni invite (Level 400 students + TAs, closing weeks of 2nd semester) ── -->

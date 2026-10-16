@@ -1,0 +1,18 @@
+{% load ui %}
+<dialog class="ds-sheet" id="checkinSheet" aria-labelledby="ciTitle" data-url="{% url 'attendance:student_submit_ta_code' %}">
+<div class="ds-sheet-grab" aria-hidden="true"></div>
+<form id="checkinForm" novalidate>
+<div class="ds-sheet-head"><div><h2 class="ds-sheet-title" id="ciTitle">Check in</h2><p class="ds-sheet-sub" id="ciSub"></p></div>
+<button type="button" class="ds-btn ds-btn-ghost ds-btn-icon" data-sheet-close aria-label="Cancel check-in">{% icon "x" 20 %}</button></div>
+<div class="ds-sheet-body">
+<label class="ds-label" for="ciCode">6-digit code from your teaching assistant</label>
+<input id="ciCode" class="ds-input ci-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="000000" aria-describedby="ciError">
+<p id="ciError" class="ds-error-text ci-error" role="alert" hidden></p>
+</div>
+<div class="ds-sheet-foot">
+<button type="submit" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-block" id="ciSubmit"><span class="lbl">Confirm attendance</span></button>
+<button type="button" class="ds-btn ds-btn-ghost ds-btn-block" data-sheet-close>Cancel</button>
+</div>
+</form>
+</dialog>
+<template id="tplRecorded"><span class="ds-status ds-status-success">{% icon "circle-check" 16 %}Attendance recorded</span></template>

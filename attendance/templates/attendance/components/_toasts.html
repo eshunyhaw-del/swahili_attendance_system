@@ -1,0 +1,2 @@
+<div class="ds-toast-region" id="toastRegion" role="status" aria-live="polite"></div>
+{% for message in messages %}<div hidden data-toast-message data-kind="{{ message.tags }}">{{ message }}</div>{% endfor %}
