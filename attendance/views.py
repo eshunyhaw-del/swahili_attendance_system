@@ -2463,6 +2463,28 @@ def ta_dashboard(request):
     return render(request, 'attendance/ta_dashboard.html', context)
 
 
+def create_unique_ta_code(student, session, ta):
+    """Create a TACode with a fresh 6-digit code for this session.
+
+    (code, class_session) is unique, and several TAs can generate at once, so a
+    code that looked free a moment ago may be taken by the time we save it. Retry
+    on that clash instead of failing — otherwise a TA gets a server error part-way
+    through a class list."""
+    from django.db import IntegrityError
+    for _ in range(50):
+        code = f"{secrets.randbelow(1000000):06d}"
+        if TACode.objects.filter(code=code, class_session=session).exists():
+            continue
+        try:
+            with transaction.atomic():
+                return TACode.objects.create(code=code, student=student, class_session=session, ta=ta)
+        except IntegrityError:
+            existing = TACode.objects.filter(student=student, class_session=session).first()
+            if existing:       # another TA just made this student's code
+                return existing
+    raise RuntimeError('Could not allocate a unique code')
+
+
 @login_required
 @require_POST
 def ta_generate_code(request):
@@ -2515,19 +2537,8 @@ def ta_generate_code(request):
                 "existing": True
             })
     
-    # Generate a unique 6-digit code (1,000,000 space per session — no practical
-    # guessing/collision risk, unlike the old 2–5 digit codes).
-    while True:
-        code = f"{secrets.randbelow(1000000):06d}"
-        if not TACode.objects.filter(code=code, class_session=session).exists():
-            break
-
-    ta_code = TACode.objects.create(
-        code=code,
-        student=student,
-        class_session=session,
-        ta=request.user
-    )
+    # Unique 6-digit code (1,000,000 space per session — no practical guessing risk).
+    ta_code = create_unique_ta_code(student, session, request.user)
     
     return JsonResponse({
         "code": ta_code.code,
@@ -2576,18 +2587,7 @@ def ta_generate_all_codes(request):
                 skipped_count += 1
             continue
 
-        # Generate a unique 6-digit code (see ta_generate_code).
-        while True:
-            code = f"{secrets.randbelow(1000000):06d}"
-            if not TACode.objects.filter(code=code, class_session=session).exists():
-                break
-
-        TACode.objects.create(
-            code=code,
-            student=student_profile.user,
-            class_session=session,
-            ta=request.user
-        )
+        create_unique_ta_code(student_profile.user, session, request.user)
         generated_count += 1
     
     return JsonResponse({
@@ -2615,7 +2615,8 @@ def ta_mark_distributed(request, code_id):
 def student_submit_ta_code(request):
     """Student submits the code given by TA"""
     session_id = request.POST.get('session_id')
-    entered_code = request.POST.get('code', '').strip()
+    # Ignore stray spaces/dashes a student may type or paste around the digits.
+    entered_code = ''.join(ch for ch in request.POST.get('code', '') if ch.isalnum())
     
     session = get_object_or_404(ClassSession, id=session_id)
     

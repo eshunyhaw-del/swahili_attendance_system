@@ -758,3 +758,57 @@ class AdminAnalyticsScopeTests(TestCase):
         self.assertEqual(ctx['total_courses'], 1)
         self.assertEqual(ctx['total_sessions'], 3)
         self.assertEqual(ctx['total_attendance_records'], 3)
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])  # fast hashing: test-only
+class CodeGenerationStressTests(TestCase):
+    """A whole class can get codes, and every student can submit theirs."""
+
+    def setUp(self):
+        cache.clear()
+        self.lv, _ = Level.objects.get_or_create(name='100')
+        sem = _make_semester()
+        self.course = Course.objects.create(code='STRESS 1', name='S', level=self.lv, semester=sem)
+        lect = User.objects.create_user('st_l', password='x')
+        self.session = ClassSession.objects.create(course=self.course, date=timezone.now().date(), topic='t', lecturer=lect)
+        self.students = []
+        for i in range(250):
+            u = User.objects.create_user(f'stu{i:03d}', password='x')
+            UserProfile.objects.create(user=u, level=self.lv, student_id_number=f'8{i:05d}', must_change_password=False)
+            self.students.append(u)
+        self.ta = User.objects.create_user('st_ta', password='x')
+        TAProfile.objects.create(user=self.ta, is_approved=True).assigned_levels.add(self.lv)
+
+    def test_generate_all_then_every_student_can_submit(self):
+        from .models import TACode, AttendanceRecord
+        self.client.force_login(self.ta)
+        r = self.client.post(reverse('attendance:ta_generate_all_codes'), {'session_id': self.session.id})
+        self.assertEqual(r.json()['generated'], 250)
+        codes = list(TACode.objects.filter(class_session=self.session))
+        self.assertEqual(len(codes), 250)
+        self.assertEqual(len({c.code for c in codes}), 250)               # all unique
+        self.assertTrue(all(len(c.code) == 6 and c.code.isdigit() for c in codes))
+        for c in codes:
+            self.client.force_login(c.student)
+            r = self.client.post(reverse('attendance:student_submit_ta_code'),
+                                 {'session_id': self.session.id, 'code': c.code})
+            self.assertEqual(r.status_code, 200, (c.student.username, r.content))
+        self.assertEqual(AttendanceRecord.objects.filter(class_session=self.session).count(), 250)
+
+    def test_code_with_stray_spaces_is_accepted(self):
+        from .models import TACode
+        self.client.force_login(self.ta)
+        self.client.post(reverse('attendance:ta_generate_all_codes'), {'session_id': self.session.id})
+        c = TACode.objects.filter(class_session=self.session).first()
+        self.client.force_login(c.student)
+        r = self.client.post(reverse('attendance:student_submit_ta_code'),
+                             {'session_id': self.session.id, 'code': f' {c.code[:3]} {c.code[3:]} '})
+        self.assertEqual(r.status_code, 200)
+
+    def test_leading_zero_codes_survive(self):
+        from .models import TACode
+        TACode.objects.create(code='004521', student=self.students[0], class_session=self.session, ta=self.ta)
+        self.client.force_login(self.students[0])
+        r = self.client.post(reverse('attendance:student_submit_ta_code'),
+                             {'session_id': self.session.id, 'code': '004521'})
+        self.assertEqual(r.status_code, 200)
