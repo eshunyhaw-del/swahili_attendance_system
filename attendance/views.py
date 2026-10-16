@@ -1590,14 +1590,21 @@ def export_attendance_csv(request, session_id):
 
 @staff_member_required
 def admin_dashboard(request):
+    # Analytics cover the ACTIVE semester only, so last semester's courses, sessions
+    # and attendance don't skew this semester's numbers.
+    active_sem = Semester.objects.filter(is_active=True, is_archived=False).first()
+    sem_courses = Course.objects.filter(semester=active_sem) if active_sem else Course.objects.all()
+    sem_sessions = ClassSession.objects.filter(course__in=sem_courses)
+    sem_records = AttendanceRecord.objects.filter(class_session__course__in=sem_courses)
+
     # ── Per-level stats ───────────────────────────────────────────────────────
     level_stats = []
     for level in Level.objects.all():
         lvl_students = UserProfile.objects.filter(level=level).count()
-        lvl_courses   = Course.objects.filter(level=level)
+        lvl_courses   = sem_courses.filter(level=level)
         lvl_course_ids = list(lvl_courses.values_list('id', flat=True))
-        lvl_sessions  = ClassSession.objects.filter(course_id__in=lvl_course_ids).count()
-        lvl_records   = AttendanceRecord.objects.filter(
+        lvl_sessions  = sem_sessions.filter(course_id__in=lvl_course_ids).count()
+        lvl_records   = sem_records.filter(
             student__userprofile__level=level
         ).count()
         expected = lvl_students * lvl_sessions
@@ -1613,9 +1620,9 @@ def admin_dashboard(request):
 
     # ── Global totals ─────────────────────────────────────────────────────────
     total_students          = UserProfile.objects.filter(is_graduate=False).count()
-    total_courses           = Course.objects.count()
-    total_sessions          = ClassSession.objects.count()
-    total_attendance_records = AttendanceRecord.objects.count()
+    total_courses           = sem_courses.count()
+    total_sessions          = sem_sessions.count()
+    total_attendance_records = sem_records.count()
     total_possible          = total_students * total_sessions
     overall_attendance_rate = round(
         (total_attendance_records / total_possible * 100) if total_possible > 0 else 0, 1
@@ -1630,6 +1637,7 @@ def admin_dashboard(request):
     ta_activity_map = {
         row['ta_id']: row
         for row in TACode.objects
+            .filter(class_session__course__in=sem_courses)
             .values('ta_id')
             .annotate(
                 codes_generated=Count('id'),
@@ -1669,7 +1677,7 @@ def admin_dashboard(request):
 
     attended_by_student = {
         row['student_id']: row['attended']
-        for row in AttendanceRecord.objects
+        for row in sem_records
             .filter(student_id__in=[p.user_id for p in all_profiles])
             .values('student_id')
             .annotate(attended=Count('id'))
