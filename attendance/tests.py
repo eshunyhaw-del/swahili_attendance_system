@@ -738,3 +738,29 @@ class FirstSemSessionsTests(TestCase):
     def test_is_idempotent(self):
         self._run(); self._run()
         self.assertEqual(ClassSession.objects.count(), 14 * 13)
+
+
+class AdminAnalyticsScopeTests(TestCase):
+    """Admin dashboard counts only the active semester."""
+
+    def test_only_active_semester_is_counted(self):
+        from .models import Semester, AttendanceCode, AttendanceRecord
+        Semester.objects.update(is_active=False)
+        lv, _ = Level.objects.get_or_create(name='100')
+        old = Semester.objects.create(name='Old', year=2025, start_date='2025-01-01', end_date='2025-05-01', is_active=False)
+        cur = Semester.objects.create(name='Cur', year=2026, start_date='2026-01-01', end_date='2026-05-01', is_active=True)
+        lect = User.objects.create_user('sc_l', password='x')
+        stud = User.objects.create_user('sc_s', password='x')
+        UserProfile.objects.create(user=stud, level=lv, student_id_number='7001', must_change_password=False)
+        for sem, code in ((old, 'OLD 1'), (cur, 'CUR 1')):
+            c = Course.objects.create(code=code, name=code, level=lv, semester=sem)
+            for i in range(3):
+                s = ClassSession.objects.create(course=c, date=timezone.now().date() + timedelta(days=i), topic='t', lecturer=lect)
+                ac = AttendanceCode.objects.create(student=stud, class_session=s, code_string=f'{code}-{i}')
+                AttendanceRecord.objects.create(student=stud, class_session=s, code=ac)
+        staff = User.objects.create_user('sc_admin', password='x', is_staff=True)
+        self.client.force_login(staff)
+        ctx = self.client.get(reverse('attendance:admin_dashboard')).context
+        self.assertEqual(ctx['total_courses'], 1)
+        self.assertEqual(ctx['total_sessions'], 3)
+        self.assertEqual(ctx['total_attendance_records'], 3)
