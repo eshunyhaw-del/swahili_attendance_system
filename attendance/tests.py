@@ -705,3 +705,36 @@ class YearRolloverTests(TestCase):
         ids = {s['profile'].user_id for s in resp.context['students']}
         self.assertNotIn(self.users['400'].id, ids)
         self.assertIn(self.users['100'].id, ids)
+
+
+class FirstSemSessionsTests(TestCase):
+    def setUp(self):
+        from .models import Semester
+        Semester.objects.update(is_active=False)
+        self.sem = Semester.objects.create(name='First Semester', year=2026, start_date='2026-10-26',
+                                           end_date='2027-01-29', is_active=True)
+        for n in ('100', '200', '300', '400'):
+            Level.objects.get_or_create(name=n)
+        self.admin = User.objects.create_superuser('sess_admin', 'a@x.com', 'x')
+
+    def _run(self, *a):
+        from django.core.management import call_command
+        from io import StringIO
+        call_command('create_first_sem_sessions', *a, stdout=StringIO())
+
+    def test_creates_weekly_sessions_on_the_right_days(self):
+        self._run()
+        a = Course.objects.get(code='KISW 105A'); b = Course.objects.get(code='KISW 105B')
+        sa = list(ClassSession.objects.filter(course=a).order_by('date'))
+        self.assertEqual(len(sa), 13)
+        self.assertEqual(str(sa[0].date), '2026-10-26')           # Monday, week 1
+        self.assertEqual(str(sa[1].date), '2026-11-02')           # next Monday
+        self.assertEqual(str(ClassSession.objects.filter(course=b).order_by('date').first().date), '2026-10-29')  # Thursday
+        c201 = ClassSession.objects.filter(course__code='KISW 201').order_by('date').first()
+        self.assertEqual(c201.date.weekday(), 3)
+        self.assertEqual(c201.topic, 'JQB 12')
+        self.assertEqual(ClassSession.objects.count(), 14 * 13)
+
+    def test_is_idempotent(self):
+        self._run(); self._run()
+        self.assertEqual(ClassSession.objects.count(), 14 * 13)
