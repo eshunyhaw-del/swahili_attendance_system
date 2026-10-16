@@ -73,6 +73,9 @@ class UserProfile(models.Model):
     verification_sent_at = models.DateTimeField(blank=True, null=True)
 
     must_change_password = models.BooleanField(default=True)
+    # Former students (last year's Level 400). They keep a login only to see the
+    # alumni invite; they have no level/courses and are excluded from all reports.
+    is_graduate = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - Level {self.level}"

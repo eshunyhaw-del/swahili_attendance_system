@@ -1,0 +1,32 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join the SWASA Alumni Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="{% static 'js/iconify.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+<style>
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: var(--ds-bg); font-family: var(--ds-font); }
+</style>
+<script>try { var t = localStorage.getItem('swasa_theme'); if (t) document.documentElement.setAttribute('data-theme', t); } catch (e) {}</script>
+</head>
+<body class="ds-scope">
+<div class="ds-modal" style="max-width:420px; text-align:center;">
+<div style="padding:28px 28px 0;">
+<div style="width:56px; height:56px; border-radius:14px; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+<span class="iconify" data-icon="mdi:whatsapp" data-width="32"></span>
+</div>
+<h1 style="font-size:1.3rem; font-weight:700; margin:0 0 8px;">Congratulations, graduate!</h1>
+<p style="font-size:14px; color:var(--ds-text-muted); line-height:1.6; margin:0;">You have completed the programme. Stay connected with SWASA members and fellow graduates by joining the alumni WhatsApp group.</p>
+</div>
+<div style="display:flex; flex-direction:column; gap:8px; padding:22px 28px 26px;">
+<a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="ds-btn ds-btn-lg" style="background:#25D366; color:#fff;"><span class="iconify" data-icon="mdi:whatsapp"></span> Join the Alumni Group</a>
+<form method="post" action="{% url 'logout' %}" style="margin:0;">{% csrf_token %}
+<button type="submit" class="ds-btn ds-btn-ghost ds-btn-block">Sign out</button>
+</form>
+</div>
+</div>
+</body>
+</html>
