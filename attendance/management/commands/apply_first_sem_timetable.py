@@ -10,7 +10,8 @@ from attendance.models import (
 # First-semester 2026/27 timetable (KISW 1ST SEM TIMETABLE 26-27).
 # (code, title, level). KISW 105 has two groups (Mon / Thu) but stays one course.
 TIMETABLE = [
-    ('KISW 105', 'Introduction to Kiswahili Studies I', '100'),
+    ('KISW 105A', 'Introduction to Kiswahili Studies I (Monday Group)', '100'),
+    ('KISW 105B', 'Introduction to Kiswahili Studies I (Thursday Group)', '100'),
     ('KISW 103', 'Elementary Kiswahili Grammar I', '100'),
     ('KISW 201', 'Kiswahili Grammar and Translation I', '200'),
     ('KISW 203', 'Oral and Composition I', '200'),
@@ -25,7 +26,7 @@ TIMETABLE = [
     ('KISW 415', 'Essay Writing and Comprehension', '400'),
 ]
 # Old code -> new code, so renamed courses keep their row instead of being dropped.
-RENAMED = {'KISW 309': 'KISW 315'}
+RENAMED = {'KISW 309': 'KISW 315', 'KISW 105': 'KISW 105A'}
 
 
 class Command(BaseCommand):
