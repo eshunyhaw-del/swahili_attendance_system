@@ -667,15 +667,9 @@ class YearRolloverTests(TestCase):
         self.assertContains(self.client.get(reverse('attendance:graduate_alumni')), 'chat.whatsapp.com')
 
     def test_retired_ta_not_listed_as_pending(self):
-        from django.test import RequestFactory
-        from .views import pending_tas
         self._run('--yes')
-        req = RequestFactory().get('/')
-        req.user = User.objects.create_user('roll_admin2', password='x', is_staff=True)
-        req.session = {}
-        from django.contrib.messages.storage.fallback import FallbackStorage
-        setattr(req, '_messages', FallbackStorage(req))
-        resp = pending_tas(req)
+        self.client.force_login(User.objects.create_user('roll_admin2', password='x', is_staff=True))
+        resp = self.client.get(reverse('attendance:pending_tas'))
         self.assertEqual(resp.status_code, 200)
         self.assertNotIn(b'roll_ta', resp.content)
 
