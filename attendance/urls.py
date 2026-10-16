@@ -73,7 +73,7 @@ urlpatterns = [
     path("dashboard-admin/alerts/", views.admin_alerts, name="admin_alerts"),
     path("dashboard-admin/export/student/<int:student_id>/csv/", views.admin_export_student_csv, name="admin_export_student_csv"),
     path("dashboard-admin/export/all/csv/", views.admin_export_all_students_csv, name="admin_export_all_csv"),
-    path("admin/pending-tas/", views.pending_tas, name="pending_tas"),
+    path("dashboard-admin/pending-tas/", views.pending_tas, name="pending_tas"),
     path("export-level/<int:level_id>/", views.export_level_attendance, name="export_level"),
     path("student-report/", views.student_attendance_report, name="student_report"),
 
