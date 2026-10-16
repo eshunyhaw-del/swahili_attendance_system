@@ -99,6 +99,8 @@ class ForcePasswordChangeMiddleware:
         ):
             try:
                 profile = request.user.userprofile
+                if profile.is_graduate and request.path != reverse('attendance:graduate_alumni')                         and not request.path.startswith(('/static/', '/media/')):
+                    return redirect('attendance:graduate_alumni')
                 if profile.must_change_password:
                     return redirect('attendance:change_password')
             except Exception:

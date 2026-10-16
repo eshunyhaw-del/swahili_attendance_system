@@ -1612,7 +1612,7 @@ def admin_dashboard(request):
         })
 
     # ── Global totals ─────────────────────────────────────────────────────────
-    total_students          = UserProfile.objects.count()
+    total_students          = UserProfile.objects.filter(is_graduate=False).count()
     total_courses           = Course.objects.count()
     total_sessions          = ClassSession.objects.count()
     total_attendance_records = AttendanceRecord.objects.count()
@@ -1650,7 +1650,7 @@ def admin_dashboard(request):
 
     # ── At-risk students (<75% attendance, bulk queries) ──────────────────────
     all_profiles = list(
-        UserProfile.objects.select_related('level', 'user').prefetch_related(
+        UserProfile.objects.filter(is_graduate=False).select_related('level', 'user').prefetch_related(
             Prefetch(
                 'course_registrations',
                 queryset=CourseRegistration.objects.filter(is_active=True),
@@ -1841,7 +1841,7 @@ def student_attendance_report(request):
     # student set once. ``?level=`` is honoured only to preselect the opening tab
     # (deep links / no-JS fallback), not to trim the dataset.
     students = (
-        UserProfile.objects
+        UserProfile.objects.filter(is_graduate=False)
         .select_related('user', 'level')
         .order_by('user__first_name', 'user__last_name', 'user__username')
     )
@@ -2116,7 +2116,7 @@ def admin_export_all_students_csv(request, level_id=None):
         level = get_object_or_404(Level, id=level_id)
         filename = f'all_attendance_level_{level.name}_{timezone.now().date()}.csv'
     else:
-        students = UserProfile.objects.all().select_related('user', 'level')
+        students = UserProfile.objects.filter(is_graduate=False).select_related('user', 'level')
         filename = f'all_attendance_{timezone.now().date()}.csv'
     
     semesters = Semester.objects.filter(is_archived=False)
@@ -2161,7 +2161,7 @@ def admin_search_students(request):
     search_query = request.GET.get('q', '')
     level_id = request.GET.get('level')
     
-    students = UserProfile.objects.select_related('user', 'level').all()
+    students = UserProfile.objects.filter(is_graduate=False).select_related('user', 'level')
     
     if search_query:
         students = students.filter(
@@ -3152,6 +3152,17 @@ def community_events(request):
 @login_required
 def community_executives(request):
     return render(request, 'attendance/community/executives.html')
+
+
+@login_required
+def graduate_alumni(request):
+    """Landing page for graduates: only the alumni invite, nothing else."""
+    profile = get_profile(request.user)
+    if not (profile and profile.is_graduate):
+        return redirect('attendance:dashboard')
+    return render(request, 'attendance/graduate_alumni.html', {
+        'alumni_whatsapp_url': getattr(settings, 'ALUMNI_WHATSAPP_URL', ''),
+    })
 
 
 @login_required

@@ -613,3 +613,73 @@ class AlumniInviteTests(TestCase):
     def test_daily_cap_passed_to_template(self):
         self._semester('Second Semester', days_to_end=3)
         self.assertEqual(self._ctx(self._student('a400e', self.l400)).get('alumni_max_per_day'), 3)
+
+
+class YearRolloverTests(TestCase):
+    """promote_students: levels move up, 400s graduate, registrations/TAs reset."""
+
+    def setUp(self):
+        cache.clear()
+        self.lv = {n: Level.objects.get_or_create(name=n)[0] for n in ('100', '200', '300', '400')}
+        sem = _make_semester()
+        self.course = Course.objects.create(code='ROLL 100', name='R', level=self.lv['100'], semester=sem)
+        self.users = {}
+        for n in ('100', '200', '300', '400'):
+            u = User.objects.create_user(f'roll{n}', password='x', email=f'roll{n}@gmail.com')
+            UserProfile.objects.create(user=u, level=self.lv[n], student_id_number=f'9{n}', must_change_password=False)
+            self.users[n] = u
+        from .models import CourseRegistration
+        CourseRegistration.objects.create(user_profile=self.users['100'].userprofile, course=self.course)
+        self.ta = User.objects.create_user('roll_ta', password='x', email='ta@gmail.com')
+        TAProfile.objects.create(user=self.ta, is_approved=True)
+
+    def _run(self, *a):
+        from django.core.management import call_command
+        from io import StringIO
+        call_command('promote_students', *a, stdout=StringIO())
+
+    def _lvl(self, n):
+        p = UserProfile.objects.get(user=self.users[n]); return p.level.name if p.level else None, p.is_graduate
+
+    def test_dry_run_changes_nothing(self):
+        self._run()
+        self.assertEqual(self._lvl('100'), ('100', False))
+        self.assertEqual(self._lvl('400'), ('400', False))
+
+    def test_promotion(self):
+        self._run('--yes')
+        self.assertEqual(self._lvl('100'), ('200', False))
+        self.assertEqual(self._lvl('200'), ('300', False))
+        self.assertEqual(self._lvl('300'), ('400', False))
+        self.assertEqual(self._lvl('400'), (None, True))
+        from .models import CourseRegistration
+        self.assertFalse(CourseRegistration.objects.filter(is_active=True).exists())
+        self.ta.refresh_from_db()
+        self.assertFalse(self.ta.is_active)
+
+    def test_keep_ta(self):
+        self._run('--yes', '--keep-ta', 'ta@gmail.com')
+        self.ta.refresh_from_db()
+        self.assertTrue(self.ta.is_active)
+
+    def test_graduate_only_sees_alumni_page(self):
+        self._run('--yes')
+        self.client.force_login(self.users['400'])
+        resp = self.client.get(reverse('attendance:dashboard'))
+        self.assertRedirects(resp, reverse('attendance:graduate_alumni'), fetch_redirect_response=False)
+        page = self.client.get(reverse('attendance:graduate_alumni'))
+        self.assertContains(page, 'chat.whatsapp.com')
+
+    def test_non_graduate_cannot_open_alumni_welcome(self):
+        self.client.force_login(self.users['200'])
+        resp = self.client.get(reverse('attendance:graduate_alumni'))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_graduates_excluded_from_records(self):
+        self._run('--yes')
+        staff = User.objects.create_user('roll_admin', password='x', is_staff=True)
+        self.client.force_login(staff)
+        resp = self.client.get(reverse('attendance:student_report'))
+        ids = {s['profile'].user_id for s in resp.context['students']}
+        self.assertNotIn(self.users['400'].id, ids)
+        self.assertIn(self.users['100'].id, ids)
