@@ -103,7 +103,7 @@ class TAProfileAdmin(admin.ModelAdmin):
         Deleting a TAProfile alone leaves an orphaned User that keeps the email
         and username locked (blocking re-registration) and can still log in to a
         broken, role-less state. This action deletes the User instead, which
-        cascades to the TAProfile — the correct way to remove a TA.
+        cascades to the TAProfile - the correct way to remove a TA.
         """
         users = [tp.user for tp in queryset.select_related('user')]
         deleted = 0
@@ -121,7 +121,7 @@ class TAProfileAdmin(admin.ModelAdmin):
         """Approve the selected TAs AND email each one.
 
         Iterates (rather than a bulk .update()) so every newly-approved TA gets
-        the approval notification — the same behaviour as the Pending-TAs page.
+        the approval notification - the same behaviour as the Pending-TAs page.
         """
         from django.utils import timezone
         from .views import send_ta_approval_email
@@ -239,7 +239,7 @@ class SWASAEventAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description', 'venue')
     ordering = ('-event_date',)
     # created_by is auto-set to the current admin in save_model, so it must be
-    # read-only here — otherwise it's a required dropdown and leaving it blank
+    # read-only here - otherwise it's a required dropdown and leaving it blank
     # silently blocks the save ("This field is required").
     readonly_fields = ('created_at', 'created_by')
     filter_horizontal = ('target_levels',)
@@ -278,7 +278,7 @@ class SWASAEventAdmin(admin.ModelAdmin):
         if not event.is_published:
             if existing:
                 SystemNotification.objects.filter(event=event).delete()
-                self.message_user(request, 'Event unpublished — its notifications were removed.')
+                self.message_user(request, 'Event unpublished. Its notifications were removed.')
             return
 
         emoji = {'event': '📅', 'news': '📰', 'announcement': '📢'}.get(event.event_type, '📢')

@@ -47,9 +47,9 @@
 {% if history_data %}
 <div class="stat-grid">
 <div class="ds-stat"><div class="ds-stat-label">Courses</div><div class="ds-stat-value">{{ history_data|length }}</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Sessions</div><div class="ds-stat-value" id="stat-total">—</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Present</div><div class="ds-stat-value" id="stat-attended" style="color:var(--ds-success)">—</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Absent</div><div class="ds-stat-value" id="stat-absent" style="color:var(--ds-danger)">—</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Sessions</div><div class="ds-stat-value" id="stat-total">-</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Present</div><div class="ds-stat-value" id="stat-attended" style="color:var(--ds-success)">-</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Absent</div><div class="ds-stat-value" id="stat-absent" style="color:var(--ds-danger)">-</div></div>
 </div>
 
 {% for item in history_data %}

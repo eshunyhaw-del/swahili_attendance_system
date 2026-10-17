@@ -202,7 +202,7 @@ html[data-theme="dark"] .icon-act:hover { border-color: var(--gold); color: var(
 <div class="page-header">
 <div>
 <h1>Attendance Records</h1>
-<div class="page-header-sub">All students across every level — switch segments, search and drill in without leaving this screen.</div>
+<div class="page-header-sub">All students across every level. Switch segments, search and drill in without leaving this screen.</div>
 </div>
 <a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-ghost">
 <span class="iconify" data-icon="mdi:download-outline"></span> Export All
@@ -257,15 +257,15 @@ All <span class="seg-count">{{ summary_all.count }}</span>
 <tbody id="recordsBody">
                 {% for s in students %}
 <tr class="srow"
-    data-level="{{ s.profile.level.name|default:'—' }}"
+    data-level="{{ s.profile.level.name|default:'-' }}"
     data-name="{{ s.profile.user.get_full_name|default:s.profile.user.username|lower }} {{ s.profile.student_id_number|default:''|lower }}"
     data-sortname="{{ s.profile.user.get_full_name|default:s.profile.user.username|lower }}"
     data-pct="{% if s.has_data %}{{ s.attendance_percentage }}{% else %}-1{% endif %}">
 <td>
 <div class="stu-name">{{ s.profile.user.get_full_name|default:s.profile.user.username }}</div>
-<div class="stu-id">ID: {{ s.profile.student_id_number|default:'—' }}</div>
+<div class="stu-id">ID: {{ s.profile.student_id_number|default:'-' }}</div>
 </td>
-<td><span class="lvl-chip">{{ s.profile.level.name|default:'—' }}</span></td>
+<td><span class="lvl-chip">{{ s.profile.level.name|default:'-' }}</span></td>
 <td>
                         {% if s.has_data %}
 <div class="att-cell">

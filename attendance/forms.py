@@ -207,7 +207,7 @@ class CourseRegistrationForm(forms.Form):
         codes = {c.code for c in courses}
         if 'KISW 106A' in codes and 'KISW 106B' in codes:
             raise forms.ValidationError(
-                "Please select only one KISW 106 group — either Monday (106A) or Thursday (106B), not both."
+                "Please select only one KISW 106 group: either Monday (106A) or Thursday (106B), not both."
             )
         return courses
 
@@ -250,7 +250,7 @@ class UserDetailsForm(forms.ModelForm):
     def clean_email(self):
         email = (self.cleaned_data.get('email') or '').strip()
         if not email:
-            raise forms.ValidationError("Email is required — it is how you sign in.")
+            raise forms.ValidationError("Email is required. It is how you sign in.")
         clash = User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
         if clash.exists():
             raise forms.ValidationError("That email is already used by another account.")

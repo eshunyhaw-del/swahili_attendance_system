@@ -91,7 +91,7 @@
 <button class="dict-toggle" id="toggleSW" onclick="setMode('sw')">Swahili → English</button>
 </div>
 <div class="dict-search-row">
-<input type="text" class="ds-input" id="dictInput" placeholder="Type an English word — e.g. love, freedom, education" autocomplete="off" autocorrect="off" spellcheck="false">
+<input type="text" class="ds-input" id="dictInput" placeholder="Type an English word, e.g. love, freedom, education" autocomplete="off" autocorrect="off" spellcheck="false">
 <button class="ds-btn ds-btn-primary" id="dictSearchBtn" onclick="doSearch()">Tafuta</button>
 </div>
 <div class="dict-chips-label">Popular words</div>
@@ -146,7 +146,7 @@
 <summary><span class="acc-num">2</span> Sign in <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
 <div class="acc-body">
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div><div class="step-text">Enter the <strong>email address</strong> you registered with.</div></div>
-<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div><div class="step-text">Enter the <strong>password you chose</strong> at sign-up — this is not your Student ID.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div><div class="step-text">Enter the <strong>password you chose</strong> at sign-up. This is not your Student ID.</div></div>
 <div class="step"><div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div><div class="step-text">Forgotten it? Use <strong>Forgot password</strong> on the sign-in page and a reset code will be emailed to you.</div></div>
 </div>
 </details>
@@ -164,7 +164,7 @@
 <div class="acc-body">
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div><div class="step-text">During each session, your <strong>teaching assistant</strong> reads out a <strong>6-digit code</strong> that is unique to you and that session.</div></div>
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:qrcode-scan"></span></div><div class="step-text">On your <strong>Dashboard</strong>, find today's class and select <strong>Check In</strong>.</div></div>
-<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Enter the code and confirm. The session updates to <strong>Present</strong> immediately — no page reload needed.</div></div>
+<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Enter the code and confirm. The session updates to <strong>Present</strong> immediately, with no page reload needed.</div></div>
 <div class="note"><span class="iconify" data-icon="mdi:shield-alert-outline"></span> Your code cannot be shared or reused. Entering another student's code is recorded as misuse.</div>
 </div>
 </details>
@@ -213,7 +213,7 @@
 <div class="acc-body">
 <div class="tips-grid">
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Add the portal to your phone's home screen for quick access.</div>
-<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Check in during class — don't wait until you've left.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Check in during class. Don't wait until you've left.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Review your history weekly to catch any missed sessions early.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Use a strong, unique password and never share it.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Export your records at the end of the semester for your own reference.</div>
@@ -226,7 +226,7 @@
 <script>
 {% if is_student %}
 var dictMode = 'en';
-var DICT_PLACEHOLDERS = { en: 'Type an English word — e.g. love, freedom, education', sw: 'Andika neno la Kiswahili — mfano: upendo, uhuru' };
+var DICT_PLACEHOLDERS = { en: 'Type an English word, e.g. love, freedom, education', sw: 'Andika neno la Kiswahili, mfano: upendo, uhuru' };
 function setMode(mode) {
     dictMode = mode;
     var input = document.getElementById('dictInput');

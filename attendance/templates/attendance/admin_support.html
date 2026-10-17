@@ -123,7 +123,7 @@ html[data-theme="dark"] .sup-avatar {
                         {{ ticket.student.get_full_name|default:ticket.student.username }}
 <span style="width:3px; height:3px; border-radius:50%; background:var(--border-strong); display:inline-block;"></span>
 <span class="iconify" data-icon="mdi:clock-outline" style="font-size:12px;"></span>
-                        {{ ticket.created_at|date:"M j, Y — H:i" }}
+                        {{ ticket.created_at|date:"M j, Y, H:i" }}
 </div>
 </div>
 </div>

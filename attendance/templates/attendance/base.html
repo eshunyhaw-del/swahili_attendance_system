@@ -410,14 +410,14 @@
         html[data-theme="dark"] .alert-error { background: rgba(180,35,24,0.18); color: #F0776B; border-color: rgba(240,119,107,0.30); }
         html[data-theme="dark"] .alert-warning { background: rgba(180,83,9,0.18); color: #E6A23C; border-color: rgba(230,162,60,0.30); }
 
-        /* Dark mode: navy brand colour as text is invisible on dark surfaces — use gold */
+        /* Dark mode: navy brand colour as text is invisible on dark surfaces - use gold */
         html[data-theme="dark"] .badge-navy {
             color: #F2C31A;
             background: rgba(242,195,26,0.12);
             border: 1px solid rgba(242,195,26,0.22);
         }
 
-        /* Dark mode: form focus rings — navy is invisible, use gold */
+        /* Dark mode: form focus rings - navy is invisible, use gold */
         html[data-theme="dark"] .form-control:focus {
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(242,195,26,0.2);
@@ -435,7 +435,7 @@
         html[data-theme="dark"] .ld-stat-chip.enrolled .ld-stat-val { color: #7BAEE8; }
         html[data-theme="dark"] .ld-stat-chip.enrolled { background: rgba(100,160,230,0.1); }
 
-        /* Dark mode: focus states — border + background */
+        /* Dark mode: focus states - border + background */
         html[data-theme="dark"] .sup-textarea:focus,
         html[data-theme="dark"] .sup-status-select:focus,
         html[data-theme="dark"] .ld-date-input:focus,
@@ -444,7 +444,7 @@
         /* Dark mode: section-head accordions (student guide, TA guide pages) */
         html[data-theme="dark"] .section-head { background: var(--bg-subtle) !important; }
 
-        /* Dark mode: navy as text colour is invisible — switch to gold or light blue */
+        /* Dark mode: navy as text colour is invisible - switch to gold or light blue */
         html[data-theme="dark"] .step-text strong,
         html[data-theme="dark"] .quick-ref-title,
         html[data-theme="dark"] .mono { color: var(--gold) !important; }
@@ -454,10 +454,6 @@
         html[data-theme="dark"] .info-box { background: rgba(46,61,80,0.6) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
         html[data-theme="dark"] .info-box .iconify { color: var(--gold) !important; }
 
-        /* Dark mode: ad-notify (admin dashboard announcement strip) */
-        html[data-theme="dark"] .ad-notify { background: rgba(242,195,26,0.08) !important; border-color: rgba(242,195,26,0.15) !important; }
-        html[data-theme="dark"] .ad-notify,
-        html[data-theme="dark"] .ad-notify-item { color: #E8D98A !important; }
 
         /* Dark mode: hardcoded light backgrounds common across templates */
         html[data-theme="dark"] .week-tabs-bar,
@@ -1045,7 +1041,7 @@
             .cultural-name { font-size: 13.5px; }
         }
 
-        /* System notification in bell (cultural date — gold tint) */
+        /* System notification in bell (cultural date - gold tint) */
         .notif-item.sys-notif {
             background: rgba(242,195,26,0.04);
             border-left-color: #F2C31A;
@@ -1475,7 +1471,7 @@
 <span class="iconify" data-icon="mdi:whatsapp" data-width="30"></span>
 </div>
 <h3 style="font-size:1.2rem; font-weight:700; margin:0 0 6px; color:var(--text-primary);">Join the SWASA Alumni Network</h3>
-<p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0;">You're in your final stretch with SWASA. Stay connected with fellow members and graduates — join the alumni WhatsApp group.</p>
+<p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0;">You're in your final stretch with SWASA. Stay connected with fellow members and graduates. Join the alumni WhatsApp group.</p>
 </div>
 <div style="display:flex; flex-direction:column; gap:8px; padding:20px 26px 24px;">
 <a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="dismissAlumniPopup()" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; font-weight:700; font-size:14px; padding:0.75rem; border-radius:var(--radius-sm); text-decoration:none;">
@@ -1645,7 +1641,7 @@
         });
     }
 
-    /* Cultural date banner — show if not dismissed today */
+    /* Cultural date banner - show if not dismissed today */
     (function() {
         var banner = document.getElementById('culturalDateBanner');
         if (!banner) return;
@@ -1776,7 +1772,7 @@
                 + '<div class="phrase-swahili">' + phrase.swahili + '</div>'
                 + '<div class="phrase-english">' + phrase.english + '</div>';
             if (hasResponse) {
-                html += '<div class="phrase-response">' + phrase.response_swahili + ' &mdash; ' + phrase.response_english + '</div>';
+                html += '<div class="phrase-response">' + phrase.response_swahili + ' - ' + phrase.response_english + '</div>';
             }
             html += '</div>';
             return html;

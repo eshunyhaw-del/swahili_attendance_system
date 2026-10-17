@@ -14,10 +14,10 @@ class JWTAuthMiddleware:
     """Authenticate requests from the JWT access-token cookie.
 
     Adds two things over a plain decode:
-      * Password-bound revocation — a token whose `sh` claim no longer matches
+      * Password-bound revocation - a token whose `sh` claim no longer matches
         the user's current password hash is rejected (covers password
         change/reset).
-      * Sliding refresh — if the (short-lived) access token is missing/expired
+      * Sliding refresh - if the (short-lived) access token is missing/expired
         but a valid refresh-token cookie is present, a fresh access token is
         minted and set on the response, so users are not logged out every couple
         of hours.
@@ -63,7 +63,7 @@ class JWTAuthMiddleware:
                 if user is not None:
                     return user, None
 
-        # Access token missing or invalid — try the refresh token.
+        # Access token missing or invalid - try the refresh token.
         refresh = request.COOKIES.get('refresh_token')
         if refresh:
             payload = decode_token(refresh, 'refresh')

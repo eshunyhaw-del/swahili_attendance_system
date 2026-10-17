@@ -10,7 +10,7 @@
         {% elif state == 'already_used' %}Already verified
         {% elif state == 'expired' %}Link expired
         {% else %}Invalid link
-        {% endif %} — SWASA Attendance
+        {% endif %} | SWASA Attendance
 </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,7 +77,7 @@
 
     <div class="card-body">
         {% if state == 'ta_pending' %}
-        <p>Thanks — your email address is confirmed. An admin will review your TA application and approve your account. You'll be able to log in once it's approved.</p>
+        <p>Thanks, your email address is confirmed. An admin will review your TA application and approve your account. You'll be able to log in once it's approved.</p>
         <a href="{% url 'login' %}" class="btn btn-primary">Go to sign in</a>
 
         {% elif state == 'already_used' %}

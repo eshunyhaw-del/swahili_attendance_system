@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SWASA Attendance System — Design System
+   SWASA Attendance System - Design System
    A single source of truth for tokens and components across every screen.
    Language: clean, minimal, institutional enterprise SaaS.
    Principles: flat neutral surfaces, subtle shadows, NO colored card borders,
@@ -15,9 +15,9 @@
     --ds-navy-700: #12297D;
     --ds-navy-800: #0A1B56;
     --ds-navy-900: #081746;
-    --ds-gold: #E6B325;           /* brand accent — used sparingly, never as body text */
+    --ds-gold: #E6B325;           /* brand accent - used sparingly, never as body text */
 
-    /* Neutral scale (slate) — the backbone of the UI */
+    /* Neutral scale (slate) - the backbone of the UI */
     --ds-white: #FFFFFF;
     --ds-neutral-25:  #FCFCFD;
     --ds-neutral-50:  #F7F8FA;
@@ -36,7 +36,7 @@
     --ds-bg: #F4F6F9;             /* app canvas */
     --ds-surface: #FFFFFF;        /* cards, panels */
     --ds-surface-sunken: #F7F8FA; /* wells, table heads */
-    --ds-border: #E1E5EC;         /* hairlines only — never coloured on cards */
+    --ds-border: #E1E5EC;         /* hairlines only - never coloured on cards */
     --ds-border-strong: #CDD3DE;
     --ds-text: #1F2937;
     --ds-text-secondary: #4B5563;
@@ -55,14 +55,14 @@
     --ds-info:    #175CD3;   --ds-info-bg:    #E8F0FC;   --ds-info-border:    #C4D9F5;
     --ds-neutral-bg: #EEF0F4; --ds-neutral-border: #DCE0E7;
 
-    /* Shadows — subtle, neutral, standard (no colour tint) */
+    /* Shadows - subtle, neutral, standard (no colour tint) */
     --ds-shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
     --ds-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
     --ds-shadow-md: 0 2px 4px -2px rgba(16, 24, 40, 0.06), 0 4px 10px -2px rgba(16, 24, 40, 0.08);
     --ds-shadow-lg: 0 4px 6px -2px rgba(16, 24, 40, 0.05), 0 12px 20px -4px rgba(16, 24, 40, 0.10);
     --ds-shadow-focus: 0 0 0 3px var(--ds-focus-ring);
 
-    /* Radii — restrained */
+    /* Radii - restrained */
     --ds-radius-xs: 4px;
     --ds-radius-sm: 6px;
     --ds-radius-md: 8px;
@@ -90,7 +90,7 @@
     --ds-z-dropdown: 1000; --ds-z-sticky: 1010; --ds-z-modal: 1100; --ds-z-toast: 1200;
 }
 
-/* Dark mode — swap surfaces/text; keep the same component contracts */
+/* Dark mode - swap surfaces/text; keep the same component contracts */
 :root[data-theme="dark"] {
     --ds-bg: #0E141C;
     --ds-surface: #171F2A;
@@ -185,7 +185,7 @@
 .ds-btn-block { width: 100%; }
 
 /* ----------------------------------------------------------------------------
-   4. CARDS  (subtle neutral shadow — NEVER a coloured border)
+   4. CARDS  (subtle neutral shadow - NEVER a coloured border)
 ---------------------------------------------------------------------------- */
 .ds-card {
     background: var(--ds-surface);
@@ -203,7 +203,7 @@
 .ds-card-body { padding: var(--ds-space-5); }
 .ds-card-footer { padding: var(--ds-space-4) var(--ds-space-5); border-top: 1px solid var(--ds-border); }
 
-/* Stat / KPI tile — hierarchy from type & shadow, not a coloured edge */
+/* Stat / KPI tile - hierarchy from type & shadow, not a coloured edge */
 .ds-stat { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); padding: var(--ds-space-4) var(--ds-space-5); }
 .ds-stat-label { font-size: var(--ds-text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ds-text-muted); display: flex; align-items: center; gap: var(--ds-space-2); }
 .ds-stat-value { font-size: var(--ds-text-3xl); font-weight: 700; letter-spacing: -0.02em; margin-top: var(--ds-space-2); line-height: 1.1; }
@@ -212,7 +212,7 @@
 .ds-stat-trend-down { color: var(--ds-danger); }
 
 /* ----------------------------------------------------------------------------
-   5. BADGES  &  ATTENDANCE STATES  (icon + text + colour — never colour alone)
+   5. BADGES  &  ATTENDANCE STATES  (icon + text + colour - never colour alone)
 ---------------------------------------------------------------------------- */
 .ds-badge, .ds-att { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
 .ds-badge .iconify, .ds-att .iconify { font-size: 12px; }
@@ -287,7 +287,7 @@
 .ds-seg-count { font-size: var(--ds-text-xs); font-weight: 700; padding: 1px 6px; border-radius: var(--ds-radius-pill); background: var(--ds-neutral-bg); }
 
 /* ----------------------------------------------------------------------------
-   9. ALERTS  (informational — restrained, not heavy)
+   9. ALERTS  (informational - restrained, not heavy)
 ---------------------------------------------------------------------------- */
 .ds-alert { display: flex; gap: var(--ds-space-3); padding: var(--ds-space-3) var(--ds-space-4); border-radius: var(--ds-radius-md); border: 1px solid var(--ds-border); background: var(--ds-surface-sunken); font-size: var(--ds-text-md); }
 .ds-alert .iconify { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
@@ -393,7 +393,7 @@
 .ds-btn-secondary .ds-spinner-sm, .ds-btn-ghost .ds-spinner-sm { border-color: var(--ds-border-strong); border-top-color: var(--ds-primary); }
 
 /* ==========================================================================
-   15. STATUS BADGE — white surface, thin border, coloured icon + text
+   15. STATUS BADGE - white surface, thin border, coloured icon + text
 ---------------------------------------------------------------------------- */
 .ds-status {
     /* Compact informational badge (shadcn-style): never a button. */
@@ -412,7 +412,7 @@
 .ds-status-neutral, .ds-status-outline { color: var(--ds-text-secondary); }
 
 /* ==========================================================================
-   16. GROUPED LIST — one bordered surface with dividers (instead of many cards)
+   16. GROUPED LIST - one bordered surface with dividers (instead of many cards)
 ---------------------------------------------------------------------------- */
 .ds-list { list-style: none; margin: 0; padding: 0; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); overflow: hidden; }
 .ds-list > li, .ds-list > details { border-bottom: 1px solid var(--ds-border); }
@@ -444,7 +444,7 @@ dialog.ds-sheet[open] { animation: ds-sheet-in .2s ease-out; }
 .ds-sheet-foot { display: flex; flex-direction: column; gap: 8px; padding: 12px 20px calc(20px + env(safe-area-inset-bottom)); }
 
 /* ==========================================================================
-   18. TOASTS — non-critical confirmations (polite live region)
+   18. TOASTS - non-critical confirmations (polite live region)
 ---------------------------------------------------------------------------- */
 .ds-toast-region { position: fixed; z-index: var(--ds-z-toast); left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 .shell-student .ds-toast-region { bottom: calc(68px + env(safe-area-inset-bottom)); }

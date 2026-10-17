@@ -42,7 +42,7 @@ DEBUG = config('DJANGO_DEBUG', default='True', cast=bool)
 # only trust what's explicitly configured via the ALLOWED_HOSTS env var (comma
 # separated), so the app isn't reachable under the whole shared .pythonanywhere
 # .com / .ngrok space. If nothing is configured we fall back to
-# .pythonanywhere.com so a missing var doesn't 400 everything — but you SHOULD
+# .pythonanywhere.com so a missing var doesn't 400 everything - but you SHOULD
 # pin your exact host in .env for production.
 _extra_hosts = list(config('ALLOWED_HOSTS', default='', cast=Csv()))
 
@@ -81,7 +81,7 @@ MIDDLEWARE = [
     'attendance.middleware.ForcePasswordChangeMiddleware',
 ]
 
-# JWT Settings (cookie-based sessions — existing system)
+# JWT Settings (cookie-based sessions - existing system)
 JWT_SECRET_KEY = config('JWT_SECRET_KEY', default=SECRET_KEY)
 
 # Public URL of this site (used for magic-link emails)
@@ -162,7 +162,7 @@ if DATABASE_URL:
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=0)
     }
     # On MySQL, enforce strict mode so invalid/oversized values are rejected
-    # rather than silently truncated. Guarded to MySQL only — other engines
+    # rather than silently truncated. Guarded to MySQL only - other engines
     # (SQLite in dev, Postgres) don't accept this OPTION.
     if 'mysql' in DATABASES['default'].get('ENGINE', ''):
         DATABASES['default'].setdefault('OPTIONS', {})['init_command'] = (
@@ -179,8 +179,8 @@ else:
 
 # Cache
 #
-# Database cache (not LocMemCache) so security-relevant counters — rate-limit
-# buckets and OTP attempt/lockout state — are SHARED across worker processes and
+# Database cache (not LocMemCache) so security-relevant counters - rate-limit
+# buckets and OTP attempt/lockout state - are SHARED across worker processes and
 # SURVIVE restarts. LocMemCache is per-process, which would let those limits
 # reset or diverge under multiple workers. The cache table is created by the
 # 0025 migration (equivalent to `manage.py createcachetable swasa_cache_table`).
@@ -257,7 +257,7 @@ LOGOUT_REDIRECT_URL = 'login'
 #
 # Dev keeps the http+https tunnel wildcards for convenience. Production trusts
 # HTTPS only, derived from the configured hosts (or an explicit
-# CSRF_TRUSTED_ORIGINS env var) — no plaintext-http origins, no ngrok.
+# CSRF_TRUSTED_ORIGINS env var) - no plaintext-http origins, no ngrok.
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = [
         'https://*.pythonanywhere.com',
@@ -328,7 +328,7 @@ EMAIL_TIMEOUT = 30
 # them (institutional servers like @st.ug.edu.gh, and sometimes other providers,
 # filter or drop the mail). So new student registration is restricted to the
 # domains below. Broaden this list ONLY after confirming a real OTP arrives at
-# that provider — override without a code change by setting a comma-separated
+# that provider - override without a code change by setting a comma-separated
 # ALLOWED_STUDENT_EMAIL_DOMAINS in .env (e.g. "gmail.com,yahoo.com").
 # Existing accounts are never affected; this is enforced only at registration.
 ALLOWED_STUDENT_EMAIL_DOMAINS = [
@@ -357,15 +357,15 @@ ALUMNI_INVITE_MAX_PER_DAY = config('ALUMNI_INVITE_MAX_PER_DAY', default=2, cast=
 # Password reset email subject template
 PASSWORD_RESET_SUBJECT_TEMPLATE = 'registration/password_reset_subject.txt'
 
-# Security settings — always on
+# Security settings - always on
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
-# Security settings — production only (behind PythonAnywhere / Render HTTPS proxy)
+# Security settings - production only (behind PythonAnywhere / Render HTTPS proxy)
 if not DEBUG:
-    # Tell Django it's behind an HTTPS reverse proxy — prevents redirect loops
+    # Tell Django it's behind an HTTPS reverse proxy - prevents redirect loops
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    # Do NOT set SECURE_SSL_REDIRECT on PythonAnywhere — the proxy handles it
+    # Do NOT set SECURE_SSL_REDIRECT on PythonAnywhere - the proxy handles it
     # SECURE_SSL_REDIRECT = True  ← causes redirect loops on PA
     SECURE_HSTS_SECONDS = 31536000      # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True

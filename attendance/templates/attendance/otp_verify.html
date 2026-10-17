@@ -11,7 +11,7 @@
         {% if purpose == 'login' %}Verify login
         {% elif purpose == 'registration' %}Verify email
         {% else %}Verify code
-        {% endif %} — SWASA Attendance
+        {% endif %} | SWASA Attendance
 </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,7 +163,7 @@
         {% if purpose == 'registration' or purpose == 'password_reset' %}
 <div id="iphoneTip" class="iphone-tip">
 <span class="iconify" data-icon="mdi:cellphone-check"></span>
-<span><strong>On iPhone?</strong> Check your email for a one-tap verification button — no code typing needed.</span>
+<span><strong>On iPhone?</strong> Check your email for a one-tap verification button. No code typing needed.</span>
 <button type="button" class="tip-close" onclick="this.closest('.iphone-tip').style.display='none';" aria-label="Dismiss">&times;</button>
 </div>
         {% endif %}

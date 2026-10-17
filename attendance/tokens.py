@@ -7,7 +7,7 @@ over the previous inline `jwt.encode` calls:
   * Password-bound revocation. Every token carries a short `sh` claim derived
     (via HMAC) from the user's current password hash. Changing/resetting the
     password changes that hash, so all previously issued tokens stop validating
-    immediately — real revocation for a stateless token.
+    immediately - real revocation for a stateless token.
 
   * Short access tokens + sliding refresh. The access token is short-lived; a
     longer-lived refresh token lets the middleware mint a fresh access token

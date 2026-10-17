@@ -61,7 +61,7 @@ COURSES = [
     {'code': 'KISW 406', 'name': 'Advanced Kiswahili Translation II',           'level': '400', 'sem': 2},
     {'code': 'KISW 414', 'name': 'Contemporary Kiswahili Literature',           'level': '400', 'sem': 2},
     # KISW 420 code is already used by Sem 1; Study Abroad is a year-long
-    # enrolment — stored under the Sem 1 course for both halves.
+    # enrolment - stored under the Sem 1 course for both halves.
 ]
 
 
@@ -78,7 +78,7 @@ class Command(BaseCommand):
         # ── 0. Find lecturer ──────────────────────────────────────────────────
         lecturer = User.objects.filter(is_staff=True).order_by('id').first()
         if not lecturer:
-            w(err('No staff user found — create one first.'))
+            w(err('No staff user found - create one first.'))
             return
         w(hdr(f'\nLecturer: {lecturer.username} (id={lecturer.id})'))
 
@@ -173,7 +173,7 @@ class Command(BaseCommand):
             ClassSession.objects.bulk_create(sessions)
             session_count += WEEKS_PER_SEM
 
-            w(f'     [{cd["sem"]}] {course.code} | {course.name} | L{cd["level"]} — {WEEKS_PER_SEM} sessions')
+            w(f'     [{cd["sem"]}] {course.code} | {course.name} | L{cd["level"]} - {WEEKS_PER_SEM} sessions')
 
         # ── Summary ───────────────────────────────────────────────────────────
         w(ok(

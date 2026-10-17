@@ -89,7 +89,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 .level-option { position: relative; }
 .level-option input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
 
-/* Currently assigned — green tint, checked by default */
+/* Currently assigned - green tint, checked by default */
 .level-label-assigned {
     display: flex;
     align-items: center;
@@ -113,7 +113,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
     background: var(--red-lt);
 }
 
-/* Available to add — normal, unchecked by default */
+/* Available to add - normal, unchecked by default */
 .level-label-available {
     display: flex;
     align-items: center;
@@ -271,7 +271,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
         {% if assigned_ids %}
 <div class="section-label">
 <span class="iconify" data-icon="mdi:check-circle-outline" style="color:var(--green);"></span>
-            Currently Teaching — uncheck to remove
+            Currently Teaching: uncheck to remove
 </div>
 <div class="level-list">
             {% for level in all_levels %}
@@ -308,7 +308,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
         {% if assigned_ids %}<hr class="divider">{% endif %}
 <div class="section-label">
 <span class="iconify" data-icon="mdi:plus-circle-outline"></span>
-            Available to Add — check to add
+            Available to Add: check to add
 </div>
 <div class="level-list">
         {% endif %}

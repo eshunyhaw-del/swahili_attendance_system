@@ -9,9 +9,9 @@ CULTURAL_DATES = [
         'emoji': '🌍',
         'description': (
             'Leo ni Siku ya Lugha ya Kiswahili Duniani! Tunaadhimisha utajiri wa lugha yetu ya Kiswahili. '
-            'Kiswahili ni lugha ya Waafrika — inayounganisha mataifa zaidi ya watu milioni 200! '
+            'Kiswahili ni lugha ya Waafrika - inayounganisha mataifa zaidi ya watu milioni 200! '
             '(Today is World Swahili Language Day! We celebrate the richness of our Kiswahili language. '
-            'Swahili is Africa\'s language — connecting over 200 million people!)'
+            'Swahili is Africa\'s language - connecting over 200 million people!)'
         ),
     },
     {

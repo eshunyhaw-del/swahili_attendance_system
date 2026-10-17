@@ -1,9 +1,9 @@
 """Security regression tests for the System_Redesigns hardening pass.
 
 Covers:
-  * C-1 — ta_get_students_ajax authorization (no PII/code leak to students)
-  * C-2 — TA accounts are NOT auto-approved by email verification
-  * C-3 — API OTP verification locks the account after repeated bad guesses
+  * C-1 - ta_get_students_ajax authorization (no PII/code leak to students)
+  * C-2 - TA accounts are NOT auto-approved by email verification
+  * C-3 - API OTP verification locks the account after repeated bad guesses
 """
 
 from datetime import timedelta
@@ -184,7 +184,7 @@ class LoginRateLimitTests(TestCase):
 
 
 class JWTSessionTests(TestCase):
-    """H-2: JWT cookie auth — password-bound revocation and sliding refresh."""
+    """H-2: JWT cookie auth - password-bound revocation and sliding refresh."""
 
     def setUp(self):
         cache.clear()
@@ -458,7 +458,7 @@ class SupportRoutingTests(TestCase):
 
 class StudentEmailDomainTests(TestCase):
     """New students may register only with an allowed email domain
-    (settings.ALLOWED_STUDENT_EMAIL_DOMAINS — Gmail by default), because
+    (settings.ALLOWED_STUDENT_EMAIL_DOMAINS - Gmail by default), because
     verification codes are Gmail-sent and reliably reach only those inboxes."""
 
     def _data(self, email):

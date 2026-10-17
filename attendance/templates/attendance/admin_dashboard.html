@@ -1,5 +1,5 @@
 {% extends "attendance/base.html" %}
-{% block title %}Lecturer Portal — Analytics{% endblock %}
+{% block title %}Lecturer Portal - Analytics{% endblock %}
 
 {% block content %}
 <style>
@@ -35,25 +35,25 @@ body { background: var(--bg-base) !important; background-image: none !important;
 
 /* ── Notification Strip ── */
 .ad-notify {
-    background: #FBF1E3; border: 1px solid #EED6AE; border-radius: var(--radius-md);
+    background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md);
     padding: 0.75rem 1.25rem; margin-bottom: 1.5rem;
     display: flex; align-items: center; gap: 0.75rem 1.5rem; flex-wrap: wrap;
-    font-size: 13px;
+    font-size: 13px; color: var(--ds-text);
 }
-.ad-notify-icon { font-size: 18px; color: #C9A00E; flex-shrink: 0; }
+.ad-notify-icon { font-size: 18px; color: var(--ds-warning); flex-shrink: 0; }
 .ad-notify-item {
     display: inline-flex; align-items: center; gap: 0.4rem;
-    font-weight: 700; text-decoration: none; color: #7a5a00; transition: color 0.13s;
+    font-weight: 600; text-decoration: none; color: var(--ds-text); transition: color 0.13s;
 }
-.ad-notify-item:hover { color: #091A55; }
+.ad-notify-item:hover { color: var(--ds-primary); }
 .ad-notify-dot {
-    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 6px; flex-shrink: 0;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 800;
-    background: #F2C31A; color: #091A55;
+    font-size: 12px; font-weight: 500; line-height: 16px;
+    background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-warning);
 }
-.ad-notify-dot.red { background: #e74c3c; color: #fff; }
-.ad-notify-dot.blue { background: #3498db; color: #fff; }
+.ad-notify-dot.red { color: var(--ds-danger); }
+.ad-notify-dot.blue { color: var(--ds-info); }
 
 /* ── KPI Grid (2 → 3 → 6 columns) ── */
 .ad-kpi-grid {
@@ -226,7 +226,7 @@ html[data-theme="dark"] .ad-ta-lvl {
 <div class="ad-page-header">
 <div class="ad-header-text">
 <h1>Lecturer Portal</h1>
-<p>Academic analytics &amp; board insights &mdash; {% now "l, F j, Y" %}</p>
+<p>Academic analytics &amp; board insights, {% now "l, F j, Y" %}</p>
 </div>
 <div class="ad-header-actions">
 <a href="{% url 'attendance:admin_search' %}" class="ad-btn-ghost">
@@ -245,7 +245,7 @@ Daily View
     {% if misuse_alerts_count or pending_tickets %}
 <div class="ad-notify">
 <span class="iconify ad-notify-icon" data-icon="mdi:bell-ring-outline"></span>
-<strong style="color:#7a5a00; font-size:12.5px; flex-shrink:0;">Action required:</strong>
+<strong style="color:var(--ds-text); font-size:12.5px; flex-shrink:0;">Action required:</strong>
         {% if misuse_alerts_count %}
 <a href="{% url 'attendance:admin_alerts' %}" class="ad-notify-item">
 <span class="ad-notify-dot red">{{ misuse_alerts_count }}</span>
@@ -486,7 +486,7 @@ View Report
         {% else %}
 <div class="ad-empty">
 <span class="iconify" data-icon="mdi:shield-check-outline" style="color:#1E9E5E;"></span>
-<span>No at-risk students — all students are above 75% attendance.</span>
+<span>No at-risk students. All students are above 75% attendance.</span>
 </div>
         {% endif %}
 </div>

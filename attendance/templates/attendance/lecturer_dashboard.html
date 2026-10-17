@@ -1,5 +1,5 @@
 {% extends "attendance/base.html" %}
-{% block title %}Weekly Sessions — {{ week_start|date:"M j" }}–{{ week_end|date:"M j, Y" }}{% endblock %}
+{% block title %}Weekly Sessions - {{ week_start|date:"M j" }}–{{ week_end|date:"M j, Y" }}{% endblock %}
 
 {% block content %}
 <style>
@@ -200,7 +200,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
 <div class="ld-header">
 <div class="ld-header-text">
 <h1>Weekly Sessions</h1>
-<p>{{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}{% if week_offset == 0 %} &mdash;<span style="color:#F2C31A;font-weight:700;">This Week</span>{% endif %}</p>
+<p>{{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}{% if week_offset == 0 %} - <span style="color:#F2C31A;font-weight:700;">This Week</span>{% endif %}</p>
 </div>
 <a href="{% url 'attendance:admin_dashboard' %}" class="ld-header-link">
 <span class="iconify" data-icon="mdi:chart-bar-outline"></span> Full Analytics
