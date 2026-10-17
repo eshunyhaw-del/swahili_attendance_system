@@ -344,7 +344,7 @@ ALLOWED_STUDENT_EMAIL_DOMAINS = [
 # overridable via .env without a code change.
 ALUMNI_WHATSAPP_URL = config(
     'ALUMNI_WHATSAPP_URL',
-    default='https://chat.whatsapp.com/DhRMUT39Jlg56QGxhNklgl?s=cl&p=a&ilr=1',
+    default='https://chat.whatsapp.com/BsRmGHZeuVZLx2RrSN69c7?s=cl&p=a&mlu=4&ilr=4',
 )
 # How many days before the second semester's end_date the pop-up starts showing.
 ALUMNI_INVITE_WINDOW_DAYS = config('ALUMNI_INVITE_WINDOW_DAYS', default=7, cast=int)
