@@ -1255,6 +1255,13 @@
 </a>
                 {% endif %}
 
+<!-- ── Scale Shop (students and TAs) ── -->
+                {% if not user.is_staff %}
+<a href="{% url 'attendance:scale_shop' %}" class="nav-item">
+<span class="iconify" data-icon="lucide:zap"></span> Scale Shop
+</a>
+                {% endif %}
+
 <!-- ── Quick Links (all roles) ── -->
 <div class="nav-label">Quick Links</div>
 <a href="https://www.ug.edu.gh/student-life" target="_blank" rel="noopener noreferrer" class="nav-item">
