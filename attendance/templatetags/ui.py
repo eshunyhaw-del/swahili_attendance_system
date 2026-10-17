@@ -40,3 +40,27 @@ def icon(name, size=20, cls=''):
         f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
         f'focusable="false">{_body(name)}</svg>'
     )
+
+
+# Status -> (visual variant, Lucide icon, default label). Only statuses the app
+# actually supports, plus "upcoming" (a not-yet-held session, a display state).
+_BADGES = {
+    'present':      ('success', 'check',       'Present'),
+    'absent':       ('danger',  'x',           'Absent'),
+    'not_recorded': ('outline', 'minus',       'Not recorded'),
+    'pending':      ('neutral', 'clock',       'Pending'),
+    'eligible':     ('success', 'badge-check', 'Exam eligible'),
+    'at_risk':      ('warning', 'badge-alert', 'At risk'),
+    'not_eligible': ('danger',  'badge-x',     'Not eligible'),
+    'upcoming':     ('neutral', 'clock',       'Upcoming'),
+}
+
+
+@register.simple_tag
+def badge(status, label=None):
+    """{% badge "present" %} / {% badge "present" label="Attendance recorded" %}
+
+    A compact, informational status badge (icon + text, never colour alone)."""
+    kind, icon_name, text = _BADGES.get(status, ('neutral', '', str(status)))
+    glyph = icon(icon_name, 12) if icon_name else ''
+    return mark_safe(f'<span class="ds-status ds-status-{kind}">{glyph}{escape(label or text)}</span>')

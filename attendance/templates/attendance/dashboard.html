@@ -40,7 +40,7 @@
 </div>
 <div class="js-state" data-session="{{ item.session.id }}">
         {% if item.submitted %}
-            {% include "attendance/components/_status.html" with kind="success" icon="circle-check" label="Attendance recorded" %}
+            {% badge "present" label="Attendance recorded" %}
         {% else %}
 <button type="button" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-block" data-checkin data-session="{{ item.session.id }}" data-course="{{ item.course.id }}" data-title="{{ item.course.code }} · {{ item.session.start_time|time:'H:i' }}"><span class="lbl">Check in</span></button>
         {% endif %}
@@ -64,15 +64,12 @@
 <summary>
 <div class="cr-main">
 <div class="cr-name">{{ course.course.name }}</div>
-<div class="cr-sub">{{ course.course.code }} · <span data-attended-for="{{ course.course.id }}">{{ course.attended }}</span> attended · {{ course.eligibility.total_absent }} missed</div>
+<div class="cr-code">{{ course.course.code }}</div>
+<div class="cr-meta">
+        {% if course.eligibility.status == 'blocked' %}{% badge "not_eligible" %}{% elif course.eligibility.status == 'warning' %}{% badge "at_risk" %}{% else %}{% badge "eligible" %}{% endif %}
+<span class="cr-counts"><span data-attended-for="{{ course.course.id }}">{{ course.attended }}</span> attended · {{ course.eligibility.total_absent }} missed</span>
 </div>
-        {% if course.eligibility.status == 'blocked' %}
-            {% include "attendance/components/_status.html" with kind="danger" icon="circle-x" label="Not eligible" %}
-        {% elif course.eligibility.status == 'warning' %}
-            {% include "attendance/components/_status.html" with kind="warning" icon="triangle-alert" label="At risk" %}
-        {% else %}
-            {% include "attendance/components/_status.html" with kind="success" icon="circle-check" label="Eligible" %}
-        {% endif %}
+</div>
 {% icon "chevron-right" 18 "cr-chev" %}
 </summary>
 <div class="cr-body">
@@ -82,9 +79,9 @@
 <div><div class="week-title">Week {{ week.week_num }}</div><div class="week-date">{{ week.session.date|date:"D j M" }} · {{ week.session.start_time|time:"H:i" }}</div></div>
 <div class="js-state" data-session="{{ week.session.id }}">
             {% if week.status == 'submitted' %}
-                {% include "attendance/components/_status.html" with kind="success" icon="circle-check" label="Present" %}
+                {% badge "present" %}
             {% elif week.session.date|date:"Y-m-d" > today_iso %}
-                {% include "attendance/components/_status.html" with kind="neutral" icon="clock" label="Upcoming" %}
+                {% badge "upcoming" %}
             {% else %}
 <button type="button" class="ds-btn ds-btn-secondary ds-btn-sm" data-checkin data-session="{{ week.session.id }}" data-course="{{ course.course.id }}" data-title="{{ course.course.code }} · Week {{ week.week_num }}"><span class="lbl">Check in</span></button>
             {% endif %}

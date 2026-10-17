@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static ui %}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -117,18 +117,15 @@
 </div>
 </section>
 
-<!-- ATTENDANCE STATES -->
-<section class="sg-section">
+<!-- STATUS BADGES -->
+<section class="sg-section" id="badges">
 <p class="ds-eyebrow">Components</p>
-<h2 class="ds-h2">Attendance status</h2>
-<p class="sg-lead" style="margin-bottom:16px">A fixed vocabulary reused on every roster, history row and report. Each state pairs a colour with an icon and label, so status is never conveyed by colour alone.</p>
-<div class="sg-panel sg-flex">
-<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
-<span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span>
-<span class="ds-att ds-att-late"><span class="iconify" data-icon="mdi:clock-alert"></span> Late</span>
-<span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span>
-<span class="ds-att ds-att-pending"><span class="iconify" data-icon="mdi:progress-clock"></span> Pending</span>
-<span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not Recorded</span>
+<h2 class="ds-h2">Status badges</h2>
+<p class="sg-lead" style="margin-bottom:16px">Compact and informational, never a button. 22px tall, 12px medium text, 6px corners, a 12px icon, a subtle tint and a thin border. Meaning is carried by the icon and the words, not by colour alone. Only statuses the application supports.</p>
+<div class="sg-panel ds-stack ds-gap-4">
+<div><p class="sg-sub" style="margin-top:0">Attendance</p><div class="sg-flex">{% badge "present" %}{% badge "absent" %}{% badge "not_recorded" %}{% badge "pending" %}</div></div>
+<div><p class="sg-sub" style="margin-top:0">Exam eligibility</p><div class="sg-flex">{% badge "eligible" %}{% badge "at_risk" %}{% badge "not_eligible" %}</div></div>
+<div><p class="sg-sub" style="margin-top:0">Display state</p><div class="sg-flex">{% badge "upcoming" %}{% badge "present" label="Attendance recorded" %}</div></div>
 </div>
 </section>
 

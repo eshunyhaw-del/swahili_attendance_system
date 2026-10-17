@@ -812,3 +812,30 @@ class CodeGenerationStressTests(TestCase):
         r = self.client.post(reverse('attendance:student_submit_ta_code'),
                              {'session_id': self.session.id, 'code': '004521'})
         self.assertEqual(r.status_code, 200)
+
+
+class StatusBadgeTagTests(TestCase):
+    """{% badge %} renders compact, informational badges for supported statuses only."""
+
+    def _render(self, tpl):
+        from django.template import Template, Context
+        return Template('{% load ui %}' + tpl).render(Context({}))
+
+    def test_supported_statuses_render_icon_and_text(self):
+        for key, text in (('present', 'Present'), ('absent', 'Absent'), ('not_recorded', 'Not recorded'),
+                          ('pending', 'Pending'), ('eligible', 'Exam eligible'), ('at_risk', 'At risk'),
+                          ('not_eligible', 'Not eligible')):
+            html = self._render('{% badge "' + key + '" %}')
+            self.assertIn('ds-status', html)
+            self.assertIn('<svg', html)       # icon is always present: meaning never relies on colour alone
+            self.assertIn(text, html)
+
+    def test_label_override_and_escaping(self):
+        html = self._render('{% badge "present" label="<b>x</b>" %}')
+        self.assertIn('&lt;b&gt;x&lt;/b&gt;', html)
+
+    def test_badge_is_not_interactive(self):
+        html = self._render('{% badge "present" %}')
+        self.assertTrue(html.startswith('<span'))
+        self.assertNotIn('<button', html)
+        self.assertNotIn('<a ', html)

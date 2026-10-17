@@ -411,11 +411,15 @@
    15. STATUS BADGE — solid tint, icon + text, readable on both themes
 ---------------------------------------------------------------------------- */
 .ds-status {
-    display: inline-flex; align-items: center; gap: 6px;
-    min-height: 26px; padding: 3px 10px; border-radius: var(--ds-radius-sm);
-    font-size: 12px; font-weight: 600; line-height: 1.2; white-space: nowrap;
-    border: 1px solid transparent;
+    /* Compact informational badge (shadcn-style): never a button. */
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--ds-radius-sm);          /* 6px */
+    font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap;
+    border: 1px solid transparent; vertical-align: middle;
+    cursor: default; user-select: none;
 }
+.ds-status .icon { width: 12px; height: 12px; vertical-align: 0; }
+.ds-status-outline { background: transparent; color: var(--ds-text-secondary); border-color: var(--ds-border-strong); }
 .ds-status-success { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
 .ds-status-warning { background: var(--ds-warning-bg); color: var(--ds-warning); border-color: var(--ds-warning-border); }
 .ds-status-danger  { background: var(--ds-danger-bg);  color: var(--ds-danger);  border-color: var(--ds-danger-border); }
