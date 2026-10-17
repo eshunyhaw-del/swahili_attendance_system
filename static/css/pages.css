@@ -82,3 +82,7 @@
 .hist-empty > summary::after { content: "+"; margin-left: auto; font-size: 18px; color: var(--ds-text-muted); }
 .hist-empty[open] > summary::after { content: "2"; }
 .hist-empty > .row:first-of-type { border-top: 0; }
+
+/* Paired action buttons: full width on phones, compact beside each other on wide screens */
+.row-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (min-width: 720px) { .row-acts { grid-template-columns: repeat(2, minmax(120px, 180px)); } }

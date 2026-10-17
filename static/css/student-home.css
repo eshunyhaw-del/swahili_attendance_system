@@ -58,3 +58,10 @@
 .ci-code { height: 60px; text-align: center; font-family: var(--ds-font-mono); font-size: 28px; font-weight: 500; letter-spacing: .4em; padding-left: .4em; }
 .ci-code::placeholder { letter-spacing: .4em; color: var(--ds-text-disabled); }
 .ci-error { margin-top: 8px; }
+
+/* Desktop and tablet: courses on the left, upcoming on the right */
+@media (min-width: 900px) {
+    .home { max-width: 1000px; }
+    .home-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 0 32px; align-items: start; }
+    .home-side .home-label:first-child { margin-top: 0; }
+}

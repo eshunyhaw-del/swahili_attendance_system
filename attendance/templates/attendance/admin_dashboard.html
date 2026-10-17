@@ -92,7 +92,7 @@
 <div><dt>Records</dt><dd>{{ stat.attendance_records }}</dd></div>
 <div><dt>At risk</dt><dd{% if stat.at_risk > 0 %} style="color:var(--ds-danger)"{% endif %}>{{ stat.at_risk }}</dd></div>
 </dl>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div class="row-acts">
 <a href="{% url 'attendance:export_level' stat.level.id %}" class="ds-btn ds-btn-secondary">{% icon "download" 18 %}Export CSV</a>
 <a href="{% url 'attendance:student_report' %}?level={{ stat.level.id }}" class="ds-btn ds-btn-primary">View report</a>
 </div>

@@ -48,7 +48,7 @@
 <span class="ds-status {% if student.percentage < 60 %}ds-status-danger{% else %}ds-status-success{% endif %}">{{ student.percentage }}%</span>
 </div>
 <p class="row-sub" style="margin:0">Attended {{ student.total_attended }} of {{ student.total_sessions }} sessions</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div class="row-acts">
 <a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="ds-btn ds-btn-secondary">Details</a>
 <a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="ds-btn ds-btn-secondary">{% icon "download" 18 %}CSV</a>
 </div>

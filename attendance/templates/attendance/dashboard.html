@@ -13,6 +13,9 @@
 <div class="home-phrase" data-phrase-widget></div>
 </header>
 
+<div class="home-cols">
+<div class="home-main">
+
 <!-- ── Today ─────────────────────────────────────────────────────────── -->
 <h2 class="home-label"><span>Today</span><span class="date">{% now "l, j M" %}</span></h2>
 {% if todays_sessions %}
@@ -102,6 +105,8 @@
 </div>
 {% endif %}
 
+</div>
+<aside class="home-side">
 <!-- ── Coming up ─────────────────────────────────────────────────────── -->
 {% if upcoming_sessions %}
 <h2 class="home-label"><span>Coming up</span></h2>
@@ -114,6 +119,8 @@
     {% endfor %}
 </ul>
 {% endif %}
+</aside>
+</div>
 
 </div>
 

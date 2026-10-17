@@ -14,6 +14,13 @@
 .stu-id { font-size: 12.5px; color: var(--ds-text-muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .srow .tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .srow .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (min-width: 900px) {
+    .srow { flex-direction: row; align-items: center; gap: 24px; flex-wrap: wrap; }
+    .srow .top { flex: 1 1 260px; }
+    .srow .bar, .srow .stu-id.nodata { flex: 1 1 220px; }
+    .srow .acts { grid-template-columns: repeat(2, 120px); flex: 0 0 auto; }
+    .drow { padding: 4px 24px 14px; }
+}
 .srow .expand-btn .icon { transition: transform .15s; }
 .srow.open .expand-btn .icon { transform: rotate(180deg); }
 .drow { display: none; padding: 4px 16px 14px; background: var(--ds-surface-sunken); border-bottom: 1px solid var(--ds-border); }
@@ -98,7 +105,7 @@
 <span class="bar-pct">{{ s.attendance_percentage }}%</span>
 </div>
                 {% else %}
-<div class="stu-id" style="margin:0">No sessions yet</div>
+<div class="stu-id nodata" style="margin:0">No sessions yet</div>
                 {% endif %}
 <div class="acts">
 <button type="button" class="ds-btn ds-btn-secondary expand-btn" aria-label="Toggle course breakdown">Courses {% icon "chevron-down" 16 %}</button>
