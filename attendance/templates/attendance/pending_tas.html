@@ -1,166 +1,56 @@
 {% extends "attendance/base.html" %}
+{% load static ui %}
 {% block title %}Pending TA Approvals{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
-<style>
-body { background: var(--bg-base) !important; background-image: none !important; }
+<div class="pg">
 
-.pta-wrap { max-width: 720px; margin: 0 auto; padding: 0 0 3rem; }
-
-.pta-page-header {
-    background: #0D2472;
-    border-radius: var(--radius-lg);
-    padding: 1.375rem 1.75rem;
-    margin-bottom: 1.5rem;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
-    position: relative; overflow: hidden;
-}
-.pta-page-header h1 { font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem; position: relative; z-index: 1; }
-.pta-page-header p { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
-.pta-header-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-warning); position: relative; z-index: 1; }
-
-.pta-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 1.5rem;
-    margin-bottom: 1.125rem; box-shadow: var(--shadow-xs);
-    border: 1px solid var(--border);
-    transition: box-shadow 0.15s;
-}
-.pta-card:hover { box-shadow: var(--shadow-md); }
-
-.pta-card-top { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
-.pta-avatar {
-    width: 46px; height: 46px; border-radius: 12px;
-    background: rgba(13,36,114,0.08); color: #0D2472;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 19px; font-weight: 800; flex-shrink: 0; border: 1px solid rgba(13,36,114,0.12);
-}
-.pta-name { font-size: 15px; font-weight: 800; color: var(--text-primary); margin-bottom: 2px; }
-.pta-email { font-size: 12px; color: var(--text-muted); }
-
-.pta-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 1.25rem; margin-bottom: 1.25rem; }
-.pta-detail-lbl { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
-.pta-detail-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.pta-lvl-chip {
-    display: inline-block; font-size: 11px; font-weight: 700;
-    padding: 2px 8px; border-radius: 5px; margin: 2px;
-    background: rgba(13,36,114,0.07); color: #0D2472; border: 1px solid rgba(13,36,114,0.12);
-}
-html[data-theme="dark"] .pta-lvl-chip {
-    color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
-}
-
-.pta-actions {
-    display: flex; align-items: flex-end; gap: 0.875rem; flex-wrap: wrap;
-    padding-top: 1.125rem; border-top: 1px solid var(--border);
-}
-.pta-notes-group { flex: 1; min-width: 200px; }
-.pta-notes-lbl { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.35rem; display: block; }
-.pta-notes {
-    width: 100%; padding: 0.6rem 0.875rem;
-    border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: inherit; font-size: 13px; color: var(--text-primary);
-    background: var(--bg-subtle); resize: none; box-sizing: border-box;
-    transition: border-color 0.13s;
-}
-.pta-notes:focus { outline: none; border-color: #0D2472; background: #fff; }
-
-.pta-btn-group { display: flex; gap: 0.5rem; flex-shrink: 0; }
-.pta-btn-reject {
-    padding: 0.55rem 1rem; border-radius: 8px; cursor: pointer; font-family: inherit;
-    font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;
-    background: transparent; color: #C0392B;
-    border: 1.5px solid rgba(192,57,43,0.28); transition: all 0.13s; white-space: nowrap;
-}
-.pta-btn-reject:hover { background: rgba(192,57,43,0.07); border-color: #C0392B; }
-.pta-btn-approve {
-    padding: 0.55rem 1.25rem; border-radius: 8px; cursor: pointer; font-family: inherit;
-    font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;
-    background: #1E9E5E; color: #fff; border: none;
-    box-shadow: 0 1px 4px rgba(30,158,94,0.3); transition: all 0.13s; white-space: nowrap;
-}
-.pta-btn-approve:hover { background: #178a51; box-shadow: 0 3px 10px rgba(30,158,94,0.4); }
-.pta-btn-approve:active, .pta-btn-reject:active { transform: scale(0.97); }
-
-.pta-empty {
-    text-align: center; padding: 3.5rem 1rem;
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);
-}
-.pta-empty .iconify { font-size: 52px; color: #1E9E5E; display: block; margin: 0 auto 0.875rem; }
-.pta-empty h3 { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; }
-.pta-empty p { font-size: 13px; color: var(--text-muted); margin: 0; }
-</style>
-
-<div class="pta-wrap">
-
-<div class="pta-page-header">
+<header class="pg-head">
 <div>
-<h1>Pending TA Approvals</h1>
-<p>Review and approve teaching assistant applications</p>
+<h1>Pending TA approvals</h1>
+<p class="pg-sub">Review and approve teaching assistant applications.</p>
 </div>
-        {% if pending_tas %}
-<span class="pta-header-count">{{ pending_tas|length }} pending</span>
-        {% endif %}
-</div>
+    {% if pending_tas %}<span class="ds-status ds-status-warning">{% icon "clock" 12 %}{{ pending_tas|length }} pending</span>{% endif %}
+</header>
 
     {% for ta in pending_tas %}
-<div class="pta-card">
-
-<div class="pta-card-top">
-<div class="pta-avatar">{{ ta.user.get_full_name|first|upper|default:ta.user.username|first|upper }}</div>
-<div>
-<div class="pta-name">{{ ta.user.get_full_name|default:ta.user.username }}</div>
-<div class="pta-email">{{ ta.user.email }}</div>
+<div class="pg-card">
+<div class="row-top">
+<div style="min-width:0">
+<p class="row-title">{{ ta.user.get_full_name|default:ta.user.username }}</p>
+<p class="row-sub">{{ ta.user.email }}</p>
 </div>
 </div>
 
-<div class="pta-details">
-<div>
-<div class="pta-detail-lbl">Username</div>
-<div class="pta-detail-val">{{ ta.user.username }}</div>
-</div>
-<div>
-<div class="pta-detail-lbl">Phone</div>
-<div class="pta-detail-val">{{ ta.phone_number|default:"-" }}</div>
-</div>
-<div style="grid-column: 1 / -1;">
-<div class="pta-detail-lbl">Requested Levels</div>
-<div class="pta-detail-val" style="margin-top:4px;">
-                    {% for level in ta.assigned_levels.all %}
-<span class="pta-lvl-chip">Level {{ level.name }}</span>
-                    {% empty %}
-<span style="color:var(--text-muted); font-style:italic;">None specified</span>
-                    {% endfor %}
-</div>
-</div>
+<dl class="mini" style="grid-template-columns:1fr 1fr;margin:14px 0">
+<div><dt>Username</dt><dd style="font-size:14px;overflow-wrap:anywhere">{{ ta.user.username }}</dd></div>
+<div><dt>Phone</dt><dd style="font-size:14px">{{ ta.phone_number|default:"-" }}</dd></div>
+</dl>
+<p class="row-sub" style="margin:0 0 6px;font-weight:600">Requested levels</p>
+<div class="row-badges" style="justify-content:flex-start;margin-bottom:16px">
+            {% for level in ta.assigned_levels.all %}<span class="ds-status ds-status-neutral">Level {{ level.name }}</span>{% empty %}<span class="row-sub">None specified</span>{% endfor %}
 </div>
 
-<form method="post">
+<form method="post" style="margin:0">
             {% csrf_token %}
 <input type="hidden" name="ta_profile_id" value="{{ ta.id }}">
-<div class="pta-actions">
-<div class="pta-notes-group">
-<label class="pta-notes-lbl">Notes (optional)</label>
-<textarea name="approval_notes" rows="2" class="pta-notes" placeholder="Add a note for this decision…"></textarea>
+<div class="ds-field">
+<label class="ds-label" for="notes-{{ ta.id }}">Notes (optional)</label>
+<textarea name="approval_notes" id="notes-{{ ta.id }}" rows="2" class="ds-textarea" placeholder="Add a note for this decision"></textarea>
 </div>
-<div class="pta-btn-group">
-<button type="submit" name="action" value="reject" class="pta-btn-reject">
-Reject
-</button>
-<button type="submit" name="action" value="approve" class="pta-btn-approve">
-Approve
-</button>
-</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button type="submit" name="action" value="reject" class="ds-btn ds-btn-secondary" style="color:var(--ds-danger)">Reject</button>
+<button type="submit" name="action" value="approve" class="ds-btn ds-btn-primary">{% icon "check" 18 %}Approve</button>
 </div>
 </form>
-
 </div>
     {% empty %}
-<div class="pta-empty">
-<span class="iconify" data-icon="mdi:check-circle-outline"></span>
-<h3>No Pending Approvals</h3>
-<p>All TA applications have been processed. Check back later.</p>
+<div class="pg-empty" style="margin-top:20px">
+{% icon "circle-check" 28 %}
+<strong>No pending approvals</strong>
+All TA applications have been processed. Check back later.
 </div>
     {% endfor %}
 

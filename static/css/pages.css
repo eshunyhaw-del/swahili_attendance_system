@@ -1,0 +1,84 @@
+/* Shared page patterns for the TA and lecturer screens (Stage 3).
+   Everything reads design-system.css tokens, so light and dark both work. */
+.pg { max-width: 760px; margin: 0 auto; }
+.pg-wide { max-width: 1080px; }
+
+.pg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 2px 0 16px; }
+.pg-head h1 { font-size: 20px; line-height: 1.3; font-weight: 700; letter-spacing: -.01em; margin: 0; color: var(--ds-text); }
+.pg-sub { font-size: 13px; line-height: 1.5; color: var(--ds-text-muted); margin: 4px 0 0; max-width: 60ch; }
+.pg-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Totals: one grouped surface, hairlines between cells */
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--ds-border); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); overflow: hidden; }
+.kpis.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.kpi { background: var(--ds-surface); padding: 14px 14px; min-width: 0; }
+.kpi-val { font-size: 22px; line-height: 1.1; font-weight: 700; letter-spacing: -.01em; color: var(--ds-text); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; }
+.kpi-val .icon { color: var(--ds-text-muted); }
+.kpi-lbl { margin-top: 4px; font-size: 12px; font-weight: 600; color: var(--ds-text-muted); }
+@media (min-width: 640px) { .kpis { grid-template-columns: repeat(4, 1fr); } .kpis.cols-3 { grid-template-columns: repeat(3, 1fr); } .kpis.cols-6 { grid-template-columns: repeat(6, 1fr); } }
+
+/* Section label + heading */
+.sec { margin: 28px 4px 10px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sec h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+.sec-note { font-size: 12.5px; color: var(--ds-text-muted); white-space: nowrap; }
+.sec-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+
+/* Rows inside a .ds-list */
+.ds-list > .row { border-bottom: 1px solid var(--ds-border); }
+.ds-list > .row:last-child { border-bottom: 0; }
+.row { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.row-title { font-size: 15px; font-weight: 600; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.row-sub { font-size: 12.5px; color: var(--ds-text-muted); margin-top: 2px; }
+.row-badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+
+/* Label-over-value mini stats */
+.mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mini > div { min-width: 0; }
+.mini dt { font-size: 11.5px; font-weight: 600; color: var(--ds-text-muted); }
+.mini dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Thin progress bar */
+.bar { display: flex; align-items: center; gap: 10px; }
+.bar-track { flex: 1; height: 6px; border-radius: 99px; background: var(--ds-neutral-100); overflow: hidden; }
+:root[data-theme="dark"] .bar-track { background: var(--ds-surface-sunken); }
+.bar-fill { height: 100%; border-radius: 99px; background: var(--ds-success); }
+.bar-fill.mid { background: var(--ds-warning); }
+.bar-fill.low { background: var(--ds-danger); }
+.bar-pct { min-width: 38px; text-align: right; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Form fields in cards */
+.pg-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); padding: 16px; }
+.pg-card + .pg-card { margin-top: 12px; }
+.pg-card h2 { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+
+/* Segmented filter chips */
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 12px 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: 0 0 auto; min-height: var(--ds-tap); display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); background: var(--ds-surface); color: var(--ds-text-secondary); font: 600 13px/1 var(--ds-font); cursor: pointer; text-decoration: none; }
+.chip.active, .chip[aria-pressed="true"] { background: var(--ds-primary); border-color: var(--ds-primary); color: #fff; }
+:root[data-theme="dark"] .chip.active, :root[data-theme="dark"] .chip[aria-pressed="true"] { background: var(--ds-inverse-bg); border-color: var(--ds-inverse-bg); color: var(--ds-inverse-text); }
+
+.pg-search { position: relative; }
+.pg-search .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ds-text-muted); pointer-events: none; }
+.pg-search input { padding-left: 42px; }
+
+/* Horizontally scrollable table that stays inside its card */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); }
+.tbl { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.tbl th { text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ds-text-muted); padding: 10px 14px; background: var(--ds-surface-sunken); border-bottom: 1px solid var(--ds-border); }
+.tbl td { padding: 12px 14px; border-bottom: 1px solid var(--ds-border); font-size: 13.5px; vertical-align: middle; }
+.tbl tr:last-child td { border-bottom: 0; }
+
+.pg-empty { padding: 36px 20px; text-align: center; color: var(--ds-text-muted); font-size: 13px; background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-lg); }
+.pg-empty strong { display: block; color: var(--ds-text); font-size: 15px; margin-bottom: 4px; }
+.pg-empty .icon { display: block; margin: 0 auto 10px; }
+.pg-note { display: flex; gap: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: var(--ds-text-secondary); background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); }
+.pg-note .icon { flex: 0 0 auto; margin-top: 2px; color: var(--ds-info); }
+
+/* Collapsible group at the end of a list */
+.hist-empty > summary { list-style: none; display: flex; align-items: center; min-height: var(--ds-tap); padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ds-text-secondary); cursor: pointer; border-top: 1px solid var(--ds-border); background: var(--ds-surface-sunken); }
+.hist-empty > summary::-webkit-details-marker { display: none; }
+.hist-empty > summary::after { content: "+"; margin-left: auto; font-size: 18px; color: var(--ds-text-muted); }
+.hist-empty[open] > summary::after { content: "2"; }
+.hist-empty > .row:first-of-type { border-top: 0; }

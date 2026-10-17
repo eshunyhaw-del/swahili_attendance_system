@@ -859,3 +859,31 @@ class TAShellTests(TestCase):
         self.assertIn(reverse("attendance:ta_announcements"), html)    # More sheet
         self.assertNotIn(reverse("attendance:course_registration"), html)  # not the student sheet
         self.assertNotIn("\u2014", html)                               # no em dashes
+
+
+class StaffShellTests(TestCase):
+    """Lecturer/admin pages share the mobile shell and render without errors."""
+
+    def setUp(self):
+        self.staff = User.objects.create_user("lect_shell", password="x", is_staff=True)
+
+    def test_staff_pages_render_with_staff_nav(self):
+        self.client.force_login(self.staff)
+        for name in ("lecturer_dashboard", "admin_dashboard", "admin_search",
+                     "student_report", "admin_alerts", "admin_support", "pending_tas"):
+            resp = self.client.get(reverse(f"attendance:{name}"))
+            self.assertEqual(resp.status_code, 200, name)
+            html = resp.content.decode()
+            self.assertIn("shell-staff", html, name)
+            self.assertIn(reverse("attendance:admin_search"), html, name)   # More sheet
+            self.assertNotIn("\u2014", html, name)
+
+    def test_ta_secondary_pages_render(self):
+        ta_user = User.objects.create_user("ta_pages", password="x")
+        ta = TAProfile.objects.create(user=ta_user, is_approved=True)
+        ta.assigned_levels.add(Level.objects.get_or_create(name="100")[0])
+        self.client.force_login(ta_user)
+        for name in ("ta_history", "ta_announcements", "ta_support", "ta_guide", "ta_add_levels"):
+            resp = self.client.get(reverse(f"attendance:{name}"))
+            self.assertEqual(resp.status_code, 200, name)
+            self.assertIn("shell-ta", resp.content.decode(), name)

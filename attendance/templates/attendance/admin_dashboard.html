@@ -1,48 +1,20 @@
 {% extends "attendance/base.html" %}
-{% block title %}Lecturer Portal - Analytics{% endblock %}
+{% load static ui %}
+{% block title %}Analytics{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
 <style>
-body { background: var(--bg-base) !important; background-image: none !important; }
-
-.ad-wrap { max-width: 1100px; margin: 0 auto; padding: 0 0 4rem; }
-
-/* ── Page Header ── */
-.ad-page-header {
-    background: #0D2472;
-    border-radius: var(--radius-lg);
-    padding: 1.75rem 2rem;
-    margin-bottom: 1.5rem;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 1rem;
-    position: relative; overflow: hidden;
-}
-.ad-header-text h1 {
-    font-size: 1.45rem; font-weight: 800; color: #fff;
-    letter-spacing: -0.02em; margin-bottom: 0.25rem; position: relative; z-index: 1;
-}
-.ad-header-text p { font-size: 12.5px; color: rgba(255,255,255,0.6); font-weight: 500; margin: 0; position: relative; z-index: 1; }
-.ad-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; position: relative; z-index: 1; }
-.ad-btn-ghost {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.5rem 1rem; border-radius: 8px;
-    font-size: 12.5px; font-weight: 700; font-family: inherit;
-    text-decoration: none; cursor: pointer; transition: all 0.13s;
-    border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.08);
-}
-.ad-btn-ghost:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.5); color: #fff; }
-
-/* ── Notification Strip ── */
 .ad-notify {
     background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md);
-    padding: 0.75rem 1.25rem; margin-bottom: 1.5rem;
+    padding: 0.75rem 1.25rem; margin-bottom: 1rem;
     display: flex; align-items: center; gap: 0.75rem 1.5rem; flex-wrap: wrap;
     font-size: 13px; color: var(--ds-text);
 }
-.ad-notify-icon { font-size: 18px; color: var(--ds-warning); flex-shrink: 0; }
+.ad-notify-icon { color: var(--ds-warning); flex-shrink: 0; }
 .ad-notify-item {
-    display: inline-flex; align-items: center; gap: 0.4rem;
+    display: inline-flex; align-items: center; gap: 0.4rem; min-height: var(--ds-tap);
     font-weight: 600; text-decoration: none; color: var(--ds-text); transition: color 0.13s;
 }
 .ad-notify-item:hover { color: var(--ds-primary); }
@@ -54,197 +26,27 @@ body { background: var(--bg-base) !important; background-image: none !important;
 }
 .ad-notify-dot.red { color: var(--ds-danger); }
 .ad-notify-dot.blue { color: var(--ds-info); }
-
-/* ── KPI Grid (2 → 3 → 6 columns) ── */
-.ad-kpi-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 0.875rem; margin-bottom: 1.5rem;
-}
-@media (min-width: 560px) { .ad-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 960px) { .ad-kpi-grid { grid-template-columns: repeat(6, 1fr); } }
-
-.ad-kpi {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 1rem 1.125rem;
-    box-shadow: 0 2px 8px rgba(13,36,114,0.06), 0 1px 3px rgba(13,36,114,0.04);
-    transition: box-shadow 0.15s, transform 0.15s; min-width: 0;
-}
-.ad-kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-
-.ad-kpi-icon {
-    font-size: 18px; padding: 0.4rem; border-radius: 8px;
-    display: inline-flex; align-items: center; justify-content: center;
-    margin-bottom: 0.6rem;
-}
-.ad-kpi:nth-child(1) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #0D2472; }
-.ad-kpi:nth-child(2) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #1E9E5E; }
-.ad-kpi:nth-child(3) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #3498db; }
-.ad-kpi:nth-child(4) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #8B5CF6; }
-.ad-kpi:nth-child(5) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #C9A00E; }
-.ad-kpi:nth-child(6) .ad-kpi-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: #e74c3c; }
-
-.ad-kpi-val {
-    font-size: 1.6rem; font-weight: 700; color: var(--text-primary);
-    font-family: 'DM Mono', monospace; line-height: 1.1; margin-bottom: 2px;
-}
-.ad-kpi-lbl { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
-
-/* ── Main Grid ── */
-.ad-main-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 1.25rem; }
-@media (min-width: 860px) { .ad-main-grid { grid-template-columns: 3fr 2fr; } }
-
-/* ── Section Box ── */
-.ad-section {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 1.375rem 1.5rem;
-    box-shadow: var(--shadow-xs);
-}
-.ad-section-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.125rem; padding-bottom: 0.875rem; border-bottom: 1px solid var(--border);
-}
-.ad-section-title {
-    font-size: 12.5px; font-weight: 800; color: var(--text-primary);
-    text-transform: uppercase; letter-spacing: 0.065em;
-    display: flex; align-items: center; gap: 0.45rem;
-}
-.ad-section-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text-secondary); }
-.ad-section-badge.danger { color: var(--ds-danger); }
-.ad-section-badge.success { color: var(--ds-success); }
-
-/* ── Level Cards ── */
-.ad-level-card {
-    border-radius: var(--radius-md);
-    padding: 1.125rem; margin-bottom: 0.875rem; background: var(--bg-subtle);
-    transition: box-shadow 0.15s;
-}
-.ad-level-card:last-child { margin-bottom: 0; }
-.ad-level-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-.ad-level-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.875rem; }
-.ad-level-name { display: flex; align-items: center; gap: 0.625rem; font-size: 14px; font-weight: 800; color: var(--text-primary); }
-.ad-level-badge {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: #0D2472; color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 800; flex-shrink: 0;
-}
-.ad-rate-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
-.ad-rate-chip.good { color: var(--ds-success); }
-.ad-rate-chip.medium { color: var(--ds-warning); }
-.ad-rate-chip.low { color: var(--ds-danger); }
-
-.ad-prog-track { height: 6px; background: var(--border); border-radius: 99px; margin-bottom: 1rem; overflow: hidden; }
-.ad-prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
-.ad-prog-fill.good { background: #167A4B; }
-.ad-prog-fill.medium { background: #B45309; }
-.ad-prog-fill.low { background: #B42318; }
-
-.ad-level-stats {
-    display: grid; grid-template-columns: repeat(5, 1fr);
-    gap: 0.375rem; margin-bottom: 1rem; text-align: center;
-}
-.ad-ls-val { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); font-family: 'DM Mono', monospace; line-height: 1.2; }
-.ad-ls-lbl { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
-.ad-ls-val.danger { color: #C0392B; }
-
-.ad-level-actions { display: flex; gap: 0.625rem; }
-.ad-btn-sm {
-    flex: 1; padding: 0.425rem 0.75rem; border-radius: 8px;
-    font-size: 12px; font-weight: 700; font-family: inherit;
-    text-decoration: none; display: inline-flex; align-items: center;
-    justify-content: center; gap: 0.35rem;
-    cursor: pointer; transition: all 0.13s; min-height: 32px;
-}
-.ad-btn-sm:active { transform: scale(0.97); }
-.ad-btn-outline { border: 1.5px solid var(--border-strong); color: var(--text-secondary); background: transparent; }
-.ad-btn-outline:hover { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
-.ad-btn-primary { background: #0D2472; color: #fff; border: none; box-shadow: 0 1px 4px rgba(13,36,114,0.2); }
-.ad-btn-primary:hover { background: #091A55; }
-
-/* ── TA Activity Table ── */
-.ad-ta-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.ad-ta-table th {
-    text-align: left; padding: 0.375rem 0.5rem;
-    font-size: 9.5px; font-weight: 700; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border);
-}
-.ad-ta-table td { padding: 0.625rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.ad-ta-table tr:last-child td { border-bottom: none; }
-.ad-ta-table tr:hover td { background: var(--bg-subtle); }
-.ad-ta-name { font-weight: 700; color: var(--text-primary); font-size: 12.5px; }
-.ad-ta-lvl {
-    display: inline-block; font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 4px;
-    background: rgba(13,36,114,0.07); color: #0D2472; margin: 1px;
-}
-html[data-theme="dark"] .ad-ta-lvl {
-    color: var(--gold); background: rgba(242,195,26,0.1);
-}
-.ad-num { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 13px; }
-.ad-muted { color: var(--text-muted); font-size: 11.5px; }
-
-/* ── At-Risk Table ── */
-.ad-risk-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.ad-risk-table th {
-    text-align: left; padding: 0.4rem 0.75rem;
-    font-size: 9.5px; font-weight: 700; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.07em;
-    border-bottom: 1px solid var(--border); white-space: nowrap;
-}
-.ad-risk-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.ad-risk-table tr:last-child td { border-bottom: none; }
-.ad-risk-table tr:hover td { background: var(--bg-subtle); }
-
-.ad-risk-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
-.ad-risk-bar-track { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; max-width: 90px; }
-.ad-risk-bar-fill { height: 100%; border-radius: 99px; }
-.ad-risk-bar-fill.amber { background: #B45309; }
-.ad-risk-bar-fill.red { background: #B42318; }
-.ad-risk-pct { font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
-.ad-risk-pct.amber { color: #C9A00E; }
-.ad-risk-pct.red { color: #C0392B; }
-
-.ad-lvl-tag {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px; border-radius: 7px;
-    background: #0D2472; color: #fff; font-size: 11px; font-weight: 800;
-}
-
-/* ── Empty State ── */
-.ad-empty {
-    text-align: center; padding: 2.5rem 1rem;
-    color: var(--text-muted); font-size: 13px;
-    display: flex; flex-direction: column; align-items: center; gap: 0.625rem;
-}
-.ad-empty .iconify { font-size: 40px; opacity: 0.45; }
+.lvl-chip { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--ds-border); background: var(--ds-surface); font-size: 12px; font-weight: 600; color: var(--ds-text); }
+.split { display: grid; grid-template-columns: 1fr; gap: 0 24px; }
+@media (min-width: 900px) { .split { grid-template-columns: 1fr 1fr; align-items: start; } }
 </style>
 
-<div class="ad-wrap">
+<div class="pg pg-wide">
 
-<!-- Page Header -->
-<div class="ad-page-header">
-<div class="ad-header-text">
-<h1>Lecturer Portal</h1>
-<p>Academic analytics &amp; board insights, {% now "l, F j, Y" %}</p>
+<header class="pg-head">
+<div>
+<h1>Analytics</h1>
+<p class="pg-sub">Academic analytics and board insights, {% now "l, F j, Y" %}</p>
 </div>
-<div class="ad-header-actions">
-<a href="{% url 'attendance:admin_search' %}" class="ad-btn-ghost">
-Search Students
-</a>
-<a href="{% url 'attendance:admin_export_all_csv' %}" class="ad-btn-ghost">
-Export All
-</a>
-<a href="{% url 'attendance:lecturer_dashboard' %}" class="ad-btn-ghost">
-Daily View
-</a>
+<div class="pg-actions">
+<a href="{% url 'attendance:admin_export_all_csv' %}" class="ds-btn ds-btn-secondary">{% icon "download" 18 %}Export all</a>
+<a href="{% url 'attendance:admin_search' %}" class="ds-btn ds-btn-secondary">{% icon "search" 18 %}Search students</a>
 </div>
-</div>
+</header>
 
-<!-- Notification Strip -->
     {% if misuse_alerts_count or pending_tickets %}
 <div class="ad-notify">
-<span class="iconify ad-notify-icon" data-icon="mdi:bell-ring-outline"></span>
+{% icon "bell" 18 "ad-notify-icon" %}
 <strong style="color:var(--ds-text); font-size:12.5px; flex-shrink:0;">Action required:</strong>
         {% if misuse_alerts_count %}
 <a href="{% url 'attendance:admin_alerts' %}" class="ad-notify-item">
@@ -261,235 +63,104 @@ Daily View
 </div>
     {% endif %}
 
-<!-- KPI Row -->
-<div class="ad-kpi-grid">
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
-<div class="ad-kpi-val">{{ total_students }}</div>
-<div class="ad-kpi-lbl">Students</div>
-</div>
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div>
-<div class="ad-kpi-val">{{ overall_attendance_rate }}%</div>
-<div class="ad-kpi-lbl">Overall Rate</div>
-</div>
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:book-open-variant"></span></div>
-<div class="ad-kpi-val">{{ total_courses }}</div>
-<div class="ad-kpi-lbl">Courses</div>
-</div>
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:calendar-check-outline"></span></div>
-<div class="ad-kpi-val">{{ total_sessions }}</div>
-<div class="ad-kpi-lbl">Sessions</div>
-</div>
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div>
-<div class="ad-kpi-val">{{ active_tas_count }}</div>
-<div class="ad-kpi-lbl">Active TAs</div>
-</div>
-<div class="ad-kpi">
-<div class="ad-kpi-icon"><span class="iconify" data-icon="mdi:alert-circle-outline"></span></div>
-<div class="ad-kpi-val">{{ at_risk_count }}</div>
-<div class="ad-kpi-lbl">At Risk</div>
-</div>
+<div class="kpis cols-3">
+<div class="kpi"><div class="kpi-val">{{ total_students }}</div><div class="kpi-lbl">Students</div></div>
+<div class="kpi"><div class="kpi-val">{{ overall_attendance_rate }}%</div><div class="kpi-lbl">Overall rate</div></div>
+<div class="kpi"><div class="kpi-val">{{ total_courses }}</div><div class="kpi-lbl">Courses</div></div>
+<div class="kpi"><div class="kpi-val">{{ total_sessions }}</div><div class="kpi-lbl">Sessions</div></div>
+<div class="kpi"><div class="kpi-val">{{ active_tas_count }}</div><div class="kpi-lbl">Active TAs</div></div>
+<div class="kpi"><div class="kpi-val"{% if at_risk_count %} style="color:var(--ds-danger)"{% endif %}>{{ at_risk_count }}</div><div class="kpi-lbl">At risk</div></div>
 </div>
 
-<!-- Main Grid: Level breakdown + TA Activity -->
-<div class="ad-main-grid">
-
-<!-- Level Performance -->
-<div class="ad-section">
-<div class="ad-section-head">
-<div class="ad-section-title">
-<span class="iconify" data-icon="mdi:layers-outline" style="font-size:15px;"></span>
-                    Performance by Level
-</div>
-<span class="ad-section-badge">{{ level_stats|length }} level{{ level_stats|length|pluralize }}</span>
-</div>
-
+<div class="split">
+<section>
+<div class="sec"><h2>Performance by level</h2><span class="sec-note">{{ level_stats|length }} level{{ level_stats|length|pluralize }}</span></div>
+<div class="ds-list">
             {% for stat in level_stats %}
-<div class="ad-level-card">
-<div class="ad-level-header">
-<div class="ad-level-name">
-<div class="ad-level-badge">{{ stat.level.name }}</div>
-                        Level {{ stat.level.name }}
+<div class="row">
+<div class="row-top">
+<p class="row-title">Level {{ stat.level.name }}</p>
+<span class="ds-status {% if stat.attendance_rate >= 75 %}ds-status-success{% elif stat.attendance_rate >= 50 %}ds-status-warning{% else %}ds-status-danger{% endif %}">{{ stat.attendance_rate }}% attendance</span>
 </div>
-<span class="ad-rate-chip {% if stat.attendance_rate >= 75 %}good{% elif stat.attendance_rate >= 50 %}medium{% else %}low{% endif %}">
-                        {{ stat.attendance_rate }}% attendance
-</span>
+<div class="bar" role="img" aria-label="Attendance {{ stat.attendance_rate }} percent">
+<div class="bar-track"><div class="bar-fill{% if stat.attendance_rate >= 75 %}{% elif stat.attendance_rate >= 50 %} mid{% else %} low{% endif %}" style="width:{{ stat.attendance_rate }}%"></div></div>
 </div>
-
-<div class="ad-prog-track">
-<div class="ad-prog-fill {% if stat.attendance_rate >= 75 %}good{% elif stat.attendance_rate >= 50 %}medium{% else %}low{% endif %}"
-                         style="width: {{ stat.attendance_rate }}%;"></div>
-</div>
-
-<div class="ad-level-stats">
-<div>
-<div class="ad-ls-val">{{ stat.total_students }}</div>
-<div class="ad-ls-lbl">Students</div>
-</div>
-<div>
-<div class="ad-ls-val">{{ stat.total_courses }}</div>
-<div class="ad-ls-lbl">Courses</div>
-</div>
-<div>
-<div class="ad-ls-val">{{ stat.total_sessions }}</div>
-<div class="ad-ls-lbl">Sessions</div>
-</div>
-<div>
-<div class="ad-ls-val">{{ stat.attendance_records }}</div>
-<div class="ad-ls-lbl">Records</div>
-</div>
-<div>
-<div class="ad-ls-val {% if stat.at_risk > 0 %}danger{% endif %}">{{ stat.at_risk }}</div>
-<div class="ad-ls-lbl">At Risk</div>
-</div>
-</div>
-
-<div class="ad-level-actions">
-<a href="{% url 'attendance:export_level' stat.level.id %}" class="ad-btn-sm ad-btn-outline">
-Export CSV
-</a>
-<a href="{% url 'attendance:student_report' %}?level={{ stat.level.id }}" class="ad-btn-sm ad-btn-primary">
-View Report
-</a>
+<dl class="mini" style="margin:0;grid-template-columns:repeat(5,1fr)">
+<div><dt>Students</dt><dd>{{ stat.total_students }}</dd></div>
+<div><dt>Courses</dt><dd>{{ stat.total_courses }}</dd></div>
+<div><dt>Sessions</dt><dd>{{ stat.total_sessions }}</dd></div>
+<div><dt>Records</dt><dd>{{ stat.attendance_records }}</dd></div>
+<div><dt>At risk</dt><dd{% if stat.at_risk > 0 %} style="color:var(--ds-danger)"{% endif %}>{{ stat.at_risk }}</dd></div>
+</dl>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<a href="{% url 'attendance:export_level' stat.level.id %}" class="ds-btn ds-btn-secondary">{% icon "download" 18 %}Export CSV</a>
+<a href="{% url 'attendance:student_report' %}?level={{ stat.level.id }}" class="ds-btn ds-btn-primary">View report</a>
 </div>
 </div>
             {% empty %}
-<div class="ad-empty">
-<span class="iconify" data-icon="mdi:layers-off-outline"></span>
-                No levels configured yet.
+<div class="pg-empty" style="border:0">No levels configured yet.</div>
+            {% endfor %}
+</div>
+</section>
+
+<section>
+<div class="sec"><h2>TA activity</h2><span class="ds-status {% if active_tas_count == 0 %}ds-status-danger{% else %}ds-status-success{% endif %}">{{ active_tas_count }} active</span></div>
+            {% if ta_stats %}
+<div class="ds-list">
+                {% for ta in ta_stats %}
+<div class="row">
+<div class="row-top">
+<div style="min-width:0">
+<p class="row-title">{{ ta.profile.user.get_full_name|default:ta.profile.user.username }}</p>
+<p class="row-sub">{% if ta.last_active %}Last active {{ ta.last_active|date:"j M Y" }}{% else %}Never active{% endif %}</p>
+</div>
+<div class="row-badges">{% for level in ta.profile.assigned_levels.all %}<span class="lvl-chip">L{{ level.name }}</span>{% endfor %}</div>
+</div>
+<dl class="mini" style="margin:0;grid-template-columns:repeat(2,1fr)">
+<div><dt>Codes generated</dt><dd>{{ ta.codes_generated }}</dd></div>
+<div><dt>Sessions active</dt><dd>{{ ta.sessions_active }}</dd></div>
+</dl>
+</div>
+                {% endfor %}
+</div>
+            {% else %}
+<div class="pg-empty">No active TAs yet.</div>
+            {% endif %}
+</section>
+</div>
+
+<section>
+<div class="sec">
+<div><h2>At-risk students</h2><p class="row-sub" style="margin:2px 0 0">Below 75% attendance</p></div>
+            {% if at_risk_count > 0 %}<span class="ds-status ds-status-danger">{{ at_risk_count }} student{{ at_risk_count|pluralize }}</span>
+            {% else %}<span class="ds-status ds-status-success">All students on track</span>{% endif %}
+</div>
+        {% if at_risk_preview %}
+<div class="ds-list">
+            {% for item in at_risk_preview %}
+<div class="row">
+<div class="row-top">
+<div style="min-width:0">
+<p class="row-title">{{ item.profile.user.get_full_name|default:item.profile.user.username }}</p>
+<p class="row-sub">{{ item.profile.user.email }}</p>
+</div>
+<span class="lvl-chip">L{{ item.profile.level.name }}</span>
+</div>
+<div class="bar" role="img" aria-label="{{ item.percentage }} percent, attended {{ item.attended }} of {{ item.expected }}">
+<div class="bar-track"><div class="bar-fill {% if item.percentage >= 60 %}mid{% else %}low{% endif %}" style="width:{{ item.percentage }}%"></div></div>
+<span class="bar-pct">{{ item.percentage }}%</span>
+</div>
+<p class="row-sub" style="margin:0">Attended {{ item.attended }} of {{ item.expected }} sessions</p>
 </div>
             {% endfor %}
 </div>
-
-<!-- TA Activity -->
-<div class="ad-section" style="height: fit-content;">
-<div class="ad-section-head">
-<div class="ad-section-title">
-<span class="iconify" data-icon="mdi:account-tie-outline" style="font-size:15px;"></span>
-                    TA Activity
-</div>
-<span class="ad-section-badge {% if active_tas_count == 0 %}danger{% else %}success{% endif %}">{{ active_tas_count }} active</span>
-</div>
-
-            {% if ta_stats %}
-<table class="ad-ta-table">
-<thead>
-<tr>
-<th>Teaching Assistant</th>
-<th style="text-align:center;">Codes</th>
-<th style="text-align:center;">Sessions</th>
-<th>Last Active</th>
-</tr>
-</thead>
-<tbody>
-                    {% for ta in ta_stats %}
-<tr>
-<td>
-<div class="ad-ta-name">{{ ta.profile.user.get_full_name|default:ta.profile.user.username }}</div>
-<div style="margin-top:3px;">
-                                {% for level in ta.profile.assigned_levels.all %}
-<span class="ad-ta-lvl">L{{ level.name }}</span>
-                                {% endfor %}
-</div>
-</td>
-<td style="text-align:center;"><span class="ad-num">{{ ta.codes_generated }}</span></td>
-<td style="text-align:center;"><span class="ad-num">{{ ta.sessions_active }}</span></td>
-<td>
-                            {% if ta.last_active %}
-<span class="ad-muted">{{ ta.last_active|date:"M j, Y" }}</span>
-                            {% else %}
-<span class="ad-muted" style="font-style:italic;">Never</span>
-                            {% endif %}
-</td>
-</tr>
-                    {% endfor %}
-</tbody>
-</table>
-            {% else %}
-<div class="ad-empty">
-<span class="iconify" data-icon="mdi:account-off-outline"></span>
-                No active TAs yet.
-</div>
+            {% if at_risk_count > 12 %}
+<p class="pg-sub" style="text-align:center;margin:12px auto 0">Showing 12 of <strong>{{ at_risk_count }}</strong> at-risk students. <a href="{% url 'attendance:admin_search' %}" style="font-weight:700">View all in search</a></p>
             {% endif %}
-</div>
-</div>
-
-<!-- At-Risk Students (full width) -->
-<div class="ad-section">
-<div class="ad-section-head">
-<div class="ad-section-title">
-<span class="iconify" data-icon="mdi:alert-circle-outline" style="font-size:15px; color:#C0392B;"></span>
-                At-Risk Students
-<span style="font-weight:500; color:var(--text-muted); font-size:11px; text-transform:none; letter-spacing:0; margin-left:0.25rem;">(&lt;75% attendance)</span>
-</div>
-            {% if at_risk_count > 0 %}
-<span class="ad-section-badge danger">{{ at_risk_count }} student{{ at_risk_count|pluralize }}</span>
-            {% else %}
-<span class="ad-section-badge success">All students on track</span>
-            {% endif %}
-</div>
-
-        {% if at_risk_preview %}
-<div style="overflow-x: auto;">
-<table class="ad-risk-table">
-<thead>
-<tr>
-<th>Student</th>
-<th>Level</th>
-<th style="text-align:center;">Attended</th>
-<th style="text-align:center;">Expected</th>
-<th>Attendance Rate</th>
-</tr>
-</thead>
-<tbody>
-                    {% for item in at_risk_preview %}
-<tr>
-<td>
-<div style="font-weight:700; color:var(--text-primary); font-size:13px; line-height:1.3;">
-                                {{ item.profile.user.get_full_name|default:item.profile.user.username }}
-</div>
-<div style="font-size:11px; color:var(--text-muted); margin-top:1px;">{{ item.profile.user.email }}</div>
-</td>
-<td>
-<span class="ad-lvl-tag">{{ item.profile.level.name }}</span>
-</td>
-<td style="text-align:center;"><span class="ad-num">{{ item.attended }}</span></td>
-<td style="text-align:center;"><span class="ad-num" style="color:var(--text-muted);">{{ item.expected }}</span></td>
-<td>
-<div class="ad-risk-bar-wrap">
-<div class="ad-risk-bar-track">
-<div class="ad-risk-bar-fill {% if item.percentage >= 60 %}amber{% else %}red{% endif %}"
-                                         style="width: {{ item.percentage }}%;"></div>
-</div>
-<span class="ad-risk-pct {% if item.percentage >= 60 %}amber{% else %}red{% endif %}">
-                                    {{ item.percentage }}%
-</span>
-</div>
-</td>
-</tr>
-                    {% endfor %}
-</tbody>
-</table>
-</div>
-        {% if at_risk_count > 12 %}
-<div style="text-align:center; padding: 1rem 0 0; border-top: 1px solid var(--border); margin-top: 0.25rem; font-size:12.5px; color:var(--text-muted);">
-            Showing 12 of <strong>{{ at_risk_count }}</strong> at-risk students.
-<a href="{% url 'attendance:admin_search' %}" style="color:#0D2472; font-weight:700; text-decoration:none; margin-left:0.25rem;">
-                View all in search &rarr;
-</a>
-</div>
-        {% endif %}
         {% else %}
-<div class="ad-empty">
-<span class="iconify" data-icon="mdi:shield-check-outline" style="color:#1E9E5E;"></span>
-<span>No at-risk students. All students are above 75% attendance.</span>
-</div>
+<div class="pg-empty">{% icon "circle-check" 28 %}<strong>No at-risk students</strong>All students are above 75% attendance.</div>
         {% endif %}
-</div>
+</section>
 
 </div>
 {% endblock %}

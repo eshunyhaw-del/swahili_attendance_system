@@ -1,358 +1,106 @@
 {% extends "attendance/base.html" %}
-{% block title %}Weekly Sessions - {{ week_start|date:"M j" }}–{{ week_end|date:"M j, Y" }}{% endblock %}
+{% load static ui %}
+{% block title %}Weekly Sessions{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
-<style>
-:root {
-    --bg-base: #EEF1F8;
-    --bg-surface: #FFFFFF;
-    --bg-subtle: #EEF1F8;
-    --radius-lg: 16px;
-    --shadow-xs: 0 1px 3px rgba(13,36,114,0.07);
-    --shadow-md: 0 4px 14px rgba(13,36,114,0.10);
-    --text-primary: #1A1A2E;
-    --text-secondary: #6B7280;
-    --text-muted: #6B7280;
-    --border: #E5E8F0;
-    --border-strong: #D4C8BE;
-    --gold: #F2C31A;
-}
+<div class="pg">
 
-body { background: var(--bg-base) !important; background-image: none !important; }
-.ld-wrap { max-width: 780px; margin: 0 auto; padding: 0 0 4rem; }
-
-/* ── Page Header ── */
-.ld-header {
-    background: #0D2472;
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 1.75rem;
-    margin-bottom: 1.375rem;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 0.875rem;
-    position: relative; overflow: hidden;
-}
-.ld-header-text h1 { font-size: 1.3rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 0.2rem; position: relative; z-index: 1; }
-.ld-header-text p { font-size: 12.5px; color: rgba(255,255,255,0.6); font-weight: 500; margin: 0; position: relative; z-index: 1; }
-.ld-header-link {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.5rem 1rem; border-radius: 8px; font-size: 12.5px; font-weight: 700;
-    font-family: inherit; text-decoration: none; transition: all 0.13s;
-    border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.08); position: relative; z-index: 1;
-}
-.ld-header-link:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.5); color: #fff; }
-
-/* ── Week Navigation ── */
-.ld-week-nav {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 0.875rem 1.25rem;
-    margin-bottom: 1.375rem; box-shadow: var(--shadow-xs);
-    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-}
-.ld-week-btn {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    padding: 0.45rem 0.875rem; border-radius: 8px; font-size: 12.5px; font-weight: 700;
-    font-family: inherit; text-decoration: none; white-space: nowrap;
-    border: 1.5px solid var(--border); color: #0D2472; background: transparent;
-    transition: all 0.13s;
-}
-.ld-week-btn:hover { border-color: #0D2472; background: rgba(13,36,114,0.04); }
-.ld-week-current { background: rgba(13,36,114,0.06); border-color: rgba(13,36,114,0.18); }
-.ld-week-range {
-    flex: 1; text-align: center;
-    font-size: 13px; font-weight: 700; color: var(--text-primary);
-    white-space: nowrap; padding: 0 0.5rem;
-}
-.ld-jump-form { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
-.ld-date-input {
-    padding: 0.45rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: inherit; font-size: 13px; color: var(--text-primary);
-    background: var(--bg-subtle); outline: none; transition: border-color 0.13s;
-    max-width: 160px;
-}
-.ld-date-input:focus { border-color: #0D2472; background: #fff; }
-.ld-date-btn {
-    padding: 0.45rem 0.75rem; border-radius: 8px; border: none; cursor: pointer;
-    font-family: inherit; font-size: 13px; font-weight: 700;
-    background: #0D2472; color: #fff;
-    display: inline-flex; align-items: center;
-    transition: all 0.13s;
-}
-.ld-date-btn:hover { background: #091A55; }
-
-/* ── Session Count Strip ── */
-.ld-count-strip {
-    font-size: 12.5px; font-weight: 600; color: var(--text-muted);
-    margin-bottom: 0.875rem; display: flex; align-items: center; gap: 0.375rem;
-}
-.ld-count-strip strong { color: var(--text-primary); }
-
-/* ── Day Header ── */
-.ld-day-header {
-    display: flex; align-items: center; gap: 0.5rem;
-    font-size: 12.5px; font-weight: 800; color: #0D2472;
-    padding: 0.35rem 0 0.5rem;
-    border-bottom: 2px solid rgba(13,36,114,0.1);
-    margin: 1.25rem 0 0.75rem;
-}
-.ld-day-header.today { color: #1A9E60; border-bottom-color: rgba(26,158,96,0.22); }
-.ld-today-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-success); }
-
-/* ── Session Card ── */
-.ld-session-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); margin-bottom: 1.125rem;
-    box-shadow: var(--shadow-xs); overflow: hidden; transition: box-shadow 0.15s;
-}
-.ld-session-card:hover { box-shadow: var(--shadow-md); }
-
-.ld-session-header {
-    padding: 1.125rem 1.375rem 0;
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 0.875rem; flex-wrap: wrap;
-}
-.ld-course-info { flex: 1; min-width: 0; }
-.ld-course-code { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-text); margin-bottom: 0.35rem; }
-.ld-course-name { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem; line-height: 1.25; }
-.ld-course-meta { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-.ld-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border-strong); }
-
-.ld-export-btn {
-    padding: 0.45rem 0.875rem; border-radius: 8px; font-size: 12px; font-weight: 700;
-    font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;
-    border: 1.5px solid var(--border-strong); color: var(--text-secondary); background: transparent;
-    transition: all 0.13s; white-space: nowrap; flex-shrink: 0;
-}
-.ld-export-btn:hover { border-color: #0D2472; color: #0D2472; background: rgba(13,36,114,0.04); }
-
-/* ── Stat Chips ── */
-.ld-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.625rem; padding: 1rem 1.375rem; }
-.ld-stat-chip { text-align: center; padding: 0.625rem 0.5rem; border-radius: 10px; }
-.ld-stat-chip { background: var(--ds-surface); border: 1px solid var(--ds-border); }
-.ld-stat-val { font-size: 1.25rem; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1.1; margin-bottom: 2px; }
-.ld-stat-chip.enrolled .ld-stat-val { color: #0D2472; }
-.ld-stat-chip.present .ld-stat-val { color: #1E9E5E; }
-.ld-stat-chip.codes .ld-stat-val { color: #C9A00E; }
-.ld-stat-chip.absent .ld-stat-val { color: #C0392B; }
-.ld-stat-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
-
-/* ── Progress Bar ── */
-.ld-prog-wrap { padding: 0 1.375rem; }
-.ld-prog-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
-.ld-prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
-.ld-prog-fill.good { background: #167A4B; }
-.ld-prog-fill.medium { background: #B45309; }
-.ld-prog-fill.low { background: #B42318; }
-.ld-prog-label {
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 10.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;
-}
-.ld-prog-label strong { font-weight: 700; }
-.ld-prog-label.good strong { color: #1E9E5E; }
-.ld-prog-label.medium strong { color: #C9A00E; }
-.ld-prog-label.low strong { color: #C0392B; }
-
-/* ── Absent Section ── */
-.ld-absent-section { padding: 0.875rem 1.375rem 1.375rem; }
-.ld-all-present {
-    display: flex; align-items: center; gap: 0.4rem;
-    font-size: 12.5px; font-weight: 700; color: #1E9E5E; margin-top: 0.875rem;
-}
-.ld-absent-toggle {
-    width: 100%; border: none; cursor: pointer; font-family: inherit;
-    display: flex; align-items: center; gap: 0.5rem;
-    padding: 0.6rem 0.75rem; border-radius: 8px;
-    background: var(--ds-surface); border: 1px solid var(--ds-border);
-    font-size: 12.5px; font-weight: 700; color: #C0392B;
-    transition: all 0.13s; text-align: left; margin-top: 0.875rem;
-}
-.ld-absent-toggle:hover { background: var(--ds-surface-sunken); }
-.ld-absent-toggle .arrow { margin-left: auto; transition: transform 0.2s; }
-.ld-absent-toggle.open .arrow { transform: rotate(180deg); }
-.ld-absent-list {
-    display: none; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem;
-    padding: 0.75rem; background: var(--bg-subtle); border-radius: 8px;
-    border: 1px solid var(--border);
-}
-.ld-absent-list.show { display: flex; }
-.ld-absent-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-danger); padding: 4px 10px; }
-
-/* ── Empty State ── */
-.ld-empty {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 3.5rem 2rem;
-    text-align: center; box-shadow: var(--shadow-xs);
-}
-.ld-empty .iconify { font-size: 52px; color: var(--border-strong); display: block; margin: 0 auto 0.875rem; }
-.ld-empty h3 { font-size: 1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.35rem; }
-.ld-empty p { font-size: 13px; color: var(--text-muted); margin: 0; }
-
-@media (max-width: 600px) {
-    .ld-stats-row { grid-template-columns: repeat(2, 1fr); }
-    .ld-week-range { order: -1; width: 100%; text-align: left; }
-    .ld-jump-form { margin-left: 0; width: 100%; }
-    .ld-date-input { flex: 1; max-width: none; }
-}
-</style>
-
-<div class="ld-wrap">
-
-<!-- Page Header -->
-<div class="ld-header">
-<div class="ld-header-text">
-<h1>Weekly Sessions</h1>
-<p>{{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}{% if week_offset == 0 %} - <span style="color:#F2C31A;font-weight:700;">This Week</span>{% endif %}</p>
+<header class="pg-head">
+<div>
+<h1>Weekly sessions</h1>
+<p class="pg-sub">{{ week_start|date:"F j" }} to {{ week_end|date:"F j, Y" }}{% if week_offset == 0 %} <span class="ds-status ds-status-info" style="margin-left:4px">This week</span>{% endif %}</p>
 </div>
-<a href="{% url 'attendance:admin_dashboard' %}" class="ld-header-link">
-<span class="iconify" data-icon="mdi:chart-bar-outline"></span> Full Analytics
-</a>
+<div class="pg-actions">
+<a href="{% url 'attendance:admin_dashboard' %}" class="ds-btn ds-btn-secondary">{% icon "chart-column" 18 %}Full analytics</a>
 </div>
+</header>
 
-<!-- Week Navigation -->
-<div class="ld-week-nav">
-<a href="?week={{ week_offset|add:"-1" }}" class="ld-week-btn">
-Prev
-</a>
-<span class="ld-week-range">{{ week_start|date:"M j" }} – {{ week_end|date:"M j" }}</span>
-<a href="?week={{ week_offset|add:"1" }}" class="ld-week-btn">
-            Next</a>
-        {% if week_offset != 0 %}
-<a href="?" class="ld-week-btn ld-week-current">
-This Week
-</a>
-        {% endif %}
-<form method="get" class="ld-jump-form">
-<input type="date" name="date" class="ld-date-input" title="Jump to week">
-<button type="submit" class="ld-date-btn" title="Go">
-<span class="iconify" data-icon="mdi:arrow-right"></span>
-</button>
+<div class="pg-card" style="padding:12px">
+<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center">
+<a href="?week={{ week_offset|add:"-1" }}" class="ds-btn ds-btn-secondary">Previous</a>
+<span style="font-size:13px;font-weight:600;color:var(--ds-text-secondary);text-align:center;padding:0 4px">{{ week_start|date:"M j" }} to {{ week_end|date:"M j" }}</span>
+<a href="?week={{ week_offset|add:"1" }}" class="ds-btn ds-btn-secondary">Next</a>
+</div>
+<form method="get" style="display:flex;gap:8px;margin-top:8px">
+<input type="date" name="date" class="ds-input" aria-label="Jump to the week of a date" style="flex:1">
+<button type="submit" class="ds-btn ds-btn-secondary">Go to week</button>
+        {% if week_offset != 0 %}<a href="?" class="ds-btn ds-btn-ghost">This week</a>{% endif %}
 </form>
 </div>
 
-<!-- Session count -->
     {% if total_sessions %}
-<div class="ld-count-strip">
-<span class="iconify" data-icon="mdi:calendar-check-outline" style="font-size:15px;color:#0D2472;"></span>
-<strong>{{ total_sessions }}</strong> session{{ total_sessions|pluralize }} this week
-</div>
+<p class="pg-sub" style="margin:12px 4px 0"><strong>{{ total_sessions }}</strong> session{{ total_sessions|pluralize }} this week</p>
     {% endif %}
 
-<!-- Days loop -->
     {% for day in days_data %}
-
-<div class="ld-day-header {% if day.is_today %}today{% endif %}">
-<span class="iconify" data-icon="mdi:calendar-outline" style="font-size:15px;"></span>
-        {{ day.date|date:"l, F j" }}
-        {% if day.is_today %}<span class="ld-today-tag">Today</span>{% endif %}
+<div class="sec" style="margin-top:24px">
+<h2>{{ day.date|date:"l, F j" }}</h2>
+        {% if day.is_today %}<span class="ds-status ds-status-info">Today</span>{% endif %}
 </div>
 
-    {% for item in day.sessions %}
-    {% with absent_count=item.absent_profiles|length %}
-<div class="ld-session-card">
-
-<div class="ld-session-header">
-<div class="ld-course-info">
-<div class="ld-course-code">{{ item.course.code }}</div>
-<div class="ld-course-name">
-                    {{ item.course.name }}
-                    {% if item.course.code == 'KISW 106A' %}
-<span class="ds-badge ds-badge-info" style="margin-left:4px;">Monday Group</span>
-                    {% elif item.course.code == 'KISW 106B' %}
-<span class="ds-badge ds-badge-info" style="margin-left:4px;">Thursday Group</span>
-                    {% endif %}
+<div class="ds-list">
+        {% for item in day.sessions %}
+        {% with absent_count=item.absent_profiles|length %}
+<div class="row">
+<div class="row-top">
+<div style="min-width:0">
+<p class="row-title">{{ item.course.name }}</p>
+<p class="row-sub">{{ item.course.code }} · Level {{ item.course.level.name }}{% if item.course.code == 'KISW 106A' %} · Monday group{% elif item.course.code == 'KISW 106B' %} · Thursday group{% endif %}</p>
+<p class="row-sub" style="display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:6px">
+<span style="display:inline-flex;align-items:center;gap:6px">{% icon "clock" 14 %}{{ item.session.start_time|time:"g:i A" }} to {{ item.session.end_time|time:"g:i A" }}</span>
+                        {% if item.session.topic %}<span style="display:inline-flex;align-items:center;gap:6px">{% icon "map-pin" 14 %}{{ item.session.topic }}</span>{% endif %}
+</p>
 </div>
-<div class="ld-course-meta">
-<span class="iconify" data-icon="mdi:layers-outline" style="font-size:13px;"></span>
-                    Level {{ item.course.level.name }}
-<span class="ld-meta-dot"></span>
-<span class="iconify" data-icon="mdi:clock-outline" style="font-size:13px;"></span>
-                    {{ item.session.start_time|time:"g:i A" }} – {{ item.session.end_time|time:"g:i A" }}
-                    {% if item.session.topic %}
-<span class="ld-meta-dot"></span>
-<span class="iconify" data-icon="mdi:book-outline" style="font-size:13px;"></span>
-                    {{ item.session.topic }}
-                    {% endif %}
-</div>
-</div>
-<a href="{% url 'attendance:export_csv' item.session.id %}" class="ld-export-btn">
-Export CSV
-</a>
+<a href="{% url 'attendance:export_csv' item.session.id %}" class="ds-btn ds-btn-secondary" aria-label="Export CSV for {{ item.course.code }}">{% icon "download" 18 %}CSV</a>
 </div>
 
-<div class="ld-stats-row">
-<div class="ld-stat-chip enrolled">
-<div class="ld-stat-val">{{ item.total_enrolled }}</div>
-<div class="ld-stat-lbl">Enrolled</div>
-</div>
-<div class="ld-stat-chip present">
-<div class="ld-stat-val">{{ item.submitted }}</div>
-<div class="ld-stat-lbl">Present</div>
-</div>
-<div class="ld-stat-chip codes">
-<div class="ld-stat-val">{{ item.generated }}</div>
-<div class="ld-stat-lbl">Codes</div>
-</div>
-<div class="ld-stat-chip absent">
-<div class="ld-stat-val">{{ absent_count }}</div>
-<div class="ld-stat-lbl">Absent</div>
-</div>
-</div>
+<dl class="mini" style="margin:0">
+<div><dt>Enrolled</dt><dd>{{ item.total_enrolled }}</dd></div>
+<div><dt>Present</dt><dd style="color:var(--ds-success)">{{ item.submitted }}</dd></div>
+<div><dt>Codes</dt><dd>{{ item.generated }}</dd></div>
+<div><dt>Absent</dt><dd{% if absent_count %} style="color:var(--ds-danger)"{% endif %}>{{ absent_count }}</dd></div>
+</dl>
 
-<div class="ld-prog-wrap">
             {% if item.total_enrolled > 0 %}
             {% widthratio item.submitted item.total_enrolled 100 as pct_int %}
-<div class="ld-prog-label {% if pct_int|add:0 >= 75 %}good{% elif pct_int|add:0 >= 50 %}medium{% else %}low{% endif %}">
-<span>Attendance rate</span>
-<strong>{{ pct_int }}%</strong>
-</div>
-<div class="ld-prog-track">
-<div class="ld-prog-fill {% if pct_int|add:0 >= 75 %}good{% elif pct_int|add:0 >= 50 %}medium{% else %}low{% endif %}"
-                     style="width:{{ pct_int }}%;"></div>
+<div class="bar" role="img" aria-label="Attendance rate {{ pct_int }} percent">
+<div class="bar-track"><div class="bar-fill{% if pct_int|add:0 >= 75 %}{% elif pct_int|add:0 >= 50 %} mid{% else %} low{% endif %}" style="width:{{ pct_int }}%"></div></div>
+<span class="bar-pct">{{ pct_int }}%</span>
 </div>
             {% else %}
-<div class="ld-prog-label"><span>No students enrolled yet</span></div>
-<div class="ld-prog-track"><div class="ld-prog-fill low" style="width:0;"></div></div>
+<p class="row-sub" style="margin:0">No students enrolled yet.</p>
             {% endif %}
-</div>
 
-<div class="ld-absent-section">
             {% if item.absent_profiles %}
-<button class="ld-absent-toggle" onclick="toggleAbsent(this)">
-Absent students ({{ absent_count }})
-<span class="iconify arrow" data-icon="mdi:chevron-down" style="font-size:16px;"></span>
-</button>
-<div class="ld-absent-list">
-                {% for profile in item.absent_profiles %}
-<span class="ld-absent-chip">{{ profile.user.get_full_name|default:profile.user.username }}</span>
-                {% endfor %}
+<details class="absent-box">
+<summary>Absent students ({{ absent_count }}){% icon "chevron-down" 16 "chev" %}</summary>
+<div class="absent-list">
+                    {% for profile in item.absent_profiles %}<span class="ds-status ds-status-danger">{{ profile.user.get_full_name|default:profile.user.username }}</span>{% endfor %}
 </div>
-            {% else %}
-<div class="ld-all-present">
-<span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:17px;"></span>
-                All enrolled students are present
-</div>
+</details>
+            {% elif item.total_enrolled > 0 %}
+<p style="margin:0;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ds-success)">{% icon "circle-check" 16 %}All enrolled students are present</p>
             {% endif %}
 </div>
-
+        {% endwith %}
+        {% endfor %}
 </div>
-    {% endwith %}
-    {% endfor %}
-
     {% empty %}
-<div class="ld-empty">
-<span class="iconify" data-icon="mdi:calendar-blank-outline"></span>
-<h3>No sessions this week</h3>
-<p>No class sessions scheduled for {{ week_start|date:"F j" }} – {{ week_end|date:"F j, Y" }}. Use the arrows to navigate to a different week.</p>
+<div class="pg-empty" style="margin-top:20px">
+{% icon "calendar-days" 28 %}
+<strong>No sessions this week</strong>
+No class sessions are scheduled for {{ week_start|date:"F j" }} to {{ week_end|date:"F j, Y" }}. Use Previous and Next to look at another week.
 </div>
     {% endfor %}
 
 </div>
-
-<script>
-function toggleAbsent(btn) {
-    const list = btn.nextElementSibling;
-    const isOpen = list.classList.contains('show');
-    list.classList.toggle('show', !isOpen);
-    btn.classList.toggle('open', !isOpen);
-}
-</script>
+<style>
+.absent-box > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; min-height: var(--ds-tap); padding: 0 12px; border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); font-size: 13px; font-weight: 600; color: var(--ds-danger); cursor: pointer; background: var(--ds-surface); }
+.absent-box > summary::-webkit-details-marker { display: none; }
+.absent-box .chev { transition: transform .15s; }
+.absent-box[open] .chev { transform: rotate(180deg); }
+.absent-list { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 2px 0; }
+</style>
 {% endblock %}

@@ -1,0 +1,30 @@
+{% load ui %}
+<dialog class="ds-sheet" id="moreSheet" aria-labelledby="moreTitle">
+<div class="ds-sheet-grab" aria-hidden="true"></div>
+<div class="ds-sheet-head"><h2 class="ds-sheet-title" id="moreTitle">More</h2>
+<button type="button" class="ds-btn ds-btn-ghost ds-btn-icon" data-sheet-close aria-label="Close">{% icon "x" 20 %}</button></div>
+<div class="ds-sheet-body">
+<p class="more-label" style="margin-top:0">Students</p>
+<ul class="ds-list">
+<li><a class="ds-list-link" href="{% url 'attendance:admin_search' %}">{% icon "search" 20 %}<span class="grow">Search students</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:admin_support' %}">{% icon "life-buoy" 20 %}<span class="grow">Support tickets</span>{% if pending_tickets %}<span class="ds-status ds-status-info">{{ pending_tickets }} open</span>{% endif %}</a></li>
+</ul>
+<p class="more-label">Management</p>
+<ul class="ds-list">
+<li><a class="ds-list-link" href="{% url 'attendance:admin_alerts' %}">{% icon "triangle-alert" 20 %}<span class="grow">Security alerts</span>{% if misuse_alerts_count %}<span class="ds-status ds-status-danger">{{ misuse_alerts_count }} open</span>{% endif %}</a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:pending_tas' %}">{% icon "clock" 20 %}<span class="grow">Pending TAs</span></a></li>
+{% if user.is_superuser %}<li><a class="ds-list-link" href="/admin/">{% icon "key-round" 20 %}<span class="grow">Django admin</span></a></li>{% endif %}
+</ul>
+<p class="more-label">Account</p>
+<ul class="ds-list">
+<li><a class="ds-list-link" href="{% url 'attendance:notifications' %}">{% icon "bell" 20 %}<span class="grow">Notifications</span>{% if unread_notif_count %}<span class="ds-status ds-status-info">{{ unread_notif_count }} new</span>{% endif %}</a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:profile' %}">{% icon "user-round" 20 %}<span class="grow">My profile</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:community_events' %}">{% icon "newspaper" 20 %}<span class="grow">Events and news</span></a></li>
+</ul>
+<ul class="ds-list" style="margin-top:16px">
+<li><button type="button" class="ds-list-link" onclick="toggleTheme()">{% icon "moon" 20 %}<span class="grow">Switch light / dark mode</span></button></li>
+<li><form method="post" action="{% url 'logout' %}" style="margin:0">{% csrf_token %}<button type="submit" class="ds-list-link more-signout">{% icon "log-out" 20 %}<span class="grow">Sign out</span></button></form></li>
+</ul>
+</div>
+<div style="height:calc(12px + env(safe-area-inset-bottom))"></div>
+</dialog>

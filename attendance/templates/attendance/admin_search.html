@@ -1,440 +1,65 @@
 ﻿{% extends "attendance/base.html" %}
+{% load static ui %}
 {% block title %}Search Students{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
-<style>
-    /* Theme Variables - Defaults to Light Mode */
-    :root {
-        --dash-bg: #F4F6F9;
-        --panel-bg: #FFFFFF;
-        --text-primary: #0F172A;
-        --text-secondary: #334155;
-        --text-muted: #64748B;
-        --border-color: rgba(226, 232, 240, 0.9);
-        --panel-shadow: 0 4px 10px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-        
-        --input-bg: #F8FAFC;
-        --input-border: #CBD5E1;
-        --input-focus: rgba(13, 36, 114, 0.15);
-        --input-focus-border: #0D2472;
-        
-        --btn-main-bg: #0D2472;
-        --btn-main-hover: #0A1B56;
-        --btn-main-text: #FFFFFF;
-        
-        --btn-out-bg: transparent;
-        --btn-out-text: #0D2472;
-        --btn-out-border: #0D2472;
-        --btn-out-hover: #F8FAFC;
-        
-        --table-head-bg: #F8FAFC;
-        --table-row-hover: #F1F5F9;
-        
-        --badge-good-bg: #D1FAE5;
-        --badge-good-text: #059669;
-        --badge-danger-bg: #FEE2E2;
-        --badge-danger-text: #DC2626;
-        
-        --action-bg: #F1F5F9;
-        --action-text: #475569;
-        --action-hover-bg: #E2E8F0;
-        --action-hover-text: #0F172A;
-    }
+<div class="pg pg-wide">
 
-    /* Dark Mode Overrides */
-    [data-theme="dark"] {
-        --dash-bg: #0E141C;
-        --panel-bg: #1E2A3B;
-        --text-primary: #E8EDF5;
-        --text-secondary: #C4CDD8;
-        --text-muted: #6B7280;
-        --border-color: #2E3D50;
-        --panel-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-
-        --input-bg: #162131;
-        --input-border: #3A4E66;
-        --input-focus: rgba(242, 195, 26, 0.15);
-        --input-focus-border: #F2C31A;
-
-        --btn-main-bg: #0D2472;
-        --btn-main-hover: #0A1B56;
-        --btn-main-text: #FFFFFF;
-
-        --btn-out-bg: transparent;
-        --btn-out-text: #F2C31A;
-        --btn-out-border: #F2C31A;
-        --btn-out-hover: rgba(242, 195, 26, 0.08);
-
-        --table-head-bg: #162131;
-        --table-row-hover: rgba(46, 61, 80, 0.5);
-
-        --badge-good-bg: rgba(30, 158, 94, 0.15);
-        --badge-good-text: #4ADE80;
-        --badge-danger-bg: rgba(239, 68, 68, 0.15);
-        --badge-danger-text: #F87171;
-
-        --action-bg: #2E3D50;
-        --action-text: #C4CDD8;
-        --action-hover-bg: #3A4E66;
-        --action-hover-text: #E8EDF5;
-    }
-
-    /* Layout */
-    body {
-        background: var(--dash-bg);
-        min-height: 100vh;
-        margin: 0;
-        background-attachment: fixed;
-        color: var(--text-primary);
-        transition: background 0.3s ease, color 0.3s ease;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    .page-wrapper {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 2.5rem 1.25rem;
-    }
-
-    .page-header {
-        margin-bottom: 2rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .page-header h1 {
-        font-size: 2rem;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -0.75px;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    /* Search Bar */
-    .search-card {
-        background: var(--panel-bg);
-        padding: 1.5rem;
-        border-radius: 20px;
-        box-shadow: var(--panel-shadow);
-        margin-bottom: 2rem;
-    }
-
-    .search-form {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .input-wrapper {
-        flex: 1;
-        min-width: 250px;
-        position: relative;
-    }
-
-    .input-wrapper .iconify {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-muted);
-        font-size: 1.25rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.85rem 1rem 0.85rem 2.75rem;
-        border: 1px solid var(--input-border);
-        border-radius: 12px;
-        font-size: 0.95rem;
-        background: var(--input-bg);
-        color: var(--text-primary);
-        box-sizing: border-box;
-        transition: all 0.2s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--input-focus-border);
-        box-shadow: 0 0 0 4px var(--input-focus);
-    }
-
-    .form-select {
-        padding-left: 1rem;
-        min-width: 180px;
-        flex: 0 0 auto;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 1em;
-    }
-
-    /* Buttons */
-    .btn {
-        padding: 0.85rem 1.5rem;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        transition: all 0.2s;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-primary {
-        background: var(--btn-main-bg);
-        color: var(--btn-main-text);
-        white-space: nowrap;
-    }
-
-    .btn-primary:hover {
-        background: var(--btn-main-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(13, 36, 114, 0.15);
-    }
-
-    .btn-outline {
-        background: var(--btn-out-bg);
-        color: var(--btn-out-text);
-        border: 2px solid var(--btn-out-border);
-        padding: 0.65rem 1.25rem;
-    }
-
-    .btn-outline:hover {
-        background: var(--btn-out-hover);
-        transform: translateY(-1px);
-    }
-
-    /* Table Container */
-    .data-card {
-        background: var(--panel-bg);
-        border-radius: 20px;
-        box-shadow: var(--panel-shadow);
-        overflow: hidden;
-    }
-
-    .data-actions-bar {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        background: var(--panel-bg);
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-    }
-
-    th {
-        background: var(--table-head-bg);
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        white-space: nowrap;
-    }
-
-    td {
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-primary);
-        font-size: 0.95rem;
-        font-weight: 500;
-        vertical-align: middle;
-    }
-
-    tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    tbody tr:hover {
-        background-color: var(--table-row-hover);
-    }
-
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    /* Micro-components */
-    .pct-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
-
-    .pct-good { color: var(--ds-success); }
-
-    .pct-danger { color: var(--ds-danger); }
-
-    .action-group {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    .action-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: var(--action-bg);
-        color: var(--action-text);
-        text-decoration: none;
-        transition: all 0.2s ease;
-    }
-
-    .action-icon:hover {
-        background: var(--action-hover-bg);
-        color: var(--action-hover-text);
-        transform: translateY(-2px);
-    }
-
-    .action-text {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--btn-main-bg);
-        text-decoration: none;
-        padding: 0.35rem 0.75rem;
-        border-radius: 8px;
-        background: rgba(13, 36, 114, 0.05);
-        transition: all 0.2s;
-        margin-left: 0.5rem;
-    }
-
-    [data-theme="dark"] .action-text {
-        color: var(--btn-main-text);
-        background: rgba(59, 130, 246, 0.2);
-    }
-
-    .action-text:hover {
-        background: var(--btn-main-bg);
-        color: var(--btn-main-text);
-    }
-
-    /* Blank State */
-    .blank-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: var(--panel-bg);
-        border-radius: 20px;
-        border: 2px dashed var(--border-color);
-    }
-</style>
-
-<div class="page-wrapper">
-<div class="page-header">
-<h1>
-<span class="iconify" data-icon="mdi:account-search-outline"></span>
-            Search Students
-</h1>
+<header class="pg-head">
+<div>
+<h1>Search students</h1>
+<p class="pg-sub">Find a student by name, username or student ID.</p>
 </div>
+</header>
 
-<div class="search-card">
-<form method="get" class="search-form">
-<div class="input-wrapper">
-<span class="iconify" data-icon="mdi:magnify"></span>
-<input type="text" name="q" placeholder="Search by name, username, or student ID..." 
-                       value="{{ search_query }}" class="form-control">
+<form method="get" class="pg-card" style="display:grid;gap:10px">
+<div class="pg-search">
+{% icon "search" 18 %}
+<input type="search" name="q" class="ds-input" placeholder="Name, username or student ID" aria-label="Search students" value="{{ search_query }}">
 </div>
-            
-<select name="level" class="form-control form-select">
-<option value="">All Levels</option>
-                {% for level in levels %}
-<option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>
-                        Level {{ level.name }}
-</option>
-                {% endfor %}
+<select name="level" class="ds-select" aria-label="Level">
+<option value="">All levels</option>
+        {% for level in levels %}
+<option value="{{ level.id }}" {% if selected_level == level.id|stringformat:"s" %}selected{% endif %}>Level {{ level.name }}</option>
+        {% endfor %}
 </select>
-            
-<button type="submit" class="btn btn-primary">Search</button>
+<button type="submit" class="ds-btn ds-btn-primary ds-btn-block">Search</button>
 </form>
-</div>
 
     {% if students %}
-<div class="data-card">
-<div class="data-actions-bar">
-<a href="{% url 'attendance:admin_export_all_csv' %}" class="btn btn-outline">
-Export All (CSV)
-</a>
-            {% if selected_level %}
-<a href="{% url 'attendance:export_level' selected_level %}" class="btn btn-outline">
-Export Level (CSV)
-</a>
-            {% endif %}
+<div class="sec">
+<h2>{{ students|length }} result{{ students|length|pluralize }}</h2>
+<div class="pg-actions">
+<a href="{% url 'attendance:admin_export_all_csv' %}" class="ds-btn ds-btn-secondary ds-btn-sm">{% icon "download" 16 %}All CSV</a>
+            {% if selected_level %}<a href="{% url 'attendance:export_level' selected_level %}" class="ds-btn ds-btn-secondary ds-btn-sm">{% icon "download" 16 %}Level CSV</a>{% endif %}
 </div>
-        
-<div class="table-responsive">
-<table>
-<thead>
-<tr>
-<th>Student ID</th>
-<th>Name</th>
-<th>Level</th>
-<th>Sessions</th>
-<th>Attended</th>
-<th>Percentage</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody>
-                    {% for student in students %}
-<tr>
-<td style="color: var(--text-muted); font-family: monospace; letter-spacing: 0.5px;">
-                            {{ student.profile.student_id_number|default:"-" }}
-</td>
-<td style="font-weight: 700;">
-                            {{ student.profile.user.get_full_name|default:student.profile.user.username }}
-</td>
-<td>
-<span style="background: var(--dash-bg); padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color);">
-                                {{ student.profile.level.name }}
-</span>
-</td>
-<td>{{ student.total_sessions }}</td>
-<td>{{ student.total_attended }}</td>
-<td>
-<span class="pct-badge {% if student.percentage < 60 %}pct-danger{% else %}pct-good{% endif %}">
-                                {{ student.percentage }}%
-</span>
-</td>
-<td>
-<div class="action-group">
-<a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="action-icon" title="Export CSV">
-<span class="iconify" data-icon="mdi:file-delimited" style="font-size: 1.2rem; color: #059669;"></span>
-</a>
-<a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="action-text">
-                                    Details
-</a>
 </div>
-</td>
-</tr>
-                    {% endfor %}
-</tbody>
-</table>
+
+<div class="ds-list">
+        {% for student in students %}
+<div class="row">
+<div class="row-top">
+<div style="min-width:0">
+<p class="row-title">{{ student.profile.user.get_full_name|default:student.profile.user.username }}</p>
+<p class="row-sub" style="font-variant-numeric:tabular-nums">{{ student.profile.student_id_number|default:"-" }} · Level {{ student.profile.level.name }}</p>
 </div>
+<span class="ds-status {% if student.percentage < 60 %}ds-status-danger{% else %}ds-status-success{% endif %}">{{ student.percentage }}%</span>
+</div>
+<p class="row-sub" style="margin:0">Attended {{ student.total_attended }} of {{ student.total_sessions }} sessions</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<a href="{% url 'attendance:student_report' %}?search={{ student.profile.user.username }}" class="ds-btn ds-btn-secondary">Details</a>
+<a href="{% url 'attendance:admin_export_student_csv' student.profile.id %}" class="ds-btn ds-btn-secondary">{% icon "download" 18 %}CSV</a>
+</div>
+</div>
+        {% endfor %}
 </div>
     {% else %}
-<div class="blank-state">
-<span class="iconify" data-icon="mdi:account-search-outline" style="font-size: 3.5rem; color: var(--border-color); margin-bottom: 1rem;"></span>
-<h3 style="margin: 0 0 0.5rem 0; color: var(--text-primary);">No students found</h3>
-<p style="color: var(--text-muted); font-weight: 500; margin: 0;">Try adjusting your search query or level filter.</p>
+<div class="pg-empty" style="margin-top:20px">
+{% icon "search" 28 %}
+<strong>No students found</strong>
+Try adjusting your search or level filter.
 </div>
     {% endif %}
 </div>

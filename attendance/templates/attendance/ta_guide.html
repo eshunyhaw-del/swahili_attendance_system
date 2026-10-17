@@ -1,277 +1,95 @@
 ﻿{% extends "attendance/base.html" %}
+{% load static ui %}
 {% block title %}TA Guide{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
 <style>
-:root {
-    --primary: #0D2472;
-    --primary-lt: rgba(13,36,114,0.07);
-    --surface: #FFFFFF;
-    --bg: #F4F6F9;
-    --text: #1F2937;
-    --muted: #6B7484;
-    --border: #E1E5EC;
-    --green: #167A4B;
-    --green-lt: rgba(26,158,96,0.10);
-    --r-sm: 8px; --r-lg: 12px; --r-xl: 14px;
-    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
-    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html[data-theme="dark"] {
-    --primary: #1B3A9C; --primary-lt: rgba(242,195,26,0.10);
-    --surface: #171F2A; --bg: #0E141C;
-    --text: #E7ECF2; --muted: #8B95A5; --border: #29323F;
-    --green: #4ED08A; --green-lt: rgba(22,122,75,0.20);
-    --amber: #E6A23C; --amber-lt: rgba(180,83,9,0.20);
-    --red: #F0776B; --red-lt: rgba(180,35,24,0.20);
-    --blue: #6AA0F0; --blue-lt: rgba(23,92,211,0.20);
-    --sh-sm: 0 1px 3px rgba(0,0,0,0.45);
-    --sh-md: 0 4px 10px -2px rgba(0,0,0,0.5);
-    --sh-lg: 0 12px 20px -4px rgba(0,0,0,0.55);
-}
-body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
-
-.wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-
-.page-header {
-    background: #0D2472;
-    color: #fff; border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
-    position: relative; overflow: hidden; box-shadow: var(--sh-md);
-}
-.page-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
-.page-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
-
-/* Sections */
-.guide-section {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sh-sm);
-    margin-bottom: 1.125rem;
-    overflow: hidden;
-}
-
-.section-head {
-    display: flex; align-items: center; gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: #F8F9FD;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer; user-select: none;
-}
-.section-num {
-    width: 28px; height: 28px;
-    background: var(--primary); color: #fff;
-    border-radius: 9999px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 800; flex-shrink: 0;
-}
-.section-title { font-size: 14px; font-weight: 700; flex: 1; }
-.chevron { font-size: 18px; color: var(--muted); transition: transform 0.2s; }
-.section-head[aria-expanded="true"] .chevron { transform: rotate(180deg); }
-
-.section-body { padding: 1.25rem; display: none; }
-.section-body.open { display: block; }
-
-/* Steps */
-.step-list { display: flex; flex-direction: column; gap: 0.875rem; }
-.step {
-    display: flex; gap: 0.875rem; align-items: flex-start;
-}
-.step-icon {
-    width: 36px; height: 36px; border-radius: var(--r-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-    background: var(--primary-lt); color: var(--primary);
-}
-.step-icon.green { background: var(--green-lt); color: var(--green); }
-.step-text { font-size: 13.5px; line-height: 1.6; padding-top: 0.4rem; }
-.step-text strong { color: var(--primary); }
-
-/* Tip box */
-.tip-box {
-    background: rgba(242,195,26,0.1);
-    border: 1px solid rgba(242,195,26,0.3);
-    border-radius: var(--r-sm);
-    padding: 0.75rem 1rem;
-    display: flex; gap: 0.625rem; align-items: flex-start;
-    font-size: 12.5px; color: #7A5C00; margin-top: 1rem; line-height: 1.55;
-}
-.tip-box .iconify { font-size: 15px; flex-shrink: 0; margin-top: 1px; color: #B8920C; }
+.gd > summary { list-style: none; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 16px; cursor: pointer; }
+.gd > summary::-webkit-details-marker { display: none; }
+.gd-num { flex: 0 0 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-border); background: var(--ds-surface); font-size: 13px; font-weight: 700; color: var(--ds-primary); }
+:root[data-theme="dark"] .gd-num { color: var(--ds-text); }
+.gd-title { flex: 1; font-size: 15px; font-weight: 600; }
+.gd .chev { color: var(--ds-text-muted); transition: transform .15s; }
+.gd[open] .chev { transform: rotate(180deg); }
+.gd-body { padding: 4px 16px 16px; background: var(--ds-surface-sunken); border-top: 1px solid var(--ds-border); }
+.gd-step { display: flex; gap: 12px; padding: 12px 0; font-size: 14px; line-height: 1.55; color: var(--ds-text-secondary); }
+.gd-step + .gd-step { border-top: 1px solid var(--ds-border); }
+.gd-ic { flex: 0 0 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--ds-radius-sm); border: 1px solid var(--ds-border); background: var(--ds-surface); color: var(--ds-primary); }
+:root[data-theme="dark"] .gd-ic { color: var(--ds-text); }
+.gd-ic.ok { color: var(--ds-success); } .gd-ic.warn { color: var(--ds-warning); } .gd-ic.info { color: var(--ds-info); } .gd-ic.bad { color: var(--ds-danger); }
+.gd-step strong { color: var(--ds-text); }
+.gd-tip { margin-top: 8px; }
 </style>
 
-<div class="wrap">
+<div class="pg">
 
-<div class="page-header">
-<h1>TA Quick Guide</h1>
-<div class="page-header-sub">Everything you need to know to run your sessions</div>
+<header class="pg-head">
+<div>
+<h1>TA quick guide</h1>
+<p class="pg-sub">Everything you need to run your sessions.</p>
 </div>
+</header>
 
-<!-- 1. Dashboard -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="true">
-<div class="section-num">1</div>
-<div class="section-title">Using Your Dashboard</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
-</div>
-<div class="section-body open">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:view-dashboard-outline"></span></div>
-<div class="step-text">Your dashboard shows all <strong>sessions grouped by course</strong>. Each course card lists every week as a tab at the top.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:calendar-week"></span></div>
-<div class="step-text">Click a <strong>Week tab</strong> to open that session. You'll see the date, time, topic, and the list of enrolled students below.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:account-group-outline"></span></div>
-<div class="step-text">The <strong>student count chip</strong> next to the session date shows how many students are registered for that course.</div>
-</div>
-</div>
-</div>
-</div>
+<div class="ds-list">
 
-<!-- 2. Generating codes -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">2</div>
-<div class="section-title">Generating Attendance Codes</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="gd" open>
+<summary><span class="gd-num">1</span><span class="gd-title">Using your home screen</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic">{% icon "house" 18 %}</span><div>Home shows your totals, then each course. For every course the <strong>current week</strong> opens by itself: today's session, or the next one if there is none today.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "calendar-days" 18 %}</span><div>You see the week before and after it. Tap <strong>Show all sessions</strong> under a course to list every week.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "users" 18 %}</span><div>Tap any week to open it. You get the date, time and venue, then a card for every enrolled student.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:lightning-bolt"></span></div>
-<div class="step-text"><strong>Generate All</strong>: click the green button at the top of a session to generate codes for every student at once. You'll be asked to confirm before it runs.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:key-outline"></span></div>
-<div class="step-text"><strong>Generate one</strong>: find the student in the table and click the green <em>Generate</em> button in their row. The code appears instantly without reloading the page.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:send-outline"></span></div>
-<div class="step-text">Once a code is generated, click <strong>Mark Given</strong> after you hand it to the student. This changes the status from <em>Pending</em> to <em>Given</em>.</div>
-</div>
-</div>
-<div class="tip-box">
-<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
-                Codes remain on the current week tab after generation. The page does not reload or switch tabs.
-</div>
-</div>
-</div>
+</details>
 
-<!-- 3. Status badges -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">3</div>
-<div class="section-title">Understanding Code Statuses</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="gd">
+<summary><span class="gd-num">2</span><span class="gd-title">Generating attendance codes</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic ok">{% icon "zap" 18 %}</span><div><strong>Generate all codes</strong>: the blue button at the top of an open week. It creates a code for every student at once and asks you to confirm first.</div></div>
+<div class="gd-step"><span class="gd-ic ok">{% icon "key-round" 18 %}</span><div><strong>Generate one</strong>: find the student's card and tap <strong>Generate code</strong>. The code appears on the card straight away.</div></div>
+<div class="gd-step"><span class="gd-ic info">{% icon "send" 18 %}</span><div>After you hand a code to a student, tap <strong>Mark given</strong>. The badge changes from Pending to Given.</div></div>
+<div class="pg-note gd-tip">{% icon "info" 18 %}<span>Use the search box and the All, Pending, Given and Used filters to find a student quickly.</span></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:minus-circle-outline"></span></div>
-<div class="step-text"><strong>Not generated</strong>: no code has been created for this student yet for this session.</div>
-</div>
-<div class="step">
-<div class="step-icon" style="background:rgba(184,146,12,0.1);color:#B8920C;"><span class="iconify" data-icon="mdi:clock-outline"></span></div>
-<div class="step-text"><strong>Pending</strong>: a code was generated but has not been given to the student or used yet.</div>
-</div>
-<div class="step">
-<div class="step-icon" style="background:rgba(37,99,235,0.09);color:#2563EB;"><span class="iconify" data-icon="mdi:send-check"></span></div>
-<div class="step-text"><strong>Given</strong>: you marked the code as distributed. The student has the code but hasn't submitted attendance yet.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div>
-<div class="step-text"><strong>Used</strong>: the student submitted their attendance using this code. No further action needed.</div>
-</div>
-</div>
-</div>
-</div>
+</details>
 
-<!-- 4. Manage courses -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">4</div>
-<div class="section-title">Managing Your Courses</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="gd">
+<summary><span class="gd-num">3</span><span class="gd-title">Understanding code statuses</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic">{% icon "minus" 18 %}</span><div><strong>No code</strong>: nothing has been generated for this student in this session yet.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "clock" 18 %}</span><div><strong>Pending</strong>: a code exists but you have not marked it as given and the student has not used it.</div></div>
+<div class="gd-step"><span class="gd-ic info">{% icon "send" 18 %}</span><div><strong>Given</strong>: you marked the code as handed over. The student has not submitted attendance yet.</div></div>
+<div class="gd-step"><span class="gd-ic ok">{% icon "check" 18 %}</span><div><strong>Used</strong>: the student submitted attendance with this code. Nothing more to do.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:book-edit-outline"></span></div>
-<div class="step-text">Go to <strong>Manage Courses</strong> in the sidebar to see all available levels. Your currently assigned ones are shown in green.</div>
-</div>
-<div class="step">
-<div class="step-icon green"><span class="iconify" data-icon="mdi:plus-circle-outline"></span></div>
-<div class="step-text">Check any level you want to add. New levels will appear on your dashboard after saving.</div>
-</div>
-<div class="step">
-<div class="step-icon" style="background:rgba(220,38,38,0.08);color:#DC2626;"><span class="iconify" data-icon="mdi:minus-circle-outline"></span></div>
-<div class="step-text">Uncheck a green level to remove it. Click <strong>Save Changes</strong> to confirm. The level will no longer appear on your dashboard.</div>
-</div>
-</div>
-</div>
-</div>
+</details>
 
-<!-- 5. Announcements -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">5</div>
-<div class="section-title">Sending Announcements</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="gd">
+<summary><span class="gd-num">4</span><span class="gd-title">Managing your courses</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic">{% icon "ellipsis" 18 %}</span><div>Tap <strong>More</strong>, then <strong>Manage courses</strong>. Levels you teach are listed first and already ticked.</div></div>
+<div class="gd-step"><span class="gd-ic ok">{% icon "plus" 18 %}</span><div>Tick a level to add it. New levels appear on Home after you save.</div></div>
+<div class="gd-step"><span class="gd-ic bad">{% icon "x" 18 %}</span><div>Untick a level to remove it, then tap <strong>Save changes</strong>.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:bullhorn-outline"></span></div>
-<div class="step-text">Click <strong>Announcements</strong> in the sidebar. Write a subject and your message, then choose which levels to target, or leave all unchecked to send to every student in your levels.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div>
-<div class="step-text">Students receive the announcement as an email. The subject line will be prefixed with <em>[SWASA]</em> so it is easy to identify.</div>
-</div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
-<div class="step-text">All past announcements are listed below the compose form, showing how many students received each one.</div>
-</div>
-</div>
-<div class="tip-box">
-<span class="iconify" data-icon="mdi:lightbulb-outline"></span>
-                Only students registered in active-semester courses for your assigned levels will receive the email.
-</div>
-</div>
-</div>
+</details>
 
-<!-- 6. History -->
-<div class="guide-section">
-<div class="section-head" onclick="toggle(this)" aria-expanded="false">
-<div class="section-num">6</div>
-<div class="section-title">Viewing Your History</div>
-<span class="iconify chevron" data-icon="mdi:chevron-down"></span>
+<details class="gd">
+<summary><span class="gd-num">5</span><span class="gd-title">Sending announcements</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic">{% icon "megaphone" 18 %}</span><div>Tap <strong>More</strong>, then <strong>Announcements</strong>. Pick the course, write a subject and your message, and send.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "bell" 18 %}</span><div>Students registered for that course see it in their notification bell and on their Notifications page.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "history" 18 %}</span><div>Earlier announcements are listed below the form with the number of recipients. You can edit or delete them there.</div></div>
 </div>
-<div class="section-body">
-<div class="step-list">
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div>
-<div class="step-text">Click <strong>My History</strong> in the sidebar for a full record of every session: codes generated, given out, used, and the overall usage rate per week.</div>
+</details>
+
+<details class="gd">
+<summary><span class="gd-num">6</span><span class="gd-title">Viewing your history</span>{% icon "chevron-down" 20 "chev" %}</summary>
+<div class="gd-body">
+<div class="gd-step"><span class="gd-ic">{% icon "history" 18 %}</span><div>Tap <strong>History</strong> in the bottom bar for a record of every week you generated codes for: enrolled, generated, given out and used.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "check" 18 %}</span><div>The <strong>usage bar</strong> shows what share of the generated codes students actually used.</div></div>
+<div class="gd-step"><span class="gd-ic">{% icon "calendar-days" 18 %}</span><div>Weeks where you have not generated anything yet sit under <strong>Sessions without codes</strong>.</div></div>
 </div>
-<div class="step">
-<div class="step-icon"><span class="iconify" data-icon="mdi:percent"></span></div>
-<div class="step-text">The <strong>usage rate bar</strong> for each session shows what percentage of generated codes were actually used to submit attendance.</div>
-</div>
-</div>
-</div>
-</div>
+</details>
 
 </div>
-
-<script>
-function toggle(head) {
-    const body = head.nextElementSibling;
-    const open = body.classList.toggle('open');
-    head.setAttribute('aria-expanded', open);
-}
-</script>
+</div>
 {% endblock %}

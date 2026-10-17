@@ -1,219 +1,64 @@
 {% extends "attendance/base.html" %}
+{% load static ui %}
 {% block title %}Security Alerts{% endblock %}
+{% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/pages.css' %}">{% endblock %}
 
 {% block content %}
 <style>
-:root {
-    --bg-base: #EEF1F8;
-    --bg-surface: #FFFFFF;
-    --bg-subtle: #EEF1F8;
-    --radius-lg: 16px;
-    --shadow-xs: 0 1px 3px rgba(13,36,114,0.07);
-    --shadow-md: 0 4px 14px rgba(13,36,114,0.10);
-    --text-primary: #1A1A2E;
-    --text-secondary: #6B7280;
-    --text-muted: #6B7280;
-    --border: #E5E8F0;
-    --border-strong: #D4C8BE;
-    --gold: #F2C31A;
-}
-html[data-theme="dark"] :root,
-html[data-theme="dark"] {
-    --bg-base: #0F172A;
-    --bg-surface: #1E293B;
-    --bg-subtle: #1E293B;
-    --text-primary: #F1F5F9;
-    --text-muted: #94A3B8;
-    --border: #334155;
-    --border-strong: #475569;
-}
-body { background: var(--bg-base) !important; background-image: none !important; }
-
-.alr-wrap { max-width: 760px; margin: 0 auto; padding: 0 0 3rem; }
-
-.alr-page-header {
-    background: #0D2472;
-    border-radius: var(--radius-lg);
-    padding: 1.375rem 1.75rem;
-    margin-bottom: 1.5rem;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
-    position: relative; overflow: hidden;
-}
-.alr-page-header h1 { font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem; position: relative; z-index: 1; }
-.alr-page-header p { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
-.alr-header-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-danger); position: relative; z-index: 1; }
-
-/* ── Alert Card ── */
-.alr-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); padding: 1.375rem 1.5rem;
-    margin-bottom: 1rem; box-shadow: var(--shadow-xs);
-    border: 1px solid var(--border);
-    transition: box-shadow 0.15s;
-}
-.alr-card:hover { box-shadow: var(--shadow-md); }
-.alr-card.unresolved { }
-.alr-card.resolved { opacity: 0.85; }
-
-.alr-card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
-}
-.alr-card-title { display: flex; align-items: center; gap: 0.5rem; font-size: 14px; font-weight: 800; color: var(--text-primary); }
-.alr-card-title .iconify { color: #e74c3c; font-size: 18px; }
-
-.alr-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
-.alr-badge.active { color: var(--ds-danger); }
-.alr-badge.resolved { color: var(--ds-success); }
-
-.alr-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem 1rem; margin-bottom: 1.125rem; }
-@media (max-width: 500px) { .alr-details { grid-template-columns: 1fr; } }
-
-.alr-detail-lbl { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
-.alr-detail-val { font-size: 13px; color: var(--text-primary); font-weight: 600; }
-.alr-code-tag {
-    display: inline-block; padding: 2px 8px; border-radius: 5px;
-    background: rgba(13,36,114,0.07); color: #0D2472;
-    font-family: 'DM Mono', monospace; font-size: 12.5px; font-weight: 700;
-    border: 1px solid rgba(13,36,114,0.12);
-}
-html[data-theme="dark"] .alr-code-tag {
-    color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
-}
-.alr-reason-box {
-    grid-column: 1 / -1; padding: 0.6rem 0.875rem;
-    background: var(--bg-subtle); border: 1px solid var(--border);
-    border-radius: 8px; font-size: 13px; color: var(--text-primary); line-height: 1.5;
-}
-
-.alr-card-footer {
-    display: flex; justify-content: flex-end;
-    border-top: 1px solid var(--border); padding-top: 1rem;
-}
-.alr-resolve-btn {
-    padding: 0.5rem 1.25rem; border-radius: 8px; border: none; cursor: pointer;
-    font-family: inherit; font-size: 12.5px; font-weight: 700;
-    background: #1E9E5E; color: #fff;
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    box-shadow: 0 1px 4px rgba(30,158,94,0.3); transition: all 0.13s;
-}
-.alr-resolve-btn:hover { background: #178a51; }
-.alr-resolve-btn:active { transform: scale(0.97); }
-
-/* ── Empty ── */
-.alr-empty {
-    text-align: center; padding: 3.5rem 1rem;
-    background: var(--bg-surface);
-    border-radius: var(--radius-lg); box-shadow: var(--shadow-xs);
-}
-.alr-empty .iconify { font-size: 52px; color: #1E9E5E; display: block; margin: 0 auto 0.875rem; }
-.alr-empty h3 { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.4rem; }
-.alr-empty p { font-size: 13px; color: var(--text-muted); margin: 0; }
+.kv { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 0; }
+@media (min-width: 560px) { .kv { grid-template-columns: 1fr 1fr; } }
+.kv dt { font-size: 11.5px; font-weight: 600; color: var(--ds-text-muted); }
+.kv dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.kv dd small { display: block; font-weight: 400; color: var(--ds-text-muted); font-size: 12px; }
+.kv .wide { grid-column: 1 / -1; }
+.code-tag { font-family: var(--ds-font-mono); letter-spacing: .06em; }
 </style>
 
-<div class="alr-wrap">
+<div class="pg">
 
-<div class="alr-page-header">
+<header class="pg-head">
 <div>
-<h1>Security Alerts</h1>
-<p>Monitor and resolve unauthorised code-sharing attempts</p>
+<h1>Security alerts</h1>
+<p class="pg-sub">Monitor and resolve unauthorised code-sharing attempts.</p>
 </div>
-        {% if alerts %}
-        {% with unresolved=alerts|length %}
-<span class="alr-header-count">{{ unresolved }} alert{{ unresolved|pluralize }}</span>
-        {% endwith %}
-        {% endif %}
-</div>
+    {% if alerts %}{% with unresolved=alerts|length %}<span class="ds-status ds-status-danger">{{ unresolved }} alert{{ unresolved|pluralize }}</span>{% endwith %}{% endif %}
+</header>
 
     {% if alerts %}
+<div class="ds-list">
         {% for alert in alerts %}
-<div class="alr-card {% if alert.is_resolved %}resolved{% else %}unresolved{% endif %}">
-
-<div class="alr-card-header">
-<div class="alr-card-title">
-<span class="iconify" data-icon="mdi:alert-decagram"></span>
-                    Code Misuse Detected
-</div>
-                {% if alert.is_resolved %}
-<span class="alr-badge resolved">
-<span class="iconify" data-icon="mdi:check-circle-outline" style="font-size:12px;"></span> Resolved
-</span>
-                {% else %}
-<span class="alr-badge active">
-<span class="iconify" data-icon="mdi:alert-circle-outline" style="font-size:12px;"></span> Active
-</span>
-                {% endif %}
+<div class="row">
+<div class="row-top">
+<p class="row-title">Code misuse detected</p>
+                {% if alert.is_resolved %}<span class="ds-status ds-status-success">{% icon "circle-check" 12 %}Resolved</span>
+                {% else %}<span class="ds-status ds-status-danger">{% icon "circle-alert" 12 %}Active</span>{% endif %}
 </div>
 
-<div class="alr-details">
-<div>
-<div class="alr-detail-lbl">Code String</div>
-<div class="alr-detail-val">
-                        {% if alert.code %}
-<span class="alr-code-tag">{{ alert.code.code_string }}</span>
-                        {% else %}
-<span class="alr-code-tag" style="opacity:0.5;">N/A</span>
-                        {% endif %}
-</div>
-</div>
-<div>
-<div class="alr-detail-lbl">Attempted At</div>
-<div class="alr-detail-val">{{ alert.attempted_at|date:"M j, Y, g:i a" }}</div>
-</div>
-<div>
-<div class="alr-detail-lbl">Attempted By</div>
-<div class="alr-detail-val">
-                        {{ alert.attempted_by.get_full_name|default:alert.attempted_by.username }}
-<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.attempted_by.username }}</div>
-</div>
-</div>
-<div>
-<div class="alr-detail-lbl">Code Owner</div>
-<div class="alr-detail-val">
-                        {% if alert.code and alert.code.student %}
-                        {{ alert.code.student.get_full_name|default:alert.code.student.username }}
-<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">{{ alert.code.student.username }}</div>
-                        {% else %}
-                        Unknown
-<div style="font-size:11px; color:var(--text-muted); font-weight:500; margin-top:1px;">N/A</div>
-                        {% endif %}
-</div>
-</div>
-<div>
-<div class="alr-detail-lbl">Session</div>
-<div class="alr-detail-val">
-                        {% if alert.code and alert.code.class_session %}
-                        {{ alert.code.class_session.course.code }} - {{ alert.code.class_session.date|date:"M j, Y" }}
-                        {% else %}
-                        N/A
-                        {% endif %}
-</div>
-</div>
-<div>
-<div class="alr-detail-lbl">Reason</div>
-<div class="alr-detail-val alr-reason-box">{{ alert.reason }}</div>
-</div>
-</div>
+<dl class="kv">
+<div><dt>Code</dt><dd>{% if alert.code %}<span class="code-tag">{{ alert.code.code_string }}</span>{% else %}Not available{% endif %}</dd></div>
+<div><dt>Attempted</dt><dd>{{ alert.attempted_at|date:"M j, Y, g:i a" }}</dd></div>
+<div><dt>Attempted by</dt><dd>{{ alert.attempted_by.get_full_name|default:alert.attempted_by.username }}<small>{{ alert.attempted_by.username }}</small></dd></div>
+<div><dt>Code owner</dt><dd>{% if alert.code and alert.code.student %}{{ alert.code.student.get_full_name|default:alert.code.student.username }}<small>{{ alert.code.student.username }}</small>{% else %}Unknown{% endif %}</dd></div>
+<div><dt>Session</dt><dd>{% if alert.code and alert.code.class_session %}{{ alert.code.class_session.course.code }} on {{ alert.code.class_session.date|date:"M j, Y" }}{% else %}Not available{% endif %}</dd></div>
+<div class="wide"><dt>Reason</dt><dd style="font-weight:400;line-height:1.5">{{ alert.reason }}</dd></div>
+</dl>
 
             {% if not alert.is_resolved %}
-<div class="alr-card-footer">
-<form method="post">
-                    {% csrf_token %}
+<form method="post" style="margin:0">
+                {% csrf_token %}
 <input type="hidden" name="alert_id" value="{{ alert.id }}">
-<button type="submit" class="alr-resolve-btn">
-Mark as Resolved
-</button>
+<button type="submit" class="ds-btn ds-btn-primary ds-btn-block">{% icon "check" 18 %}Mark as resolved</button>
 </form>
-</div>
             {% endif %}
-
 </div>
         {% endfor %}
+</div>
     {% else %}
-<div class="alr-empty">
-<span class="iconify" data-icon="mdi:shield-check-outline"></span>
-<h3>No Security Alerts</h3>
-<p>All students are using their own attendance codes correctly.</p>
+<div class="pg-empty" style="margin-top:20px">
+{% icon "circle-check" 28 %}
+<strong>No security alerts</strong>
+All students are using their own attendance codes correctly.
 </div>
     {% endif %}
 

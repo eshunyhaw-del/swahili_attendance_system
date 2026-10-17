@@ -1,0 +1,8 @@
+{% load ui %}{% with page=request.resolver_match.url_name %}
+<nav class="bottom-nav bn-4" aria-label="Primary">
+<a href="{% url 'attendance:lecturer_dashboard' %}" class="bn-item{% if page == 'lecturer_dashboard' or page == 'dashboard' %} is-active{% endif %}"{% if page == 'lecturer_dashboard' or page == 'dashboard' %} aria-current="page"{% endif %}>{% icon "calendar-days" 22 %}<span>Sessions</span></a>
+<a href="{% url 'attendance:admin_dashboard' %}" class="bn-item{% if page == 'admin_dashboard' %} is-active{% endif %}"{% if page == 'admin_dashboard' %} aria-current="page"{% endif %}>{% icon "chart-column" 22 %}<span>Analytics</span></a>
+<a href="{% url 'attendance:student_report' %}" class="bn-item{% if page == 'student_report' or page == 'admin_search' %} is-active{% endif %}"{% if page == 'student_report' or page == 'admin_search' %} aria-current="page"{% endif %}>{% icon "users" 22 %}<span>Students</span></a>
+<button type="button" class="bn-item{% if page != 'lecturer_dashboard' and page != 'dashboard' and page != 'admin_dashboard' and page != 'student_report' and page != 'admin_search' %} is-active{% endif %}" data-sheet-open="moreSheet" aria-haspopup="dialog">{% icon "ellipsis" 22 %}<span>More</span>{% if misuse_alerts_count or pending_tickets %}<i class="bn-dot" aria-hidden="true"></i><span class="ds-sr-only">Items need attention</span>{% endif %}</button>
+</nav>
+{% endwith %}
