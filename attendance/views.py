@@ -518,8 +518,6 @@ def token_logout_view(request):
 # ── Student Registration ──────────────────────────────────────────────────────
 
 def register(request):
-    if request.user.is_authenticated:
-        return redirect("attendance:dashboard")
 
     if request.method == "POST":
         # Throttle registration email sends per IP (account-creation / mail abuse).
@@ -587,8 +585,6 @@ def register(request):
 
 def resend_verification(request):
     """Let students request a fresh OTP if they never completed email verification."""
-    if request.user.is_authenticated:
-        return redirect("attendance:dashboard")
 
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
@@ -2232,8 +2228,6 @@ def admin_search_students(request):
 # ── TA Registration and Dashboard ─────────────────────────────────────────────
 
 def ta_register(request):
-    if request.user.is_authenticated:
-        return redirect("attendance:dashboard")
 
     if request.method == "POST":
         # Throttle registration email sends per IP (account-creation / mail abuse).
@@ -3191,6 +3185,11 @@ def community_alumni(request):
 @login_required
 def community_clubs(request):
     return render(request, 'attendance/community/clubs.html')
+
+
+@login_required
+def scale_shop(request):
+    return render(request, 'attendance/community/scale_shop.html')
 
 
 @login_required

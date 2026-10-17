@@ -63,14 +63,16 @@ def make_refresh_token(user, remember_me=False):
         'user_id': user.id,
         'type': 'refresh',
         'sh': user_security_hash(user),
+        'rm': bool(remember_me),
     }, ttl)
     return token, ttl
 
 
 def _set_cookie(response, name, value, max_age):
+    # max_age=None makes a session cookie: the browser drops it when it closes.
     response.set_cookie(
         name, value,
-        max_age=int(max_age),
+        max_age=None if max_age is None else int(max_age),
         httponly=True,
         secure=settings.JWT_COOKIE_SECURE,
         samesite='Lax',
@@ -81,14 +83,19 @@ def set_auth_cookies(response, user, remember_me=False):
     """Attach fresh access + refresh cookies for `user` to `response`."""
     access = make_access_token(user)
     refresh, refresh_ttl = make_refresh_token(user, remember_me)
-    _set_cookie(response, 'access_token', access, ACCESS_TOKEN_TTL.total_seconds())
-    _set_cookie(response, 'refresh_token', refresh, refresh_ttl.total_seconds())
+    # Without "Keep me signed in" both cookies are session cookies, so closing
+    # the browser signs the user out. With it they persist (refresh up to 30 days).
+    _set_cookie(response, 'access_token', access,
+                ACCESS_TOKEN_TTL.total_seconds() if remember_me else None)
+    _set_cookie(response, 'refresh_token', refresh,
+                refresh_ttl.total_seconds() if remember_me else None)
     return response
 
 
-def set_access_cookie(response, access_token):
+def set_access_cookie(response, access_token, persistent=True):
     """Attach just a refreshed access cookie (used by the middleware)."""
-    _set_cookie(response, 'access_token', access_token, ACCESS_TOKEN_TTL.total_seconds())
+    _set_cookie(response, 'access_token', access_token,
+                ACCESS_TOKEN_TTL.total_seconds() if persistent else None)
     return response
 
 

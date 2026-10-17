@@ -28,15 +28,16 @@ class JWTAuthMiddleware:
 
     def __call__(self, request):
         new_access_token = None
+        persistent = True
         if not request.user.is_authenticated:
-            user, new_access_token = self._authenticate(request)
+            user, new_access_token, persistent = self._authenticate(request)
             if user is not None:
                 request.user = user
 
         response = self.get_response(request)
 
         if new_access_token:
-            set_access_cookie(response, new_access_token)
+            set_access_cookie(response, new_access_token, persistent)
         return response
 
     def _user_for(self, payload):
@@ -54,14 +55,14 @@ class JWTAuthMiddleware:
         return user
 
     def _authenticate(self, request):
-        """Return (user, new_access_token_or_None)."""
+        """Return (user, new_access_token_or_None, persistent_cookie)."""
         access = request.COOKIES.get('access_token')
         if access:
             payload = decode_token(access, 'access')
             if payload:
                 user = self._user_for(payload)
                 if user is not None:
-                    return user, None
+                    return user, None, True
 
         # Access token missing or invalid - try the refresh token.
         refresh = request.COOKIES.get('refresh_token')
@@ -70,9 +71,10 @@ class JWTAuthMiddleware:
             if payload:
                 user = self._user_for(payload)
                 if user is not None:
-                    return user, make_access_token(user)
+                    # Tokens minted before the `rm` claim existed stay persistent.
+                    return user, make_access_token(user), payload.get('rm', True)
 
-        return None, None
+        return None, None, True
 
 
 EXEMPT_URLS = {

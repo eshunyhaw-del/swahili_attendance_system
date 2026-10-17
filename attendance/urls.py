@@ -83,4 +83,5 @@ urlpatterns = [
     path("community/alumni/", views.community_alumni, name="community_alumni"),
     path("community/clubs/", views.community_clubs, name="community_clubs"),
     path("community/dues/", views.community_dues, name="community_dues"),
+    path("scale-shop/", views.scale_shop, name="scale_shop"),
 ]
