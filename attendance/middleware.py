@@ -68,11 +68,13 @@ class JWTAuthMiddleware:
         refresh = request.COOKIES.get('refresh_token')
         if refresh:
             payload = decode_token(refresh, 'refresh')
-            if payload:
+            # Refresh tokens issued before the `rm` claim existed are long-lived
+            # persistent logins; reject them so everyone signs in once under the
+            # session-only-by-default rules.
+            if payload and 'rm' in payload:
                 user = self._user_for(payload)
                 if user is not None:
-                    # Tokens minted before the `rm` claim existed stay persistent.
-                    return user, make_access_token(user), payload.get('rm', True)
+                    return user, make_access_token(user), bool(payload['rm'])
 
         return None, None, True
 
