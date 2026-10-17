@@ -123,7 +123,17 @@ def notifications(request):
 
     total_unread = len(sys_unread) + len(ann_unread) + len(generic_unread)
 
+    staff_counts = {}
+    if request.user.is_staff:
+        # Drive the "needs attention" dot and counts in the staff More sheet.
+        from .models import CodeMisuseAlert, SupportTicket
+        staff_counts = {
+            'misuse_alerts_count': CodeMisuseAlert.objects.filter(is_resolved=False).count(),
+            'pending_tickets': SupportTicket.objects.filter(status='pending').count(),
+        }
+
     return {
+        **staff_counts,
         'sys_notifications':     sys_unread,
         'ann_notifications':     ann_unread,
         'generic_notifications': generic_unread,

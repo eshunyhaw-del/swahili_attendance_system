@@ -84,8 +84,8 @@ class UserProfile(models.Model):
 class Avatar(models.Model):
     """Universal profile record for EVERY user (student, TA, lecturer, admin).
 
-    Kept separate from UserProfile — which is student-only and drives student
-    analytics such as ``UserProfile.objects.count()`` — so giving a lecturer or
+    Kept separate from UserProfile - which is student-only and drives student
+    analytics such as ``UserProfile.objects.count()`` - so giving a lecturer or
     TA a profile photo never inflates student counts. Name and email are edited
     directly on the ``User``; this model only stores the photo and phone.
     """
@@ -102,7 +102,7 @@ class CourseRegistration(models.Model):
     """Explicit through-model for UserProfile.registered_courses.
 
     Each row is one student's registration in one course. Deregistration is a
-    soft state change (is_active=False) — rows are NEVER deleted, so the full
+    soft state change (is_active=False) - rows are NEVER deleted, so the full
     history of who dropped a course and when is preserved for auditing.
     """
     user_profile = models.ForeignKey(
@@ -205,7 +205,7 @@ class AttendanceCode(models.Model):
         code = self.code_string or 'N/A'
         student = self.student.username if self.student else 'Unknown'
         session = str(self.class_session) if self.class_session else 'Unknown'
-        return f"{code} — {student} — {session}"
+        return f"{code} - {student} - {session}"
 
 
 class AttendanceRecord(models.Model):
@@ -418,4 +418,4 @@ class OTPCode(models.Model):
         return timezone.now() > self.expires_at
 
     def __str__(self):
-        return f"OTP({self.purpose}) for {self.user.username} — {'used' if self.is_used else 'active'}"
+        return f"OTP({self.purpose}) for {self.user.username} - {'used' if self.is_used else 'active'}"

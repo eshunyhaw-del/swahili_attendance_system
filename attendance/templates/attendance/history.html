@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Attendance History{% endblock %}
 
 {% block content %}
@@ -46,9 +47,9 @@
 {% if history_data %}
 <div class="stat-grid">
 <div class="ds-stat"><div class="ds-stat-label">Courses</div><div class="ds-stat-value">{{ history_data|length }}</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Sessions</div><div class="ds-stat-value" id="stat-total">—</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Present</div><div class="ds-stat-value" id="stat-attended" style="color:var(--ds-success)">—</div></div>
-<div class="ds-stat"><div class="ds-stat-label">Absent</div><div class="ds-stat-value" id="stat-absent" style="color:var(--ds-danger)">—</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Sessions</div><div class="ds-stat-value" id="stat-total">-</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Present</div><div class="ds-stat-value" id="stat-attended" style="color:var(--ds-success)">-</div></div>
+<div class="ds-stat"><div class="ds-stat-label">Absent</div><div class="ds-stat-value" id="stat-absent" style="color:var(--ds-danger)">-</div></div>
 </div>
 
 {% for item in history_data %}
@@ -67,11 +68,11 @@
 <div class="track-meta">
 <span class="ds-text-muted">{{ item.percentage|floatformat:0 }}% attendance · {{ item.eligibility.total_absent }} missed</span>
         {% if item.eligibility.status == 'blocked' %}
-<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
+{% badge "not_eligible" %}
         {% elif item.eligibility.status == 'warning' %}
-<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
+{% badge "at_risk" %}
         {% else %}
-<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
+{% badge "eligible" %}
         {% endif %}
 </div>
 </div>
@@ -86,11 +87,11 @@
 </div>
 </div>
             {% if week.status == 'present' %}
-<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+{% badge "present" %}
             {% elif week.status == 'absent' %}
-<span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span>
+{% badge "absent" %}
             {% else %}
-<span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not recorded</span>
+{% badge "not_recorded" %}
             {% endif %}
 </div>
         {% endfor %}

@@ -156,7 +156,7 @@ def profile(request):
 # A simple fixed-window counter keyed in the cache. Used to blunt password
 # brute force / spraying on login and email-send abuse on the OTP-request and
 # registration endpoints. NOTE: the default cache is LocMemCache (per-process),
-# so under multiple workers these limits are per-worker — good enough as a
+# so under multiple workers these limits are per-worker - good enough as a
 # speed bump, but move to a shared cache (Redis/DB) for authoritative limits.
 
 def _client_ip(request):
@@ -170,7 +170,7 @@ def _client_ip(request):
 
 def _rate_is_over(bucket, identifier, limit):
     """True if this (bucket, identifier) has already reached `limit` hits in the
-    current window. Read-only — does not count a hit."""
+    current window. Read-only - does not count a hit."""
     from django.core.cache import cache
     return cache.get(f"rl_{bucket}_{identifier}", 0) >= limit
 
@@ -199,7 +199,7 @@ def active_courses(profile):
 
     Use this anywhere "currently enrolled" is meant. Plain
     ``profile.registered_courses`` now returns inactive (deregistered) rows too,
-    because the through model — not the M2M — holds the is_active flag.
+    because the through model - not the M2M - holds the is_active flag.
     """
     return Course.objects.filter(
         course_registrations__user_profile=profile,
@@ -315,7 +315,7 @@ def _absolute_url(path, request=None):
 def send_ta_approval_email(ta_profile, request=None):
     """Email a TA that their account was approved. Returns True on success.
 
-    Never raises — a mail failure must not roll back the approval itself — but
+    Never raises - a mail failure must not roll back the approval itself - but
     the boolean lets callers (e.g. the admin) tell the approver whether the
     notification actually went out.
     """
@@ -430,7 +430,7 @@ def generate_and_send_otp(user, purpose, expiry_minutes=5, request=None):
             "Or verify instantly with this link (expires in 30 minutes):",
             magic_link_url,
         ]
-    plain_parts += ["", "If you did not request this, please ignore this email.", "", "— SWASA Attendance System"]
+    plain_parts += ["", "If you did not request this, please ignore this email.", "", "SWASA Attendance System"]
 
     send_mail(
         subject='Your SWASA Verification Code',
@@ -477,7 +477,7 @@ def token_login_view(request):
             pass
 
         if user is not None and user.is_active:
-            # Successful login — clear this identity's failure counters.
+            # Successful login - clear this identity's failure counters.
             _rate_clear('login_ip', ip)
             if email:
                 _rate_clear('login_email', email)
@@ -493,7 +493,7 @@ def token_login_view(request):
             response = redirect(next_url)
             return set_auth_cookies(response, user, remember_me=bool(remember_me))
 
-        # Failed attempt — count it against both the IP and the email.
+        # Failed attempt - count it against both the IP and the email.
         _rate_hit('login_ip', ip, _RL_WINDOW)
         if email:
             _rate_hit('login_email', email, _RL_WINDOW)
@@ -606,7 +606,7 @@ def resend_verification(request):
                 f"A new verification code has been sent to {email}. Please check your inbox."
             )
             return redirect("attendance:otp_verify_registration")
-        # No unverified account found — non-revealing response, stay on page
+        # No unverified account found - non-revealing response, stay on page
         messages.success(
             request,
             "If that email has an unverified account, a new code has been sent."
@@ -692,7 +692,7 @@ def otp_verify_registration(request):
             request.session.pop('pending_reg_type', None)
 
             if reg_type == 'ta':
-                # Email verification proves the address — it does NOT grant the
+                # Email verification proves the address - it does NOT grant the
                 # TA role. TA accounts stay is_approved=False until an admin
                 # approves them via the pending-TAs page. Do not issue a login
                 # token here; show a "pending approval" result instead.
@@ -810,7 +810,7 @@ def otp_password_reset_request(request):
             except User.DoesNotExist:
                 pass
             _rate_hit('pwreset_ip', ip, 900)
-        # Always redirect — don't reveal whether the email exists
+        # Always redirect - don't reveal whether the email exists
         return redirect(reverse('attendance:otp_verify_password_reset'))
 
     return render(request, 'attendance/otp_password_reset_request.html')
@@ -948,7 +948,7 @@ def magic_verify_registration(request, token):
     otp.is_used = True
     otp.save(update_fields=['magic_token_used', 'is_used'])
 
-    # Activate account (email confirmed) — but verifying an email never grants
+    # Activate account (email confirmed) - but verifying an email never grants
     # the TA role. A TA account stays is_approved=False until an admin approves
     # it. Only students are auto-logged-in here.
     user.is_active = True
@@ -971,7 +971,7 @@ def magic_verify_registration(request, token):
 
 
 def magic_reset_password(request, token):
-    """One-tap password-reset verification via magic link — skips OTP entry."""
+    """One-tap password-reset verification via magic link - skips OTP entry."""
     otp = OTPCode.objects.filter(
         magic_token=token,
         purpose=OTPCode.PURPOSE_PASSWORD_RESET,
@@ -996,7 +996,7 @@ def magic_reset_password(request, token):
     otp.is_used = True
     otp.save(update_fields=['magic_token_used', 'is_used'])
 
-    # Store verified user in session — otp_set_password reads this
+    # Store verified user in session - otp_set_password reads this
     request.session['reset_verified_user_id'] = user.id
     return redirect(reverse('attendance:otp_set_password'))
 
@@ -1059,7 +1059,7 @@ def student_deregister_course(request):
     """A student drops one of their OWN courses.
 
     Allowed ONLY when the student has zero attendance records for the course.
-    Soft delete — the registration row is kept, just marked inactive.
+    Soft delete - the registration row is kept, just marked inactive.
     """
     profile = get_profile(request.user)
     if not profile:
@@ -1072,7 +1072,7 @@ def student_deregister_course(request):
         messages.error(request, "You are not registered for that course.")
         return redirect('attendance:dashboard')
 
-    # The attendance gate — students cannot drop a course they've attended.
+    # The attendance gate - students cannot drop a course they've attended.
     if student_has_attendance(request.user, course):
         messages.error(
             request,
@@ -1089,7 +1089,7 @@ def student_deregister_course(request):
 def _staff_registration_target(request):
     """Resolve and authorize a TA/admin registration action.
 
-    Returns (profile, course, error_response) — error_response is a ready
+    Returns (profile, course, error_response) - error_response is a ready
     HttpResponse (JSON for XHR, redirect otherwise) when the actor is not
     allowed, else None. Also stashes a 'redirect_to' url name on the request.
     """
@@ -1193,7 +1193,7 @@ def dashboard(request):
     courses = list(active_courses(profile).filter(semester__is_active=True).select_related("semester"))
     course_data = []
 
-    # Bulk-fetch all sessions for enrolled courses — 1 query
+    # Bulk-fetch all sessions for enrolled courses - 1 query
     all_sessions = list(
         ClassSession.objects.filter(course__in=courses).order_by("course_id", "date")
     )
@@ -1203,7 +1203,7 @@ def dashboard(request):
 
     session_ids = [s.id for s in all_sessions]
 
-    # Bulk-fetch attendance codes for this student — 1 query
+    # Bulk-fetch attendance codes for this student - 1 query
     codes_by_session = {
         ac.class_session_id: ac
         for ac in AttendanceCode.objects.filter(
@@ -1211,7 +1211,7 @@ def dashboard(request):
         )
     }
 
-    # Bulk-fetch attendance records for this student — 1 query
+    # Bulk-fetch attendance records for this student - 1 query
     records_by_session = {
         ar.class_session_id: ar
         for ar in AttendanceRecord.objects.filter(
@@ -1380,7 +1380,7 @@ def student_history(request):
     today = timezone.now().date()
     date_joined = request.user.date_joined.date()
 
-    # Bulk-fetch all sessions for enrolled courses — 1 query
+    # Bulk-fetch all sessions for enrolled courses - 1 query
     all_sessions = list(
         ClassSession.objects.filter(course__in=courses).order_by("course_id", "date")
     )
@@ -1388,7 +1388,7 @@ def student_history(request):
     for s in all_sessions:
         course_id_to_sessions.setdefault(s.course_id, []).append(s)
 
-    # Bulk-fetch all attendance records for this student — 1 query
+    # Bulk-fetch all attendance records for this student - 1 query
     attended_session_ids = set(
         AttendanceRecord.objects.filter(
             student=request.user,
@@ -1633,7 +1633,7 @@ def admin_dashboard(request):
     pending_tickets     = SupportTicket.objects.filter(status='pending').count()
     active_tas_count    = TAProfile.objects.filter(is_approved=True).count()
 
-    # ── TA activity stats (bulk — no N+1) ────────────────────────────────────
+    # ── TA activity stats (bulk - no N+1) ────────────────────────────────────
     ta_activity_map = {
         row['ta_id']: row
         for row in TACode.objects
@@ -1749,7 +1749,7 @@ def pending_tas(request):
                 send_ta_approval_email(ta_profile, request=request)
                 messages.success(request, f"TA {ta_profile.user.get_full_name() or ta_profile.user.username} approved successfully.")
             except Exception:
-                messages.error(request, "Approval failed — please try again.")
+                messages.error(request, "Approval failed. Please try again.")
         elif action == 'reject':
             try:
                 username = ta_profile.user.get_full_name() or ta_profile.user.username
@@ -1757,7 +1757,7 @@ def pending_tas(request):
                 ta_profile.user.delete()
                 messages.success(request, f"Application from {username} rejected and removed.")
             except Exception:
-                messages.error(request, "Rejection failed — please try again.")
+                messages.error(request, "Rejection failed. Please try again.")
 
         return redirect(reverse('attendance:pending_tas'))
 
@@ -2001,7 +2001,7 @@ def ta_support_tickets(request):
         link=reverse('attendance:ta_support'),
     ).update(is_read=True)
 
-    # A TA handles every ticket from students in the levels they're assigned to —
+    # A TA handles every ticket from students in the levels they're assigned to -
     # not only tickets pre-assigned to them. This closes the "orphaned ticket"
     # gap: a ticket created when no TA was approved for the level had
     # assigned_ta=None and was invisible to (and unanswerable by) every TA.
@@ -2265,7 +2265,7 @@ def ta_register(request):
 
 @login_required
 def ta_history(request):
-    """TA history — per-session code generation record."""
+    """TA history - per-session code generation record."""
     if not hasattr(request.user, 'taprofile'):
         return redirect('attendance:dashboard')
 
@@ -2294,7 +2294,7 @@ def ta_history(request):
     )
     stats_by_session = {s['class_session_id']: s for s in stats_qs}
 
-    # Student counts per course (one query) — active registrations only
+    # Student counts per course (one query) - active registrations only
     from django.db.models import Count as _Count
     course_ids = list({s.course_id for s in sessions})
     student_counts = {
@@ -2399,7 +2399,7 @@ def ta_dashboard(request):
 
     courses_in_levels = Course.objects.filter(level__in=assigned_levels, semester__is_active=True)
 
-    # Single aggregation query instead of one query per course — active only
+    # Single aggregation query instead of one query per course - active only
     course_student_counts = {
         row['course']: row['cnt']
         for row in CourseRegistration.objects
@@ -2468,7 +2468,7 @@ def create_unique_ta_code(student, session, ta):
 
     (code, class_session) is unique, and several TAs can generate at once, so a
     code that looked free a moment ago may be taken by the time we save it. Retry
-    on that clash instead of failing — otherwise a TA gets a server error part-way
+    on that clash instead of failing - otherwise a TA gets a server error part-way
     through a class list."""
     from django.db import IntegrityError
     for _ in range(50):
@@ -2537,7 +2537,7 @@ def ta_generate_code(request):
                 "existing": True
             })
     
-    # Unique 6-digit code (1,000,000 space per session — no practical guessing risk).
+    # Unique 6-digit code (1,000,000 space per session - no practical guessing risk).
     ta_code = create_unique_ta_code(student, session, request.user)
     
     return JsonResponse({
@@ -2644,7 +2644,7 @@ def student_submit_ta_code(request):
         return JsonResponse({"error": "This code has already been used."}, status=400)
     
     # Record attendance and mark the code used atomically. The code must be
-    # marked used ONLY after the records are written — otherwise a failure here
+    # marked used ONLY after the records are written - otherwise a failure here
     # would "burn" the code (is_used=True) while leaving no AttendanceRecord,
     # permanently locking the student out via the is_used guard above.
     now = timezone.now()
@@ -2811,7 +2811,7 @@ def ta_change_password(request):
             from django.contrib.auth import update_session_auth_hash
             update_session_auth_hash(request, request.user)
             messages.success(request, "Password changed successfully!")
-            # Re-issue cookies — the password change invalidates the old JWT.
+            # Re-issue cookies - the password change invalidates the old JWT.
             return set_auth_cookies(redirect('attendance:ta_dashboard'), request.user)
 
     return render(request, 'attendance/ta_change_password.html', {'error': error})
@@ -3030,7 +3030,7 @@ def notifications_page(request):
             active_courses(profile).filter(semester__is_active=True).order_by('code')
         )
 
-    # System notifications (events, cultural dates) — previously these only
+    # System notifications (events, cultural dates) - previously these only
     # appeared in the bell and were invisible on this "view all" page. Hide them
     # when a course filter is active (that filter only applies to announcements).
     sys_notifs = []

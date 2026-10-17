@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Register Courses{% endblock %}
 
 {% block content %}
@@ -21,9 +22,7 @@
     .course-opt-name { font-size: 13.5px; font-weight: 600; }
     .course-opt:has(input:checked) .course-opt-name { color: var(--ds-primary); }
     :root[data-theme="dark"] .course-opt:has(input:checked) .course-opt-name { color: var(--ds-text); }
-    .group-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-top: 4px; }
-    .group-badge.monday { background: var(--ds-info-bg); color: var(--ds-info); }
-    .group-badge.thursday { background: var(--ds-info-bg); color: var(--ds-info); }
+    .group-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; margin-top: 4px; color: var(--ds-info); }
     .sel-hint { font-size: 12px; color: var(--ds-text-muted); font-weight: 600; margin-bottom: 12px; }
     .sel-hint b { color: var(--ds-primary); }
     :root[data-theme="dark"] .sel-hint b { color: var(--ds-text); }
@@ -37,8 +36,8 @@
 </header>
 
 <div class="ctx-bar">
-<span class="ds-badge ds-badge-neutral"><span class="iconify" data-icon="mdi:school-outline"></span> Level {{ level.name }}</span>
-<span class="ds-badge ds-badge-neutral"><span class="iconify" data-icon="mdi:calendar-outline"></span> {{ semester.name }} {{ semester.year }}</span>
+<span class="ds-badge ds-badge-neutral">{% icon "graduation-cap" 12 %} Level {{ level.name }}</span>
+<span class="ds-badge ds-badge-neutral">{% icon "calendar-days" 12 %} {{ semester.name }} {{ semester.year }}</span>
 </div>
 
 <div class="ds-card">

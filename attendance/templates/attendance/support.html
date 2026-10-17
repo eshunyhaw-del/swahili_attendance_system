@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Contact Support{% endblock %}
 
 {% block content %}
@@ -64,13 +65,13 @@
 </div>
 <div style="margin-bottom:8px">
         {% if ticket.status == 'resolved' %}
-<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check"></span> Resolved</span>
+<span class="ds-badge ds-badge-success">{% icon "check" 12 %} Resolved</span>
         {% elif ticket.status == 'in_progress' %}
-<span class="ds-badge ds-badge-info"><span class="iconify" data-icon="mdi:progress-clock"></span> In progress</span>
+<span class="ds-badge ds-badge-info">{% icon "clock" 12 %} In progress</span>
         {% elif ticket.status == 'closed' %}
-<span class="ds-badge ds-badge-neutral"><span class="iconify" data-icon="mdi:archive-outline"></span> Closed</span>
+<span class="ds-badge ds-badge-neutral">{% icon "archive" 12 %} Closed</span>
         {% else %}
-<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:clock-outline"></span> Open</span>
+<span class="ds-badge ds-badge-warning">{% icon "clock" 12 %} Open</span>
         {% endif %}
 </div>
 <div class="ticket-msg">{{ ticket.message }}</div>

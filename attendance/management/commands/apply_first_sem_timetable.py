@@ -74,7 +74,7 @@ class Command(BaseCommand):
             used = (CourseRegistration.objects.filter(course=c).exists()
                     or AttendanceRecord.objects.filter(class_session__course=c).exists())
             if used:
-                self.stdout.write(self.style.WARNING(f'  KEPT {c.code} (not in timetable but has registrations/attendance) — review in admin'))
+                self.stdout.write(self.style.WARNING(f'  KEPT {c.code} (not in timetable but has registrations/attendance) - review in admin'))
             else:
                 c.delete()
                 self.stdout.write(f'  removed {c.code} (not in timetable, no data)')
@@ -86,4 +86,4 @@ class Command(BaseCommand):
 
         if o['dry_run']:
             transaction.set_rollback(True)
-            self.stdout.write(self.style.WARNING('DRY RUN — rolled back'))
+            self.stdout.write(self.style.WARNING('DRY RUN - rolled back'))

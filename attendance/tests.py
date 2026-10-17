@@ -1,9 +1,9 @@
 """Security regression tests for the System_Redesigns hardening pass.
 
 Covers:
-  * C-1 — ta_get_students_ajax authorization (no PII/code leak to students)
-  * C-2 — TA accounts are NOT auto-approved by email verification
-  * C-3 — API OTP verification locks the account after repeated bad guesses
+  * C-1 - ta_get_students_ajax authorization (no PII/code leak to students)
+  * C-2 - TA accounts are NOT auto-approved by email verification
+  * C-3 - API OTP verification locks the account after repeated bad guesses
 """
 
 from datetime import timedelta
@@ -184,7 +184,7 @@ class LoginRateLimitTests(TestCase):
 
 
 class JWTSessionTests(TestCase):
-    """H-2: JWT cookie auth — password-bound revocation and sliding refresh."""
+    """H-2: JWT cookie auth - password-bound revocation and sliding refresh."""
 
     def setUp(self):
         cache.clear()
@@ -458,7 +458,7 @@ class SupportRoutingTests(TestCase):
 
 class StudentEmailDomainTests(TestCase):
     """New students may register only with an allowed email domain
-    (settings.ALLOWED_STUDENT_EMAIL_DOMAINS — Gmail by default), because
+    (settings.ALLOWED_STUDENT_EMAIL_DOMAINS - Gmail by default), because
     verification codes are Gmail-sent and reliably reach only those inboxes."""
 
     def _data(self, email):
@@ -812,3 +812,78 @@ class CodeGenerationStressTests(TestCase):
         r = self.client.post(reverse('attendance:student_submit_ta_code'),
                              {'session_id': self.session.id, 'code': '004521'})
         self.assertEqual(r.status_code, 200)
+
+
+class StatusBadgeTagTests(TestCase):
+    """{% badge %} renders compact, informational badges for supported statuses only."""
+
+    def _render(self, tpl):
+        from django.template import Template, Context
+        return Template('{% load ui %}' + tpl).render(Context({}))
+
+    def test_supported_statuses_render_icon_and_text(self):
+        for key, text in (('present', 'Present'), ('absent', 'Absent'), ('not_recorded', 'Not recorded'),
+                          ('pending', 'Pending'), ('eligible', 'Exam eligible'), ('at_risk', 'At risk'),
+                          ('not_eligible', 'Not eligible')):
+            html = self._render('{% badge "' + key + '" %}')
+            self.assertIn('ds-status', html)
+            self.assertIn('<svg', html)       # icon is always present: meaning never relies on colour alone
+            self.assertIn(text, html)
+
+    def test_label_override_and_escaping(self):
+        html = self._render('{% badge "present" label="<b>x</b>" %}')
+        self.assertIn('&lt;b&gt;x&lt;/b&gt;', html)
+
+    def test_badge_is_not_interactive(self):
+        html = self._render('{% badge "present" %}')
+        self.assertTrue(html.startswith('<span'))
+        self.assertNotIn('<button', html)
+        self.assertNotIn('<a ', html)
+
+
+class TAShellTests(TestCase):
+    """The TA dashboard uses the mobile shell; students keep their own nav."""
+
+    def setUp(self):
+        self.ta_user = User.objects.create_user("ta_shell", password="x")
+        ta = TAProfile.objects.create(user=self.ta_user, is_approved=True)
+        ta.assigned_levels.add(Level.objects.get_or_create(name="100")[0])
+
+    def test_ta_dashboard_has_ta_nav_and_hooks(self):
+        self.client.force_login(self.ta_user)
+        resp = self.client.get(reverse("attendance:ta_dashboard"))
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn('class="shell-student shell-ta"', html)
+        self.assertIn(reverse("attendance:ta_history"), html)          # bottom nav
+        self.assertIn(reverse("attendance:ta_announcements"), html)    # More sheet
+        self.assertNotIn(reverse("attendance:course_registration"), html)  # not the student sheet
+        self.assertNotIn("\u2014", html)                               # no em dashes
+
+
+class StaffShellTests(TestCase):
+    """Lecturer/admin pages share the mobile shell and render without errors."""
+
+    def setUp(self):
+        self.staff = User.objects.create_user("lect_shell", password="x", is_staff=True)
+
+    def test_staff_pages_render_with_staff_nav(self):
+        self.client.force_login(self.staff)
+        for name in ("lecturer_dashboard", "admin_dashboard", "admin_search",
+                     "student_report", "admin_alerts", "admin_support", "pending_tas"):
+            resp = self.client.get(reverse(f"attendance:{name}"))
+            self.assertEqual(resp.status_code, 200, name)
+            html = resp.content.decode()
+            self.assertIn("shell-staff", html, name)
+            self.assertIn(reverse("attendance:admin_search"), html, name)   # More sheet
+            self.assertNotIn("\u2014", html, name)
+
+    def test_ta_secondary_pages_render(self):
+        ta_user = User.objects.create_user("ta_pages", password="x")
+        ta = TAProfile.objects.create(user=ta_user, is_approved=True)
+        ta.assigned_levels.add(Level.objects.get_or_create(name="100")[0])
+        self.client.force_login(ta_user)
+        for name in ("ta_history", "ta_announcements", "ta_support", "ta_guide", "ta_add_levels"):
+            resp = self.client.get(reverse(f"attendance:{name}"))
+            self.assertEqual(resp.status_code, 200, name)
+            self.assertIn("shell-ta", resp.content.decode(), name)

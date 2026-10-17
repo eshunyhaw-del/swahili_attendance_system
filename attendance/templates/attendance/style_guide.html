@@ -1,9 +1,9 @@
-{% load static %}<!DOCTYPE html>
+{% load static ui %}<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Design System — SWASA Attendance</title>
+<title>Design System | SWASA Attendance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -79,7 +79,7 @@
 <!-- TYPOGRAPHY -->
 <section class="sg-section">
 <p class="ds-eyebrow">Foundations</p>
-<h2 class="ds-h2">Typography — Montserrat</h2>
+<h2 class="ds-h2">Typography: Montserrat</h2>
 <div class="sg-panel">
 <div class="sg-type-row"><span class="lbl">H1 / 28</span><span class="ds-h1">Attendance Overview</span></div>
 <div class="sg-type-row"><span class="lbl">H2 / 23</span><span class="ds-h2">Today's Classes</span></div>
@@ -117,18 +117,15 @@
 </div>
 </section>
 
-<!-- ATTENDANCE STATES -->
-<section class="sg-section">
+<!-- STATUS BADGES -->
+<section class="sg-section" id="badges">
 <p class="ds-eyebrow">Components</p>
-<h2 class="ds-h2">Attendance status</h2>
-<p class="sg-lead" style="margin-bottom:16px">A fixed vocabulary reused on every roster, history row and report. Each state pairs a colour with an icon and label, so status is never conveyed by colour alone.</p>
-<div class="sg-panel sg-flex">
-<span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
-<span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span>
-<span class="ds-att ds-att-late"><span class="iconify" data-icon="mdi:clock-alert"></span> Late</span>
-<span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span>
-<span class="ds-att ds-att-pending"><span class="iconify" data-icon="mdi:progress-clock"></span> Pending</span>
-<span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not Recorded</span>
+<h2 class="ds-h2">Status badges</h2>
+<p class="sg-lead" style="margin-bottom:16px">Compact and informational, never a button. 22px tall, 12px medium text, 6px corners, a 12px icon, a white surface with a thin neutral border, and colour only on the icon and text. Meaning is carried by the icon and the words, not by colour alone. Only statuses the application supports.</p>
+<div class="sg-panel ds-stack ds-gap-4">
+<div><p class="sg-sub" style="margin-top:0">Attendance</p><div class="sg-flex">{% badge "present" %}{% badge "absent" %}{% badge "not_recorded" %}{% badge "pending" %}</div></div>
+<div><p class="sg-sub" style="margin-top:0">Exam eligibility</p><div class="sg-flex">{% badge "eligible" %}{% badge "at_risk" %}{% badge "not_eligible" %}</div></div>
+<div><p class="sg-sub" style="margin-top:0">Display state</p><div class="sg-flex">{% badge "upcoming" %}{% badge "present" label="Attendance recorded" %}</div></div>
 </div>
 </section>
 
@@ -149,7 +146,7 @@
 <section class="sg-section">
 <p class="ds-eyebrow">Components</p>
 <h2 class="ds-h2">Cards &amp; statistics</h2>
-<p class="sg-lead" style="margin-bottom:16px">Hierarchy comes from type and a subtle neutral shadow — never a coloured border.</p>
+<p class="sg-lead" style="margin-bottom:16px">Hierarchy comes from type and a subtle neutral shadow, never a coloured border.</p>
 <div class="ds-grid ds-grid-4" style="margin-bottom:16px">
 <div class="ds-stat">
 <div class="ds-stat-label"><span class="iconify" data-icon="mdi:chart-line"></span> Attendance</div>
@@ -201,7 +198,7 @@
 </div>
 <div class="ds-field">
 <label class="ds-label">Course <span class="ds-optional">(optional)</span></label>
-<select class="ds-select"><option>Kiswahili Grammar — SWAH 201</option><option>Swahili Literature — SWAH 305</option></select>
+<select class="ds-select"><option>Kiswahili Grammar - SWAH 201</option><option>Swahili Literature - SWAH 305</option></select>
 </div>
 <div class="ds-field ds-search">
 <span class="iconify" data-icon="mdi:magnify"></span>
@@ -235,8 +232,8 @@
 <tbody>
 <tr><td class="ds-td-strong">Ama Boateng</td><td class="ds-mono">10809707</td><td>SWAH 201</td><td><span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span></td><td style="text-align:right" class="ds-text-muted">09:02</td></tr>
 <tr><td class="ds-td-strong">Kwame Mensah</td><td class="ds-mono">10811245</td><td>SWAH 201</td><td><span class="ds-att ds-att-late"><span class="iconify" data-icon="mdi:clock-alert"></span> Late</span></td><td style="text-align:right" class="ds-text-muted">09:14</td></tr>
-<tr><td class="ds-td-strong">Efua Sarpong</td><td class="ds-mono">10809930</td><td>SWAH 201</td><td><span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span></td><td style="text-align:right" class="ds-text-muted">—</td></tr>
-<tr><td class="ds-td-strong">Yaw Osei</td><td class="ds-mono">10812007</td><td>SWAH 201</td><td><span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span></td><td style="text-align:right" class="ds-text-muted">—</td></tr>
+<tr><td class="ds-td-strong">Efua Sarpong</td><td class="ds-mono">10809930</td><td>SWAH 201</td><td><span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span></td><td style="text-align:right" class="ds-text-muted">-</td></tr>
+<tr><td class="ds-td-strong">Yaw Osei</td><td class="ds-mono">10812007</td><td>SWAH 201</td><td><span class="ds-att ds-att-excused"><span class="iconify" data-icon="mdi:shield-check"></span> Excused</span></td><td style="text-align:right" class="ds-text-muted">-</td></tr>
 </tbody>
 </table>
 </div>

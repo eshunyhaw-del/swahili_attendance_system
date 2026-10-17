@@ -6,7 +6,7 @@ from django.db import transaction
 
 from attendance.models import ClassSession, Course, Level, Semester
 
-# code, title, level, weekday (Mon=0), start, end, venue — from the 2026/27 first-semester timetable.
+# code, title, level, weekday (Mon=0), start, end, venue - from the 2026/27 first-semester timetable.
 # KISW 105 has two groups on different days, so it is split into two courses (like 106A/106B).
 SLOTS = [
     ('KISW 105A', 'Introduction to Kiswahili Studies I (Monday Group)', '100', 0, '15:30', '17:20', 'GCB Main'),

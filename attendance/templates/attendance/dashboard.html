@@ -1,388 +1,129 @@
 {% extends "attendance/base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% load static ui %}
+{% block title %}Home{% endblock %}
 {% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/student-home.css' %}">{% endblock %}
 
 {% block content %}
-<style>
-    .dash { max-width: 880px; margin: 0 auto; padding: 4px 0 40px; }
+{% now "Y-m-d" as today_iso %}
+<div class="home">
 
-    /* Header — navy overview banner */
-    .dash-head { background: var(--ds-navy); color: #fff; border-radius: var(--ds-radius-lg); padding: 20px 22px; margin-bottom: 20px; box-shadow: var(--ds-shadow-sm); }
-    .dash-head .greeting { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 0; color: #fff; }
-    .dash-head .greeting .swahili-greeting-kw { color: var(--ds-gold); }
-    .phrase-block { margin-top: 12px; }
-    /* Phrase-of-the-hour widget sits on the navy banner — white/gold variants */
-    .dash-head .phrase-category { color: var(--ds-gold); opacity: 0.85; }
-    .dash-head .phrase-swahili { color: #fff; }
-    .dash-head .phrase-english { color: rgba(255,255,255,0.72); }
-    .dash-head .phrase-response { color: var(--ds-gold); opacity: 0.9; }
-
-    /* Stat grid */
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-    @media (max-width: 620px) { .stat-grid { grid-template-columns: 1fr; } }
-
-    /* Section heading */
-    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 24px 0 12px; }
-    .sec-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
-    .sec-head a { font-size: 12px; font-weight: 600; color: var(--ds-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
-    :root[data-theme="dark"] .sec-head a { color: var(--ds-text-secondary); }
-
-    /* Session rows (today / upcoming) */
-    .sess-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--ds-border); }
-    .sess-row:last-child { border-bottom: none; }
-    .sess-time { flex-shrink: 0; width: 64px; text-align: center; }
-    .sess-time .t1 { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .sess-time .t2 { font-size: 11px; color: var(--ds-text-muted); font-variant-numeric: tabular-nums; }
-    .sess-main { flex: 1; min-width: 0; }
-    .sess-course { font-size: 13.5px; font-weight: 600; }
-    .sess-topic { font-size: 12px; color: var(--ds-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sess-action { flex-shrink: 0; }
-    .sess-date { flex-shrink: 0; width: 58px; text-align: center; }
-    .sess-date .d1 { font-size: 17px; font-weight: 700; line-height: 1; }
-    .sess-date .d2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ds-text-muted); margin-top: 2px; }
-
-    /* Course panels */
-    .course-panel { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); margin-bottom: 12px; overflow: hidden; }
-    .course-panel > summary { list-style: none; cursor: pointer; padding: 16px 18px; }
-    .course-panel > summary::-webkit-details-marker { display: none; }
-    .course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
-    .course-code { font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ds-primary); background: var(--ds-primary-soft); padding: 3px 8px; border-radius: var(--ds-radius-xs); align-self: flex-start; }
-    :root[data-theme="dark"] .course-code { color: var(--ds-text-secondary); }
-    .course-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin-top: 6px; }
-    .course-score { font-family: var(--ds-font-mono); font-size: 13px; font-weight: 500; color: var(--ds-text-secondary); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); padding: 5px 10px; border-radius: var(--ds-radius-sm); white-space: nowrap; flex-shrink: 0; }
-    .track-line { height: 6px; background: var(--ds-neutral-150); border-radius: 999px; overflow: hidden; }
-    :root[data-theme="dark"] .track-line { background: var(--ds-surface-sunken); }
-    .track-fill { height: 100%; border-radius: 999px; background: var(--ds-primary); transition: width .6s cubic-bezier(.4,0,.2,1); }
-    .track-fill.good { background: var(--ds-success); }
-    .track-fill.medium { background: var(--ds-warning); }
-    .track-fill.low { background: var(--ds-danger); }
-    .course-elig { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .elig-meta { font-size: 11.5px; color: var(--ds-text-muted); font-weight: 600; }
-    .course-expand { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--ds-text-muted); margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--ds-border); }
-    .course-expand .iconify { transition: transform .2s; }
-    details[open] .course-expand .iconify { transform: rotate(180deg); }
-    details[open] .course-expand::before { content: "Hide sessions"; }
-    details:not([open]) .course-expand::before { content: "View sessions"; }
-
-    .weeks-box { border-top: 1px solid var(--ds-border); background: var(--ds-surface-sunken); }
-    .week-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 12px 18px; border-bottom: 1px solid var(--ds-border); }
-    .week-item:last-child { border-bottom: none; }
-    .week-title { font-size: 13px; font-weight: 600; }
-    .week-date { font-size: 11.5px; color: var(--ds-text-muted); margin-top: 1px; }
-    .course-foot { padding: 12px 18px; }
-    .deregister-btn { background: none; border: none; cursor: pointer; font: inherit; color: var(--ds-danger); font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; padding: 0; }
-    .deregister-lock { font-size: 12px; color: var(--ds-text-muted); display: inline-flex; align-items: center; gap: 6px; }
-
-    /* Status chip injected by JS keeps these class names */
-    .txt-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid transparent; }
-    .txt-done { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
-
-    /* Toast */
-    .toast-success { position: fixed; top: 72px; right: 20px; z-index: 2000; display: flex; align-items: center; gap: 8px; padding: 11px 15px; border-radius: var(--ds-radius-md); background: var(--ds-success-bg); color: var(--ds-success); border: 1px solid var(--ds-success-border); box-shadow: var(--ds-shadow-md); font-size: 13px; font-weight: 600; animation: toastInOut 2.2s ease forwards; }
-    @keyframes toastInOut { 0%{opacity:0;transform:translateY(-10px)} 12%{opacity:1;transform:translateY(0)} 85%{opacity:1} 100%{opacity:0;transform:translateY(-10px)} }
-    @keyframes ds-spin { to { transform: rotate(360deg); } }
-
-    /* Social */
-    .social { text-align: center; }
-    .social-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ds-text-muted); margin-bottom: 12px; }
-    .social-links { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-    .social-btn { width: 38px; height: 38px; border-radius: var(--ds-radius-sm); background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); color: var(--ds-text-secondary); display: inline-flex; align-items: center; justify-content: center; text-decoration: none; transition: all .14s; }
-    .social-btn:hover { border-color: var(--ds-border-strong); color: var(--ds-text); }
-    .social-btn .iconify { font-size: 18px; }
-
-    #skeletonLoader { transition: opacity .3s ease; }
-    #realContent { display: none; opacity: 0; transition: opacity .3s ease; }
-    .skel-line { height: 12px; border-radius: 4px; }
-</style>
-
-<!-- ── Skeleton ── -->
-<div id="skeletonLoader" class="dash" aria-hidden="true">
-<div style="margin-bottom:20px">
-<div class="ds-skeleton skel-line" style="width:180px;height:22px;margin-bottom:8px"></div>
-<div class="ds-skeleton skel-line" style="width:120px"></div>
-</div>
-<div class="stat-grid">
-    {% for i in "123" %}<div class="ds-stat"><div class="ds-skeleton skel-line" style="width:70px;margin-bottom:12px"></div><div class="ds-skeleton skel-line" style="width:60px;height:26px"></div></div>{% endfor %}
-</div>
-<div class="ds-card ds-card-body">
-<div class="ds-skeleton skel-line" style="width:140px;height:16px;margin-bottom:16px"></div>
-<div class="ds-skeleton skel-line" style="margin-bottom:10px"></div>
-<div class="ds-skeleton skel-line" style="width:80%"></div>
-</div>
-</div>
-
-<!-- ── Real content ── -->
-<div id="realContent">
-<div class="dash">
-
-<!-- Header -->
-<header class="dash-head">
-<h1 class="greeting"><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}!</h1>
-<div class="phrase-block" data-phrase-widget></div>
+<header class="home-head">
+<h1><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}</h1>
+<div class="home-phrase" data-phrase-widget></div>
 </header>
 
-<!-- Stats -->
-<div class="stat-grid">
-<div class="ds-stat">
-<div class="ds-stat-label"><span class="iconify" data-icon="mdi:chart-line"></span> Overall Attendance</div>
-<div class="ds-stat-value" style="{% if overall_pct < 75 and overall_total %}color:var(--ds-danger){% endif %}">{{ overall_pct }}%</div>
-<div class="ds-stat-meta">{{ overall_attended }} of {{ overall_total }} session{{ overall_total|pluralize }} attended</div>
-</div>
-<div class="ds-stat">
-<div class="ds-stat-label"><span class="iconify" data-icon="mdi:book-outline"></span> Registered Courses</div>
-<div class="ds-stat-value">{{ course_data|length }}</div>
-<div class="ds-stat-meta">This semester</div>
-</div>
-<div class="ds-stat">
-<div class="ds-stat-label"><span class="iconify" data-icon="mdi:alert-outline"></span> At-Risk Courses</div>
-<div class="ds-stat-value" style="{% if blocked_count %}color:var(--ds-danger){% elif at_risk_count %}color:var(--ds-warning){% endif %}">{{ at_risk_count }}</div>
-<div class="ds-stat-meta">Near or over the absence limit</div>
-</div>
-</div>
+<div class="home-cols">
+<div class="home-main">
 
-<!-- Exam-eligibility: blocked (danger) -->
-{% if blocked_courses %}
-<div class="ds-alert ds-alert-danger" style="margin-bottom:12px">
-<span class="iconify" data-icon="mdi:alert-octagon"></span>
-<div>
-<p class="ds-alert-title">Not eligible to sit the exam</p>
-<p class="ds-alert-body">You've missed too many sessions in {% for c in blocked_courses %}<strong>{{ c.course.code }}</strong> ({{ c.eligibility.reason }}){% if not forloop.last %}, {% endif %}{% endfor %}. Missing 3 sessions in a row, or 4 in total, blocks you from a course's exam. Speak to your teaching assistant if you believe this is a mistake.</p>
-</div>
-</div>
-{% endif %}
-
-<!-- Exam-eligibility: approaching the limit (warning) -->
-{% if warning_courses %}
-<div class="ds-alert ds-alert-warning" style="margin-bottom:20px">
-<span class="iconify" data-icon="mdi:alert"></span>
-<div>
-<p class="ds-alert-title">Close to the absence limit</p>
-<p class="ds-alert-body">One more missed session would make you ineligible in {% for c in warning_courses %}<strong>{{ c.course.code }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}. You may sit the exam only if you miss fewer than 3 sessions in a row and fewer than 4 in total.</p>
-</div>
-</div>
-{% elif blocked_courses %}
-<div style="margin-bottom:8px"></div>
-{% endif %}
-
-<!-- Today's classes -->
-<div class="sec-head"><h2>Today's Classes</h2></div>
-<div class="ds-card">
+<!-- ── Today ─────────────────────────────────────────────────────────── -->
+<h2 class="home-label"><span>Today</span><span class="date">{% now "l, j M" %}</span></h2>
 {% if todays_sessions %}
+<ul class="ds-list">
     {% for item in todays_sessions %}
-<div class="sess-row" id="week-{{ item.session.id }}">
-<div class="sess-time">
-<div class="t1">{{ item.session.start_time|time:"H:i" }}</div>
-<div class="t2">{{ item.session.end_time|time:"H:i" }}</div>
+<li class="today-row">
+<div class="today-top">
+<span class="today-time">{{ item.session.start_time|time:"H:i" }}–{{ item.session.end_time|time:"H:i" }}</span>
+        {% if item.session.topic %}<span class="today-venue">{% icon "map-pin" 14 %}{{ item.session.topic }}</span>{% endif %}
 </div>
-<div class="sess-main">
-<div class="sess-course">{{ item.course.code }} · {{ item.course.name }}</div>
-<div class="sess-topic">{{ item.session.topic }}</div>
-</div>
-<div class="sess-action js-state" data-session="{{ item.session.id }}">
-        {% if item.submitted %}
-<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
-        {% else %}
-<button class="ds-btn ds-btn-primary ds-btn-sm" onclick="openTaCodeModal({{ item.session.id }})"><span class="iconify" data-icon="mdi:qrcode-scan"></span> Check In</button>
-        {% endif %}
-</div>
-</div>
-    {% endfor %}
-{% else %}
-<div class="ds-empty" style="padding:36px 24px">
-<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:calendar-blank-outline"></span></div>
-<p class="ds-empty-title">No classes scheduled today</p>
-<p class="ds-empty-text">You have no recorded sessions for today. Check the sessions under each course below.</p>
-</div>
-{% endif %}
-</div>
-
-<!-- Courses -->
-<div class="sec-head"><h2>My Courses</h2><a href="{% url 'attendance:history' %}">Full history <span class="iconify" data-icon="mdi:arrow-right" data-width="14"></span></a></div>
-{% if course_data %}
-    {% for course in course_data %}
-<details class="course-panel" {% if forloop.first and not todays_sessions %}open{% endif %}>
-<summary>
-<div class="course-top">
-<div style="min-width:0">
-<span class="course-code">{{ course.course.code }}</span>
-<div class="course-name">{{ course.course.name }}</div>
-</div>
-<div class="course-score" id="course-score-{{ course.course.id }}">{{ course.attended }} / {{ course.total_sessions }}</div>
-</div>
-<div class="track-line">
-<div class="track-fill {% if course.percentage >= 75 %}good{% elif course.percentage >= 50 %}medium{% else %}low{% endif %}" style="width: {{ course.percentage }}%;"></div>
-</div>
-<div class="course-elig">
-        {% if course.eligibility.status == 'blocked' %}
-<span class="ds-badge ds-badge-danger"><span class="iconify" data-icon="mdi:close-octagon"></span> Not exam-eligible</span>
-        {% elif course.eligibility.status == 'warning' %}
-<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:alert"></span> At risk</span>
-        {% else %}
-<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:check-circle"></span> Exam-eligible</span>
-        {% endif %}
-<span class="elig-meta">{{ course.eligibility.total_absent }} missed{% if course.eligibility.max_consecutive_absent >= 2 %} · {{ course.eligibility.max_consecutive_absent }} in a row{% endif %}</span>
-</div>
-<div class="course-expand"><span class="iconify" data-icon="mdi:chevron-down"></span></div>
-</summary>
-<div class="weeks-box">
-        {% for week in course.weeks %}
-<div class="week-item">
 <div>
-<div class="week-title">Week {{ week.week_num }} · {{ week.session.topic }}</div>
-<div class="week-date">{{ week.session.date|date:"D, d M Y" }} · {{ week.session.start_time|time:"H:i" }}</div>
+<p class="today-course">{{ item.course.name }}</p>
+<p class="today-code">{{ item.course.code }}</p>
 </div>
+<div class="js-state" data-session="{{ item.session.id }}">
+        {% if item.submitted %}
+            {% badge "present" label="Attendance recorded" %}
+        {% else %}
+<button type="button" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-block" data-checkin data-session="{{ item.session.id }}" data-course="{{ item.course.id }}" data-title="{{ item.course.code }} · {{ item.session.start_time|time:'H:i' }}"><span class="lbl">Check in</span></button>
+        {% endif %}
+</div>
+</li>
+    {% endfor %}
+</ul>
+<p class="today-hint">Your teaching assistant gives you a personal 6-digit code in class.</p>
+{% else %}
+<div class="ds-list"><div class="none-row">{% icon "calendar-days" 20 %}
+<div><p class="none-title">No class today</p>
+</div></div></div>
+{% endif %}
+
+<!-- ── Courses ───────────────────────────────────────────────────────── -->
+<h2 class="home-label"><span>Your courses</span></h2>
+{% if course_data %}
+<div class="ds-list">
+    {% for course in course_data %}
+<details class="course-row">
+<summary>
+<div class="cr-main">
+<div class="cr-name">{{ course.course.name }}</div>
+<div class="cr-sub">{{ course.course.code }} · <span data-attended-for="{{ course.course.id }}">{{ course.attended }}</span> attended · {{ course.eligibility.total_absent }} missed</div>
+</div>
+        {% if course.eligibility.status == 'blocked' %}
+            {% badge "not_eligible" %}
+        {% elif course.eligibility.status == 'warning' %}
+            {% badge "at_risk" %}
+        {% else %}
+            {% badge "eligible" label="Eligible" %}
+        {% endif %}
+{% icon "chevron-right" 18 "cr-chev" %}
+</summary>
+<div class="cr-body">
+<p class="cr-rule">Exam eligibility: you may sit this exam if you miss fewer than 3 sessions in a row and fewer than 4 in total.</p>
+        {% for week in course.weeks %}
+<div class="week-row">
+<div><div class="week-title">Week {{ week.week_num }}</div><div class="week-date">{{ week.session.date|date:"D j M" }} · {{ week.session.start_time|time:"H:i" }}</div></div>
 <div class="js-state" data-session="{{ week.session.id }}">
             {% if week.status == 'submitted' %}
-<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>
+                {% badge "present" %}
+            {% elif week.session.date|date:"Y-m-d" > today_iso %}
+                {% badge "upcoming" %}
             {% else %}
-<button class="ds-btn ds-btn-secondary ds-btn-sm" onclick="openTaCodeModal({{ week.session.id }})">Check In</button>
+<button type="button" class="ds-btn ds-btn-secondary ds-btn-sm" data-checkin data-session="{{ week.session.id }}" data-course="{{ course.course.id }}" data-title="{{ course.course.code }} · Week {{ week.week_num }}"><span class="lbl">Check in</span></button>
             {% endif %}
 </div>
 </div>
         {% endfor %}
-<div class="course-foot">
+<div class="cr-foot">
         {% if course.can_deregister %}
-<form method="post" action="{% url 'attendance:student_deregister_course' %}" onsubmit="return confirm('Deregister from {{ course.course.code }}? You can re-register later from the course registration page.');" style="margin:0">
+<form method="post" action="{% url 'attendance:student_deregister_course' %}" style="margin:0" data-confirm-title="Drop {{ course.course.code }}?" data-confirm="You will no longer see this course. You can register for it again later from Register or manage courses." data-confirm-label="Drop course">
             {% csrf_token %}
 <input type="hidden" name="course_id" value="{{ course.course.id }}">
-<button type="submit" class="deregister-btn"><span class="iconify" data-icon="mdi:close-circle-outline" data-width="14"></span> Deregister from this course</button>
+<button type="submit" class="ds-btn ds-btn-ghost cr-drop">Drop this course</button>
 </form>
         {% else %}
-<span class="deregister-lock"><span class="iconify" data-icon="mdi:lock-outline" data-width="14"></span> Attendance recorded — contact your TA to drop this course.</span>
+<p class="cr-lock">{% icon "lock" 16 %}<span>Attendance is already recorded, so this course can only be dropped by your teaching assistant.</span></p>
         {% endif %}
 </div>
 </div>
 </details>
     {% endfor %}
+</div>
 {% else %}
-<div class="ds-card"><div class="ds-empty">
-<div class="ds-empty-icon"><span class="iconify" data-icon="mdi:book-plus-outline"></span></div>
-<p class="ds-empty-title">No courses registered</p>
-<p class="ds-empty-text">Register for your courses to start tracking attendance.</p>
-<a href="{% url 'attendance:course_registration' %}" class="ds-btn ds-btn-primary"><span class="iconify" data-icon="mdi:plus"></span> Register Courses</a>
-</div></div>
+<div class="ds-list">
+    {% include "attendance/components/_empty.html" with icon="book-open" title="No courses registered" text="Register for your courses to start recording attendance." %}
+<div style="padding:0 20px 24px;text-align:center"><a href="{% url 'attendance:course_registration' %}" class="ds-btn ds-btn-primary ds-btn-lg">Register courses</a></div>
+</div>
 {% endif %}
 
-<!-- Upcoming -->
+</div>
+<aside class="home-side">
+<!-- ── Coming up ─────────────────────────────────────────────────────── -->
 {% if upcoming_sessions %}
-<div class="sec-head"><h2>Upcoming Classes</h2></div>
-<div class="ds-card">
-    {% for item in upcoming_sessions %}
-<div class="sess-row">
-<div class="sess-date">
-<div class="d1">{{ item.session.date|date:"j" }}</div>
-<div class="d2">{{ item.session.date|date:"M" }}</div>
-</div>
-<div class="sess-main">
-<div class="sess-course">{{ item.course.code }} · {{ item.course.name }}</div>
-<div class="sess-topic">{{ item.session.topic }}</div>
-</div>
-<div class="ds-text-muted" style="font-size:12.5px;font-variant-numeric:tabular-nums;flex-shrink:0">{{ item.session.start_time|time:"H:i" }}–{{ item.session.end_time|time:"H:i" }}</div>
-</div>
+<h2 class="home-label"><span>Coming up</span></h2>
+<ul class="ds-list">
+    {% for item in upcoming_sessions|slice:":3" %}
+<li class="up-row">
+<div class="up-date"><div class="up-day">{{ item.session.date|date:"j" }}</div><div class="up-mon">{{ item.session.date|date:"M" }}</div></div>
+<div class="up-main"><div class="up-name">{{ item.course.name }}</div><div class="up-sub">{{ item.session.date|date:"D" }} · {{ item.session.start_time|time:"H:i" }}–{{ item.session.end_time|time:"H:i" }}{% if item.session.topic %} · {{ item.session.topic }}{% endif %}</div></div>
+</li>
     {% endfor %}
-</div>
+</ul>
 {% endif %}
-
-<!-- Stay connected -->
-<div class="ds-card ds-card-body social" style="margin-top:20px">
-<p class="social-title">Stay connected with SWASA</p>
-<div class="social-links">
-<a href="https://chat.whatsapp.com/GDc4n706R1gH8M2tagCQWF" target="_blank" rel="noopener noreferrer" class="social-btn" title="WhatsApp Community"><span class="iconify" data-icon="mdi:whatsapp"></span></a>
-<a href="https://www.instagram.com/ugswasa/" target="_blank" rel="noopener noreferrer" class="social-btn" title="Instagram"><span class="iconify" data-icon="mdi:instagram"></span></a>
-<a href="https://web.facebook.com/profile.php?id=61562158511679" target="_blank" rel="noopener noreferrer" class="social-btn" title="Facebook"><span class="iconify" data-icon="mdi:facebook"></span></a>
-<a href="https://www.tiktok.com/@swasaug" target="_blank" rel="noopener noreferrer" class="social-btn" title="TikTok"><span class="iconify" data-icon="simple-icons:tiktok" data-width="15"></span></a>
-<a href="https://www.youtube.com/@learnswahiliwithswasa" target="_blank" rel="noopener noreferrer" class="social-btn" title="YouTube"><span class="iconify" data-icon="mdi:youtube"></span></a>
-</div>
+</aside>
 </div>
 
-</div><!-- /.dash -->
-</div><!-- /#realContent -->
-
-<!-- Check-in modal -->
-<div id="taCodeModal" class="ds-modal-overlay" style="display:none">
-<div class="ds-modal" style="max-width:380px">
-<div class="ds-modal-header">
-<h3 class="ds-modal-title">Check in to class</h3>
-</div>
-<div class="ds-modal-body">
-<p style="margin:0 0 14px">Enter the 6-digit code your teaching assistant read out in class.</p>
-<input type="text" id="taCodeInput" class="ds-input ds-mono" placeholder="——————" maxlength="6" autocomplete="off" inputmode="numeric" style="text-align:center;font-size:22px;letter-spacing:8px;height:52px">
-</div>
-<div class="ds-modal-footer">
-<button onclick="closeTaCodeModal()" class="ds-btn ds-btn-ghost">Cancel</button>
-<button onclick="submitTaCode()" class="ds-btn ds-btn-primary">Confirm attendance</button>
-</div>
-</div>
 </div>
 
-<!-- Error modal -->
-<div id="errorModal" class="ds-modal-overlay" style="display:none">
-<div class="ds-modal" style="max-width:360px">
-<div class="ds-modal-header"><h3 class="ds-modal-title" id="errorTitle">Something went wrong</h3></div>
-<div class="ds-modal-body" id="errorMessage">Please try again.</div>
-<div class="ds-modal-footer"><button class="ds-btn ds-btn-primary" onclick="closeErrorModal()">Got it</button></div>
-</div>
-</div>
-
-<script>
-let currentTaSessionId = null;
-function getCsrfToken() { return document.querySelector('meta[name="csrf-token"]')?.content || document.cookie.match(/csrftoken=([^;]+)/)?.[1]; }
-function openTaCodeModal(sessionId) { currentTaSessionId = sessionId; document.getElementById('taCodeInput').value = ''; document.getElementById('taCodeModal').style.display = 'flex'; setTimeout(() => document.getElementById('taCodeInput').focus(), 50); }
-function closeTaCodeModal() { document.getElementById('taCodeModal').style.display = 'none'; currentTaSessionId = null; }
-function showSuccessMessage(message) { const t = document.createElement('div'); t.className = 'toast-success'; t.innerHTML = '<span class="iconify" data-icon="mdi:check-circle"></span> ' + message; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
-function showErrorModal(message, title = "Something went wrong") { document.getElementById('errorMessage').innerText = message; document.getElementById('errorTitle').innerText = title; document.getElementById('errorModal').style.display = 'flex'; }
-function closeErrorModal() { document.getElementById('errorModal').style.display = 'none'; }
-
-async function submitTaCode() {
-    const code = document.getElementById('taCodeInput').value.trim();
-    if (!code) { showErrorModal('Please enter the code from your teaching assistant.', 'Missing code'); return; }
-    const btn = event.target;
-    const originalHTML = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="iconify" data-icon="mdi:loading" style="animation:ds-spin 1s linear infinite"></span> Checking in…';
-    try {
-        const res = await fetch("{% url 'attendance:student_submit_ta_code' %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": getCsrfToken(), "Content-Type": "application/x-www-form-urlencoded" },
-            body: `session_id=${currentTaSessionId}&code=${code}`
-        });
-        const data = await res.json();
-        if (res.ok) {
-            document.querySelectorAll(`.js-state[data-session="${currentTaSessionId}"]`).forEach(function (zone) {
-                zone.innerHTML = '<span class="txt-status txt-done"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span>';
-            });
-            const scoreEl = document.getElementById(`course-score-${data.course_id}`);
-            if (scoreEl) {
-                const m = scoreEl.innerText.match(/(\d+)\s*\/\s*(\d+)/);
-                if (m) {
-                    const n = parseInt(m[1]) + 1, tot = parseInt(m[2]);
-                    scoreEl.innerText = `${n} / ${tot}`;
-                    const panel = scoreEl.closest('.course-panel');
-                    const fill = panel ? panel.querySelector('.track-fill') : null;
-                    if (fill) { const pct = (n / tot) * 100; fill.style.width = `${pct}%`; fill.className = 'track-fill ' + (pct >= 75 ? 'good' : pct >= 50 ? 'medium' : 'low'); }
-                }
-            }
-            closeTaCodeModal();
-            showSuccessMessage('Attendance recorded');
-        } else {
-            closeTaCodeModal();
-            showErrorModal(data.error || 'We could not record your attendance.', 'Check-in failed');
-        }
-    } catch (e) {
-        closeTaCodeModal();
-        showErrorModal('Network error. Please check your connection and try again.', 'Connection error');
-    } finally { btn.disabled = false; btn.innerHTML = originalHTML; }
-}
-document.getElementById('taCodeModal').addEventListener('click', function (e) { if (e.target === this) closeTaCodeModal(); });
-document.getElementById('errorModal').addEventListener('click', function (e) { if (e.target === this) closeErrorModal(); });
-document.getElementById('taCodeInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') submitTaCode(); });
-
-document.addEventListener('DOMContentLoaded', function () {
-    var skeleton = document.getElementById('skeletonLoader'), real = document.getElementById('realContent');
-    setTimeout(function () {
-        skeleton.style.opacity = '0';
-        setTimeout(function () { skeleton.style.display = 'none'; real.style.display = 'block'; requestAnimationFrame(function () { real.style.opacity = '1'; }); }, 300);
-    }, 400);
-});
-</script>
+{% include "attendance/components/_checkin_sheet.html" %}
+<script src="{% static 'js/checkin.js' %}" defer></script>
 {% endblock %}

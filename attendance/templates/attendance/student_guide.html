@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Help &amp; Guide{% endblock %}
 
 {% block content %}
@@ -45,20 +46,20 @@
     .acc { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-sm); margin-bottom: 10px; overflow: hidden; }
     .acc > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 15px 18px; font-size: 14px; font-weight: 600; }
     .acc > summary::-webkit-details-marker { display: none; }
-    .acc-num { width: 26px; height: 26px; border-radius: var(--ds-radius-sm); background: var(--ds-primary-soft); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .acc-num { width: 26px; height: 26px; border-radius: var(--ds-radius-sm); background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
     :root[data-theme="dark"] .acc-num { color: var(--ds-text); }
-    .acc-num.green { background: var(--ds-success-bg); color: var(--ds-success); }
-    .acc-num.gold { background: var(--ds-warning-bg); color: var(--ds-warning); }
+    .acc-num.green { color: var(--ds-success); }
+    .acc-num.gold { color: var(--ds-warning); }
     .acc-chev { margin-left: auto; color: var(--ds-text-muted); transition: transform .2s; }
     .acc[open] .acc-chev { transform: rotate(180deg); }
     .acc-body { padding: 4px 18px 18px; }
     .step { display: flex; gap: 12px; margin-bottom: 14px; }
     .step:last-child { margin-bottom: 0; }
-    .step-icon { width: 30px; height: 30px; border-radius: var(--ds-radius-sm); background: var(--ds-primary-soft); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-icon { width: 30px; height: 30px; border-radius: var(--ds-radius-sm); background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--ds-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     :root[data-theme="dark"] .step-icon { color: var(--ds-text); }
-    .step-icon.green { background: var(--ds-success-bg); color: var(--ds-success); }
-    .step-icon.amber { background: var(--ds-warning-bg); color: var(--ds-warning); }
-    .step-icon.red { background: var(--ds-danger-bg); color: var(--ds-danger); }
+    .step-icon.green { color: var(--ds-success); }
+    .step-icon.amber { color: var(--ds-warning); }
+    .step-icon.red { color: var(--ds-danger); }
     .step-text { font-size: 13.5px; line-height: 1.6; color: var(--ds-text-secondary); padding-top: 4px; }
     .step-text strong { color: var(--ds-text); font-weight: 600; }
     .note { display: flex; gap: 8px; margin-top: 12px; padding: 10px 12px; background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-sm); font-size: 12.5px; color: var(--ds-text-secondary); line-height: 1.5; }
@@ -90,7 +91,7 @@
 <button class="dict-toggle" id="toggleSW" onclick="setMode('sw')">Swahili → English</button>
 </div>
 <div class="dict-search-row">
-<input type="text" class="ds-input" id="dictInput" placeholder="Type an English word — e.g. love, freedom, education" autocomplete="off" autocorrect="off" spellcheck="false">
+<input type="text" class="ds-input" id="dictInput" placeholder="Type an English word, e.g. love, freedom, education" autocomplete="off" autocorrect="off" spellcheck="false">
 <button class="ds-btn ds-btn-primary" id="dictSearchBtn" onclick="doSearch()">Tafuta</button>
 </div>
 <div class="dict-chips-label">Popular words</div>
@@ -145,7 +146,7 @@
 <summary><span class="acc-num">2</span> Sign in <span class="iconify acc-chev" data-icon="mdi:chevron-down"></span></summary>
 <div class="acc-body">
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:email-outline"></span></div><div class="step-text">Enter the <strong>email address</strong> you registered with.</div></div>
-<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div><div class="step-text">Enter the <strong>password you chose</strong> at sign-up — this is not your Student ID.</div></div>
+<div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:lock-outline"></span></div><div class="step-text">Enter the <strong>password you chose</strong> at sign-up. This is not your Student ID.</div></div>
 <div class="step"><div class="step-icon amber"><span class="iconify" data-icon="mdi:lock-reset"></span></div><div class="step-text">Forgotten it? Use <strong>Forgot password</strong> on the sign-in page and a reset code will be emailed to you.</div></div>
 </div>
 </details>
@@ -163,7 +164,7 @@
 <div class="acc-body">
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:account-tie-outline"></span></div><div class="step-text">During each session, your <strong>teaching assistant</strong> reads out a <strong>6-digit code</strong> that is unique to you and that session.</div></div>
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:qrcode-scan"></span></div><div class="step-text">On your <strong>Dashboard</strong>, find today's class and select <strong>Check In</strong>.</div></div>
-<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Enter the code and confirm. The session updates to <strong>Present</strong> immediately — no page reload needed.</div></div>
+<div class="step"><div class="step-icon green"><span class="iconify" data-icon="mdi:check-circle-outline"></span></div><div class="step-text">Enter the code and confirm. The session updates to <strong>Present</strong> immediately, with no page reload needed.</div></div>
 <div class="note"><span class="iconify" data-icon="mdi:shield-alert-outline"></span> Your code cannot be shared or reused. Entering another student's code is recorded as misuse.</div>
 </div>
 </details>
@@ -174,9 +175,9 @@
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:chart-line"></span></div><div class="step-text">Your <strong>Dashboard</strong> shows overall attendance plus a progress bar and score for each course.</div></div>
 <div class="step"><div class="step-icon"><span class="iconify" data-icon="mdi:history"></span></div><div class="step-text">Open <strong>My History</strong> for a full week-by-week record:</div></div>
 <div style="padding-left:42px">
-<div class="status-row"><span class="ds-att ds-att-present"><span class="iconify" data-icon="mdi:check-circle"></span> Present</span> code confirmed for the session</div>
-<div class="status-row"><span class="ds-att ds-att-absent"><span class="iconify" data-icon="mdi:close-circle"></span> Absent</span> no code confirmed</div>
-<div class="status-row"><span class="ds-att ds-att-not-recorded"><span class="iconify" data-icon="mdi:minus-circle-outline"></span> Not recorded</span> session hasn't happened yet</div>
+<div class="status-row">{% badge "present" %} code confirmed for the session</div>
+<div class="status-row">{% badge "absent" %} no code confirmed</div>
+<div class="status-row">{% badge "not_recorded" %} session hasn't happened yet</div>
 </div>
 </div>
 </details>
@@ -212,7 +213,7 @@
 <div class="acc-body">
 <div class="tips-grid">
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Add the portal to your phone's home screen for quick access.</div>
-<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Check in during class — don't wait until you've left.</div>
+<div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Check in during class. Don't wait until you've left.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Review your history weekly to catch any missed sessions early.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Use a strong, unique password and never share it.</div>
 <div class="tip-item"><span class="iconify" data-icon="mdi:check"></span> Export your records at the end of the semester for your own reference.</div>
@@ -225,7 +226,7 @@
 <script>
 {% if is_student %}
 var dictMode = 'en';
-var DICT_PLACEHOLDERS = { en: 'Type an English word — e.g. love, freedom, education', sw: 'Andika neno la Kiswahili — mfano: upendo, uhuru' };
+var DICT_PLACEHOLDERS = { en: 'Type an English word, e.g. love, freedom, education', sw: 'Andika neno la Kiswahili, mfano: upendo, uhuru' };
 function setMode(mode) {
     dictMode = mode;
     var input = document.getElementById('dictInput');

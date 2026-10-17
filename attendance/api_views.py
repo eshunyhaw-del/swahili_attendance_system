@@ -93,7 +93,7 @@ def _get_user_by_email(email):
 
 
 class LoginRequestView(APIView):
-    """POST /api/auth/login/ — send a 6-digit OTP to the user's email."""
+    """POST /api/auth/login/ - send a 6-digit OTP to the user's email."""
 
     permission_classes = [AllowAny]
     throttle_scope = 'otp_request'
@@ -121,7 +121,7 @@ class LoginRequestView(APIView):
 
 
 class VerifyOTPView(APIView):
-    """POST /api/auth/verify-otp/ — verify OTP and return JWT tokens."""
+    """POST /api/auth/verify-otp/ - verify OTP and return JWT tokens."""
 
     permission_classes = [AllowAny]
     throttle_scope = 'otp_verify'
@@ -180,7 +180,7 @@ class VerifyOTPView(APIView):
 
 
 class PasswordResetRequestView(APIView):
-    """POST /api/auth/password-reset/ — send a password-reset OTP."""
+    """POST /api/auth/password-reset/ - send a password-reset OTP."""
 
     permission_classes = [AllowAny]
     throttle_scope = 'otp_request'
@@ -208,7 +208,7 @@ class PasswordResetRequestView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
-    """POST /api/auth/password-reset/confirm/ — verify OTP and set new password."""
+    """POST /api/auth/password-reset/confirm/ - verify OTP and set new password."""
 
     permission_classes = [AllowAny]
     throttle_scope = 'otp_verify'

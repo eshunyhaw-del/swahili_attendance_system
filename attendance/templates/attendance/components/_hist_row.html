@@ -1,0 +1,26 @@
+{% load ui %}
+<div class="row">
+<div class="row-top">
+<div>
+<p class="row-title">Week {{ entry.week_num }}</p>
+<p class="row-sub">{{ entry.session.date|date:"D j M Y" }} · {{ entry.session.start_time|time:"g:i A" }} to {{ entry.session.end_time|time:"g:i A" }}</p>
+</div>
+<div class="row-badges">
+                    {% if entry.used %}<span class="ds-status ds-status-success">{% icon "check" 12 %}{{ entry.used }} used</span>{% endif %}
+                    {% if entry.pending %}<span class="ds-status ds-status-neutral">{% icon "clock" 12 %}{{ entry.pending }} pending</span>{% endif %}
+                    {% if not entry.generated %}<span class="ds-status ds-status-outline">{% icon "minus" 12 %}No codes</span>{% endif %}
+</div>
+</div>
+<dl class="mini" style="margin:0">
+<div><dt>Enrolled</dt><dd>{{ entry.enrolled }}</dd></div>
+<div><dt>Generated</dt><dd>{{ entry.generated|default:"-" }}</dd></div>
+<div><dt>Given out</dt><dd>{{ entry.given|default:"-" }}</dd></div>
+<div><dt>Used</dt><dd>{{ entry.used|default:"-" }}</dd></div>
+</dl>
+                {% if entry.generated %}
+<div class="bar" role="img" aria-label="Usage rate {{ entry.coverage }} percent">
+<div class="bar-track"><div class="bar-fill{% if entry.coverage < 40 %} low{% elif entry.coverage < 80 %} mid{% endif %}" style="width:{{ entry.coverage }}%"></div></div>
+<span class="bar-pct">{{ entry.coverage }}%</span>
+</div>
+                {% endif %}
+</div>

@@ -7,14 +7,14 @@ from attendance.views import token_login_view, token_logout_view, otp_password_r
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # REST API — OTP auth
+    # REST API - OTP auth
     path('api/auth/', include('attendance.api_urls')),
 
     # Auth
     path('login/', token_login_view, name='login'),
     path('logout/', token_logout_view, name='logout'),
 
-    # Password reset — OTP-based (keeps the 'password_reset' name so the login page link works)
+    # Password reset - OTP-based (keeps the 'password_reset' name so the login page link works)
     path('password-reset/', otp_password_reset_request, name='password_reset'),
 
     # Attendance app

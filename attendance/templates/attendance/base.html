@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token }}">
 <title>SWASA Attendance System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,8 @@
     {% load static %}
 <script src="{% static 'js/iconify.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+{% if user.is_authenticated %}<link rel="stylesheet" href="{% static 'css/shell-student.css' %}">{% endif %}
+<script src="{% static 'js/ui.js' %}" defer></script>
 <style>
         :root {
             /* ── Design tokens ── */
@@ -25,7 +27,7 @@
             --bg-main: #F4F6F9;
             --bg-card: #FFFFFF;
             --text-main: #1F2937;
-            --text-muted: #6B7484;
+            --text-muted: #667080;
             --text-hint: #9BA4B4;
             --border: #E1E5EC;
             --shadow: 0 2px 4px -2px rgba(16, 24, 40, 0.06), 0 4px 10px -2px rgba(16, 24, 40, 0.08);
@@ -408,14 +410,14 @@
         html[data-theme="dark"] .alert-error { background: rgba(180,35,24,0.18); color: #F0776B; border-color: rgba(240,119,107,0.30); }
         html[data-theme="dark"] .alert-warning { background: rgba(180,83,9,0.18); color: #E6A23C; border-color: rgba(230,162,60,0.30); }
 
-        /* Dark mode: navy brand colour as text is invisible on dark surfaces — use gold */
+        /* Dark mode: navy brand colour as text is invisible on dark surfaces - use gold */
         html[data-theme="dark"] .badge-navy {
             color: #F2C31A;
             background: rgba(242,195,26,0.12);
             border: 1px solid rgba(242,195,26,0.22);
         }
 
-        /* Dark mode: form focus rings — navy is invisible, use gold */
+        /* Dark mode: form focus rings - navy is invisible, use gold */
         html[data-theme="dark"] .form-control:focus {
             border-color: var(--gold);
             box-shadow: 0 0 0 3px rgba(242,195,26,0.2);
@@ -427,13 +429,13 @@
         /* Dark mode: navy text in CSS-class elements across templates */
         html[data-theme="dark"] .sup-avatar,
         html[data-theme="dark"] .pta-avatar { color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2); }
-        html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; background: rgba(100,160,230,0.12); }
+        html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; }
         html[data-theme="dark"] .ad-level-chip,
         html[data-theme="dark"] .ad-num { color: var(--text-primary); }
         html[data-theme="dark"] .ld-stat-chip.enrolled .ld-stat-val { color: #7BAEE8; }
         html[data-theme="dark"] .ld-stat-chip.enrolled { background: rgba(100,160,230,0.1); }
 
-        /* Dark mode: focus states — border + background */
+        /* Dark mode: focus states - border + background */
         html[data-theme="dark"] .sup-textarea:focus,
         html[data-theme="dark"] .sup-status-select:focus,
         html[data-theme="dark"] .ld-date-input:focus,
@@ -442,7 +444,7 @@
         /* Dark mode: section-head accordions (student guide, TA guide pages) */
         html[data-theme="dark"] .section-head { background: var(--bg-subtle) !important; }
 
-        /* Dark mode: navy as text colour is invisible — switch to gold or light blue */
+        /* Dark mode: navy as text colour is invisible - switch to gold or light blue */
         html[data-theme="dark"] .step-text strong,
         html[data-theme="dark"] .quick-ref-title,
         html[data-theme="dark"] .mono { color: var(--gold) !important; }
@@ -452,10 +454,6 @@
         html[data-theme="dark"] .info-box { background: rgba(46,61,80,0.6) !important; color: var(--text-secondary) !important; border-color: var(--border) !important; }
         html[data-theme="dark"] .info-box .iconify { color: var(--gold) !important; }
 
-        /* Dark mode: ad-notify (admin dashboard announcement strip) */
-        html[data-theme="dark"] .ad-notify { background: rgba(242,195,26,0.08) !important; border-color: rgba(242,195,26,0.15) !important; }
-        html[data-theme="dark"] .ad-notify,
-        html[data-theme="dark"] .ad-notify-item { color: #E8D98A !important; }
 
         /* Dark mode: hardcoded light backgrounds common across templates */
         html[data-theme="dark"] .week-tabs-bar,
@@ -619,10 +617,10 @@
             font-size: 17px;
         }
 
-        .stat-card.total .stat-icon { background: rgba(13,36,114,0.08); color: var(--navy); }
-        .stat-card.present .stat-icon { background: rgba(30,158,94,0.1); color: var(--green); }
-        .stat-card.absent .stat-icon { background: rgba(192,57,43,0.1); color: var(--red); }
-        .stat-card.late .stat-icon { background: rgba(242,195,26,0.15); color: var(--gold-dark); }
+        .stat-card.total .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--navy); }
+        .stat-card.present .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--green); }
+        .stat-card.absent .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--red); }
+        .stat-card.late .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--gold-dark); }
 
         .stat-title {
             font-size: 10px;
@@ -769,22 +767,13 @@
         .data-table tbody tr:last-child td { border-bottom: none; }
 
         /* ─── BADGES ─── */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
 
-        .badge-present { background: rgba(30,158,94,0.12); color: var(--green); }
-        .badge-absent { background: rgba(192,57,43,0.10); color: var(--red); }
-        .badge-late { background: rgba(201,160,14,0.12); color: var(--gold-dark); }
-        .badge-pending { background: rgba(74,144,217,0.12); color: var(--blue); }
-        .badge-navy { background: rgba(13,36,114,0.1); color: var(--navy); }
+        .badge-present { color: var(--ds-success); }
+        .badge-absent { color: var(--ds-danger); }
+        .badge-late { color: var(--ds-warning); }
+        .badge-pending { color: var(--ds-info); }
+        .badge-navy { color: var(--ds-text-secondary); }
 
         /* ─── ALERTS ─── */
         .alert {
@@ -1052,7 +1041,7 @@
             .cultural-name { font-size: 13.5px; }
         }
 
-        /* System notification in bell (cultural date — gold tint) */
+        /* System notification in bell (cultural date - gold tint) */
         .notif-item.sys-notif {
             background: rgba(242,195,26,0.04);
             border-left-color: #F2C31A;
@@ -1119,7 +1108,7 @@
         (function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
 </script>
 </head>
-<body>
+<body{% if user.is_authenticated %} class="shell-student{% if user.is_staff %} shell-staff{% elif user.taprofile %} shell-ta{% endif %}"{% endif %}>
 
 <div class="app">
 
@@ -1401,7 +1390,7 @@
 </div>
 </div>
                 {% endif %}
-<button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+<button class="icon-btn shell-extra" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
 <span class="theme-light-icon"><span class="iconify" data-icon="mdi:weather-night" data-width="18" data-height="18"></span></span>
 <span class="theme-dark-icon"><span class="iconify" data-icon="mdi:weather-sunny" data-width="18" data-height="18"></span></span>
 </button>
@@ -1411,7 +1400,7 @@
 <span class="user-role">{% if user.is_superuser %}Admin{% elif user.is_staff %}Lecturer{% elif user.taprofile %}Teaching Assistant{% else %}Student{% endif %}</span>
 </div>
 <a href="{% url 'attendance:profile' %}" class="user-avatar" title="Edit profile" aria-label="Edit profile">{% if user.avatar.image %}<img src="{{ user.avatar.image.url }}" alt="Profile photo">{% else %}{{ user.username|first|upper }}{% endif %}</a>
-<form method="post" action="{% url 'logout' %}" style="display:inline;">
+<form class="shell-extra" method="post" action="{% url 'logout' %}" style="display:inline;">
                         {% csrf_token %}
 <button type="submit" class="icon-btn danger" aria-label="Logout">
 <span class="iconify" data-icon="mdi:logout" data-width="18" data-height="18"></span>
@@ -1424,14 +1413,14 @@
 </div>
 
 <div class="container">
-            {% if messages %}
+            {% if messages %}{% if user.is_authenticated %}{% else %}
                 {% for message in messages %}
 <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
 <span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
                     {{ message }}
 </div>
                 {% endfor %}
-            {% endif %}
+            {% endif %}{% endif %}
 
             {% if today_cultural_dates %}
             {% with cd=today_cultural_dates.0 %}
@@ -1467,6 +1456,20 @@
 </div>
 </div>
 
+{% if user.is_authenticated %}
+{% if user.is_staff %}
+{% include "attendance/components/_bottom_nav_staff.html" %}
+{% include "attendance/components/_more_sheet_staff.html" %}
+{% elif user.taprofile %}
+{% include "attendance/components/_bottom_nav_ta.html" %}
+{% include "attendance/components/_more_sheet_ta.html" %}
+{% else %}
+{% include "attendance/components/_bottom_nav.html" %}
+{% include "attendance/components/_more_sheet.html" %}
+{% endif %}
+{% include "attendance/components/_toasts.html" %}
+{% endif %}
+
 {% if show_alumni_popup %}
 <!-- ── SWASA alumni invite (Level 400 students + TAs, closing weeks of 2nd semester) ── -->
 <div id="alumniPopup" class="ds-modal-overlay" style="display:none; z-index:1300;" data-max="{{ alumni_max_per_day|default:2 }}">
@@ -1476,7 +1479,7 @@
 <span class="iconify" data-icon="mdi:whatsapp" data-width="30"></span>
 </div>
 <h3 style="font-size:1.2rem; font-weight:700; margin:0 0 6px; color:var(--text-primary);">Join the SWASA Alumni Network</h3>
-<p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0;">You're in your final stretch with SWASA. Stay connected with fellow members and graduates — join the alumni WhatsApp group.</p>
+<p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin:0;">You're in your final stretch with SWASA. Stay connected with fellow members and graduates. Join the alumni WhatsApp group.</p>
 </div>
 <div style="display:flex; flex-direction:column; gap:8px; padding:20px 26px 24px;">
 <a href="{{ alumni_whatsapp_url }}" target="_blank" rel="noopener noreferrer" onclick="dismissAlumniPopup()" style="display:inline-flex; align-items:center; justify-content:center; gap:8px; background:#25D366; color:#fff; font-weight:700; font-size:14px; padding:0.75rem; border-radius:var(--radius-sm); text-decoration:none;">
@@ -1646,7 +1649,7 @@
         });
     }
 
-    /* Cultural date banner — show if not dismissed today */
+    /* Cultural date banner - show if not dismissed today */
     (function() {
         var banner = document.getElementById('culturalDateBanner');
         if (!banner) return;
@@ -1777,7 +1780,7 @@
                 + '<div class="phrase-swahili">' + phrase.swahili + '</div>'
                 + '<div class="phrase-english">' + phrase.english + '</div>';
             if (hasResponse) {
-                html += '<div class="phrase-response">' + phrase.response_swahili + ' &mdash; ' + phrase.response_english + '</div>';
+                html += '<div class="phrase-response">' + phrase.response_swahili + ' - ' + phrase.response_english + '</div>';
             }
             html += '</div>';
             return html;
