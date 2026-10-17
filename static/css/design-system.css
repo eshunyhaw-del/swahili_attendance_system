@@ -408,7 +408,7 @@
 .ds-btn-secondary .ds-spinner-sm, .ds-btn-ghost .ds-spinner-sm { border-color: var(--ds-border-strong); border-top-color: var(--ds-primary); }
 
 /* ==========================================================================
-   15. STATUS BADGE — solid tint, icon + text, readable on both themes
+   15. STATUS BADGE — white surface, thin border, coloured icon + text
 ---------------------------------------------------------------------------- */
 .ds-status {
     /* Compact informational badge (shadcn-style): never a button. */
@@ -419,12 +419,12 @@
     cursor: default; user-select: none;
 }
 .ds-status .icon { width: 12px; height: 12px; vertical-align: 0; }
-.ds-status-outline { background: transparent; color: var(--ds-text-secondary); border-color: var(--ds-border-strong); }
-.ds-status-success { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
-.ds-status-warning { background: var(--ds-warning-bg); color: var(--ds-warning); border-color: var(--ds-warning-border); }
-.ds-status-danger  { background: var(--ds-danger-bg);  color: var(--ds-danger);  border-color: var(--ds-danger-border); }
-.ds-status-info    { background: var(--ds-info-bg);    color: var(--ds-info);    border-color: var(--ds-info-border); }
-.ds-status-neutral { background: var(--ds-neutral-bg); color: var(--ds-text-secondary); border-color: var(--ds-neutral-border); }
+.ds-status { background: var(--ds-surface); border-color: var(--ds-border); }   /* white surface + thin neutral border */
+.ds-status-success { color: var(--ds-success); }                                  /* only the icon and text carry colour */
+.ds-status-warning { color: var(--ds-warning); }
+.ds-status-danger  { color: var(--ds-danger); }
+.ds-status-info    { color: var(--ds-info); }
+.ds-status-neutral, .ds-status-outline { color: var(--ds-text-secondary); }
 
 /* ==========================================================================
    16. GROUPED LIST — one bordered surface with dividers (instead of many cards)
