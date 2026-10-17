@@ -9,300 +9,46 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-    :root {
-        --navy:        #0D2472;
-        --navy-deep:   #081A52;
-        --navy-900:    #06123F;
-        --gold:        #E6B325;
-        --gold-deep:   #C7961A;
-
-        --ink:         #16203C;
-        --muted:       #5B6577;
-        --line:        #E5E8F0;
-        --field-line:  #D2D8E6;
-        --bg:          #EEF1F8;
-        --white:       #FFFFFF;
-
-        --danger:      #C0392B;
-        --danger-bg:   #FCEDEB;
-        --danger-line: #F1C7C1;
-    }
-
-    * , *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-        font-family: 'Montserrat', system-ui, sans-serif;
-        color: var(--ink);
-        background:
-            radial-gradient(1200px 600px at 15% -10%, rgba(13,36,114,0.10), transparent 60%),
-            radial-gradient(900px 500px at 100% 110%, rgba(230,179,37,0.08), transparent 55%),
-            var(--bg);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-    }
-
-    .auth {
-        width: 100%;
-        max-width: 940px;
-        display: grid;
-        grid-template-columns: 1.02fr 1fr;
-        background: var(--white);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 30px 70px -30px rgba(13,36,114,0.30);
-    }
-
-    /* ── Brand panel ───────────────────────────────────── */
-    .brand {
-        position: relative;
-        background:
-            linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 60%, var(--navy-900) 100%);
-        color: #fff;
-        padding: 2.75rem 2.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        min-height: 520px;
-        overflow: hidden;
-    }
-    /* Quiet woven texture - a nod to kente, never loud */
-    .brand::before {
-        content: "";
-        position: absolute; inset: 0;
-        background-image:
-            repeating-linear-gradient(45deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 22px),
-            repeating-linear-gradient(-45deg, rgba(230,179,37,0.05) 0 1px, transparent 1px 22px);
-        pointer-events: none;
-    }
-    .brand > * { position: relative; z-index: 1; }
-
-    .brand-mark { display: flex; align-items: center; gap: 0.85rem; }
-    .brand-logo {
-        width: 46px; height: 46px; border-radius: 50%;
-        object-fit: cover;
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 0 0 3px rgba(230,179,37,0.55);
-    }
-    .brand-mark-text { display: flex; flex-direction: column; line-height: 1.15; }
-    .brand-mark-name { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.01em; }
-    .brand-mark-org  { font-size: 0.7rem; font-weight: 500; color: rgba(255,255,255,0.6); letter-spacing: 0.04em; }
-
-    .brand-lede { max-width: 22ch; }
-    .brand-eyebrow {
-        display: inline-block;
-        font-size: 0.66rem; font-weight: 600; letter-spacing: 0.22em;
-        text-transform: uppercase; color: var(--gold);
-        margin-bottom: 1rem;
-    }
-    .brand-eyebrow::after {
-        content: ""; display: block; width: 34px; height: 2px;
-        background: var(--gold); margin-top: 0.7rem; border-radius: 2px;
-    }
-    .brand-title {
-        font-size: 2rem; font-weight: 800; line-height: 1.12;
-        letter-spacing: -0.02em;
-    }
-    .brand-desc {
-        margin-top: 0.85rem; font-size: 0.82rem; font-weight: 400;
-        line-height: 1.65; color: rgba(255,255,255,0.68);
-        max-width: 30ch;
-    }
-    .brand-foot {
-        font-size: 0.66rem; font-weight: 500; letter-spacing: 0.03em;
-        color: rgba(255,255,255,0.45);
-    }
-
-    /* ── Form panel ────────────────────────────────────── */
-    .panel { padding: 2.75rem 2.75rem 2.25rem; display: flex; flex-direction: column; }
-
-    .panel-head { margin-bottom: 1.6rem; }
-    .panel-head h1 {
-        font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em;
-        color: var(--ink);
-    }
-    .panel-head p { margin-top: 0.4rem; font-size: 0.83rem; color: var(--muted); font-weight: 500; }
-
-    .alert {
-        display: flex; gap: 0.5rem; align-items: flex-start;
-        background: var(--danger-bg);
-        border: 1px solid var(--danger-line);
-        border-left: 3px solid var(--danger);
-        border-radius: 8px;
-        padding: 0.65rem 0.8rem;
-        font-size: 0.78rem; font-weight: 500; color: var(--danger);
-        line-height: 1.45; margin-bottom: 1.25rem;
-    }
-    .alert svg { flex-shrink: 0; margin-top: 1px; }
-
-    .field { margin-bottom: 1rem; }
-    .field label {
-        display: block; font-size: 0.73rem; font-weight: 600;
-        color: var(--ink); letter-spacing: 0.01em; margin-bottom: 0.4rem;
-    }
-    .field-wrap { position: relative; }
-    .field input {
-        width: 100%;
-        padding: 0.8rem 0.9rem;
-        font-family: inherit; font-size: 0.9rem; font-weight: 500; color: var(--ink);
-        background: #FBFCFE;
-        border: 1.5px solid var(--field-line);
-        border-radius: 10px;
-        outline: none;
-        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-    }
-    .field input[type="password"] { padding-right: 3rem; }
-    .field input::placeholder { color: #9AA3B5; font-weight: 400; }
-    .field input:focus {
-        border-color: var(--navy);
-        background: #fff;
-        box-shadow: 0 0 0 3px rgba(13,36,114,0.12);
-    }
-
-    .pw-toggle {
-        position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; cursor: pointer; color: var(--muted);
-        padding: 0.4rem; border-radius: 8px; display: flex; line-height: 0;
-        transition: color 0.15s, background 0.15s;
-    }
-    .pw-toggle:hover { color: var(--navy); background: rgba(13,36,114,0.06); }
-
-    .row {
-        display: flex; align-items: center; justify-content: space-between;
-        margin: 0.25rem 0 1.4rem; gap: 1rem;
-    }
-    .remember { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
-    .remember input {
-        appearance: none; -webkit-appearance: none;
-        width: 17px; height: 17px; flex-shrink: 0;
-        border: 1.5px solid var(--field-line); border-radius: 5px;
-        background: #fff; cursor: pointer; position: relative; transition: all 0.15s;
-    }
-    .remember input:checked { background: var(--navy); border-color: var(--navy); }
-    .remember input:checked::after {
-        content: ""; position: absolute; left: 5px; top: 1.5px;
-        width: 4px; height: 8px; border: 2px solid #fff; border-top: 0; border-left: 0;
-        transform: rotate(43deg);
-    }
-    .remember span { font-size: 0.78rem; font-weight: 500; color: var(--muted); }
-    .link {
-        font-size: 0.78rem; font-weight: 600; color: var(--navy);
-        text-decoration: none; text-underline-offset: 2px;
-    }
-    .link:hover { text-decoration: underline; }
-
-    .btn {
-        width: 100%; padding: 0.9rem 1.25rem;
-        font-family: inherit; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.01em;
-        color: #fff; background: var(--navy);
-        border: none; border-radius: 10px; cursor: pointer;
-        display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-        transition: background 0.15s, transform 0.05s;
-    }
-    .btn:hover { background: var(--navy-deep); }
-    .btn:active { transform: translateY(1px); }
-    .btn svg { transition: transform 0.15s; }
-    .btn:hover svg { transform: translateX(3px); }
-
-    .sep {
-        display: flex; align-items: center; gap: 0.85rem;
-        margin: 1.75rem 0 1.1rem;
-        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-        color: #9AA3B5;
-    }
-    .sep::before, .sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-
-    .reg { display: flex; flex-direction: column; gap: 0.6rem; }
-    .reg-link {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 0.8rem 0.95rem;
-        border: 1px solid var(--line); border-radius: 10px;
-        text-decoration: none; color: var(--ink);
-        transition: border-color 0.15s, background 0.15s;
-    }
-    .reg-link:hover { border-color: var(--navy); background: #FBFCFE; }
-    .reg-link .rl-title { font-size: 0.83rem; font-weight: 600; }
-    .reg-link .rl-sub { font-size: 0.72rem; font-weight: 500; color: var(--muted); margin-top: 1px; }
-    .reg-link .rl-arrow { color: #B4BCCB; transition: transform 0.15s, color 0.15s; }
-    .reg-link:hover .rl-arrow { color: var(--navy); transform: translateX(3px); }
-
-    .credit {
-        margin-top: 1.75rem; text-align: center;
-        font-size: 0.68rem; font-weight: 500; color: #A2AAB9;
-    }
-    .credit a { color: var(--navy); text-decoration: none; font-weight: 600; }
-    .credit a:hover { text-decoration: underline; }
-
-    /* Orchestrated load - one calm reveal */
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    .stagger > * { opacity: 0; animation: rise 0.5s cubic-bezier(0.22,0.61,0.36,1) forwards; }
-    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
-    .stagger > *:nth-child(2) { animation-delay: 0.12s; }
-    .stagger > *:nth-child(3) { animation-delay: 0.19s; }
-    .stagger > *:nth-child(4) { animation-delay: 0.26s; }
-    .stagger > *:nth-child(5) { animation-delay: 0.33s; }
-    .stagger > *:nth-child(6) { animation-delay: 0.40s; }
-
-    /* ── Responsive ────────────────────────────────────── */
-    @media (max-width: 800px) {
-        body { padding: 0; align-items: stretch; background: var(--white); }
-        .auth {
-            grid-template-columns: 1fr; max-width: 480px; margin: 0 auto;
-            border: none; border-radius: 0; box-shadow: none; min-height: 100vh;
-        }
-        .brand {
-            min-height: auto; padding: 1.75rem 1.75rem 1.6rem;
-            flex-direction: row; align-items: center; gap: 1rem;
-        }
-        .brand-lede, .brand-foot { display: none; }
-        .brand-mark { flex: 1; }
-        .panel { padding: 2rem 1.75rem 2.5rem; flex: 1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        .stagger > * { animation: none; opacity: 1; }
-        .btn:hover svg, .reg-link:hover .rl-arrow { transform: none; }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 <body>
 
-<main class="auth">
+<main class="split">
 
-    <!-- Brand side -->
-    <aside class="brand">
-        <div class="brand-mark">
-            <img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA" class="brand-logo">
-            <span class="brand-mark-text">
-                <span class="brand-mark-name">SWASA Attendance</span>
-                <span class="brand-mark-org">University of Ghana</span>
+    <aside class="split-aside">
+        <div class="aside-mark">
+            <img src="{% static 'img/swasa_logo.jpg' %}" alt="SWASA" class="aside-logo">
+            <span>
+                <span class="aside-name">SWASA Attendance</span>
+                <span class="aside-org">University of Ghana</span>
             </span>
         </div>
 
-        <div class="brand-lede">
-            <span class="brand-eyebrow">Attendance Portal</span>
-            <h2 class="brand-title">Karibu tena.</h2>
-            <p class="brand-desc">Sign in to record and track attendance for the Kiswahili programme.</p>
+        <div>
+            <span class="aside-eyebrow">Attendance Portal</span>
+            <h2 class="aside-title">Karibu tena.</h2>
+            <p class="aside-desc">Sign in to record and track attendance for the Kiswahili programme.</p>
         </div>
 
-        <p class="brand-foot">Department of African and Asian Languages</p>
+        <ul class="aside-points">
+            <li><span class="pt"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Mark attendance in seconds</li>
+            <li><span class="pt"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>See every session and week at a glance</li>
+            <li><span class="pt"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></span>Know your exam eligibility early</li>
+        </ul>
+
+        <p class="aside-foot">Department of African and Asian Languages</p>
     </aside>
 
-    <!-- Form side -->
-    <section class="panel stagger">
+    <section class="split-main stagger">
 
-        <div class="panel-head">
+        <div class="split-head">
             <h1>Sign in</h1>
             <p>Welcome back. Access your portal.</p>
         </div>
 
         {% if login_error %}
         <div class="alert" role="alert">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <span>{{ login_error_message|default:"Invalid email or password. Please check and try again." }}</span>
         </div>
         {% endif %}
@@ -314,19 +60,15 @@
             <div class="field">
                 <label for="id_email">Email address</label>
                 <div class="field-wrap">
-                    <input type="email" name="email" id="id_email"
-                           placeholder="you@example.com" required autocomplete="email">
+                    <input type="email" name="email" id="id_email" placeholder="you@example.com" required autocomplete="email" inputmode="email" autocapitalize="none">
                 </div>
             </div>
 
             <div class="field">
                 <label for="id_password">Password</label>
                 <div class="field-wrap">
-                    <input type="password" name="password" id="id_password"
-                           placeholder="Enter your password" required autocomplete="current-password">
-                    <button type="button" class="pw-toggle" id="pwToggle" onclick="togglePw()" aria-label="Show password">
-                        <svg id="pwIcon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                    <input type="password" name="password" id="id_password" placeholder="Enter your password" required autocomplete="current-password">
+                    <button type="button" class="pw-toggle" id="pwToggle" onclick="togglePw()" aria-label="Show password"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="pwIcon"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
                 </div>
             </div>
 
@@ -348,18 +90,12 @@
 
         <nav class="reg">
             <a href="{% url 'attendance:register' %}" class="reg-link">
-                <span>
-                    <span class="rl-title">Register as Student</span>
-                    <span class="rl-sub">Create your student account</span>
-                </span>
-                <svg class="rl-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                <span><span class="rl-title">Student</span><span class="rl-sub">Create account</span></span>
+                <svg class="rl-arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
             <a href="{% url 'attendance:ta_register' %}" class="reg-link">
-                <span>
-                    <span class="rl-title">Register as Teaching Assistant</span>
-                    <span class="rl-sub">Create your TA account</span>
-                </span>
-                <svg class="rl-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                <span><span class="rl-title">Teaching Assistant</span><span class="rl-sub">Apply for access</span></span>
+                <svg class="rl-arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
         </nav>
 

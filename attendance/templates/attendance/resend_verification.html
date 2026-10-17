@@ -10,46 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="{% static 'js/iconify.min.js' %}"></script>
-<style>
-    :root { --navy: #0D2472; --navy-deep: #081A52; --gold: #E6B325;
-        --ink: #16203C; --muted: #5B6577; --line: #E5E8F0; --field-line: #D2D8E6;
-        --bg: #EEF1F8; --white: #FFFFFF; --danger: #C0392B; --danger-bg: #FCEDEB; --danger-line: #F1C7C1;
-        --green: #1A9E60; --green-bg: #E9F7F0; --green-line: #BFE6D2; }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Montserrat', system-ui, sans-serif; color: var(--ink);
-        background: radial-gradient(1000px 500px at 15% -10%, rgba(13,36,114,0.09), transparent 60%),
-            radial-gradient(800px 460px at 100% 110%, rgba(230,179,37,0.07), transparent 55%), var(--bg);
-        min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem 1rem; -webkit-font-smoothing: antialiased; }
-    .card { width: 100%; max-width: 420px; background: var(--white); border: 1px solid var(--line);
-        border-radius: 18px; overflow: hidden; box-shadow: 0 26px 60px -28px rgba(13,36,114,0.28); }
-    .card-top { padding: 1.9rem 2rem 1.5rem; text-align: center; border-bottom: 1px solid var(--line); position: relative; }
-    .card-top::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--navy), var(--gold)); }
-    .brand-icon { width: 48px; height: 48px; border-radius: 14px; background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--navy);
-        display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.9rem; }
-    .card-top h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
-    .card-top-sub { margin-top: 0.3rem; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
-    .card-body { padding: 1.6rem 2rem 2rem; }
-    .error-banner, .success-banner { display: flex; gap: 0.5rem; align-items: flex-start; border-radius: 10px;
-        padding: 0.65rem 0.85rem; font-size: 0.78rem; font-weight: 500; line-height: 1.45; margin-bottom: 1rem; }
-    .error-banner { background: var(--danger-bg); border: 1px solid var(--danger-line); border-left: 3px solid var(--danger); color: var(--danger); }
-    .success-banner { background: var(--green-bg); border: 1px solid var(--green-line); border-left: 3px solid var(--green); color: #10794A; }
-    .error-banner .iconify, .success-banner .iconify { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-    .field { margin-bottom: 0.9rem; }
-    .field-label { display: block; font-size: 0.73rem; font-weight: 600; color: var(--ink); margin-bottom: 0.35rem; }
-    .field-hint { font-size: 0.68rem; color: var(--muted); margin-top: 0.35rem; }
-    .field-input { width: 100%; padding: 0.75rem 0.9rem; font-family: inherit; font-size: 0.88rem; font-weight: 500;
-        color: var(--ink); background: #FBFCFE; border: 1.5px solid var(--field-line); border-radius: 10px; outline: none;
-        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s; }
-    .field-input::placeholder { color: #9AA3B5; font-weight: 400; }
-    .field-input:focus { border-color: var(--navy); background: #fff; box-shadow: 0 0 0 3px rgba(13,36,114,0.12); }
-    .btn-send { width: 100%; padding: 0.85rem; background: var(--navy); color: #fff; border: none; border-radius: 10px;
-        font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: background 0.15s, transform 0.05s; margin-top: 0.35rem; }
-    .btn-send:hover { background: var(--navy-deep); }
-    .btn-send:active { transform: translateY(1px); }
-    .back-link { display: flex; align-items: center; justify-content: center; gap: 0.3rem; margin-top: 1.1rem;
-        font-size: 0.78rem; font-weight: 600; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-    .back-link:hover { color: var(--navy); }
-</style>
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 <body>
 <main class="card">
