@@ -771,22 +771,13 @@
         .data-table tbody tr:last-child td { border-bottom: none; }
 
         /* ─── BADGES ─── */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
 
-        .badge-present { background: rgba(30,158,94,0.12); color: var(--green); }
-        .badge-absent { background: rgba(192,57,43,0.10); color: var(--red); }
-        .badge-late { background: rgba(201,160,14,0.12); color: var(--gold-dark); }
-        .badge-pending { background: rgba(74,144,217,0.12); color: var(--blue); }
-        .badge-navy { background: rgba(13,36,114,0.1); color: var(--navy); }
+        .badge-present { color: var(--ds-success); }
+        .badge-absent { color: var(--ds-danger); }
+        .badge-late { color: var(--ds-warning); }
+        .badge-pending { color: var(--ds-info); }
+        .badge-navy { color: var(--ds-text-secondary); }
 
         /* ─── ALERTS ─── */
         .alert {

@@ -13,17 +13,6 @@
 <div class="home-phrase" data-phrase-widget></div>
 </header>
 
-{% if blocked_courses %}
-<div class="home-notice home-notice-danger" role="status">{% icon "circle-x" 20 %}
-<div><strong>Not eligible to sit the exam in {% for c in blocked_courses %}{{ c.course.code }}{% if not forloop.last %}, {% endif %}{% endfor %}.</strong> Missing 3 sessions in a row, or 4 in total, blocks a course's exam. Speak to your teaching assistant if you think this is a mistake.</div>
-</div>
-{% endif %}
-{% if warning_courses %}
-<div class="home-notice home-notice-warning" role="status">{% icon "triangle-alert" 20 %}
-<div><strong>One more missed session would make you ineligible in {% for c in warning_courses %}{{ c.course.code }}{% if not forloop.last %}, {% endif %}{% endfor %}.</strong></div>
-</div>
-{% endif %}
-
 <!-- ── Today ─────────────────────────────────────────────────────────── -->
 <h2 class="home-label"><span>Today</span><span class="date">{% now "l, j M" %}</span></h2>
 {% if todays_sessions %}

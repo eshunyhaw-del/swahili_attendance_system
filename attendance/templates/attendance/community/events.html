@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Events &amp; News{% endblock %}
 
 {% block content %}
@@ -40,9 +41,9 @@
 <div class="ev-card-top">
 <span class="ds-badge ds-badge-neutral">Event</span>
         {% if ev.event_date == today %}
-<span class="ds-badge ds-badge-warning"><span class="iconify" data-icon="mdi:star"></span> Today</span>
+<span class="ds-badge ds-badge-warning">{% icon "star" 12 %} Today</span>
         {% elif ev.event_date > today %}
-<span class="ds-badge ds-badge-success"><span class="iconify" data-icon="mdi:clock-outline"></span> In {{ ev.event_date|timeuntil }}</span>
+<span class="ds-badge ds-badge-success">{% icon "clock" 12 %} In {{ ev.event_date|timeuntil }}</span>
         {% else %}
 <span class="ds-badge ds-badge-neutral">Past</span>
         {% endif %}

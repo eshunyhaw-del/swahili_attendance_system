@@ -1,4 +1,5 @@
 {% extends "attendance/base.html" %}
+{% load ui %}
 {% block title %}Notifications{% endblock %}
 
 {% block content %}
@@ -61,7 +62,7 @@
 <div class="nc-head">
 <div class="nc-meta">
         {% if not s.is_read %}<div class="unread-dot"></div>{% endif %}
-<span class="ds-badge ds-badge-neutral"><span class="iconify" data-icon="mdi:bullhorn-outline"></span> Department</span>
+<span class="ds-badge ds-badge-neutral">{% icon "megaphone" 12 %} Department</span>
 </div>
 <div class="nc-time">{{ s.created_at|date:"j M Y · H:i" }}</div>
 </div>

@@ -275,25 +275,11 @@
     }
 
     /* Micro-components */
-    .pct-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.35rem 0.75rem;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        letter-spacing: -0.2px;
-    }
+    .pct-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
 
-    .pct-good {
-        background: var(--badge-good-bg);
-        color: var(--badge-good-text);
-    }
+    .pct-good { color: var(--ds-success); }
 
-    .pct-danger {
-        background: var(--badge-danger-bg);
-        color: var(--badge-danger-text);
-    }
+    .pct-danger { color: var(--ds-danger); }
 
     .action-group {
         display: flex;

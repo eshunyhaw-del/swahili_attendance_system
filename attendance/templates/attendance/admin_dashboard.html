@@ -108,16 +108,9 @@ body { background: var(--bg-base) !important; background-image: none !important;
     text-transform: uppercase; letter-spacing: 0.065em;
     display: flex; align-items: center; gap: 0.45rem;
 }
-.ad-section-badge {
-    font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
-    background: rgba(13,36,114,0.07); color: #0D2472;
-    border: 1px solid rgba(13,36,114,0.12); white-space: nowrap;
-}
-html[data-theme="dark"] .ad-section-badge {
-    color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2);
-}
-.ad-section-badge.danger { background: rgba(231,76,60,0.09); color: #c0392b; border-color: rgba(231,76,60,0.18); }
-.ad-section-badge.success { background: rgba(30,158,94,0.09); color: #1E9E5E; border-color: rgba(30,158,94,0.18); }
+.ad-section-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text-secondary); }
+.ad-section-badge.danger { color: var(--ds-danger); }
+.ad-section-badge.success { color: var(--ds-success); }
 
 /* ── Level Cards ── */
 .ad-level-card {
@@ -136,10 +129,10 @@ html[data-theme="dark"] .ad-section-badge {
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 800; flex-shrink: 0;
 }
-.ad-rate-chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
-.ad-rate-chip.good { background: rgba(30,158,94,0.12); color: #1E9E5E; border: 1px solid rgba(30,158,94,0.2); }
-.ad-rate-chip.medium { background: rgba(201,160,14,0.12); color: #C9A00E; border: 1px solid rgba(201,160,14,0.2); }
-.ad-rate-chip.low { background: rgba(192,57,43,0.1); color: #C0392B; border: 1px solid rgba(192,57,43,0.18); }
+.ad-rate-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
+.ad-rate-chip.good { color: var(--ds-success); }
+.ad-rate-chip.medium { color: var(--ds-warning); }
+.ad-rate-chip.low { color: var(--ds-danger); }
 
 .ad-prog-track { height: 6px; background: var(--border); border-radius: 99px; margin-bottom: 1rem; overflow: hidden; }
 .ad-prog-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }

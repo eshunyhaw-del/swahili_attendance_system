@@ -41,7 +41,7 @@ body { background: var(--bg-base) !important; background-image: none !important;
 }
 .alr-page-header h1 { font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.2rem; position: relative; z-index: 1; }
 .alr-page-header p { font-size: 12.5px; color: rgba(255,255,255,0.6); margin: 0; position: relative; z-index: 1; }
-.alr-header-count { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(231,76,60,0.2); color: #ff8f8f; border: 1px solid rgba(231,76,60,0.3); position: relative; z-index: 1; white-space: nowrap; }
+.alr-header-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-danger); position: relative; z-index: 1; }
 
 /* ── Alert Card ── */
 .alr-card {
@@ -62,12 +62,9 @@ body { background: var(--bg-base) !important; background-image: none !important;
 .alr-card-title { display: flex; align-items: center; gap: 0.5rem; font-size: 14px; font-weight: 800; color: var(--text-primary); }
 .alr-card-title .iconify { color: #e74c3c; font-size: 18px; }
 
-.alr-badge {
-    font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
-    display: inline-flex; align-items: center; gap: 0.3rem;
-}
-.alr-badge.active { background: rgba(231,76,60,0.1); color: #C0392B; border: 1px solid rgba(231,76,60,0.2); }
-.alr-badge.resolved { background: rgba(30,158,94,0.1); color: #1E9E5E; border: 1px solid rgba(30,158,94,0.2); }
+.alr-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
+.alr-badge.active { color: var(--ds-danger); }
+.alr-badge.resolved { color: var(--ds-success); }
 
 .alr-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem 1rem; margin-bottom: 1.125rem; }
 @media (max-width: 500px) { .alr-details { grid-template-columns: 1fr; } }

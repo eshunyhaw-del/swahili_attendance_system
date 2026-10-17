@@ -14,15 +14,6 @@
 .home-label:first-of-type { margin-top: 0; }
 .home-label .date { font-weight: 600; letter-spacing: .02em; text-transform: none; }
 
-/* Exam-eligibility notice: one compact line, only when it matters */
-.home-notice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; margin-bottom: 20px; border-radius: var(--ds-radius-md); border: 1px solid; font-size: 13.5px; line-height: 1.5; }
-.home-notice .icon { margin-top: 2px; }
-.home-notice strong { font-weight: 700; }
-.home-notice-danger { background: var(--ds-danger-bg); border-color: var(--ds-danger-border); color: var(--ds-text); }
-.home-notice-danger .icon { color: var(--ds-danger); }
-.home-notice-warning { background: var(--ds-warning-bg); border-color: var(--ds-warning-border); color: var(--ds-text); }
-.home-notice-warning .icon { color: var(--ds-warning); }
-
 /* Today */
 .today-row { display: flex; flex-direction: column; gap: 14px; padding: 16px; }
 .today-top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 13px; font-weight: 600; color: var(--ds-text-muted); }

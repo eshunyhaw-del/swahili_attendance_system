@@ -78,15 +78,7 @@ body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, s
 .ta-header .phrase-response { color: var(--gold); opacity: 0.9; }
 
 .level-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.875rem; }
-.level-pill {
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    font-size: 11px; font-weight: 700;
-    padding: 4px 11px;
-    border-radius: 9999px;
-    display: inline-flex; align-items: center; gap: 0.3rem;
-}
+.level-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text); }
 
 /* ─── Stats ─── */
 .stats-row {
@@ -195,16 +187,8 @@ html[data-theme="dark"] .session-accordion.open > .session-head { background: rg
 .session-week { font-size: 13.5px; font-weight: 800; color: var(--text); }
 .session-head-date { font-size: 12px; font-weight: 500; color: var(--muted); }
 .session-head-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
-.session-count {
-    font-size: 11px; font-weight: 700; color: var(--primary);
-    background: rgba(13,36,114,0.07); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
-}
-html[data-theme="dark"] .session-count { color: #9DB2FF; background: rgba(157,178,255,0.12); }
-.session-progress {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 11px; font-weight: 700; color: var(--green);
-    background: var(--green-lt); padding: 2px 9px; border-radius: 99px; white-space: nowrap;
-}
+.session-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text-secondary); }
+.session-progress { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-success); }
 .session-chevron { font-size: 20px; color: var(--muted); transition: transform 0.2s; }
 .session-accordion.open > .session-head .session-chevron { transform: rotate(180deg); }
 
@@ -396,20 +380,12 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 .st-drop { margin-left: auto; }
 
 
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 3px 9px;
-    border-radius: 9999px;
-    font-size: 11px;
-    font-weight: 700;
-}
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
 
-.badge-used { background: var(--green-lt); color: var(--green); }
-.badge-given { background: var(--blue-lt); color: var(--blue); }
-.badge-pending { background: var(--amber-lt); color: var(--amber); }
-.badge-none { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.badge-used { color: var(--ds-success); }
+.badge-given { color: var(--ds-info); }
+.badge-pending { color: var(--ds-warning); }
+.badge-none { color: var(--ds-text-secondary); }
 
 /* ─── Action buttons ─── */
 .btn-generate {
@@ -698,9 +674,9 @@ html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,
 <div class="course-name">{{ course_data.course.name }}</div>
 <span class="course-code">{{ course_data.course.code }}</span>
                 {% if course_data.course.code == 'KISW 106A' %}
-<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(219,234,254,0.85);color:#1D4ED8;margin-left:5px;border:1px solid rgba(29,78,216,0.25);">Monday Group</span>
+<span class="ds-badge ds-badge-info" style="margin-left:5px;">Monday Group</span>
                 {% elif course_data.course.code == 'KISW 106B' %}
-<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(237,233,254,0.85);color:#6D28D9;margin-left:5px;border:1px solid rgba(109,40,217,0.25);">Thursday Group</span>
+<span class="ds-badge ds-badge-info" style="margin-left:5px;">Thursday Group</span>
                 {% endif %}
 </div>
 <div class="course-sessions-count">

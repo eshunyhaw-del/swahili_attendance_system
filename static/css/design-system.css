@@ -214,29 +214,14 @@
 /* ----------------------------------------------------------------------------
    5. BADGES  &  ATTENDANCE STATES  (icon + text + colour — never colour alone)
 ---------------------------------------------------------------------------- */
-.ds-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: var(--ds-text-xs); font-weight: 600; line-height: 1;
-    padding: 4px 9px; border-radius: var(--ds-radius-pill);
-    background: var(--ds-neutral-bg); color: var(--ds-text-secondary); border: 1px solid var(--ds-neutral-border);
-}
-.ds-badge .iconify { font-size: 13px; }
-.ds-badge-neutral { background: var(--ds-neutral-bg); color: var(--ds-text-secondary); border-color: var(--ds-neutral-border); }
-.ds-badge-success { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
-.ds-badge-warning { background: var(--ds-warning-bg); color: var(--ds-warning); border-color: var(--ds-warning-border); }
-.ds-badge-danger  { background: var(--ds-danger-bg);  color: var(--ds-danger);  border-color: var(--ds-danger-border); }
-.ds-badge-info    { background: var(--ds-info-bg);    color: var(--ds-info);    border-color: var(--ds-info-border); }
-
-/* Attendance status — a fixed, accessible vocabulary reused everywhere.
-   Each carries a dot, an icon and a text label so meaning survives without colour. */
-.ds-att { display: inline-flex; align-items: center; gap: 6px; font-size: var(--ds-text-sm); font-weight: 600; padding: 4px 10px; border-radius: var(--ds-radius-pill); border: 1px solid transparent; }
-.ds-att .iconify { font-size: 14px; }
-.ds-att-present      { background: var(--ds-success-bg); color: var(--ds-success); border-color: var(--ds-success-border); }
-.ds-att-absent       { background: var(--ds-danger-bg);  color: var(--ds-danger);  border-color: var(--ds-danger-border); }
-.ds-att-late         { background: var(--ds-warning-bg); color: var(--ds-warning); border-color: var(--ds-warning-border); }
-.ds-att-excused      { background: var(--ds-info-bg);    color: var(--ds-info);    border-color: var(--ds-info-border); }
-.ds-att-pending      { background: var(--ds-neutral-bg); color: var(--ds-text-secondary); border-color: var(--ds-neutral-border); }
-.ds-att-not-recorded { background: transparent; color: var(--ds-text-muted); border-color: var(--ds-border-strong); border-style: dashed; }
+.ds-badge, .ds-att { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
+.ds-badge .iconify, .ds-att .iconify { font-size: 12px; }
+.ds-badge .icon, .ds-att .icon { width: 12px; height: 12px; }
+.ds-badge-neutral, .ds-att-pending, .ds-att-not-recorded { color: var(--ds-text-secondary); }
+.ds-badge-success, .ds-att-present { color: var(--ds-success); }
+.ds-badge-warning, .ds-att-late { color: var(--ds-warning); }
+.ds-badge-danger, .ds-att-absent { color: var(--ds-danger); }
+.ds-badge-info, .ds-att-excused { color: var(--ds-info); }
 
 /* ----------------------------------------------------------------------------
    6. FORMS
