@@ -429,7 +429,7 @@
         /* Dark mode: navy text in CSS-class elements across templates */
         html[data-theme="dark"] .sup-avatar,
         html[data-theme="dark"] .pta-avatar { color: var(--gold); background: rgba(242,195,26,0.1); border-color: rgba(242,195,26,0.2); }
-        html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; background: rgba(100,160,230,0.12); }
+        html[data-theme="dark"] .ad-kpi:nth-child(1) .ad-kpi-icon { color: #7BAEE8; }
         html[data-theme="dark"] .ad-level-chip,
         html[data-theme="dark"] .ad-num { color: var(--text-primary); }
         html[data-theme="dark"] .ld-stat-chip.enrolled .ld-stat-val { color: #7BAEE8; }
@@ -621,10 +621,10 @@
             font-size: 17px;
         }
 
-        .stat-card.total .stat-icon { background: rgba(13,36,114,0.08); color: var(--navy); }
-        .stat-card.present .stat-icon { background: rgba(30,158,94,0.1); color: var(--green); }
-        .stat-card.absent .stat-icon { background: rgba(192,57,43,0.1); color: var(--red); }
-        .stat-card.late .stat-icon { background: rgba(242,195,26,0.15); color: var(--gold-dark); }
+        .stat-card.total .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--navy); }
+        .stat-card.present .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--green); }
+        .stat-card.absent .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--red); }
+        .stat-card.late .stat-icon { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--gold-dark); }
 
         .stat-title {
             font-size: 10px;
