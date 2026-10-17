@@ -839,3 +839,23 @@ class StatusBadgeTagTests(TestCase):
         self.assertTrue(html.startswith('<span'))
         self.assertNotIn('<button', html)
         self.assertNotIn('<a ', html)
+
+
+class TAShellTests(TestCase):
+    """The TA dashboard uses the mobile shell; students keep their own nav."""
+
+    def setUp(self):
+        self.ta_user = User.objects.create_user("ta_shell", password="x")
+        ta = TAProfile.objects.create(user=self.ta_user, is_approved=True)
+        ta.assigned_levels.add(Level.objects.get_or_create(name="100")[0])
+
+    def test_ta_dashboard_has_ta_nav_and_hooks(self):
+        self.client.force_login(self.ta_user)
+        resp = self.client.get(reverse("attendance:ta_dashboard"))
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        self.assertIn('class="shell-student shell-ta"', html)
+        self.assertIn(reverse("attendance:ta_history"), html)          # bottom nav
+        self.assertIn(reverse("attendance:ta_announcements"), html)    # More sheet
+        self.assertNotIn(reverse("attendance:course_registration"), html)  # not the student sheet
+        self.assertNotIn("\u2014", html)                               # no em dashes

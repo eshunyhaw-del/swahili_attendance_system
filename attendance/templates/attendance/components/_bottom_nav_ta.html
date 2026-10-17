@@ -1,0 +1,7 @@
+{% load ui %}{% with page=request.resolver_match.url_name %}
+<nav class="bottom-nav" aria-label="Primary">
+<a href="{% url 'attendance:ta_dashboard' %}" class="bn-item{% if page == 'ta_dashboard' or page == 'dashboard' %} is-active{% endif %}"{% if page == 'ta_dashboard' or page == 'dashboard' %} aria-current="page"{% endif %}>{% icon "house" 22 %}<span>Home</span></a>
+<a href="{% url 'attendance:ta_history' %}" class="bn-item{% if page == 'ta_history' %} is-active{% endif %}"{% if page == 'ta_history' %} aria-current="page"{% endif %}>{% icon "history" 22 %}<span>History</span></a>
+<button type="button" class="bn-item{% if page != 'ta_dashboard' and page != 'dashboard' and page != 'ta_history' %} is-active{% endif %}" data-sheet-open="moreSheet" aria-haspopup="dialog">{% icon "ellipsis" 22 %}<span>More</span>{% if unread_notif_count %}<i class="bn-dot" aria-hidden="true"></i><span class="ds-sr-only">{{ unread_notif_count }} unread notifications</span>{% endif %}</button>
+</nav>
+{% endwith %}

@@ -1,831 +1,132 @@
 ﻿{% extends "attendance/base.html" %}
+{% load static ui %}
 {% block title %}TA Dashboard{% endblock %}
-
 {% block greeting %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/ta-home.css' %}">{% endblock %}
 
 {% block content %}
-<style>
-:root {
-    --primary: #0D2472;
-    --primary-dk: #091A55;
-    --primary-lt: rgba(13,36,114,0.07);
-    --gold: #E6B325;
-    --surface: #FFFFFF;
-    --bg: #F4F6F9;
-    --text: #1F2937;
-    --muted: #6B7484;
-    --border: #E1E5EC;
-    --green: #167A4B;
-    --green-lt: #E7F4EC;
-    --amber: #B45309;
-    --amber-lt: #FBF1E3;
-    --blue: #175CD3;
-    --blue-lt: #E8F0FC;
-    --red: #B42318;
-    --r-sm: 8px; --r-md: 10px; --r-lg: 12px; --r-xl: 14px;
-    --sh-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
-    --sh-md: 0 2px 4px -2px rgba(16,24,40,0.06), 0 4px 10px -2px rgba(16,24,40,0.08);
-    --sh-lg: 0 4px 6px -2px rgba(16,24,40,0.05), 0 12px 20px -4px rgba(16,24,40,0.10);
-}
-html[data-theme="dark"] {
-    --primary: #1B3A9C;
-    --primary-lt: rgba(242,195,26,0.10);
-    --surface: #171F2A;
-    --bg: #0E141C;
-    --text: #E7ECF2;
-    --muted: #8B95A5;
-    --border: #29323F;
-    --green: #4ED08A; --green-lt: rgba(22,122,75,0.20);
-    --amber: #E6A23C; --amber-lt: rgba(180,83,9,0.20);
-    --blue: #6AA0F0;  --blue-lt: rgba(23,92,211,0.20);
-    --red: #F0776B;
-    --sh-sm: 0 1px 3px rgba(0,0,0,0.45);
-    --sh-md: 0 4px 10px -2px rgba(0,0,0,0.5);
-    --sh-lg: 0 12px 20px -4px rgba(0,0,0,0.55);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg) !important; font-family: 'Montserrat', system-ui, sans-serif; color: var(--text); }
-
-.ta-wrap { max-width: 1080px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
-
-/* ─── Header ─── */
-.ta-header {
-    background: var(--primary);
-    color: #fff;
-    border-radius: var(--r-xl);
-    padding: 1.5rem 1.75rem;
-    margin-bottom: 1.125rem;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--sh-md);
-}
-
-
-.ta-header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.2rem; }
-.ta-greeting-label { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 0.2rem; }
-.ta-header-sub { font-size: 12.5px; opacity: 0.68; font-weight: 500; }
-.ta-proverb { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 0.35rem; line-height: 1.5; }
-/* Phrase-of-the-hour widget sits on the navy header - force white/gold variants */
-.ta-header .phrase-category { color: var(--gold); opacity: 0.85; }
-.ta-header .phrase-swahili { color: #fff; }
-.ta-header .phrase-english { color: rgba(255,255,255,0.75); }
-.ta-header .phrase-response { color: var(--gold); opacity: 0.9; }
-
-.level-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.875rem; }
-.level-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text); }
-
-/* ─── Stats ─── */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.875rem;
-    margin-bottom: 1.375rem;
-}
-
-.stat-card {
-    background: var(--surface);
-    border-radius: var(--r-lg);
-    padding: 1.1rem 1.25rem;
-    box-shadow: var(--sh-sm);
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
-
-.stat-icon {
-    width: 44px; height: 44px;
-    border-radius: var(--r-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 21px; flex-shrink: 0;
-}
-
-.stat-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.035em; line-height: 1; }
-.stat-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
-
-/* ─── Course card ─── */
-.course-card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    box-shadow: var(--sh-sm);
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-}
-
-.course-header {
-    padding: 1rem 1.25rem;
-    background: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    color: #fff;
-}
-
-.course-icon {
-    width: 42px; height: 42px;
-    background: rgba(255,255,255,0.12);
-    border-radius: var(--r-sm);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-}
-
-.course-name { font-size: 1rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
-
-.course-code {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 10.5px; font-weight: 700;
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #fff;
-    padding: 2px 9px;
-    border-radius: 9999px;
-}
-
-.course-sessions-count {
-    margin-left: auto;
-    font-size: 11.5px;
-    font-weight: 600;
-    opacity: 0.75;
-    white-space: nowrap;
-    align-self: flex-start;
-    margin-top: 2px;
-}
-
-/* ─── Week tabs ─── */
-/* ─── Session accordion (collapsible per session) ─── */
-.session-accordion { border-top: 1px solid var(--border); }
-.session-accordion:first-of-type { border-top: none; }
-
-.session-head {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.875rem 1.25rem;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-    transition: background 0.13s;
-}
-.session-head:hover { background: rgba(13,36,114,0.03); }
-.session-accordion.open > .session-head { background: #F4F6FC; }
-html[data-theme="dark"] .session-accordion.open > .session-head { background: rgba(255,255,255,0.03); }
-
-.session-head-left { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; flex-wrap: wrap; }
-.session-week { font-size: 13.5px; font-weight: 800; color: var(--text); }
-.session-head-date { font-size: 12px; font-weight: 500; color: var(--muted); }
-.session-head-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
-.session-count { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-text-secondary); }
-.session-progress { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; color: var(--ds-success); }
-.session-chevron { font-size: 20px; color: var(--muted); transition: transform 0.2s; }
-.session-accordion.open > .session-head .session-chevron { transform: rotate(180deg); }
-
-/* Body is hidden until the session is opened. */
-.session-body { display: none; }
-.session-accordion.open > .session-body { display: block; }
-
-/* ─── Session info bar ─── */
-.session-info-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-}
-
-.session-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
-
-.chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    padding: 4px 10px;
-    background: var(--bg);
-    border-radius: 9999px;
-    border: 1px solid var(--border);
-    white-space: nowrap;
-}
-
-.chip .iconify { color: var(--primary); opacity: 0.65; font-size: 13px; }
-
-.chip-topic {
-    color: var(--primary);
-    background: var(--primary-lt);
-    border-color: rgba(13,36,114,0.13);
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.chip-students { color: var(--blue); background: var(--blue-lt); border-color: rgba(37,99,235,0.15); }
-.chip-students .iconify { color: var(--blue); opacity: 1; }
-
-.btn-gen-all {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1.1rem;
-    background: var(--green);
-    color: #fff;
-    border: none;
-    border-radius: var(--r-sm);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.13s;
-    white-space: nowrap;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(26,158,96,0.3);
-}
-
-.btn-gen-all:hover { background: #148050; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(26,158,96,0.35); }
-.btn-gen-all:active { transform: scale(0.97); }
-
-.session-actions { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
-
-.btn-export-csv {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1.1rem;
-    background: transparent;
-    color: var(--primary);
-    border: 1.5px solid var(--primary);
-    border-radius: var(--r-sm);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.13s;
-    white-space: nowrap;
-    text-decoration: none;
-}
-.btn-export-csv:hover { background: var(--primary); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(13,36,114,0.18); }
-.btn-export-csv:active { transform: scale(0.97); }
-
-/* ─── Table controls ─── */
-.table-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.7rem 1.25rem;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-}
-
-.search-box { position: relative; flex: 1; min-width: 160px; max-width: 300px; }
-.search-box .iconify {
-    position: absolute; left: 0.6rem; top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted); font-size: 1rem; pointer-events: none;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.48rem 0.875rem 0.48rem 2rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--r-sm);
-    font-size: 12.5px;
-    font-family: inherit;
-    color: var(--text);
-    background: var(--surface);
-    outline: none;
-    transition: border-color 0.13s, box-shadow 0.13s;
-}
-
-.search-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(13,36,114,0.08);
-}
-.search-input::placeholder { color: var(--muted); }
-
-.filter-tabs {
-    display: flex;
-    gap: 2px;
-    background: var(--border);
-    padding: 2px;
-    border-radius: var(--r-sm);
-}
-
-.filter-tab {
-    padding: 0.3rem 0.7rem;
-    border: none;
-    background: transparent;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.11s;
-    white-space: nowrap;
-}
-
-.filter-tab:hover:not(.active) { background: rgba(255,255,255,0.55); color: var(--text); }
-.filter-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--sh-sm); }
-
-/* ─── Table ─── */
-.table-scroll { -webkit-overflow-scrolling: touch; }
-
-/* ─── Student cards (mobile-first replacement for the dense table) ─── */
-.student-cards { display: flex; flex-direction: column; gap: 0.625rem; padding: 0.25rem 0; }
-.st-card {
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: var(--bg-surface);
-    padding: 0.875rem 1rem;
-    transition: box-shadow 0.15s;
-}
-.st-card:hover { box-shadow: 0 2px 10px rgba(13,36,114,0.06); }
-.st-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
-.st-info { min-width: 0; }
-.st-name { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.st-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 500; margin-top: 2px; }
-.st-action-row { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.75rem; flex-wrap: wrap; }
-/* The code the TA reads out - big, monospaced, easy to read on a phone. */
-.st-code {
-    font-family: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    color: #0D2472;
-    background: rgba(13,36,114,0.07);
-    padding: 0.3rem 0.85rem;
-    border-radius: 10px;
-    line-height: 1.2;
-    user-select: all;
-}
-html[data-theme="dark"] .st-code { color: #9DB2FF; background: rgba(157,178,255,0.12); }
-.st-action-row .btn-mark-given { min-height: 40px; }
-.st-generate { min-height: 44px; font-size: 14px; }
-.st-drop { margin-left: auto; }
-
-
-.badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; background: var(--ds-surface); border: 1px solid var(--ds-border); cursor: default; }
-
-.badge-used { color: var(--ds-success); }
-.badge-given { color: var(--ds-info); }
-.badge-pending { color: var(--ds-warning); }
-.badge-none { color: var(--ds-text-secondary); }
-
-/* ─── Action buttons ─── */
-.btn-generate {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.38rem 0.875rem;
-    background: var(--green);
-    color: #fff;
-    border: none;
-    border-radius: var(--r-sm);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.12s;
-    box-shadow: 0 1px 3px rgba(26,158,96,0.25);
-}
-
-.btn-generate:hover { background: #148050; }
-
-.btn-mark-given {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.38rem 0.875rem;
-    background: transparent;
-    color: var(--primary);
-    border: 1.5px solid #C8D0E0;
-    border-radius: var(--r-sm);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.12s;
-}
-
-.btn-mark-given:hover {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-}
-
-.btn-deregister {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.38rem 0.5rem;
-    margin-left: 0.35rem;
-    background: transparent;
-    color: #B91C1C;
-    border: 1.5px solid #F1C4C4;
-    border-radius: var(--r-sm);
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.12s;
-}
-
-.btn-deregister:hover {
-    background: #B91C1C;
-    color: #fff;
-    border-color: #B91C1C;
-}
-
-/* ─── Loading ─── */
-.loading-state {
-    padding: 2.5rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.spinner {
-    width: 26px; height: 26px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.75s linear infinite;
-    margin: 0 auto 0.75rem;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Pagination ─── */
-.pagination-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.7rem 1.25rem;
-    border-top: 1px solid var(--border);
-    background: var(--bg);
-    font-size: 12px;
-}
-
-.page-info { color: var(--muted); font-weight: 500; }
-.page-btns { display: flex; gap: 0.4rem; }
-
-.page-btn {
-    padding: 0.35rem 0.875rem;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    border-radius: var(--r-sm);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text);
-    transition: all 0.12s;
-}
-
-.page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
-.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ─── Empty states ─── */
-.empty-table-row td {
-    padding: 2.5rem 1rem;
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-}
-
-.empty-dash {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    border: 2px dashed var(--border);
-}
-
-.empty-dash h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
-.empty-dash p { font-size: 13px; color: var(--muted); }
-
-/* ─── Modals ─── */
-.modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(5,15,45,0.55);
-    z-index: 2000;
-    align-items: center; justify-content: center;
-    padding: 1.5rem;
-}
-
-.modal-card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    max-width: 360px;
-    width: 100%;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: var(--sh-lg);
-    animation: modalIn 0.2s cubic-bezier(0.34,1.46,0.64,1) forwards;
-}
-
-.modal-icon {
-    width: 52px; height: 52px;
-    border-radius: var(--r-md);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1rem; font-size: 26px;
-}
-
-.modal-icon.confirm { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--primary); }
-.modal-icon.error { background: var(--ds-surface); border: 1px solid var(--ds-border); color: var(--red); }
-
-.modal-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
-.modal-card p { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 1.5rem; }
-.modal-actions { display: flex; gap: 0.6rem; justify-content: center; }
-
-.modal-btn {
-    padding: 0.55rem 1.25rem;
-    border-radius: var(--r-sm);
-    font-weight: 700; font-size: 13px;
-    border: none; cursor: pointer; font-family: inherit;
-    transition: all 0.12s;
-}
-
-.modal-btn-primary { background: var(--primary); color: #fff; }
-.modal-btn-primary:hover { background: var(--primary-dk); }
-.modal-btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-.modal-btn-secondary:hover { background: var(--border); }
-
-/* ─── Toast ─── */
-.toast-msg {
-    position: fixed; top: 72px; right: 1.25rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--r-md);
-    z-index: 3000;
-    animation: toastAnim 6s ease forwards;
-    background: rgba(26,158,96,0.1);
-    color: var(--green);
-    border: 1px solid rgba(26,158,96,0.22);
-    box-shadow: var(--sh-md);
-    font-weight: 700; font-size: 14px;
-    display: flex; align-items: center; gap: 0.4rem;
-    max-width: 260px;
-}
-
-@keyframes modalIn {
-    from { transform: scale(0.94) translateY(8px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-@keyframes toastAnim {
-    0% { opacity: 0; transform: translateY(-10px); }
-    8% { opacity: 1; transform: translateY(0); }
-    88% { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-10px); }
-}
-
-@media (max-width: 600px) {
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .stats-row .stat-card:last-child { grid-column: span 2; }
-    .session-info-bar { flex-direction: column; align-items: flex-start; }
-    .session-actions { width: 100%; }
-    .btn-gen-all, .btn-export-csv { flex: 1; justify-content: center; }
-    .ta-header h1 { font-size: 1.15rem; }
-}
-</style>
-
-<div class="ta-wrap">
-
-<!-- ── Header ── -->
-<div class="ta-header">
-<div>
-<div class="ta-greeting-label">
-<span class="swahili-greeting-kw" data-swahili-kw></span>
+{% now "Y-m-d" as today_iso %}
+<div class="ta" data-today="{{ today_iso }}">
+
+<header class="ta-head">
+<h1><span class="swahili-greeting-kw" data-swahili-kw></span>, {{ user.first_name|default:user.username }}</h1>
+<p class="ta-role">Teaching Assistant</p>
+<div class="ta-phrase" data-phrase-widget></div>
+    {% if assigned_levels %}
+<div class="ta-levels">
+        {% for level in assigned_levels %}<span class="ds-status ds-status-neutral">{% icon "graduation-cap" 12 %}Level {{ level.name }}</span>{% endfor %}
 </div>
-<h1>{{ user.first_name|default:user.username }}!</h1>
-<div class="ta-header-sub">Teaching Assistant Dashboard</div>
-<div class="ta-proverb" data-phrase-widget></div>
-<div class="level-pills">
-                {% for level in assigned_levels %}
-<span class="level-pill">
-<span class="iconify" data-icon="mdi:school-outline"></span>
-                    Level {{ level.name }}
-</span>
-                {% endfor %}
-</div>
-</div>
-</div>
+    {% endif %}
+</header>
 
     {% if ta_profile.is_approved %}
 
-<!-- ── Stats ── -->
-<div class="stats-row">
-<div class="stat-card">
-<div class="stat-icon" style="background:rgba(13,36,114,0.08);color:#0D2472;">
-<span class="iconify" data-icon="mdi:barcode-scan"></span>
-</div>
-<div>
-<div class="stat-value" id="stat-codes-generated">{{ total_codes_generated }}</div>
-<div class="stat-label">Codes Generated</div>
-</div>
-</div>
-<div class="stat-card">
-<div class="stat-icon" style="background:var(--green-lt);color:var(--green);">
-<span class="iconify" data-icon="mdi:check-circle-outline"></span>
-</div>
-<div>
-<div class="stat-value" id="stat-codes-used">{{ total_codes_used }}</div>
-<div class="stat-label">Codes Used</div>
-</div>
-</div>
-<div class="stat-card">
-<div class="stat-icon" style="background:var(--blue-lt);color:var(--blue);">
-<span class="iconify" data-icon="mdi:account-group-outline"></span>
-</div>
-<div>
-<div class="stat-value">{{ total_students }}</div>
-<div class="stat-label">Total Students</div>
-</div>
-</div>
+<div class="ta-kpis">
+<div class="ta-kpi"><div class="ta-kpi-val" id="stat-codes-generated">{{ total_codes_generated }}</div><div class="ta-kpi-lbl">Generated</div></div>
+<div class="ta-kpi"><div class="ta-kpi-val" id="stat-codes-used">{{ total_codes_used }}</div><div class="ta-kpi-lbl">Used</div></div>
+<div class="ta-kpi"><div class="ta-kpi-val">{{ total_students }}</div><div class="ta-kpi-lbl">Students</div></div>
 </div>
 
-<!-- ── Course cards ── -->
-    {% for course_id, course_data in sessions_by_course.items %}
-<div class="course-card">
-
-<!-- Course header -->
-<div class="course-header">
-<div class="course-icon">
-<span class="iconify" data-icon="mdi:book-open-variant"></span>
-</div>
+        {% for course_id, course_data in sessions_by_course.items %}
+<section class="ta-course" data-course>
+<div class="ta-course-head">
 <div>
-<div class="course-name">{{ course_data.course.name }}</div>
-<span class="course-code">{{ course_data.course.code }}</span>
-                {% if course_data.course.code == 'KISW 106A' %}
-<span class="ds-badge ds-badge-info" style="margin-left:5px;">Monday Group</span>
-                {% elif course_data.course.code == 'KISW 106B' %}
-<span class="ds-badge ds-badge-info" style="margin-left:5px;">Thursday Group</span>
-                {% endif %}
+<h2 class="ta-course-name">{{ course_data.course.name }}</h2>
+<div class="ta-course-meta">
+<span class="ds-status ds-status-neutral">{{ course_data.course.code }}</span>
+                    {% if course_data.course.code == 'KISW 106A' %}<span class="ds-status ds-status-info">Monday group</span>
+                    {% elif course_data.course.code == 'KISW 106B' %}<span class="ds-status ds-status-info">Thursday group</span>{% endif %}
 </div>
-<div class="course-sessions-count">
-                {{ course_data.sessions|length }} session{{ course_data.sessions|length|pluralize }}
 </div>
+<span class="ta-course-count">{{ course_data.sessions|length }} session{{ course_data.sessions|length|pluralize }}</span>
 </div>
 
-<!-- Sessions (collapsible accordion) - collapsed by default; tap a week to open -->
-        {% for session in course_data.sessions %}
-<div class="session-accordion"
-             id="session-{{ course_id }}-{{ session.id }}"
-             data-session-id="{{ session.id }}">
-
-<!-- Tap this header to hide/show the students for this session -->
-<button type="button" class="session-head" onclick="toggleSession(this, {{ session.id }})">
-<div class="session-head-left">
-<span class="session-week">Week {{ forloop.counter }}</span>
-<span class="session-head-date">{{ session.date|date:"D, M j" }}</span>
-</div>
-<div class="session-head-right">
-                        {% if session.codes_used %}
-<span class="session-progress" title="Students who have submitted attendance">
-<span class="iconify" data-icon="mdi:check-circle" style="font-size:12px;"></span>
-                            {{ session.codes_used }} in
+<div class="ds-list" data-session-list>
+            {% for session in course_data.sessions %}
+<div class="sess" id="session-{{ course_id }}-{{ session.id }}" data-session-id="{{ session.id }}" data-date="{{ session.date|date:'Y-m-d' }}">
+<button type="button" class="sess-head" aria-expanded="false" onclick="toggleSession(this, {{ session.id }})">
+<span class="sess-main">
+<span class="sess-week">Week {{ forloop.counter }}</span>
+<span class="sess-date">{{ session.date|date:"D j M" }}</span>
 </span>
-                        {% endif %}
-<span class="session-count">{{ session.student_count }} student{{ session.student_count|pluralize }}</span>
-<span class="iconify session-chevron" data-icon="mdi:chevron-down"></span>
-</div>
+<span class="sess-badges">
+                        {% if session.codes_used %}<span class="ds-status ds-status-success" title="Students who have submitted attendance">{% icon "check" 12 %}{{ session.codes_used }} in</span>{% endif %}
+<span class="ds-status ds-status-neutral">{{ session.student_count }} student{{ session.student_count|pluralize }}</span>
+</span>
+{% icon "chevron-down" 20 "sess-chev" %}
 </button>
 
-<div class="session-body">
-
-<!-- Info bar + Generate All -->
-<div class="session-info-bar">
-<div class="session-chips">
-<span class="chip">
-<span class="iconify" data-icon="mdi:calendar-month-outline"></span>
-                        {{ session.date|date:"l, N j, Y" }}
-</span>
-<span class="chip">
-<span class="iconify" data-icon="mdi:clock-outline"></span>
-                        {{ session.start_time|time:"g:i A" }} – {{ session.end_time|time:"g:i A" }}
-</span>
-                    {% if session.topic %}
-<span class="chip chip-topic" title="{{ session.topic }}">
-                        {{ session.topic }}
-</span>
-                    {% endif %}
-<span class="chip chip-students">
-<span class="iconify" data-icon="mdi:account-multiple-outline"></span>
-                        {{ session.student_count }} student{{ session.student_count|pluralize }}
-</span>
+<div class="sess-body">
+<div class="sess-meta">
+<span>{% icon "calendar-days" 16 %}{{ session.date|date:"l, N j, Y" }}</span>
+<span>{% icon "clock" 16 %}{{ session.start_time|time:"g:i A" }} to {{ session.end_time|time:"g:i A" }}</span>
+                        {% if session.topic %}<span>{% icon "map-pin" 16 %}{{ session.topic }}</span>{% endif %}
 </div>
-<div class="session-actions">
-<a href="{% url 'attendance:ta_export_session_csv' session.id %}" class="btn-export-csv">
-                        Export CSV
-</a>
-<button class="btn-gen-all" onclick="generateAllCodes({{ session.id }})">
-                        Generate All
-</button>
+<div class="sess-actions">
+<button type="button" class="ds-btn ds-btn-primary ds-btn-block" onclick="generateAllCodes({{ session.id }})">{% icon "zap" 18 %}Generate all codes</button>
+<a href="{% url 'attendance:ta_export_session_csv' session.id %}" class="ds-btn ds-btn-secondary ds-btn-block">{% icon "download" 18 %}Export CSV</a>
+</div>
+
+<div class="sess-tools">
+<div class="ta-search">
+{% icon "search" 18 %}
+<input type="search" class="ds-input search-input" id="search-{{ session.id }}" placeholder="Search name or student ID" aria-label="Search students" onkeyup="debouncedLoadStudents({{ session.id }})">
+</div>
+<div class="filter-tabs" id="filters-{{ session.id }}" role="group" aria-label="Filter students">
+<button type="button" class="filter-tab active" onclick="setFilter({{ session.id }}, 'all', this)">All</button>
+<button type="button" class="filter-tab" onclick="setFilter({{ session.id }}, 'pending', this)">Pending</button>
+<button type="button" class="filter-tab" onclick="setFilter({{ session.id }}, 'given', this)">Given</button>
+<button type="button" class="filter-tab" onclick="setFilter({{ session.id }}, 'used', this)">Used</button>
 </div>
 </div>
 
-<!-- Search + filter -->
-<div class="table-controls">
-<div class="search-box">
-<span class="iconify" data-icon="mdi:magnify"></span>
-<input type="text" class="search-input"
-                           id="search-{{ session.id }}"
-                           placeholder="Search name or student ID…"
-                           onkeyup="debouncedLoadStudents({{ session.id }})">
-</div>
-<div class="filter-tabs" id="filters-{{ session.id }}">
-<button class="filter-tab active" onclick="setFilter({{ session.id }}, 'all', this)">All</button>
-<button class="filter-tab" onclick="setFilter({{ session.id }}, 'pending', this)">Pending</button>
-<button class="filter-tab" onclick="setFilter({{ session.id }}, 'given', this)">Given</button>
-<button class="filter-tab" onclick="setFilter({{ session.id }}, 'used', this)">Used</button>
-</div>
-</div>
-
-<!-- Table -->
-<div class="table-scroll">
-<div class="loading-state" id="loading-{{ session.id }}">
-<div class="spinner"></div>
-                    Loading students…
-</div>
+<div class="loading-state" id="loading-{{ session.id }}">{% icon "loader-circle" 18 %}Loading students</div>
 <div id="table-container-{{ session.id }}" style="display:none;">
 <div class="student-cards" id="students-cards-{{ session.id }}"></div>
 </div>
-</div>
 
-<!-- Pagination -->
 <div class="pagination-bar" id="pagination-{{ session.id }}" style="display:none;">
 <span class="page-info" id="page-info-{{ session.id }}"></span>
 <div class="page-btns">
-<button class="page-btn" onclick="changePage({{ session.id }}, -1)">&#8592; Prev</button>
-<button class="page-btn" onclick="changePage({{ session.id }}, 1)">Next &#8594;</button>
+<button type="button" class="ds-btn ds-btn-secondary ds-btn-sm" onclick="changePage({{ session.id }}, -1)">Prev</button>
+<button type="button" class="ds-btn ds-btn-secondary ds-btn-sm" onclick="changePage({{ session.id }}, 1)">Next</button>
 </div>
 </div>
-
-</div><!-- /.session-body -->
-</div><!-- /.session-accordion -->
+</div>
+</div>
+            {% endfor %}
+</div>
+<button type="button" class="ds-btn ds-btn-ghost ds-btn-block ta-showall" data-showall hidden></button>
+</section>
+        {% empty %}
+<ul class="ds-list"><li class="ta-pending">{% icon "calendar-days" 20 %}<div><p style="margin:0;font-size:15px;font-weight:600">No sessions scheduled</p><p style="margin:2px 0 0;font-size:13px;color:var(--ds-text-muted)">You don't have any sessions for your assigned levels yet.</p></div></li></ul>
         {% endfor %}
 
-</div>
-    {% empty %}
-<div class="empty-dash">
-<span class="iconify" style="font-size:2.75rem;color:var(--muted);display:block;margin-bottom:0.875rem;" data-icon="mdi:calendar-blank-outline"></span>
-<h3>No sessions scheduled</h3>
-<p>You don't have any sessions for your assigned levels yet.</p>
-</div>
-    {% endfor %}
-
     {% else %}
-<div class="empty-dash">
-<span class="iconify" style="font-size:2.75rem;color:#B8920C;display:block;margin-bottom:0.875rem;" data-icon="mdi:account-clock-outline"></span>
-<h3>Account Pending Approval</h3>
-<p>Your TA account is awaiting admin approval. You'll receive an email once approved.</p>
-</div>
+<ul class="ds-list"><li class="ta-pending">{% icon "clock" 20 %}<div><p style="margin:0;font-size:15px;font-weight:600">Account pending approval</p><p style="margin:2px 0 0;font-size:13px;color:var(--ds-text-muted)">Your TA account is awaiting admin approval. You'll receive an email once approved.</p></div></li></ul>
     {% endif %}
 
 </div>
 
-<!-- Confirm modal -->
-<div id="confirmModal" class="modal-overlay">
+<!-- Confirm dialog -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
 <div class="modal-card">
-<div class="modal-icon confirm">
-<span class="iconify" data-icon="mdi:help-circle-outline" data-width="26"></span>
-</div>
-<h3 id="confirmTitle">Confirm Action</h3>
+<h3 id="confirmTitle">Confirm action</h3>
 <p id="confirmMessage">Are you sure you want to proceed?</p>
 <div class="modal-actions">
-<button class="modal-btn modal-btn-secondary" id="confirmCancelBtn">Cancel</button>
-<button class="modal-btn modal-btn-primary" id="confirmOkBtn">Yes, Proceed</button>
+<button type="button" class="ds-btn ds-btn-primary" id="confirmOkBtn">Yes, proceed</button>
+<button type="button" class="ds-btn ds-btn-secondary" id="confirmCancelBtn">Cancel</button>
 </div>
 </div>
 </div>
 
-<!-- Error modal -->
-<div id="errorModal" class="modal-overlay">
+<!-- Error dialog -->
+<div id="errorModal" class="modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="errorTitle">
 <div class="modal-card">
-<div class="modal-icon error">
-<span class="iconify" data-icon="mdi:alert-circle-outline" data-width="26"></span>
-</div>
-<h3>Something went wrong</h3>
+<h3 id="errorTitle">Something went wrong</h3>
 <p id="errorMessage">An error occurred. Please try again.</p>
 <div class="modal-actions">
-<button class="modal-btn modal-btn-primary" id="errorOkBtn">Got it</button>
+<button type="button" class="ds-btn ds-btn-primary" id="errorOkBtn">Got it</button>
 </div>
 </div>
 </div>
@@ -836,14 +137,31 @@ function getCsrfToken() {
         || document.cookie.match(/csrftoken=([^;]+)/)?.[1];
 }
 
-// ── Modals ──
+// Small inline Lucide icons for the cards built in JS (no network, inherit colour).
+const ICONS = {
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    send: '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    minus: '<path d="M5 12h14"/>',
+    drop: '<path d="M2 21a8 8 0 0 1 13.292-6"/><circle cx="10" cy="8" r="5"/><path d="M22 19h-6"/>',
+    zap: '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'
+};
+function icon(name, size) {
+    size = size || 12;
+    return '<svg class="icon" xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size +
+        '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+        ICONS[name] + '</svg>';
+}
+
+// ── Dialogs ──
 let pendingConfirmAction = null;
 
 function showConfirmModal(message, title, onConfirm) {
     document.getElementById('confirmMessage').innerText = message;
-    document.getElementById('confirmTitle').innerText = title || 'Confirm Action';
+    document.getElementById('confirmTitle').innerText = title || 'Confirm action';
     pendingConfirmAction = onConfirm;
     document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('confirmOkBtn').focus();
 }
 
 function closeConfirmModal() {
@@ -854,18 +172,16 @@ function closeConfirmModal() {
 function showErrorModal(message) {
     document.getElementById('errorMessage').innerText = message;
     document.getElementById('errorModal').style.display = 'flex';
+    document.getElementById('errorOkBtn').focus();
 }
 
 function closeErrorModal() {
     document.getElementById('errorModal').style.display = 'none';
 }
 
-function showToast(message, duration = 6000) {
-    const t = document.createElement('div');
-    t.className = 'toast-msg';
-    t.innerHTML = '<span class="iconify" data-icon="mdi:check-circle" data-width="15"></span>' + message;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), duration);
+function showToast(message) {
+    if (window.swasaToast) { window.swasaToast(message); return; }
+    alert(message);
 }
 
 document.getElementById('confirmCancelBtn').addEventListener('click', closeConfirmModal);
@@ -876,6 +192,9 @@ document.getElementById('confirmOkBtn').addEventListener('click', () => {
 document.getElementById('errorOkBtn').addEventListener('click', closeErrorModal);
 document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirmModal(); });
 document.getElementById('errorModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeErrorModal(); });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeConfirmModal(); closeErrorModal(); }
+});
 
 // ── API actions ──
 async function generateCode(sessionId, studentUsername) {
@@ -901,7 +220,7 @@ async function generateCode(sessionId, studentUsername) {
 async function generateAllCodes(sessionId) {
     showConfirmModal(
         'Generate codes for ALL students in this session? This can only be done once.',
-        'Generate All Codes',
+        'Generate all codes',
         async () => {
             try {
                 const res = await fetch("{% url 'attendance:ta_generate_all_codes' %}", {
@@ -912,7 +231,7 @@ async function generateAllCodes(sessionId) {
                 const data = await res.json();
                 if (res.ok) {
                     const generated = data.generated || 0;
-                    showToast(generated > 0 ? `${generated} code${generated !== 1 ? 's' : ''} generated!` : 'All codes already existed.');
+                    showToast(generated > 0 ? `${generated} code${generated !== 1 ? 's' : ''} generated.` : 'All codes already existed.');
                     loadStudents(sessionId);
                     // Update stat counters live
                     const genEl = document.getElementById('stat-codes-generated');
@@ -928,7 +247,7 @@ async function generateAllCodes(sessionId) {
 async function deregisterStudent(profileId, courseId, fullName, sessionId) {
     showConfirmModal(
         `Deregister ${fullName} from this course? They will stop receiving codes. You can reactivate them later.`,
-        'Deregister Student',
+        'Deregister student',
         async () => {
             try {
                 const res = await fetch("{% url 'attendance:staff_deregister_course' %}", {
@@ -955,14 +274,14 @@ async function deregisterStudent(profileId, courseId, fullName, sessionId) {
 async function markDistributed(codeId, sessionId) {
     showConfirmModal(
         'Mark this code as given to the student?',
-        'Mark as Given',
+        'Mark as given',
         async () => {
             try {
                 const res = await fetch(`/ta/mark-distributed/${codeId}/`, {
                     method: 'POST',
                     headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' }
                 });
-                if (res.ok) { showToast('Code marked as given!'); loadStudents(sessionId); }
+                if (res.ok) { showToast('Code marked as given.'); loadStudents(sessionId); }
                 else { showErrorModal('Error marking as given.'); }
             } catch { showErrorModal('Network error. Please try again.'); }
         }
@@ -974,25 +293,30 @@ let sessionStates = {};
 let debounceTimers = {};
 const loadedSessions = new Set();  // sessions whose students have been fetched
 
-// Collapse / expand a session's student list. Students are lazy-loaded the
-// first time a session is opened, so opening the page (or a course) is fast even
-// with many sessions.
-function toggleSession(head, sessionId) {
-    const acc = head.closest('.session-accordion');
-    const opening = !acc.classList.contains('open');
-    acc.classList.toggle('open');
-    if (opening) {
-        if (!loadedSessions.has(String(sessionId))) {
-            loadedSessions.add(String(sessionId));
-            if (!sessionStates[sessionId]) {
-                sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
-            }
-            loadStudents(sessionId);
+function openSession(acc) {
+    const sessionId = acc.dataset.sessionId;
+    acc.classList.add('open');
+    acc.querySelector('.sess-head').setAttribute('aria-expanded', 'true');
+    if (!loadedSessions.has(String(sessionId))) {
+        loadedSessions.add(String(sessionId));
+        if (!sessionStates[sessionId]) {
+            sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
         }
-        // Bring the opened header into view (nice when tapping a session low
-        // on the page).
-        setTimeout(() => head.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+        loadStudents(sessionId);
     }
+}
+
+// Collapse / expand a session. Students are lazy-loaded the first time a session
+// is opened, so the page stays fast with many sessions.
+function toggleSession(head, sessionId) {
+    const acc = head.closest('.sess');
+    if (acc.classList.contains('open')) {
+        acc.classList.remove('open');
+        head.setAttribute('aria-expanded', 'false');
+        return;
+    }
+    openSession(acc);
+    setTimeout(() => head.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
 }
 
 function debouncedLoadStudents(sessionId) {
@@ -1000,11 +324,30 @@ function debouncedLoadStudents(sessionId) {
     debounceTimers[sessionId] = setTimeout(() => loadStudents(sessionId), 300);
 }
 
+function statusBadge(student) {
+    const badge = document.createElement('span');
+    badge.className = 'ds-status';
+    if (student.code && student.code.is_used) {
+        badge.className += ' ds-status-success';
+        badge.innerHTML = icon('check') + 'Used';
+    } else if (student.code && student.code.is_distributed) {
+        badge.className += ' ds-status-info';
+        badge.innerHTML = icon('send') + 'Given';
+    } else if (student.code) {
+        badge.className += ' ds-status-neutral';
+        badge.innerHTML = icon('clock') + 'Pending';
+    } else {
+        badge.className += ' ds-status-outline';
+        badge.innerHTML = icon('minus') + 'No code';
+    }
+    return badge;
+}
+
 async function loadStudents(sessionId) {
     const state = sessionStates[sessionId] || { page: 1, filter: 'all', search: '' };
     const search = document.getElementById(`search-${sessionId}`)?.value ?? '';
 
-    document.getElementById(`loading-${sessionId}`).style.display = 'block';
+    document.getElementById(`loading-${sessionId}`).style.display = 'flex';
     document.getElementById(`table-container-${sessionId}`).style.display = 'none';
     document.getElementById(`pagination-${sessionId}`).style.display = 'none';
 
@@ -1016,7 +359,7 @@ async function loadStudents(sessionId) {
 
         if (!data.students.length) {
             const empty = document.createElement('div');
-            empty.style.cssText = 'padding:2.5rem 1rem;text-align:center;color:#8896AB;font-size:13px;';
+            empty.className = 'ta-empty';
             empty.textContent = state.filter !== 'all' || search
                 ? 'No students match your search or filter.'
                 : 'No students are enrolled in this course.';
@@ -1027,10 +370,8 @@ async function loadStudents(sessionId) {
                 const card = document.createElement('div');
                 card.className = 'st-card';
 
-                // ── Top row: name + ID (left), status badge (right) ──
                 const top = document.createElement('div');
                 top.className = 'st-card-top';
-
                 const info = document.createElement('div');
                 info.className = 'st-info';
                 const nameEl = document.createElement('div');
@@ -1042,26 +383,9 @@ async function loadStudents(sessionId) {
                 info.appendChild(nameEl);
                 info.appendChild(idEl);
                 top.appendChild(info);
-
-                const badge = document.createElement('span');
-                badge.className = 'badge';
-                if (student.code && student.code.is_used) {
-                    badge.className += ' badge-used';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:check-bold"></span> Used';
-                } else if (student.code && student.code.is_distributed) {
-                    badge.className += ' badge-given';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:send-check"></span> Given';
-                } else if (student.code) {
-                    badge.className += ' badge-pending';
-                    badge.innerHTML = '<span class="iconify" data-icon="mdi:clock-outline"></span> Pending';
-                } else {
-                    badge.className += ' badge-none';
-                    badge.textContent = 'No code';
-                }
-                top.appendChild(badge);
+                top.appendChild(statusBadge(student));
                 card.appendChild(top);
 
-                // ── Action row: big code + Mark Given, OR Generate button ──
                 const row = document.createElement('div');
                 row.className = 'st-action-row';
 
@@ -1073,24 +397,27 @@ async function loadStudents(sessionId) {
 
                     if (!student.code.is_used && !student.code.is_distributed) {
                         const mark = document.createElement('button');
-                        mark.className = 'btn-mark-given';
-                        mark.textContent = 'Mark Given';
+                        mark.type = 'button';
+                        mark.className = 'ds-btn ds-btn-secondary';
+                        mark.innerHTML = icon('send', 16) + 'Mark given';
                         mark.onclick = () => markDistributed(student.code.id, sessionId);
                         row.appendChild(mark);
                     }
                 } else {
                     const gen = document.createElement('button');
-                    gen.className = 'btn-generate st-generate';
-                    gen.textContent = 'Generate Code';
+                    gen.type = 'button';
+                    gen.className = 'ds-btn ds-btn-secondary st-generate';
+                    gen.innerHTML = icon('zap', 16) + 'Generate code';
                     gen.onclick = () => generateCode(sessionId, student.username);
                     row.appendChild(gen);
                 }
 
-                // Drop override - subtle, pushed to the right.
                 const drop = document.createElement('button');
-                drop.className = 'btn-deregister st-drop';
+                drop.type = 'button';
+                drop.className = 'ds-btn ds-btn-ghost ds-btn-icon';
+                drop.setAttribute('aria-label', 'Deregister ' + student.full_name + ' from this course');
                 drop.title = 'Deregister this student from the course';
-                drop.innerHTML = '<span class="iconify" data-icon="mdi:account-remove-outline"></span>';
+                drop.innerHTML = icon('drop', 20);
                 drop.onclick = () => deregisterStudent(student.id, data.course_id, student.full_name, sessionId);
                 row.appendChild(drop);
 
@@ -1102,7 +429,7 @@ async function loadStudents(sessionId) {
         const startNum = ((data.page - 1) * 50) + 1;
         const endNum = Math.min(data.page * 50, data.total);
         document.getElementById(`page-info-${sessionId}`).textContent =
-            `Showing ${startNum}–${endNum} of ${data.total} student${data.total !== 1 ? 's' : ''}`;
+            `Showing ${startNum} to ${endNum} of ${data.total} student${data.total !== 1 ? 's' : ''}`;
 
         document.getElementById(`pagination-${sessionId}`).style.display =
             data.total_pages > 1 ? 'flex' : 'none';
@@ -1114,8 +441,7 @@ async function loadStudents(sessionId) {
 
     } catch (err) {
         console.error('loadStudents error:', err);
-        document.getElementById(`loading-${sessionId}`).innerHTML =
-            '<span style="color:#DC2626;font-size:13px;">Failed to load students. Please refresh.</span>';
+        document.getElementById(`loading-${sessionId}`).textContent = 'Failed to load students. Please refresh.';
     }
 }
 
@@ -1132,21 +458,43 @@ function changePage(sessionId, delta) {
     const state = sessionStates[sessionId];
     if (!state) return;
     const newPage = state.page + delta;
-    if (newPage< 1 || (state.total_pages && newPage > state.total_pages)) return;
+    if (newPage < 1 || (state.total_pages && newPage > state.total_pages)) return;
     state.page = newPage;
     loadStudents(sessionId);
 }
 
-
-// Auto-load the first visible session of every course on page load
+// Focus each course on the week that matters now: today's session, else the next
+// one, else the latest. Show it open with its neighbours; the rest sit behind
+// "Show all sessions". Without JavaScript every week is simply listed.
 document.addEventListener('DOMContentLoaded', () => {
-    // Load students for whichever sessions start expanded (the first of each course).
-    document.querySelectorAll('.session-accordion.open').forEach(acc => {
-        const sessionId = acc.dataset.sessionId;
-        if (sessionId) {
-            loadedSessions.add(String(sessionId));
-            sessionStates[sessionId] = { page: 1, filter: 'all', search: '' };
-            loadStudents(sessionId);
+    const today = document.querySelector('.ta').dataset.today;
+    document.querySelectorAll('[data-course]').forEach((course, ci) => {
+        const rows = Array.from(course.querySelectorAll('.sess'));
+        if (!rows.length) return;
+        let cur = rows.findIndex(r => r.dataset.date >= today);
+        if (cur === -1) cur = rows.length - 1;
+        const row = rows[cur];
+        const label = row.dataset.date === today ? 'Today' : (row.dataset.date > today ? 'Next' : 'Latest');
+        const b = document.createElement('span');
+        b.className = 'ds-status ds-status-info';
+        b.textContent = label;
+        row.querySelector('.sess-badges').prepend(b);
+        if (ci === 0 || label === 'Today') openSession(row);
+
+        if (rows.length > 4) {
+            const keep = new Set([cur - 1, cur, cur + 1]);
+            rows.forEach((r, i) => { if (!keep.has(i)) r.classList.add('is-hidden'); });
+            const btn = course.querySelector('[data-showall]');
+            const hiddenCount = rows.length - Array.from(keep).filter(i => i >= 0 && i < rows.length).length;
+            let expanded = false;
+            const sync = () => { btn.textContent = expanded ? 'Show fewer sessions' : `Show all ${rows.length} sessions`; };
+            sync();
+            btn.hidden = hiddenCount <= 0;
+            btn.addEventListener('click', () => {
+                expanded = !expanded;
+                rows.forEach((r, i) => r.classList.toggle('is-hidden', !expanded && !keep.has(i)));
+                sync();
+            });
         }
     });
 });

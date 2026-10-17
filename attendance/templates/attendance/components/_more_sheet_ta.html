@@ -1,0 +1,28 @@
+{% load ui %}
+<dialog class="ds-sheet" id="moreSheet" aria-labelledby="moreTitle">
+<div class="ds-sheet-grab" aria-hidden="true"></div>
+<div class="ds-sheet-head"><h2 class="ds-sheet-title" id="moreTitle">More</h2>
+<button type="button" class="ds-btn ds-btn-ghost ds-btn-icon" data-sheet-close aria-label="Close">{% icon "x" 20 %}</button></div>
+<div class="ds-sheet-body">
+<p class="more-label" style="margin-top:0">Teaching</p>
+<ul class="ds-list">
+<li><a class="ds-list-link" href="{% url 'attendance:ta_announcements' %}">{% icon "megaphone" 20 %}<span class="grow">Announcements</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:ta_support' %}">{% icon "life-buoy" 20 %}<span class="grow">Student tickets</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:ta_add_levels' %}">{% icon "book-open" 20 %}<span class="grow">Manage courses</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:ta_guide' %}">{% icon "circle-help" 20 %}<span class="grow">Resources and guide</span></a></li>
+</ul>
+<p class="more-label">Account</p>
+<ul class="ds-list">
+<li><a class="ds-list-link" href="{% url 'attendance:notifications' %}">{% icon "bell" 20 %}<span class="grow">Notifications</span>{% if unread_notif_count %}<span class="ds-status ds-status-info">{{ unread_notif_count }} new</span>{% endif %}</a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:profile' %}">{% icon "user-round" 20 %}<span class="grow">My profile</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:ta_change_password' %}">{% icon "lock-keyhole" 20 %}<span class="grow">Change password</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:support' %}">{% icon "circle-help" 20 %}<span class="grow">Contact support</span></a></li>
+<li><a class="ds-list-link" href="{% url 'attendance:community_events' %}">{% icon "newspaper" 20 %}<span class="grow">Events and news</span></a></li>
+</ul>
+<ul class="ds-list" style="margin-top:16px">
+<li><button type="button" class="ds-list-link" onclick="toggleTheme()">{% icon "moon" 20 %}<span class="grow">Switch light / dark mode</span></button></li>
+<li><form method="post" action="{% url 'logout' %}" style="margin:0">{% csrf_token %}<button type="submit" class="ds-list-link more-signout">{% icon "log-out" 20 %}<span class="grow">Sign out</span></button></form></li>
+</ul>
+</div>
+<div style="height:calc(12px + env(safe-area-inset-bottom))"></div>
+</dialog>

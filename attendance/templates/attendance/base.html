@@ -11,7 +11,7 @@
     {% load static %}
 <script src="{% static 'js/iconify.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
-{% if user.is_authenticated and not user.is_staff and not user.taprofile %}<link rel="stylesheet" href="{% static 'css/shell-student.css' %}">{% endif %}
+{% if user.is_authenticated and not user.is_staff %}<link rel="stylesheet" href="{% static 'css/shell-student.css' %}">{% endif %}
 <script src="{% static 'js/ui.js' %}" defer></script>
 <style>
         :root {
@@ -1108,7 +1108,7 @@
         (function(){var t=localStorage.getItem('swasa_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
 </script>
 </head>
-<body{% if user.is_authenticated and not user.is_staff and not user.taprofile %} class="shell-student"{% endif %}>
+<body{% if user.is_authenticated and not user.is_staff %} class="shell-student{% if user.taprofile %} shell-ta{% endif %}"{% endif %}>
 
 <div class="app">
 
@@ -1413,7 +1413,7 @@
 </div>
 
 <div class="container">
-            {% if messages %}{% if user.is_authenticated and not user.is_staff and not user.taprofile %}{% else %}
+            {% if messages %}{% if user.is_authenticated and not user.is_staff %}{% else %}
                 {% for message in messages %}
 <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}" style="margin-bottom:0.75rem;">
 <span class="iconify" data-icon="{% if message.tags == 'success' %}mdi:check-circle-outline{% elif message.tags == 'error' %}mdi:alert-circle-outline{% elif message.tags == 'warning' %}mdi:alert-outline{% else %}mdi:information-outline{% endif %}" data-width="16" style="flex-shrink:0;margin-top:1px;"></span>
@@ -1456,9 +1456,14 @@
 </div>
 </div>
 
-{% if user.is_authenticated and not user.is_staff and not user.taprofile %}
+{% if user.is_authenticated and not user.is_staff %}
+{% if user.taprofile %}
+{% include "attendance/components/_bottom_nav_ta.html" %}
+{% include "attendance/components/_more_sheet_ta.html" %}
+{% else %}
 {% include "attendance/components/_bottom_nav.html" %}
 {% include "attendance/components/_more_sheet.html" %}
+{% endif %}
 {% include "attendance/components/_toasts.html" %}
 {% endif %}
 

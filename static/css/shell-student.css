@@ -20,6 +20,7 @@
     body.shell-student .top-bar .icon-btn { width: 44px; height: 44px; padding: 0; }
     body.shell-student .top-bar .user-avatar { width: 44px; height: 44px; }
     body.shell-student .user-menu { gap: 2px; }
+    body.shell-ta .swahili-greeting-banner { display: none; }
     body.shell-student .main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 
     .bottom-nav {
