@@ -64,12 +64,15 @@
 <summary>
 <div class="cr-main">
 <div class="cr-name">{{ course.course.name }}</div>
-<div class="cr-code">{{ course.course.code }}</div>
-<div class="cr-meta">
-        {% if course.eligibility.status == 'blocked' %}{% badge "not_eligible" %}{% elif course.eligibility.status == 'warning' %}{% badge "at_risk" %}{% else %}{% badge "eligible" %}{% endif %}
-<span class="cr-counts"><span data-attended-for="{{ course.course.id }}">{{ course.attended }}</span> attended · {{ course.eligibility.total_absent }} missed</span>
+<div class="cr-sub">{{ course.course.code }} · <span data-attended-for="{{ course.course.id }}">{{ course.attended }}</span> attended · {{ course.eligibility.total_absent }} missed</div>
 </div>
-</div>
+        {% if course.eligibility.status == 'blocked' %}
+            {% badge "not_eligible" %}
+        {% elif course.eligibility.status == 'warning' %}
+            {% badge "at_risk" %}
+        {% else %}
+            {% badge "eligible" label="Eligible" %}
+        {% endif %}
 {% icon "chevron-right" 18 "cr-chev" %}
 </summary>
 <div class="cr-body">

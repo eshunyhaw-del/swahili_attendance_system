@@ -41,9 +41,7 @@
 .course-row > summary::-webkit-details-marker { display: none; }
 .cr-main { flex: 1; min-width: 0; }
 .cr-name { font-size: 15px; font-weight: 600; line-height: 1.3; }
-.cr-code { font-size: 12.5px; color: var(--ds-text-muted); margin-top: 1px; }
-.cr-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 8px; }
-.cr-counts { font-size: 12.5px; color: var(--ds-text-muted); }
+.cr-sub { font-size: 12.5px; color: var(--ds-text-muted); margin-top: 2px; }
 .cr-chev { color: var(--ds-text-muted); transition: transform .15s; }
 .course-row[open] .cr-chev { transform: rotate(90deg); }
 .cr-body { padding: 4px 16px 14px; background: var(--ds-surface-sunken); border-top: 1px solid var(--ds-border); }
