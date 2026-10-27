@@ -69,6 +69,21 @@ def match_user(listed_name, candidates):
     return best, 'matched'
 
 
+def _candidates(course):
+    """Students a listed name may belong to: registrants of the course plus every
+    current (non-graduate) student at the course's level. Lecturers' lists often
+    include students who have not registered for the course in the app yet."""
+    registered = Q(
+        userprofile__course_registrations__course=course,
+        userprofile__course_registrations__is_active=True,
+    )
+    same_level = Q(userprofile__level=course.level, userprofile__is_graduate=False)
+    return list(
+        User.objects.filter(is_active=True, is_staff=False, userprofile__isnull=False)
+        .filter(registered | same_level).distinct()
+    )
+
+
 def load_groups(course, groups):
     """Create or update groups/members from [(number, book, [names])] and link users.
 
@@ -76,18 +91,7 @@ def load_groups(course, groups):
     (more students register over time).
     Returns (report_lines, linked_count, unmatched_count).
     """
-    # Students on the lecturer's list may not have registered for the course in the
-    # app yet, so match against its registrants AND every current (non-graduate)
-    # student at the course's level. Ties are still refused.
-    registered = Q(
-        userprofile__course_registrations__course=course,
-        userprofile__course_registrations__is_active=True,
-    )
-    same_level = Q(userprofile__level=course.level, userprofile__is_graduate=False)
-    candidates = list(
-        User.objects.filter(is_active=True, is_staff=False, userprofile__isnull=False)
-        .filter(registered | same_level).distinct()
-    )
+    candidates = _candidates(course)
     lines, linked, unmatched = [
         f"{len(candidates)} students to match against "
         f"(registered for {course.code} or at level {course.level.name})"
@@ -114,12 +118,15 @@ def load_groups(course, groups):
     return lines, linked, unmatched
 
 
-def notify_members(course):
-    """Send each newly linked student one notification. Returns how many were sent."""
+def notify_members(course, user=None):
+    """Send each newly linked student one notification (only `user`, if given).
+    Returns how many were sent."""
     sent = 0
-    for m in ReadingGroupMember.objects.filter(
-            group__course=course, user__isnull=False, notified_at__isnull=True
-    ).select_related('group', 'user'):
+    pending = ReadingGroupMember.objects.filter(
+        group__course=course, user__isnull=False, notified_at__isnull=True)
+    if user is not None:
+        pending = pending.filter(user=user)
+    for m in pending.select_related('group', 'user'):
         SystemNotification.objects.create(
             user=m.user,
             title=f"{course.code}: your reading group",
@@ -145,3 +152,23 @@ def groups_for_user(user):
         ReadingGroup.objects.filter(pk__in=ids)
         .select_related('course').prefetch_related('members__user').order_by('course__code', 'number')
     )
+
+
+def link_new_registrant(user, course):
+    """Called when a student registers for `course`: if they are on a reading-group
+    list that is still unlinked, link them and send their notification.
+
+    The name is matched against the whole candidate pool, so a name that fits two
+    students is still left alone. Returns how many notifications were sent.
+    """
+    pending = list(ReadingGroupMember.objects.filter(group__course=course, user__isnull=True))
+    if not pending:
+        return 0
+    pool = _candidates(course)
+    for m in pending:
+        found, _ = match_user(m.listed_name, pool)
+        if found is not None and found.pk == user.pk:
+            m.user = user
+            m.save(update_fields=['user'])
+    return notify_members(course, user=user)
+
