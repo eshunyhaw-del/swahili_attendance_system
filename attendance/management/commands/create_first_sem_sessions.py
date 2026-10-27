@@ -10,7 +10,7 @@ from attendance.models import ClassSession, Course, Level, Semester
 # KISW 105 has two groups on different days, so it is split into two courses (like 106A/106B).
 SLOTS = [
     ('KISW 105A', 'Introduction to Kiswahili Studies I (Monday Group)', '100', 0, '15:30', '17:20', 'GCB Main'),
-    ('KISW 105B', 'Introduction to Kiswahili Studies I (Thursday Group)', '100', 3, '13:30', '15:20', 'SOE SF1'),
+    ('KISW 105B', 'Introduction to Kiswahili Studies I (Thursday Group)', '100', 3, '11:30', '13:20', 'SOE SF1'),
     ('KISW 103', 'Elementary Kiswahili Grammar I', '100', 2, '11:30', '13:30', 'KAB'),
     ('KISW 201', 'Kiswahili Grammar and Translation I', '200', 3, '07:30', '09:20', 'JQB 12'),
     ('KISW 203', 'Oral and Composition I', '200', 0, '13:30', '15:20', 'LLT'),

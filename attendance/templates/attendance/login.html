@@ -53,6 +53,12 @@
         </div>
         {% endif %}
 
+        {% for message in messages %}
+        <div class="{% if message.tags == 'success' %}success-banner{% else %}alert{% endif %}" role="alert">
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+
         <form method="post" autocomplete="on">
             {% csrf_token %}
             {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}

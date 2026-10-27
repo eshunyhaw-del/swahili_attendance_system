@@ -60,7 +60,9 @@
 <div class="course-opt-name">{{ checkbox.choice_label }}</div>
                 {% if 'KISW 106A' in checkbox.choice_label or 'KISW 105A' in checkbox.choice_label %}
 <span class="group-badge monday">Monday group · 15:30–17:20</span>
-                {% elif 'KISW 106B' in checkbox.choice_label or 'KISW 105B' in checkbox.choice_label %}
+                {% elif 'KISW 105B' in checkbox.choice_label %}
+<span class="group-badge thursday">Thursday group · 11:30–13:20</span>
+                {% elif 'KISW 106B' in checkbox.choice_label %}
 <span class="group-badge thursday">Thursday group · 13:30–15:20</span>
                 {% endif %}
 </div>
