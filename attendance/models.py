@@ -419,3 +419,36 @@ class OTPCode(models.Model):
 
     def __str__(self):
         return f"OTP({self.purpose}) for {self.user.username} - {'used' if self.is_used else 'active'}"
+
+
+class ReadingGroup(models.Model):
+    """A lecturer-assigned reading group for a course (e.g. KISW 413 set books)."""
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reading_groups')
+    number = models.PositiveSmallIntegerField()
+    book = models.CharField(max_length=150)
+
+    class Meta:
+        unique_together = ('course', 'number')
+        ordering = ['course__code', 'number']
+
+    def __str__(self):
+        return f"{self.course.code} group {self.number}: {self.book}"
+
+
+class ReadingGroupMember(models.Model):
+    """One name on the lecturer's list, linked to a student account when known."""
+    group = models.ForeignKey(ReadingGroup, on_delete=models.CASCADE, related_name='members')
+    listed_name = models.CharField(max_length=150, help_text="Name exactly as the lecturer wrote it")
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reading_group_memberships',
+        help_text="The student account this name belongs to. Set automatically; fix by hand if wrong or missing.",
+    )
+    notified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['group__number', 'id']
+        unique_together = ('group', 'listed_name')
+
+    def __str__(self):
+        return f"{self.listed_name} (group {self.group.number})"
+

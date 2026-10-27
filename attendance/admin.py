@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import (
+    ReadingGroup, ReadingGroupMember,
     Level, Semester, Course, ClassSession, UserProfile,
     TAProfile, TACode, AttendanceCode, AttendanceRecord,
     SupportTicket, CodeMisuseAlert, CulturalDate, SystemNotification,
@@ -334,3 +335,29 @@ class SWASAEventAdmin(admin.ModelAdmin):
             'fields': ('is_published', 'created_by', 'created_at'),
         }),
     )
+
+
+class ReadingGroupMemberInline(admin.TabularInline):
+    model = ReadingGroupMember
+    extra = 1
+    autocomplete_fields = ['user']
+    readonly_fields = ['notified_at']
+
+
+@admin.register(ReadingGroup)
+class ReadingGroupAdmin(admin.ModelAdmin):
+    list_display = ('course', 'number', 'book', 'member_count')
+    list_filter = ('course',)
+    inlines = [ReadingGroupMemberInline]
+
+    def member_count(self, obj):
+        return obj.members.count()
+
+
+@admin.register(ReadingGroupMember)
+class ReadingGroupMemberAdmin(admin.ModelAdmin):
+    list_display = ('listed_name', 'group', 'user', 'notified_at')
+    list_filter = ('group__course', 'group', ('user', admin.EmptyFieldListFilter))
+    search_fields = ('listed_name', 'user__first_name', 'user__last_name', 'user__email')
+    autocomplete_fields = ['user']
+

@@ -84,4 +84,5 @@ urlpatterns = [
     path("community/clubs/", views.community_clubs, name="community_clubs"),
     path("community/dues/", views.community_dues, name="community_dues"),
     path("scale-shop/", views.scale_shop, name="scale_shop"),
+    path("reading-group/", views.reading_group, name="reading_group"),
 ]
