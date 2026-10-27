@@ -2884,8 +2884,19 @@ def ta_export_session_csv(request, session_id):
 
 def student_guide(request):
     """Display student guide page"""
+    from .reading_groups import groups_for_user
     return render(request, 'attendance/student_guide.html', {
         'is_student': request.user.is_authenticated and is_student(request.user),
+        'my_reading_groups': groups_for_user(request.user) if request.user.is_authenticated else [],
+    })
+
+
+@login_required
+def reading_group(request):
+    """The signed-in student's reading group(s): set book and group mates."""
+    from .reading_groups import groups_for_user
+    return render(request, 'attendance/reading_group.html', {
+        'groups': groups_for_user(request.user),
     })
 
 

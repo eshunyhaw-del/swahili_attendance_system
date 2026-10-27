@@ -120,6 +120,15 @@
 <p class="sub">A step-by-step guide to registering, checking in to class, and tracking your attendance.</p>
 </header>
 
+{% for g in my_reading_groups %}
+<div class="ds-card ds-card-body card-mb">
+<p class="ds-eyebrow" style="margin-bottom:6px">{{ g.course.code }} reading group</p>
+<p style="margin:0 0 4px;font-size:16px;font-weight:700">You are in Group {{ g.number }}</p>
+<p style="margin:0 0 12px;font-size:13px;color:var(--ds-text-secondary)">Your set book is <b>{{ g.book }}</b>. Find the group assignments for {{ g.course.name }} and take note of your group and book.</p>
+<a class="ds-btn ds-btn-secondary" href="{% url 'attendance:reading_group' %}" style="min-height:44px">See my group mates</a>
+</div>
+{% endfor %}
+
 <!-- Quick reference -->
 <div class="ds-card ds-card-body card-mb">
 <p class="ds-eyebrow" style="margin-bottom:10px">At a glance</p>

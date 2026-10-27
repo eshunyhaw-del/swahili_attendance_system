@@ -887,3 +887,97 @@ class StaffShellTests(TestCase):
             resp = self.client.get(reverse(f"attendance:{name}"))
             self.assertEqual(resp.status_code, 200, name)
             self.assertIn("shell-ta", resp.content.decode(), name)
+
+
+class ReadingGroupTests(TestCase):
+    """KISW 413 reading groups: name matching, one-time notification, student pages."""
+
+    def setUp(self):
+        from .models import CourseRegistration
+        sem = _make_semester()
+        self.level = Level.objects.get_or_create(name="400")[0]
+        self.course, _ = Course.objects.get_or_create(
+            code="KISW 413", defaults={"name": "Modern Kiswahili Drama", "level": self.level, "semester": sem})
+        self._reg = CourseRegistration
+        self.users = {}
+
+    def _student(self, username, first, last, register=True):
+        u = User.objects.create_user(username, email=f"{username}@gmail.com", password="x",
+                                     first_name=first, last_name=last)
+        profile = UserProfile.objects.create(user=u, level=self.level, must_change_password=False)
+        if register:
+            self._reg.objects.create(user_profile=profile, course=self.course)
+        self.users[username] = u
+        return u
+
+    def test_matching_rules(self):
+        from .reading_groups import match_user
+        abdul = self._student("a", "Abdul-Rahman", "Nayo")
+        nana = self._student("n", "Nana Yaa", "Korangeng")
+        felicity = self._student("f", "Felicity", "Ayensu")
+        enoch = self._student("e", "Enoch", "Mensah")
+        pool = list(self.users.values())
+        self.assertEqual(match_user("Abdul-Rahman Nayo", pool)[0], abdul)
+        self.assertEqual(match_user("Nayo Abdul Rahman", pool)[0], abdul)            # any order
+        self.assertEqual(match_user("Ofosu Nana Yaa G. Korangeng", pool)[0], nana)   # extra names, initial
+        self.assertEqual(match_user("Ayensu Felicty", pool)[0], felicity)            # spelling slip
+        self.assertIsNone(match_user("Enoch Opare", pool)[0])                         # different person
+        self.assertIsNone(match_user("Nobody Atall", pool)[0])
+
+    def test_single_name_needs_one_unique_student(self):
+        from .reading_groups import match_user
+        j1 = self._student("j1", "Juliet", "Mensah")
+        pool = list(self.users.values())
+        self.assertEqual(match_user("Juliet", pool)[0], j1)
+        self._student("j2", "Juliet", "Asare")
+        pool = list(self.users.values())
+        user, why = match_user("Juliet", pool)
+        self.assertIsNone(user)
+        self.assertIn("more than one", why)
+
+    def test_load_notifies_once_and_relinks_later(self):
+        from .models import ReadingGroupMember, SystemNotification
+        from .reading_groups import load_groups, notify_members
+        abdul = self._student("a", "Abdul-Rahman", "Nayo")
+        data = [(1, "JOGOO KIJIJINI", ["Abdul-Rahman Nayo", "Enoch Opare"])]
+        _, linked, missing = load_groups(self.course, data)
+        self.assertEqual((linked, missing), (1, 1))
+        self.assertEqual(notify_members(self.course), 1)
+        self.assertEqual(notify_members(self.course), 0)                              # never twice
+        note = SystemNotification.objects.get(user=abdul)
+        self.assertIn("Group 1", note.message)
+        self.assertIn("JOGOO KIJIJINI", note.message)
+
+        enoch = self._student("e", "Enoch", "Opare")                                  # registers later
+        _, linked, missing = load_groups(self.course, data)
+        self.assertEqual((linked, missing), (2, 0))
+        self.assertEqual(notify_members(self.course), 1)                              # only the new one
+        self.assertEqual(SystemNotification.objects.filter(user=abdul).count(), 1)
+        self.assertEqual(ReadingGroupMember.objects.get(listed_name="Enoch Opare").user, enoch)
+
+    def test_unregistered_students_are_not_linked(self):
+        from .reading_groups import load_groups
+        self._student("x", "Abdul-Rahman", "Nayo", register=False)
+        _, linked, missing = load_groups(self.course, [(1, "B", ["Abdul-Rahman Nayo"])])
+        self.assertEqual((linked, missing), (0, 1))
+
+    def test_student_pages(self):
+        from .reading_groups import load_groups
+        me = self._student("me", "Queen", "Tongar")
+        other = self._student("ot", "Pat", "Outsider")
+        load_groups(self.course, [(2, "NGUZO MAMA", ["Queen Manuella L.V. Tongar", "Kelvin"])])
+
+        self.client.force_login(me)
+        page = self.client.get(reverse("attendance:reading_group")).content.decode()
+        self.assertIn("NGUZO MAMA", page)
+        self.assertIn("Kelvin", page)                       # group mate shown
+        self.assertNotIn("—", page)
+        guide = self.client.get(reverse("attendance:student_guide")).content.decode()
+        self.assertIn("You are in Group 2", guide)
+
+        self.client.force_login(other)
+        self.assertIn("No reading group yet",
+                      self.client.get(reverse("attendance:reading_group")).content.decode())
+        self.assertNotIn("You are in Group",
+                         self.client.get(reverse("attendance:student_guide")).content.decode())
+

@@ -1,0 +1,58 @@
+{% extends "attendance/base.html" %}
+{% load ui %}
+{% block title %}My reading group{% endblock %}
+
+{% block content %}
+<style>
+    .wrap { max-width: 640px; margin: 0 auto; padding: 4px 0 40px; }
+    .page-head { margin-bottom: 18px; }
+    .page-head h1 { font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .page-head .sub { font-size: 13px; color: var(--ds-text-muted); margin-top: 4px; line-height: 1.5; }
+    .rg-card { margin-bottom: 16px; }
+    .rg-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .rg-num { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ds-text-muted); }
+    .rg-book { font-size: 22px; font-weight: 800; letter-spacing: -.01em; line-height: 1.2; margin-top: 2px; }
+    .rg-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ds-text-muted); margin: 18px 0 8px; }
+    .rg-list { list-style: none; margin: 0; padding: 0; }
+    .rg-list li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 0; border-bottom: 1px solid var(--ds-border); font-size: 14px; }
+    .rg-list li:last-child { border-bottom: none; }
+    .rg-idx { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); color: var(--ds-text-muted); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .rg-me { font-weight: 700; }
+</style>
+<div class="wrap">
+<header class="page-head">
+<p class="ds-eyebrow">Resources</p>
+<h1>My reading group</h1>
+<p class="sub">Your group and set book for the course. Take note of both and meet your group mates.</p>
+</header>
+
+{% for g in groups %}
+<div class="ds-card ds-card-body rg-card">
+<div class="rg-top">
+<div>
+<div class="rg-num">{{ g.course.code }} · Group {{ g.number }}</div>
+<div class="rg-book">{{ g.book }}</div>
+</div>
+<span class="ds-badge ds-badge-info">Your set book</span>
+</div>
+<p style="margin:0;font-size:13px;color:var(--ds-text-secondary)">{{ g.course.name }}</p>
+
+<div class="rg-label">Group {{ g.number }} members</div>
+<ul class="rg-list">
+{% for m in g.members.all %}
+<li>
+<span class="rg-idx">{{ forloop.counter }}</span>
+<span class="{% if m.user_id == request.user.id %}rg-me{% endif %}">{{ m.listed_name }}</span>
+{% if m.user_id == request.user.id %}<span class="ds-badge ds-badge-neutral" style="margin-left:auto">You</span>{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+{% empty %}
+<div class="ds-card ds-card-body">
+<p style="margin:0 0 6px;font-weight:700">No reading group yet</p>
+<p style="margin:0;font-size:13px;color:var(--ds-text-muted);line-height:1.55">You are not on a reading group list. If your lecturer told you that you are in one, contact support and we will link your account to your name on the list.</p>
+</div>
+{% endfor %}
+</div>
+{% endblock %}
