@@ -138,6 +138,7 @@ def notify_members(course, user=None):
             emoji='\U0001F4DA',
             link=reverse('attendance:reading_group'),
             notification_type=SystemNotification.TYPE_SYSTEM,
+            course=course,
         )
         m.notified_at = timezone.now()
         m.save(update_fields=['notified_at'])
