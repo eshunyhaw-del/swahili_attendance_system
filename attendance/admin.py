@@ -337,6 +337,13 @@ class SWASAEventAdmin(admin.ModelAdmin):
     )
 
 
+def _notify_if_linked(member):
+    """Alert a student the moment an admin links them to a reading group by hand."""
+    if member.user_id and not member.notified_at:
+        from .reading_groups import notify_members
+        notify_members(member.group.course, user=member.user)
+
+
 class ReadingGroupMemberInline(admin.TabularInline):
     model = ReadingGroupMember
     extra = 1
@@ -353,6 +360,10 @@ class ReadingGroupAdmin(admin.ModelAdmin):
     def member_count(self, obj):
         return obj.members.count()
 
+    def save_formset(self, request, form, formset, change):
+        for member in formset.save():
+            _notify_if_linked(member)
+
 
 @admin.register(ReadingGroupMember)
 class ReadingGroupMemberAdmin(admin.ModelAdmin):
@@ -360,4 +371,9 @@ class ReadingGroupMemberAdmin(admin.ModelAdmin):
     list_filter = ('group__course', 'group', ('user', admin.EmptyFieldListFilter))
     search_fields = ('listed_name', 'user__first_name', 'user__last_name', 'user__email')
     autocomplete_fields = ['user']
+    readonly_fields = ['notified_at']
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        _notify_if_linked(obj)
 

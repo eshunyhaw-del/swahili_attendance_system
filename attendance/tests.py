@@ -1002,3 +1002,19 @@ class ReadingGroupTests(TestCase):
         register_or_reactivate(stranger.userprofile, self.course)
         self.assertFalse(SystemNotification.objects.filter(user=stranger).exists())
 
+    def test_linking_a_member_by_hand_in_admin_sends_the_alert(self):
+        from django.contrib import admin as dj_admin
+        from .models import ReadingGroup, ReadingGroupMember, SystemNotification
+        from .admin import ReadingGroupMemberAdmin
+        me = self._student("me", "Ebenezer", "Eshun")
+        group = ReadingGroup.objects.create(course=self.course, number=3, book="MASHETANI")
+        member = ReadingGroupMember(group=group, listed_name="Ebenezer Eshun", user=me)
+        model_admin = ReadingGroupMemberAdmin(ReadingGroupMember, dj_admin.site)
+        model_admin.save_model(None, member, None, False)                     # what the admin form does
+        note = SystemNotification.objects.get(user=me)
+        self.assertIn("MASHETANI", note.message)
+        self.assertEqual(self.client.force_login(me) or self.client.get(reverse("attendance:notifications")).status_code, 200)
+        member = ReadingGroupMember.objects.get(pk=member.pk)                 # the admin reloads the row
+        model_admin.save_model(None, member, None, True)                      # saving again: no second alert
+        self.assertEqual(SystemNotification.objects.filter(user=me).count(), 1)
+
