@@ -84,5 +84,8 @@ urlpatterns = [
     path("community/clubs/", views.community_clubs, name="community_clubs"),
     path("community/dues/", views.community_dues, name="community_dues"),
     path("scale-shop/", views.scale_shop, name="scale_shop"),
+    path("learn/", views.learn_a_skill, name="learn_a_skill"),
+    path("learn/<slug:slug>/", views.learn_course, name="learn_course"),
+    path("learn/<slug:slug>/progress/", views.learn_toggle_lesson, name="learn_toggle_lesson"),
     path("reading-group/", views.reading_group, name="reading_group"),
 ]

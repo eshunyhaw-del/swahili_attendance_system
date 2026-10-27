@@ -457,3 +457,17 @@ class ReadingGroupMember(models.Model):
     def __str__(self):
         return f"{self.listed_name} (group {self.group.number})"
 
+
+class LessonProgress(models.Model):
+    """A lesson a user has marked complete in a Learn a Skill course."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lesson_progress')
+    course_slug = models.CharField(max_length=80)
+    lesson_key = models.CharField(max_length=60)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'course_slug', 'lesson_key')
+
+    def __str__(self):
+        return f"{self.user.username}: {self.course_slug}/{self.lesson_key}"
+
