@@ -1032,3 +1032,85 @@ class ReadingGroupTests(TestCase):
         if other:
             self.assertEqual(shown(course=other.id), [])                                           # other course chip
         self.assertEqual(len(shown(course="abc")), 1)                                              # junk filter = All, no crash
+
+
+class LearnASkillTests(TestCase):
+    """Learn a Skill: catalogue, course page, per-user progress, and nav for students and TAs."""
+
+    SLUG = "design-websites-with-ai"
+
+    def setUp(self):
+        self.level = Level.objects.get_or_create(name="100")[0]
+        self.student = User.objects.create_user("learner", password="x")
+        UserProfile.objects.create(user=self.student, level=self.level, must_change_password=False)
+        self.ta_user = User.objects.create_user("learner_ta", password="x")
+        ta = TAProfile.objects.create(user=self.ta_user, is_approved=True)
+        ta.assigned_levels.add(self.level)
+
+    def test_course_data_is_consistent(self):
+        from .learning import COURSES, COMING_SOON, lesson_keys
+        for c in COURSES:
+            keys = lesson_keys(c)
+            self.assertEqual(len(keys), len(set(keys)), "lesson keys must be unique")
+            starts = [l["start"] for _, ls in c["sections"] for l in ls]
+            self.assertEqual(starts, sorted(starts), "lessons must be in video order")
+        self.assertEqual(len(COMING_SOON), 10)
+
+    def test_catalog_for_student_and_ta(self):
+        for user in (self.student, self.ta_user):
+            self.client.force_login(user)
+            html = self.client.get(reverse("attendance:learn_a_skill")).content.decode()
+            self.assertIn("Learn how to design websites with AI", html)
+            self.assertIn("youtube-nocookie.com/embed/SpRVakDblFE", html)      # video preview
+            self.assertIn("What you will learn", html)
+            for title in ("How to Use a Computer", "Microsoft 365 for Beginners", "After University, What Is Next?"):
+                self.assertIn(title, html)
+            self.assertNotIn("Scale Shop", html)
+            self.assertNotIn("—", html)
+
+    def test_nav_says_learn_a_skill_for_students_and_tas(self):
+        for user, home in ((self.student, "attendance:student_guide"), (self.ta_user, "attendance:ta_dashboard")):
+            self.client.force_login(user)
+            html = self.client.get(reverse(home)).content.decode()
+            self.assertIn(reverse("attendance:learn_a_skill"), html)
+            self.assertIn("Learn a Skill", html)
+            self.assertNotIn("Scale Shop", html)
+
+    def test_course_page(self):
+        self.client.force_login(self.student)
+        html = self.client.get(reverse("attendance:learn_course", args=[self.SLUG])).content.decode()
+        self.assertIn("SpRVakDblFE", html)
+        self.assertIn("Find an inspiring website", html)
+        self.assertIn("0 of 23 lessons completed", html)
+        self.assertNotIn("—", html)
+        self.assertEqual(self.client.get(reverse("attendance:learn_course", args=["nope"])).status_code, 404)
+
+    def test_progress_is_saved_toggles_and_is_per_user(self):
+        url = reverse("attendance:learn_toggle_lesson", args=[self.SLUG])
+        self.client.force_login(self.student)
+        r = self.client.post(url, {"lesson": "intro"}).json()
+        self.assertEqual((r["completed"], r["done"], r["total"]), (True, 1, 23))
+        self.assertIn("1 of 23 lessons completed",
+                      self.client.get(reverse("attendance:learn_course", args=[self.SLUG])).content.decode())
+        self.client.force_login(self.ta_user)                                    # someone else sees nothing
+        self.assertIn("0 of 23 lessons completed",
+                      self.client.get(reverse("attendance:learn_course", args=[self.SLUG])).content.decode())
+        self.client.force_login(self.student)
+        r = self.client.post(url, {"lesson": "intro"}).json()                    # tick again = undo
+        self.assertEqual((r["completed"], r["done"]), (False, 0))
+
+    def test_progress_rejects_bad_input(self):
+        self.client.force_login(self.student)
+        self.assertEqual(self.client.post(reverse("attendance:learn_toggle_lesson", args=[self.SLUG]),
+                                          {"lesson": "not-a-lesson"}).status_code, 404)
+        self.assertEqual(self.client.post(reverse("attendance:learn_toggle_lesson", args=["nope"]),
+                                          {"lesson": "intro"}).status_code, 404)
+        self.assertEqual(self.client.get(reverse("attendance:learn_toggle_lesson", args=[self.SLUG])).status_code, 405)
+
+    def test_login_required_and_old_scale_shop_address_redirects(self):
+        self.client.logout()
+        for name, args in (("learn_a_skill", []), ("learn_course", [self.SLUG])):
+            self.assertEqual(self.client.get(reverse(f"attendance:{name}", args=args)).status_code, 302)
+        r = self.client.get("/scale-shop/")
+        self.assertEqual((r.status_code, r["Location"]), (301, reverse("attendance:learn_a_skill")))
+

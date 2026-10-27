@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.http import JsonResponse, HttpResponse
+from django.http import Http404, JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -35,7 +35,7 @@ from .models import (
     AttendanceCode, AttendanceRecord, ClassSession,
     Course, UserProfile, Level, Semester, SupportTicket, CodeMisuseAlert,
     TAProfile, TACode, OTPCode, TAnnouncement, Notification, StudentNotification,
-    CulturalDate, SystemNotification, CourseRegistration, Avatar,
+    CulturalDate, SystemNotification, CourseRegistration, Avatar, LessonProgress,
 )
 
 
@@ -3224,9 +3224,61 @@ def community_clubs(request):
     return render(request, 'attendance/community/clubs.html')
 
 
-@login_required
 def scale_shop(request):
-    return render(request, 'attendance/community/scale_shop.html')
+    """Old Scale Shop address: now Learn a Skill."""
+    return redirect('attendance:learn_a_skill', permanent=True)
+
+
+def _progress_for(user, course):
+    from .learning import lesson_keys
+    keys = set(lesson_keys(course))
+    done = set(
+        LessonProgress.objects.filter(user=user, course_slug=course['slug'], lesson_key__in=keys)
+        .values_list('lesson_key', flat=True)
+    )
+    total = len(keys)
+    return done, {'done': len(done), 'total': total, 'percent': round(100 * len(done) / total) if total else 0}
+
+
+@login_required
+def learn_a_skill(request):
+    """Learning platform home: available courses and what is coming next."""
+    from .learning import COURSES, COMING_SOON, embed_url, lesson_count
+    courses = []
+    for c in COURSES:
+        _, progress = _progress_for(request.user, c)
+        courses.append({**c, 'progress': progress, 'embed': embed_url(c), 'lesson_count': lesson_count(c)})
+    return render(request, 'attendance/learn/catalog.html', {'courses': courses, 'coming_soon': COMING_SOON})
+
+
+@login_required
+def learn_course(request, slug):
+    from .learning import COURSES_BY_SLUG, embed_url, lesson_count, watch_url
+    course = COURSES_BY_SLUG.get(slug)
+    if course is None:
+        raise Http404("No such course")
+    done, progress = _progress_for(request.user, course)
+    return render(request, 'attendance/learn/course.html', {
+        'course': course, 'done': done, 'progress': progress,
+        'embed': embed_url(course), 'embed_base': embed_url(course), 'watch_url': watch_url(course),
+        'lesson_count': lesson_count(course),
+    })
+
+
+@login_required
+@require_POST
+def learn_toggle_lesson(request, slug):
+    """Mark a lesson complete, or undo it. Returns the new progress as JSON."""
+    from .learning import COURSES_BY_SLUG, lesson_keys
+    course = COURSES_BY_SLUG.get(slug)
+    key = request.POST.get('lesson', '')
+    if course is None or key not in lesson_keys(course):
+        return JsonResponse({'ok': False}, status=404)
+    obj, created = LessonProgress.objects.get_or_create(user=request.user, course_slug=slug, lesson_key=key)
+    if not created:
+        obj.delete()
+    _, progress = _progress_for(request.user, course)
+    return JsonResponse({'ok': True, 'completed': created, **progress})
 
 
 @login_required

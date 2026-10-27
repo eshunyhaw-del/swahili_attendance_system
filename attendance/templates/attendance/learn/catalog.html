@@ -1,0 +1,94 @@
+{% extends "attendance/base.html" %}
+{% load ui %}
+{% block title %}Learn a Skill{% endblock %}
+
+{% block content %}
+<style>
+    .learn { max-width: 960px; margin: 0 auto; padding: 4px 0 48px; }
+    .learn-head { margin-bottom: 20px; }
+    .learn-head h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 2px 0 0; }
+    .learn-head .sub { font-size: 14px; color: var(--ds-text-muted); margin-top: 6px; line-height: 1.55; max-width: 62ch; }
+    .sec-title { font-size: 15px; font-weight: 700; margin: 30px 0 12px; display: flex; align-items: center; gap: 10px; }
+    .sec-title .count { font-size: 12px; font-weight: 600; color: var(--ds-text-muted); }
+
+    .feat { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0; overflow: hidden; padding: 0; }
+    .feat-video { background: #0B1020; display: flex; align-items: center; }
+    .feat-video .ratio { width: 100%; aspect-ratio: 16 / 9; }
+    .feat-video iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .feat-body { padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+    .feat-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .feat-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.25; margin: 0; }
+    .feat-sum { font-size: 13.5px; color: var(--ds-text-secondary); line-height: 1.6; margin: 0; }
+    .learn-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .learn-list li { display: flex; gap: 8px; font-size: 13px; color: var(--ds-text-secondary); line-height: 1.45; }
+    .learn-list .icon { color: var(--ds-success); flex-shrink: 0; margin-top: 1px; }
+    .feat-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: auto; padding-top: 4px; }
+    .feat-actions .ds-btn { min-height: 44px; }
+    .bar { height: 6px; border-radius: 99px; background: var(--ds-neutral-150); overflow: hidden; flex: 1; min-width: 90px; }
+    .bar > span { display: block; height: 100%; background: var(--ds-primary); border-radius: 99px; }
+    .bar-label { font-size: 12px; color: var(--ds-text-muted); white-space: nowrap; }
+
+    .soon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .soon-card { background: var(--ds-surface); border: 1px solid var(--ds-border); border-radius: var(--ds-radius-md); box-shadow: var(--ds-shadow-xs); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .soon-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .soon-num { width: 28px; height: 28px; border-radius: 50%; background: var(--ds-surface-sunken); border: 1px solid var(--ds-border); color: var(--ds-text-muted); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .soon-title { font-size: 14px; font-weight: 600; line-height: 1.35; }
+    .soon-blurb { font-size: 12.5px; color: var(--ds-text-muted); line-height: 1.5; }
+
+    @media (max-width: 760px) {
+        .feat { grid-template-columns: 1fr; }
+        .feat-body { padding: 18px; }
+        .feat-actions .ds-btn { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="learn">
+<header class="learn-head">
+<p class="ds-eyebrow">Learning</p>
+<h1>Learn a Skill</h1>
+<p class="sub">Practical skills to use alongside your studies, taught step by step. Watch, follow along, and tick off each lesson as you go.</p>
+</header>
+
+<h2 class="sec-title">Available now</h2>
+{% for c in courses %}
+<article class="ds-card feat">
+<div class="feat-video"><div class="ratio">
+<iframe src="{{ c.embed }}" title="{{ c.title }} (video preview)" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div></div>
+<div class="feat-body">
+<div class="feat-meta">
+<span class="ds-badge ds-badge-info">{{ c.level }}</span>
+<span class="ds-badge ds-badge-neutral">{{ c.duration }}</span>
+<span class="ds-badge ds-badge-neutral">{{ c.lesson_count }} lessons</span>
+</div>
+<h3 class="feat-title">{{ c.title }}</h3>
+<p class="feat-sum">{{ c.summary }}</p>
+<div>
+<p class="ds-eyebrow" style="margin-bottom:8px">What you will learn</p>
+<ul class="learn-list">
+{% for o in c.outcomes|slice:":4" %}<li>{% icon "circle-check" 16 %}<span>{{ o }}</span></li>{% endfor %}
+</ul>
+</div>
+<div class="feat-actions">
+<a class="ds-btn ds-btn-primary" href="{% url 'attendance:learn_course' c.slug %}">{% if c.progress.done %}Continue course{% else %}Start course{% endif %} {% icon "arrow-right" 16 %}</a>
+{% if c.progress.done %}
+<div class="bar" role="progressbar" aria-valuenow="{{ c.progress.percent }}" aria-valuemin="0" aria-valuemax="100"><span style="width:{{ c.progress.percent }}%"></span></div>
+<span class="bar-label">{{ c.progress.done }} of {{ c.progress.total }} done</span>
+{% endif %}
+</div>
+</div>
+</article>
+{% endfor %}
+
+<h2 class="sec-title">Coming soon <span class="count">{{ coming_soon|length }} trainings</span></h2>
+<div class="soon-grid">
+{% for t in coming_soon %}
+<div class="soon-card">
+<div class="soon-top"><span class="soon-num">{{ forloop.counter }}</span><span class="ds-badge ds-badge-neutral">Coming soon</span></div>
+<div class="soon-title">{{ t.title }}</div>
+<div class="soon-blurb">{{ t.blurb }}</div>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}
