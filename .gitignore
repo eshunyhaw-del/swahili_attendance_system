@@ -31,3 +31,6 @@ server.log
 server_err.log
 server_test.log
 server_test_err.log
+
+# local dev login details (never commit)
+local_test_accounts.txt

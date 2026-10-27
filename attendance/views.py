@@ -508,6 +508,21 @@ def token_login_view(request):
     })
 
 
+def _sign_out_to_login(request, message=None):
+    """Clear the web session and go to sign-in with an optional reason.
+
+    The login page bounces signed-in users to their dashboard, so a view that
+    redirects a signed-in user to login (unapproved TA, missing profile) would
+    loop forever. Dropping the auth cookies first breaks that loop.
+    """
+    if message:
+        messages.error(request, message)
+    response = redirect('login')
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
+
+
 def token_logout_view(request):
     response = redirect('login')
     response.delete_cookie('access_token')
@@ -1003,7 +1018,7 @@ def magic_reset_password(request, token):
 def course_registration(request):
     profile = get_profile(request.user)
     if not profile:
-        return redirect('login')
+        return _sign_out_to_login(request, "We could not find a student profile for this account. Please sign in again or contact support.")
     
     active_semester = Semester.objects.filter(is_archived=False, is_active=True).first()
     if not active_semester:
@@ -1059,7 +1074,7 @@ def student_deregister_course(request):
     """
     profile = get_profile(request.user)
     if not profile:
-        return redirect('login')
+        return _sign_out_to_login(request, "We could not find a student profile for this account. Please sign in again or contact support.")
 
     course = get_object_or_404(Course, id=request.POST.get('course_id'))
 
@@ -1181,7 +1196,7 @@ def dashboard(request):
 
     profile = get_profile(request.user)
     if not profile:
-        return redirect("login")
+        return _sign_out_to_login(request, "We could not find a student profile for this account. Please sign in again or contact support.")
 
     if not active_courses(profile).exists():
         return redirect("attendance:course_registration")
@@ -1369,7 +1384,7 @@ def student_history(request):
 
     profile = get_profile(request.user)
     if not profile:
-        return redirect("login")
+        return _sign_out_to_login(request, "We could not find a student profile for this account. Please sign in again or contact support.")
 
     courses = list(active_courses(profile).filter(semester__is_active=True))
     history_data = []
@@ -1436,7 +1451,7 @@ def student_history(request):
 def export_my_attendance_csv(request):
     profile = get_profile(request.user)
     if not profile:
-        return redirect('login')
+        return _sign_out_to_login(request, "We could not find a student profile for this account. Please sign in again or contact support.")
     
     semesters = Semester.objects.filter(is_archived=False)
     courses = active_courses(profile).filter(semester__in=semesters)
@@ -1987,8 +2002,7 @@ def ta_support_tickets(request):
         return redirect('/')
 
     if not ta_profile.is_approved:
-        messages.error(request, "Your account is pending admin approval.")
-        return redirect('login')
+        return _sign_out_to_login(request, "Your account is pending admin approval.")
 
     # Auto-clear ticket notifications when TA opens this page
     Notification.objects.filter(
@@ -2380,8 +2394,7 @@ def ta_dashboard(request):
         return redirect('/')
 
     if not ta_profile.is_approved:
-        messages.error(request, "Your account is pending admin approval. You will be notified via email once approved.")
-        return redirect('login')
+        return _sign_out_to_login(request, "Your account is pending admin approval. You will be notified via email once approved.")
 
     assigned_levels = ta_profile.assigned_levels.all()
     assigned_level_ids = [level.id for level in assigned_levels]
