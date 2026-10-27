@@ -4,6 +4,7 @@ import re
 from difflib import SequenceMatcher
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -75,14 +76,22 @@ def load_groups(course, groups):
     (more students register over time).
     Returns (report_lines, linked_count, unmatched_count).
     """
-    candidates = list(
-        User.objects.filter(
-            is_active=True, is_staff=False, userprofile__isnull=False,
-            userprofile__course_registrations__course=course,
-            userprofile__course_registrations__is_active=True,
-        ).distinct()
+    # Students on the lecturer's list may not have registered for the course in the
+    # app yet, so match against its registrants AND every current (non-graduate)
+    # student at the course's level. Ties are still refused.
+    registered = Q(
+        userprofile__course_registrations__course=course,
+        userprofile__course_registrations__is_active=True,
     )
-    lines, linked, unmatched = [f"{len(candidates)} active registrants in {course.code}"], 0, 0
+    same_level = Q(userprofile__level=course.level, userprofile__is_graduate=False)
+    candidates = list(
+        User.objects.filter(is_active=True, is_staff=False, userprofile__isnull=False)
+        .filter(registered | same_level).distinct()
+    )
+    lines, linked, unmatched = [
+        f"{len(candidates)} students to match against "
+        f"(registered for {course.code} or at level {course.level.name})"
+    ], 0, 0
     for number, book, names in groups:
         group, _ = ReadingGroup.objects.update_or_create(
             course=course, number=number, defaults={'book': book})

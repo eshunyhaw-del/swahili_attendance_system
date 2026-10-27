@@ -955,11 +955,15 @@ class ReadingGroupTests(TestCase):
         self.assertEqual(SystemNotification.objects.filter(user=abdul).count(), 1)
         self.assertEqual(ReadingGroupMember.objects.get(listed_name="Enoch Opare").user, enoch)
 
-    def test_unregistered_students_are_not_linked(self):
+    def test_same_level_student_links_before_registering_but_other_levels_do_not(self):
         from .reading_groups import load_groups
-        self._student("x", "Abdul-Rahman", "Nayo", register=False)
-        _, linked, missing = load_groups(self.course, [(1, "B", ["Abdul-Rahman Nayo"])])
-        self.assertEqual((linked, missing), (0, 1))
+        self._student("x", "Abdul-Rahman", "Nayo", register=False)          # level 400, not registered yet
+        other_level = Level.objects.get_or_create(name="100")[0]
+        y = User.objects.create_user("y", first_name="Enoch", last_name="Opare", password="x")
+        UserProfile.objects.create(user=y, level=other_level)               # level 100: not eligible
+        data = [(1, "B", ["Abdul-Rahman Nayo", "Enoch Opare"])]
+        _, linked, missing = load_groups(self.course, data)
+        self.assertEqual((linked, missing), (1, 1))
 
     def test_student_pages(self):
         from .reading_groups import load_groups
