@@ -236,14 +236,27 @@ def register_or_reactivate(profile, course):
         user_profile=profile, course=course, defaults={'is_active': True},
     )
     if created:
+        _link_reading_group(profile.user, course)
         return 'created'
     if not reg.is_active:
         reg.is_active = True
         reg.deregistered_at = None
         reg.deregistered_by = None
         reg.save(update_fields=['is_active', 'deregistered_at', 'deregistered_by'])
+        _link_reading_group(profile.user, course)
         return 'reactivated'
     return 'existing'
+
+
+def _link_reading_group(user, course):
+    """Link a newly registered student to a lecturer's reading-group list, if listed.
+    Never allowed to break course registration."""
+    try:
+        from .reading_groups import link_new_registrant
+        link_new_registrant(user, course)
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception("Reading group auto-link failed for %s", user.pk)
 
 
 def _registration_audit_cells(reg):

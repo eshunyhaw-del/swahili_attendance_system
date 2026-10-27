@@ -985,3 +985,20 @@ class ReadingGroupTests(TestCase):
         self.assertNotIn("You are in Group",
                          self.client.get(reverse("attendance:student_guide")).content.decode())
 
+    def test_new_student_is_linked_and_notified_when_registering(self):
+        from .models import SystemNotification
+        from .reading_groups import load_groups, notify_members
+        from .views import register_or_reactivate
+        load_groups(self.course, [(3, "MASHETANI", ["Hokey Joel", "Kelvin"])])
+        notify_members(self.course)                                           # nobody linked yet
+        joel = self._student("joel", "Joel", "Hokey", register=False)         # new student arrives later
+        self.assertFalse(SystemNotification.objects.filter(user=joel).exists())
+        self.assertEqual(register_or_reactivate(joel.userprofile, self.course), "created")
+        note = SystemNotification.objects.get(user=joel)
+        self.assertIn("Group 3", note.message)
+        register_or_reactivate(joel.userprofile, self.course)                 # registering again: no duplicate
+        self.assertEqual(SystemNotification.objects.filter(user=joel).count(), 1)
+        stranger = self._student("st", "Some", "Stranger", register=False)
+        register_or_reactivate(stranger.userprofile, self.course)
+        self.assertFalse(SystemNotification.objects.filter(user=stranger).exists())
+
