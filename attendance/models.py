@@ -344,6 +344,11 @@ class SystemNotification(models.Model):
         'SWASAEvent', null=True, blank=True, on_delete=models.CASCADE,
         related_name='notifications',
     )
+    # Set for course-specific alerts (e.g. reading groups) so the notifications
+    # page can show them under that course's filter chip.
+    course = models.ForeignKey(
+        'Course', null=True, blank=True, on_delete=models.SET_NULL, related_name='+',
+    )
 
     class Meta:
         ordering = ['-created_at']

@@ -1018,3 +1018,17 @@ class ReadingGroupTests(TestCase):
         model_admin.save_model(None, member, None, True)                      # saving again: no second alert
         self.assertEqual(SystemNotification.objects.filter(user=me).count(), 1)
 
+    def test_course_filter_on_notifications_page_shows_the_reading_group_alert(self):
+        from .reading_groups import load_groups, notify_members
+        me = self._student("me", "Queen", "Tongar")
+        load_groups(self.course, [(2, "NGUZO MAMA", ["Queen Manuella L.V. Tongar"])])
+        notify_members(self.course)
+        self.client.force_login(me)
+        url = reverse("attendance:notifications")
+        shown = lambda **q: [n.title for n in self.client.get(url, q).context["sys_notifs"]]
+        self.assertEqual(len(shown()), 1)                                                          # All
+        self.assertEqual(len(shown(course=self.course.id)), 1)                                     # KISW 413 chip
+        other = Course.objects.exclude(pk=self.course.pk).first()
+        if other:
+            self.assertEqual(shown(course=other.id), [])                                           # other course chip
+        self.assertEqual(len(shown(course="abc")), 1)                                              # junk filter = All, no crash

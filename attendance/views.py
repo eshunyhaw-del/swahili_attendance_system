@@ -3051,6 +3051,8 @@ def notifications_page(request):
     )
 
     course_filter = request.GET.get('course')
+    if course_filter and not course_filter.isdigit():
+        course_filter = None                      # ignore a hand-edited / junk filter instead of crashing
     if course_filter:
         notifs = notifs.filter(announcement__course_id=course_filter)
 
@@ -3061,14 +3063,12 @@ def notifications_page(request):
             active_courses(profile).filter(semester__is_active=True).order_by('code')
         )
 
-    # System notifications (events, cultural dates) - previously these only
-    # appeared in the bell and were invisible on this "view all" page. Hide them
-    # when a course filter is active (that filter only applies to announcements).
-    sys_notifs = []
-    if not course_filter:
-        sys_notifs = list(
-            SystemNotification.objects.filter(user=request.user).order_by('-created_at')[:50]
-        )
+    # System notifications (events, cultural dates, reading groups). With a course
+    # filter on, only the alerts tagged with that course are shown.
+    sys_qs = SystemNotification.objects.filter(user=request.user)
+    if course_filter:
+        sys_qs = sys_qs.filter(course_id=course_filter)
+    sys_notifs = list(sys_qs.order_by('-created_at')[:50])
 
     return render(request, 'attendance/notifications.html', {
         'notifs':             notifs,
